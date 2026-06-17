@@ -1,0 +1,292 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Narrow:ital,wght@0,400..700;1,400..700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined');
+
+// ── Joker Nutrition Design Tokens ─────────────────────────────────────────────
+:root {
+  // Brand Colors
+  --color-navy:              #0b132b;
+  --color-navy-light:        #131a33;
+  --color-navy-mid:          #1a2340;
+  --color-gold:              #fdc003;
+  --color-gold-dim:          #fabd00;
+  --color-gold-text:         #785900;
+  --color-gold-bg:           rgba(253, 192, 3, 0.12);
+  --color-red:               #ba1a1a;
+  --color-red-bright:        #dc2626;
+  --color-red-bg:            rgba(186, 26, 26, 0.10);
+
+  // Surfaces
+  --background-color:        #f9f9ff;
+  --surface-container-low:   #f1f3ff;
+  --surface-container:       #e9edff;
+  --surface-container-high:  #e1e8fd;
+  --surface-variant:         #dce2f7;
+  --color-canvas:            #f3f4f6;
+  --color-white:             #ffffff;
+
+  // Text
+  --color-text-primary:      #141b2b;
+  --color-text-secondary:    #45464d;
+  --color-text-tertiary:     #6b7280;
+  --color-text-inverse:      #ffffff;
+
+  // Borders
+  --color-border:            #c6c6ce;
+  --color-border-strong:     #76767e;
+  --color-border-light:      rgba(198, 198, 206, 0.5);
+
+  // Semantic
+  --color-success:           #12b76a;
+  --color-success-bg:        rgba(18, 183, 106, 0.10);
+  --color-warning:           #f79009;
+  --color-warning-bg:        rgba(247, 144, 9, 0.10);
+  --color-error:             #ba1a1a;
+  --color-info:              #0ba5ec;
+
+  // Typography
+  --font-heading:            'Archivo Narrow', sans-serif;
+  --font-body:               'Inter', sans-serif;
+  --font-data:               'JetBrains Mono', monospace;
+  --font-family:             var(--font-body);
+
+  // Radius
+  --radius-xs:               2px;
+  --radius-btn:              4px;
+  --radius-card:             8px;
+  --radius-lg:               12px;
+  --radius-xl:               16px;
+  --radius-full:             9999px;
+
+  // Spacing (8px base scale)
+  --space-xs:                8px;
+  --space-sm:                16px;
+  --space-md:                24px;
+  --space-lg:                32px;
+  --space-xl:                40px;
+  --space-2xl:               64px;
+
+  // Shadows
+  --shadow-sm:               0 1px 3px rgba(11, 19, 43, 0.08), 0 1px 2px rgba(11, 19, 43, 0.04);
+  --shadow-md:               0 4px 12px rgba(11, 19, 43, 0.10), 0 2px 4px rgba(11, 19, 43, 0.06);
+  --shadow-lg:               0 10px 30px rgba(11, 19, 43, 0.12), 0 4px 8px rgba(11, 19, 43, 0.06);
+  --shadow-gold:             0 4px 16px rgba(253, 192, 3, 0.25);
+
+  // Transitions
+  --transition-fast:         150ms ease;
+  --transition-base:         250ms ease;
+  --transition-slow:         400ms ease;
+
+  // Sidebar
+  --sidebar-width:           240px;
+  --sidebar-collapsed:       64px;
+
+  // Layout
+  --header-height:           64px;
+  --content-max-width:       1280px;
+}
+
+// ── Global Reset ──────────────────────────────────────────────────────────────
+*,
+*::before,
+*::after {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+// ── Typography ────────────────────────────────────────────────────────────────
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  color: var(--color-text-primary);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+a {
+  color: var(--color-gold-text);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+
+  &:hover {
+    color: var(--color-gold-dim);
+  }
+}
+
+// ── Utility Classes ───────────────────────────────────────────────────────────
+.mono,
+.data-label {
+  font-family: var(--font-data);
+  letter-spacing: 0.05em;
+}
+
+.text-gold { color: var(--color-gold-text); }
+.text-red { color: var(--color-red); }
+.text-success { color: var(--color-success); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-inverse { color: var(--color-text-inverse); }
+
+// ── Page Loader ───────────────────────────────────────────────────────────────
+.page-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  width: 100%;
+
+  &__spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--surface-variant);
+    border-top-color: var(--color-gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Ant Design Global Overrides ───────────────────────────────────────────────
+
+// Primary color overrides via CSS (Ant Design v5 uses CSS vars in config)
+.ant-btn-primary {
+  background-color: var(--color-gold) !important;
+  border-color: var(--color-gold) !important;
+  color: var(--color-navy) !important;
+  font-family: var(--font-heading);
+  font-weight: 700;
+
+  &:hover,
+  &:focus {
+    background-color: var(--color-gold-dim) !important;
+    border-color: var(--color-gold-dim) !important;
+    box-shadow: var(--shadow-gold) !important;
+  }
+}
+
+.ant-input,
+.ant-input-affix-wrapper {
+  border-radius: var(--radius-btn) !important;
+  border-color: var(--color-border) !important;
+  font-family: var(--font-body);
+
+  &:hover {
+    border-color: var(--color-gold) !important;
+  }
+
+  &:focus,
+  &-focused {
+    border-color: var(--color-gold) !important;
+    box-shadow: 0 0 0 2px rgba(253, 192, 3, 0.2) !important;
+  }
+}
+
+.ant-form-item-explain-error {
+  color: var(--color-red) !important;
+  font-size: 12px;
+}
+
+.ant-message-notice-content {
+  border-radius: var(--radius-card) !important;
+  font-family: var(--font-body);
+  box-shadow: var(--shadow-md) !important;
+}
+
+// Dropdown overrides
+.table-menu-dropdown {
+  .ant-dropdown-menu {
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 4px;
+  }
+
+  .ant-dropdown-menu-item {
+    border-radius: var(--radius-btn);
+    padding: 0;
+
+    &:hover {
+      background-color: var(--surface-container-low);
+    }
+  }
+}
+
+.table-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+
+  svg {
+    color: var(--color-border-strong);
+    flex-shrink: 0;
+  }
+
+  &.delete-item,
+  &.delete-item svg {
+    color: var(--color-red);
+  }
+}
+
+// ── Scrollbar styling ─────────────────────────────────────────────────────────
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-container-low);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+
+  &:hover {
+    background: var(--color-border-strong);
+  }
+}
+
+// ── Animations ────────────────────────────────────────────────────────────────
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(253, 192, 3, 0.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(253, 192, 3, 0); }
+}
+
+.animate-fade-in { animation: fadeIn var(--transition-slow) both; }
+.animate-slide-left { animation: slideInLeft var(--transition-base) both; }

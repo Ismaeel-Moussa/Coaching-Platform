@@ -1,0 +1,205 @@
+.auth-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-canvas);
+
+  // ── Left brand panel ───────────────────────────────────────────────────────
+  &__brand {
+    position: relative;
+    width: 44%;
+    background-color: var(--color-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    // Subtle grid pattern overlay
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(253, 192, 3, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(253, 192, 3, 0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+    }
+
+    // Radial glow
+    &::after {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: -20%;
+      width: 140%;
+      height: 140%;
+      background: radial-gradient(ellipse at 30% 40%, rgba(253, 192, 3, 0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+  }
+
+  &__brand-content {
+    position: relative;
+    z-index: 1;
+    padding: var(--space-xl);
+    max-width: 380px;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: var(--space-xl);
+  }
+
+  &__logo-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--color-gold);
+    border-radius: var(--radius-btn);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    span {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--color-navy);
+      letter-spacing: 0.05em;
+    }
+  }
+
+  &__logo-text {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.15em;
+    color: var(--color-text-inverse);
+    text-transform: uppercase;
+  }
+
+  &__tagline {
+    font-family: var(--font-heading);
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--color-text-inverse);
+    line-height: 1.1;
+    margin-bottom: var(--space-sm);
+    
+    // Gold accent on second line via inline mark
+  }
+
+  &__sub {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.6;
+    margin-bottom: var(--space-xl);
+  }
+
+  &__stats {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  &__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__stat-value {
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-gold);
+  }
+
+  &__stat-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__stat-divider {
+    width: 1px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  // Gold accent strip on right edge of brand panel
+  &__brand-accent {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, transparent, var(--color-gold), transparent);
+    opacity: 0.6;
+  }
+
+  // ── Right form panel ───────────────────────────────────────────────────────
+  &__form-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl) var(--space-lg);
+    overflow-y: auto;
+    background-color: var(--color-canvas);
+  }
+
+  &__form-container {
+    width: 100%;
+    max-width: 420px;
+    animation: fadeIn 0.4s ease both;
+  }
+
+  // ── Responsive ─────────────────────────────────────────────────────────────
+  @media (max-width: 768px) {
+    flex-direction: column;
+
+    &__brand {
+      width: 100%;
+      min-height: 220px;
+      align-items: flex-end;
+      padding-bottom: var(--space-md);
+
+      &::before,
+      &::after { display: none; }
+    }
+
+    &__brand-content {
+      padding: var(--space-md);
+      max-width: 100%;
+    }
+
+    &__tagline {
+      font-size: 28px;
+    }
+
+    &__stats {
+      display: none;
+    }
+
+    &__brand-accent {
+      width: 100%;
+      height: 3px;
+      top: auto;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+    }
+
+    &__form-panel {
+      padding: var(--space-md);
+    }
+  }
+}
