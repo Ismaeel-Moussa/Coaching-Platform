@@ -22,8 +22,9 @@ using Serilog.Events;
 
 // ─── Bootstrap Serilog ───────────────────────────────────────────────────────
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Warning()
+    .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .WriteTo.File(
