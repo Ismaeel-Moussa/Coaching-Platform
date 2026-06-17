@@ -1,0 +1,15 @@
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net8.0\JokerNutrition.Data.csproj.AssemblyReference.cache
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net8.0\JokerNutrition.Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net8.0\JokerNutrition.Data.AssemblyInfoInputs.cache
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net8.0\JokerNutrition.Data.AssemblyInfo.cs
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net8.0\JokerNutrition.Data.csproj.CoreCompileInputs.cache
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net8.0\JokerNutrition.Data.sourcelink.json
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\bin\Debug\net8.0\JokerNutrition.Data.deps.json
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\bin\Debug\net8.0\JokerNutrition.Data.runtimeconfig.json
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\bin\Debug\net8.0\JokerNutrition.Data.dll
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\bin\Debug\net8.0\JokerNutrition.Data.pdb
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net8.0\JokerNutrition.Data.dll
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net8.0\refint\JokerNutrition.Data.dll
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net8.0\JokerNutrition.Data.pdb
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net8.0\JokerNutrition.Data.genruntimeconfig.cache
+C:\Users\ismail\Desktop\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net8.0\ref\JokerNutrition.Data.dll
