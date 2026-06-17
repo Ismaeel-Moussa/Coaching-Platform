@@ -1,0 +1,112 @@
+.sign-in {
+  width: 100%;
+  animation: fadeIn 0.35s ease both;
+
+  &__header {
+    margin-bottom: var(--space-lg);
+    text-align: center;
+  }
+
+  &__title {
+    font-family: var(--font-heading);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--color-navy);
+    margin-bottom: 6px;
+  }
+
+  &__subtitle {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+  }
+
+  &__form {
+    // Label styles
+    .ant-form-item-label > label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      height: auto;
+    }
+
+    // Input override
+    .ant-input-affix-wrapper {
+      padding: 10px 12px;
+      border-radius: var(--radius-btn) !important;
+    }
+
+    .ant-input-affix-wrapper-lg {
+      font-size: 14px;
+    }
+  }
+
+  &__field-icon {
+    font-size: 18px;
+    color: var(--color-border-strong);
+    user-select: none;
+  }
+
+  &__password-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  &__forgot-link {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-gold-text);
+    transition: color var(--transition-fast);
+
+    &:hover {
+      color: var(--color-gold-dim);
+    }
+  }
+
+  &__submit-btn {
+    height: 46px !important;
+    font-family: var(--font-heading) !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em;
+    border-radius: var(--radius-btn) !important;
+    background-color: var(--color-gold) !important;
+    border-color: var(--color-gold) !important;
+    color: var(--color-navy) !important;
+    transition: all var(--transition-fast) !important;
+    box-shadow: none !important;
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-gold-dim) !important;
+      border-color: var(--color-gold-dim) !important;
+      box-shadow: var(--shadow-gold) !important;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0) !important;
+    }
+  }
+
+  &__divider {
+    margin: var(--space-sm) 0 !important;
+
+    .ant-divider-inner-text {
+      font-size: 12px;
+      color: var(--color-text-tertiary);
+    }
+  }
+
+  &__register-hint {
+    text-align: center;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+  }
+
+  &__register-note {
+    color: var(--color-text-tertiary);
+    font-style: italic;
+  }
+}

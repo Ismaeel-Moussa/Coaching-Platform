@@ -187,9 +187,14 @@ try
     // 15. Health check endpoint
     app.MapGet("/api/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
 
-    // 16. Seed mock data in dev
+    // 16. Migrate and seed mock data in dev
     if (app.Environment.IsDevelopment())
     {
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<JokerNutritionContext>();
+            await dbContext.Database.MigrateAsync();
+        }
         await app.SeedMockDataAsync();
     }
 

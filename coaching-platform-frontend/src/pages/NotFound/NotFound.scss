@@ -1,0 +1,59 @@
+.not-found {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-canvas);
+
+  &__content {
+    text-align: center;
+    padding: var(--space-xl);
+    animation: fadeIn 0.4s ease both;
+  }
+
+  &__code {
+    font-family: var(--font-heading);
+    font-size: 96px;
+    font-weight: 700;
+    color: var(--color-gold);
+    line-height: 1;
+    margin-bottom: var(--space-xs);
+  }
+
+  &__title {
+    font-family: var(--font-heading);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--color-navy);
+    margin-bottom: var(--space-xs);
+  }
+
+  &__message {
+    font-size: 15px;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background-color: var(--color-navy);
+    color: var(--color-text-inverse);
+    border-radius: var(--radius-btn);
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+
+    .material-symbols-outlined { font-size: 20px; }
+
+    &:hover {
+      background-color: var(--color-navy-mid);
+      color: var(--color-gold);
+      transform: translateY(-1px);
+    }
+  }
+}

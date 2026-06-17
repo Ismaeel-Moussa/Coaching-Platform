@@ -1,0 +1,15 @@
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\bin\Debug\net10.0\JokerNutrition.Data.deps.json
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\bin\Debug\net10.0\JokerNutrition.Data.runtimeconfig.json
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\bin\Debug\net10.0\JokerNutrition.Data.dll
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\bin\Debug\net10.0\JokerNutrition.Data.pdb
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net10.0\JokerNutrition.Data.csproj.AssemblyReference.cache
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net10.0\JokerNutrition.Data.GeneratedMSBuildEditorConfig.editorconfig
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net10.0\JokerNutrition.Data.AssemblyInfoInputs.cache
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net10.0\JokerNutrition.Data.AssemblyInfo.cs
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net10.0\JokerNutrition.Data.csproj.CoreCompileInputs.cache
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net10.0\JokerNutrition.Data.sourcelink.json
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net10.0\JokerNutrition.Data.dll
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net10.0\refint\JokerNutrition.Data.dll
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net10.0\JokerNutrition.Data.pdb
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net10.0\JokerNutrition.Data.genruntimeconfig.cache
+F:\1111\Projects\GYM\Coaching-Platform\coaching-platform-backend\JokerNutrition.Data\obj\Debug\net10.0\ref\JokerNutrition.Data.dll
