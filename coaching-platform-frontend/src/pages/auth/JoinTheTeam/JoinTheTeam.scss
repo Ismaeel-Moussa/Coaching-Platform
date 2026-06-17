@@ -1,0 +1,138 @@
+.join-team {
+  width: 100%;
+  animation: fadeIn 0.35s ease both;
+
+  &--loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xl) 0;
+
+    p {
+      color: var(--color-text-secondary);
+      font-size: 14px;
+    }
+  }
+
+  &__header {
+    margin-bottom: var(--space-md);
+    text-align: center;
+  }
+
+  &__title {
+    font-family: var(--font-heading);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--color-navy);
+    margin-bottom: 6px;
+  }
+
+  &__subtitle {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+  }
+
+  &__invite-banner {
+    margin-bottom: var(--space-md) !important;
+    border-radius: var(--radius-card) !important;
+    border-color: var(--color-gold) !important;
+    background-color: var(--color-gold-bg) !important;
+
+    .ant-alert-icon {
+      color: var(--color-gold-text) !important;
+      font-size: 18px !important;
+    }
+  }
+
+  &__invite-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  &__invite-label {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+  }
+
+  &__invite-role {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    background: var(--color-gold);
+    color: var(--color-navy);
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-radius: var(--radius-full);
+  }
+
+  &__invite-email {
+    font-size: 13px;
+    color: var(--color-text-primary);
+    font-weight: 500;
+  }
+
+  &__form {
+    .ant-form-item-label > label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      height: auto;
+    }
+  }
+
+  &__name-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+
+  &__field-icon {
+    font-size: 18px;
+    color: var(--color-border-strong);
+    user-select: none;
+  }
+
+  &__submit-btn {
+    height: 46px !important;
+    font-family: var(--font-heading) !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em;
+    border-radius: var(--radius-btn) !important;
+    background-color: var(--color-gold) !important;
+    border-color: var(--color-gold) !important;
+    color: var(--color-navy) !important;
+    transition: all var(--transition-fast) !important;
+    box-shadow: none !important;
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-gold-dim) !important;
+      border-color: var(--color-gold-dim) !important;
+      box-shadow: var(--shadow-gold) !important;
+      transform: translateY(-1px);
+    }
+  }
+
+  &__signin-hint {
+    text-align: center;
+    margin-top: var(--space-sm);
+    font-size: 13px;
+    color: var(--color-text-secondary);
+
+    a {
+      color: var(--color-gold-text);
+      font-weight: 500;
+    }
+  }
+}
