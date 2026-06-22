@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("JokerNutrition.Data")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+06e40c8f2cb8a6d94f04623097babcf0f3caca6b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cf6e0be719ab71aedae9a87ea5471986a23c063a")]
 [assembly: System.Reflection.AssemblyProductAttribute("JokerNutrition.Data")]
 [assembly: System.Reflection.AssemblyTitleAttribute("JokerNutrition.Data")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

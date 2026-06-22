@@ -37,10 +37,25 @@ public static class MacroCalculatorHelper
         var factor = effectiveGrams / 100m;
 
         return (
-            food.CaloriesPer100g * factor,
-            food.ProteinPer100g * factor,
-            food.CarbsPer100g * factor,
-            food.FatPer100g * factor
+            Math.Round(food.CaloriesPer100g * factor, 1),
+            Math.Round(food.ProteinPer100g * factor, 1),
+            Math.Round(food.CarbsPer100g * factor, 1),
+            Math.Round(food.FatPer100g * factor, 1)
         );
+    }
+
+    /// <summary>
+    /// Calculates combined macros for all ingredients in a recipe and returns totals.
+    /// </summary>
+    public static (decimal Calories, decimal Protein, decimal Carbs, decimal Fat)
+        CalculateRecipeTotals(IEnumerable<(Food Food, decimal QuantityGrams, FoodState State)> ingredients)
+    {
+        decimal cal = 0, pro = 0, carb = 0, fat = 0;
+        foreach (var (food, qty, state) in ingredients)
+        {
+            var (c, p, cb, f) = Calculate(food, qty, state);
+            cal += c; pro += p; carb += cb; fat += f;
+        }
+        return (Math.Round(cal, 1), Math.Round(pro, 1), Math.Round(carb, 1), Math.Round(fat, 1));
     }
 }
