@@ -237,4 +237,118 @@
   &__submit {
     margin-top: 4px;
   }
+
+  &__segmented {
+    margin-bottom: 8px;
+    background: var(--surface-container-low) !important;
+    border-radius: var(--radius-btn);
+    padding: 2px;
+
+    .ant-segmented-item-selected {
+      background: var(--color-gold) !important;
+      color: var(--color-navy) !important;
+      font-weight: 600;
+
+      .material-symbols-outlined {
+        color: var(--color-navy) !important;
+      }
+    }
+
+    .ant-segmented-item {
+      color: var(--color-text-secondary);
+      transition: color var(--transition-fast);
+
+      &:hover {
+        color: var(--color-navy);
+      }
+
+      .material-symbols-outlined {
+        font-size: 16px;
+        vertical-align: middle;
+        margin-right: 4px;
+        transition: color var(--transition-fast);
+      }
+    }
+  }
+
+  &__selected-food--recipe {
+    background: rgba(26, 38, 57, 0.05) !important;
+    border: 1px solid var(--color-border) !important;
+    
+    .material-symbols-outlined {
+      color: var(--color-navy) !important;
+    }
+  }
+
+  &__recipe-details {
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__recipe-desc {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  &__recipe-meta {
+    display: flex;
+    gap: 16px;
+    border-bottom: 1px solid var(--color-border-light);
+    padding-bottom: 10px;
+  }
+
+  &__meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+
+    .material-symbols-outlined {
+      font-size: 18px;
+      color: var(--color-gold);
+    }
+  }
+
+  &__ingredients-list-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__ingredients-title {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-navy);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__ingredients-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__ingredient-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--color-text-primary);
+    padding: 6px 8px;
+    background: var(--surface-container-low);
+    border-radius: var(--radius-btn);
+  }
 }
