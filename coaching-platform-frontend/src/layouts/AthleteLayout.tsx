@@ -42,8 +42,20 @@ const AthleteLayout: React.FC = () => {
       <aside className="athlete-layout__sidebar">
         {/* Logo */}
         <div className="athlete-layout__sidebar-logo">
-          <div className="athlete-layout__logo-icon">JN</div>
-          <span className="athlete-layout__logo-text">JOKER NUTRITION</span>
+          <div className="athlete-layout__logo-brand">
+            <div className="athlete-layout__logo-icon">JN</div>
+            <span className="athlete-layout__logo-text">JOKER NUTRITION</span>
+          </div>
+          <button
+            id="athlete-sidebar-toggle"
+            className="athlete-layout__toggle"
+            onClick={toggleCollapsed}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <span className="material-symbols-outlined">
+              {collapsed ? 'chevron_right' : 'chevron_left'}
+            </span>
+          </button>
         </div>
 
         {/* Nav */}
@@ -89,18 +101,6 @@ const AthleteLayout: React.FC = () => {
             </button>
           </Tooltip>
         </div>
-
-        {/* Collapse toggle */}
-        <button
-          id="athlete-sidebar-toggle"
-          className="athlete-layout__toggle"
-          onClick={toggleCollapsed}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          <span className="material-symbols-outlined">
-            {collapsed ? 'chevron_right' : 'chevron_left'}
-          </span>
-        </button>
       </aside>
 
       {/* Main content */}
