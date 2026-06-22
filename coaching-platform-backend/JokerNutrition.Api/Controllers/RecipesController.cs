@@ -24,10 +24,11 @@ public class RecipesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetRecipes(
         [FromQuery] RecipeCategory? category,
+        [FromQuery] string? search,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
-        var result = await _recipeService.GetRecipesAsync(category, page, pageSize);
+        var result = await _recipeService.GetRecipesAsync(category, search, page, pageSize);
         return Ok(result);
     }
 

@@ -3,10 +3,11 @@ import { message as antMessage } from 'antd';
 import { getRecipes, createRecipe, quickAddRecipeToDiary } from '../../api/recipe';
 import type { RecipeDto, RecipesPagedResult, CreateRecipeForm, GetRecipesParams } from '../../types/Recipe';
 
-export const useGetRecipes = (params: GetRecipesParams) =>
+export const useGetRecipes = (params: GetRecipesParams, enabled = true) =>
   useQuery<RecipesPagedResult>({
     queryKey: ['recipes', params],
     queryFn: () => getRecipes(params),
+    enabled,
   });
 
 export const useCreateRecipe = () => {

@@ -126,7 +126,6 @@
     width: 100%;
     padding: 9px 16px;
     background: var(--color-gold);
-    border: none;
     border-radius: var(--radius-btn);
     color: var(--color-navy);
     font-family: var(--font-heading);
@@ -139,9 +138,32 @@
       font-size: 16px;
     }
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: var(--color-gold-dim);
       box-shadow: var(--shadow-gold);
     }
+
+    &--loading,
+    &:disabled {
+      background: var(--surface-container) !important;
+      color: var(--color-text-tertiary) !important;
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+      border: 1px solid var(--color-border-light) !important;
+    }
   }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
 }

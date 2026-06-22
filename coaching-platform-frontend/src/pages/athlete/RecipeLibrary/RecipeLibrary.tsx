@@ -61,6 +61,7 @@ const RecipeGrid: React.FC<RecipeGridProps> = ({ category, today, targetMealType
           key={recipe.id}
           recipe={recipe}
           onQuickAdd={handleQuickAdd}
+          isAdding={quickAddMutation.isPending && quickAddMutation.variables?.id === recipe.id}
         />
       ))}
     </div>
