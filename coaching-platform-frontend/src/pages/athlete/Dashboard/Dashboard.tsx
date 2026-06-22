@@ -31,6 +31,12 @@ const AthleteDashboard: React.FC = () => {
     updateWaterMutation.mutate({ waterLiters: newTotal });
   };
 
+  const handleAddSteps = () => {
+    if (!data) return;
+    const newTotal = data.today.stepsWalked + 1000;
+    updateStepsMutation.mutate({ steps: newTotal });
+  };
+
   if (error) {
     return (
       <div className="dashboard dashboard--error">
@@ -201,6 +207,8 @@ const AthleteDashboard: React.FC = () => {
                 unit="steps"
                 label="Steps"
                 size={120}
+                onIncrement={handleAddSteps}
+                incrementLabel="+1000"
               />
             </div>
           ) : null}
