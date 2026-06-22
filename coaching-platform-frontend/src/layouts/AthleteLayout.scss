@@ -1,3 +1,8 @@
+// ── Sidebar collapse variables ────────────────────────────────────────────────
+$sidebar-collapsed-width: 64px;
+$sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                     margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
 .athlete-layout {
   display: flex;
   min-height: 100vh;
@@ -15,6 +20,7 @@
     bottom: 0;
     z-index: 100;
     overflow: hidden;
+    transition: $sidebar-transition;
   }
 
   &__sidebar-logo {
@@ -24,11 +30,13 @@
     padding: var(--space-md) var(--space-sm);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     flex-shrink: 0;
+    overflow: hidden;
   }
 
   &__logo-icon {
     width: 36px;
     height: 36px;
+    min-width: 36px;
     background: var(--color-gold);
     border-radius: var(--radius-btn);
     display: flex;
@@ -50,12 +58,16 @@
     color: var(--color-text-inverse);
     text-transform: uppercase;
     white-space: nowrap;
+    opacity: 1;
+    overflow: hidden;
+    transition: opacity 0.2s ease;
   }
 
   &__nav {
     flex: 1;
     padding: var(--space-xs) 0;
     overflow-y: auto;
+    overflow-x: hidden;
   }
 
   &__nav-item {
@@ -71,6 +83,8 @@
     position: relative;
     margin: 2px 8px;
     border-radius: var(--radius-btn);
+    overflow: hidden;
+    white-space: nowrap;
 
     .material-symbols-outlined {
       font-size: 20px;
@@ -104,6 +118,13 @@
     }
   }
 
+  &__nav-label {
+    opacity: 1;
+    transition: opacity 0.15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
   &__sidebar-footer {
     padding: var(--space-xs) var(--space-sm) var(--space-sm);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -111,6 +132,7 @@
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
+    overflow: hidden;
   }
 
   &__user {
@@ -119,11 +141,13 @@
     gap: 10px;
     flex: 1;
     min-width: 0;
+    cursor: default;
   }
 
   &__avatar {
     width: 32px;
     height: 32px;
+    min-width: 32px;
     background: var(--color-navy-mid);
     border: 2px solid var(--color-gold);
     border-radius: 50%;
@@ -143,6 +167,9 @@
     flex-direction: column;
     gap: 1px;
     min-width: 0;
+    overflow: hidden;
+    opacity: 1;
+    transition: opacity 0.15s ease;
   }
 
   &__user-name {
@@ -182,11 +209,72 @@
     }
   }
 
-  // ── Main content ───────────────────────────────────────────────────────────
+  // ── Collapse toggle ───────────────────────────────────────────────────────
+  &__toggle {
+    width: 100%;
+    padding: 10px 0;
+    background: rgba(255, 255, 255, 0.04);
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+    flex-shrink: 0;
+
+    .material-symbols-outlined { font-size: 18px; }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--color-gold);
+    }
+  }
+
+  // ── Main content ─────────────────────────────────────────────────────────
   &__main {
     margin-left: var(--sidebar-width);
     flex: 1;
     min-height: 100vh;
     padding: var(--space-lg);
+    transition: $sidebar-transition;
+  }
+
+  // ── Collapsed state ───────────────────────────────────────────────────────
+  &--collapsed {
+    .athlete-layout__sidebar {
+      width: $sidebar-collapsed-width;
+    }
+
+    .athlete-layout__main {
+      margin-left: $sidebar-collapsed-width;
+    }
+
+    .athlete-layout__logo-text {
+      opacity: 0;
+      width: 0;
+    }
+
+    .athlete-layout__nav-label {
+      opacity: 0;
+      width: 0;
+    }
+
+    .athlete-layout__user-info {
+      opacity: 0;
+      width: 0;
+    }
+
+    .athlete-layout__logout {
+      display: none;
+    }
+
+    .athlete-layout__nav-item {
+      justify-content: center;
+      gap: 0;
+      padding-left: 0;
+      padding-right: 0;
+    }
   }
 }
