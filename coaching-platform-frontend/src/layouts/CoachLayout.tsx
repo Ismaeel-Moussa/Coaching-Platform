@@ -42,11 +42,23 @@ const CoachLayout: React.FC = () => {
       <aside className="coach-layout__sidebar">
         {/* Logo */}
         <div className="coach-layout__sidebar-logo">
-          <div className="coach-layout__logo-icon">JN</div>
-          <div className="coach-layout__logo-info">
-            <span className="coach-layout__logo-text">JOKER NUTRITION</span>
-            <span className="coach-layout__logo-sub">Coach Hub</span>
+          <div className="coach-layout__logo-brand">
+            <div className="coach-layout__logo-icon">JN</div>
+            <div className="coach-layout__logo-info">
+              <span className="coach-layout__logo-text">JOKER NUTRITION</span>
+              <span className="coach-layout__logo-sub">Coach Hub</span>
+            </div>
           </div>
+          <button
+            id="coach-sidebar-toggle"
+            className="coach-layout__toggle"
+            onClick={toggleCollapsed}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <span className="material-symbols-outlined">
+              {collapsed ? 'chevron_right' : 'chevron_left'}
+            </span>
+          </button>
         </div>
 
         {/* Nav */}
@@ -92,18 +104,6 @@ const CoachLayout: React.FC = () => {
             </button>
           </Tooltip>
         </div>
-
-        {/* Collapse toggle */}
-        <button
-          id="coach-sidebar-toggle"
-          className="coach-layout__toggle"
-          onClick={toggleCollapsed}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          <span className="material-symbols-outlined">
-            {collapsed ? 'chevron_right' : 'chevron_left'}
-          </span>
-        </button>
       </aside>
 
       {/* Main content */}

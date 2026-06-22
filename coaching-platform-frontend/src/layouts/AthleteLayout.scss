@@ -1,5 +1,5 @@
 // ── Sidebar collapse variables ────────────────────────────────────────────────
-$sidebar-collapsed-width: 64px;
+$sidebar-collapsed-width: 70px;
 $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
                      margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -26,11 +26,22 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
   &__sidebar-logo {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
     padding: var(--space-md) var(--space-sm);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     flex-shrink: 0;
     overflow: hidden;
+    position: relative;
+  }
+
+  &__logo-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    transition: opacity var(--transition-fast);
   }
 
   &__logo-icon {
@@ -211,17 +222,17 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
 
   // ── Collapse toggle ───────────────────────────────────────────────────────
   &__toggle {
-    width: 100%;
-    padding: 10px 0;
-    background: rgba(255, 255, 255, 0.04);
+    background: none;
     border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
     cursor: pointer;
     color: rgba(255, 255, 255, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color var(--transition-fast), color var(--transition-fast);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-btn);
+    transition: all var(--transition-fast);
     flex-shrink: 0;
 
     .material-symbols-outlined { font-size: 18px; }
@@ -275,6 +286,30 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
       gap: 0;
       padding-left: 0;
       padding-right: 0;
+    }
+
+    // Hover-to-reveal toggle in collapsed state
+    .athlete-layout__logo-brand {
+      margin: 0 auto;
+    }
+
+    .athlete-layout__toggle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .athlete-layout__sidebar-logo:hover {
+      .athlete-layout__logo-brand {
+        opacity: 0;
+      }
+      .athlete-layout__toggle {
+        opacity: 1;
+        pointer-events: auto;
+      }
     }
   }
 }
