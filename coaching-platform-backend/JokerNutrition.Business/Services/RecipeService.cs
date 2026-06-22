@@ -15,7 +15,7 @@ namespace JokerNutrition.Business.Services;
 
 public interface IRecipeService
 {
-    Task<PagedResult<RecipeDto>> GetRecipesAsync(RecipeCategory? category, int page, int pageSize);
+    Task<PagedResult<RecipeDto>> GetRecipesAsync(RecipeCategory? category, string? search, int page, int pageSize);
     Task<RecipeDto> GetRecipeByIdAsync(int id);
     Task<RecipeDto> CreateRecipeAsync(CreateRecipeForm form);
     Task<DailyDiaryDto> QuickAddToDiaryAsync(int recipeId, MealType mealType);
@@ -46,7 +46,7 @@ public class RecipeService : _BaseService, IRecipeService
         _mealLogRepo = mealLogRepo;
     }
 
-    public async Task<PagedResult<RecipeDto>> GetRecipesAsync(RecipeCategory? category, int page, int pageSize)
+    public async Task<PagedResult<RecipeDto>> GetRecipesAsync(RecipeCategory? category, string? search, int page, int pageSize)
     {
         var query = _recipeRepo.Query()
             .Include(r => r.Ingredients).ThenInclude(i => i.Food);
@@ -54,6 +54,13 @@ public class RecipeService : _BaseService, IRecipeService
         var filtered = category.HasValue
             ? query.Where(r => r.Category == category.Value)
             : query;
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var searchLower = search.ToLower();
+            filtered = filtered.Where(r => r.Name.ToLower().Contains(searchLower) 
+                || (r.Description != null && r.Description.ToLower().Contains(searchLower)));
+        }
 
         var totalCount = await filtered.CountAsync();
 
