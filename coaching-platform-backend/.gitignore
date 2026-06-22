@@ -1,0 +1,25 @@
+## Ignore Visual Studio & VS Code temp/config files
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Ignore build outputs for all projects
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+## Ignore log files
+Logs/
+logs/
+*.log
+
+## Ignore user secrets and environment configs
+appsettings.Development.json
+
+## Ignore OS specific files
+.DS_Store
+Thumbs.db
