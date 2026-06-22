@@ -12,5 +12,12 @@ public class ServicesModule : Module
         builder.RegisterType<EmailService>().As<IEmailService>().InstancePerLifetimeScope();
         builder.RegisterType<AuthService>().As<IAuthService>().InstancePerLifetimeScope();
         builder.RegisterType<InvitationService>().As<IInvitationService>().InstancePerLifetimeScope();
+
+        // ─── Day 2: Nutrition & Diary ────────────────────────────────────
+        builder.RegisterType<FoodService>().As<IFoodService>().InstancePerLifetimeScope();
+        builder.RegisterType<DiaryService>().As<IDiaryService>().InstancePerLifetimeScope();
+        builder.RegisterType<MealLogService>().As<IMealLogService>().InstancePerLifetimeScope();
+        builder.RegisterType<RecipeService>().As<IRecipeService>().InstancePerLifetimeScope();
+        builder.RegisterType<AthleteService>().As<IAthleteService>().InstancePerLifetimeScope();
     }
 }
