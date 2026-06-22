@@ -68,6 +68,7 @@ export interface CreateRecipeForm {
 
 export interface GetRecipesParams {
   category?: RecipeCategory;
+  search?: string;
   page?: number;
   pageSize?: number;
 }

@@ -8,6 +8,7 @@ interface RecipeCardProps {
   recipe: RecipeDto;
   onQuickAdd?: (recipe: RecipeDto) => void;
   onViewDetails?: (recipe: RecipeDto) => void;
+  isAdding?: boolean;
 }
 
 const CATEGORY_COLORS: Record<RecipeCategory, string> = {
@@ -16,7 +17,7 @@ const CATEGORY_COLORS: Record<RecipeCategory, string> = {
   [RecipeCategory.Custom]: '#785900',           // Gold text
 };
 
-const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onQuickAdd, onViewDetails }) => {
+const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onQuickAdd, onViewDetails, isAdding = false }) => {
   const totalTime = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
   const categoryColor = CATEGORY_COLORS[recipe.category];
 
@@ -78,15 +79,19 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onQuickAdd, onViewDetai
         {/* Quick Add */}
         {onQuickAdd && (
           <button
-            className="recipe-card__quick-add"
+            className={`recipe-card__quick-add ${isAdding ? 'recipe-card__quick-add--loading' : ''}`}
             onClick={(e) => {
               e.stopPropagation();
+              if (isAdding) return;
               onQuickAdd(recipe);
             }}
+            disabled={isAdding}
             type="button"
           >
-            <span className="material-symbols-outlined">add_circle</span>
-            Quick Add to Diary
+            <span className={`material-symbols-outlined ${isAdding ? 'animate-spin' : ''}`}>
+              {isAdding ? 'sync' : 'add_circle'}
+            </span>
+            {isAdding ? 'Adding...' : 'Quick Add to Diary'}
           </button>
         )}
       </div>
