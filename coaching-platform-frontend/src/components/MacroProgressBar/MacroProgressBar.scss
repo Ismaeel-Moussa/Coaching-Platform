@@ -1,0 +1,63 @@
+.macro-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__label {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__values {
+    font-family: var(--font-data);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+
+    &--exceeded {
+      color: var(--color-red);
+    }
+  }
+
+  &__unit {
+    font-weight: 400;
+    color: var(--color-text-tertiary);
+    font-size: 11px;
+  }
+
+  &__track {
+    height: 8px;
+    background-color: var(--surface-container);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    background-color: var(--color-gold);
+    border-radius: var(--radius-full);
+    transition: width var(--transition-base);
+
+    &--exceeded {
+      background-color: var(--color-red);
+    }
+  }
+
+  &__over-label {
+    font-family: var(--font-data);
+    font-size: 11px;
+    color: var(--color-red);
+    font-weight: 500;
+    text-align: right;
+  }
+}

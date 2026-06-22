@@ -1,0 +1,340 @@
+.create-recipe-modal {
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-navy);
+
+    .material-symbols-outlined {
+      color: var(--color-gold);
+      font-size: 22px;
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 8px 0;
+  }
+
+  &__steps {
+    .ant-steps-item-finish .ant-steps-item-icon {
+      background: var(--color-gold) !important;
+      border-color: var(--color-gold) !important;
+    }
+    .ant-steps-item-process .ant-steps-item-icon {
+      background: var(--color-navy) !important;
+      border-color: var(--color-navy) !important;
+    }
+  }
+
+  &__step {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__search-area {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__results {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+  }
+
+  &__food-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  &__food-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--color-border-light);
+    transition: background-color var(--transition-fast);
+
+    &:last-child { border-bottom: none; }
+    &:hover { background-color: var(--surface-container-low); }
+  }
+
+  &__food-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  &__food-kcal {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+  }
+
+  &__pending {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    background: var(--color-gold-bg);
+    border: 1px solid var(--color-gold);
+    border-radius: var(--radius-card);
+  }
+
+  &__pending-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--color-text-primary);
+  }
+
+  &__pending-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  // Ingredient list
+  &__ingredient-list {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+
+  &__ingredient-header {
+    display: grid;
+    grid-template-columns: 1fr 80px 60px 32px;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--surface-container-low);
+    font-family: var(--font-data);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  &__ingredient-row {
+    display: grid;
+    grid-template-columns: 1fr 80px 60px 32px;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 14px;
+    border-top: 1px solid var(--color-border-light);
+  }
+
+  &__ingredient-food {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__ingredient-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__ingredient-state {
+    font-family: var(--font-data);
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+  }
+
+  &__ingredient-qty,
+  &__ingredient-kcal {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+
+  &__remove-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: var(--radius-btn);
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+
+    .material-symbols-outlined { font-size: 16px; }
+
+    &:hover {
+      color: var(--color-red);
+      background: var(--color-red-bg);
+    }
+  }
+
+  &__running-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--color-navy);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+  }
+
+  &__total-macros {
+    display: flex;
+    gap: 12px;
+
+    .mono {
+      font-size: 12px;
+      color: var(--color-gold);
+    }
+  }
+
+  &__nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  &__form {
+    .ant-form-item {
+      margin-bottom: 14px;
+    }
+  }
+
+  &__row {
+    display: flex;
+    gap: 12px;
+  }
+
+  // Preview card
+  &__preview-card {
+    background: var(--surface-container-low);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  &__preview-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__preview-name {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-navy);
+  }
+
+  &__preview-category {
+    flex-shrink: 0;
+    font-family: var(--font-data);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    background: var(--color-navy);
+    color: var(--color-gold);
+    border-radius: var(--radius-full);
+  }
+
+  &__preview-desc {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+  }
+
+  &__preview-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--color-text-tertiary);
+
+    span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .material-symbols-outlined { font-size: 16px; }
+    }
+  }
+
+  &__macro-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    background: var(--color-navy);
+    border-radius: var(--radius-card);
+    padding: 16px;
+  }
+
+  &__macro-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+
+    &--kcal &__macro-val { color: var(--color-gold); }
+  }
+
+  &__macro-val {
+    font-family: var(--font-data);
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+  }
+
+  &__macro-lbl {
+    font-family: var(--font-data);
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+  }
+
+  &__preview-ingredients {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__preview-ingredient-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    padding: 4px 0;
+    border-bottom: 1px solid var(--color-border-light);
+
+    &:last-child { border-bottom: none; }
+  }
+}
