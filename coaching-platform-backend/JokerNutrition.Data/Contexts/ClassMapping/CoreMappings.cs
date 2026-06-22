@@ -11,6 +11,8 @@ public class AthleteMapping : IEntityTypeConfiguration<Athlete>
         builder.ToTable("Athletes");
         builder.HasKey(a => a.Id);
         builder.Property(a => a.TargetGoal).HasMaxLength(100);
+        builder.Property(a => a.WeightKg).HasPrecision(5, 2);
+        builder.Property(a => a.HeightCm).HasPrecision(5, 2);
         builder.HasOne(a => a.User).WithMany().HasForeignKey(a => a.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(a => a.AssignedCoach).WithMany(c => c.Athletes).HasForeignKey(a => a.AssignedCoachId).OnDelete(DeleteBehavior.Restrict);
     }
