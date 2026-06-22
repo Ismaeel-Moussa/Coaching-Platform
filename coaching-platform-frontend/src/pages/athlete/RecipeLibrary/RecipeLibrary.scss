@@ -1,0 +1,144 @@
+.recipe-library {
+  padding: var(--space-md);
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+
+  // ── Header ──────────────────────────────────────────────────────────────────
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  &__title {
+    font-family: var(--font-heading);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  &__sub {
+    font-size: 13px;
+    color: var(--color-text-tertiary);
+    margin-top: 4px;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__meal-picker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__meal-picker-label {
+    font-family: var(--font-data);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  &__create-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: var(--color-navy);
+    border: none;
+    border-radius: var(--radius-btn);
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-gold);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+    white-space: nowrap;
+
+    .material-symbols-outlined { font-size: 18px; }
+
+    &:hover {
+      background: var(--color-navy-light);
+      box-shadow: var(--shadow-md);
+    }
+  }
+
+  // ── Tabs card ───────────────────────────────────────────────────────────────
+  &__tabs-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  &__tabs {
+    .ant-tabs-nav {
+      background: var(--surface-container-low);
+      margin: 0;
+      padding: 0 16px;
+    }
+
+    .ant-tabs-tab-active .ant-tabs-tab-btn {
+      color: var(--color-navy) !important;
+    }
+
+    .ant-tabs-ink-bar {
+      background: var(--color-gold) !important;
+    }
+  }
+
+  &__tab-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  &__tab-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+
+    &--0 { background: var(--color-navy); }   // MuscleBuilding
+    &--1 { background: var(--color-success); } // FatLoss
+    &--2 { background: var(--color-gold); }    // Custom
+  }
+
+  &__tab-content {
+    padding: 20px;
+  }
+
+  &__empty {
+    padding: 48px 0;
+  }
+}
+
+// ── Recipe Grid ──────────────────────────────────────────────────────────────
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+
+  &__skeleton {
+    background: var(--color-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-card);
+    padding: 16px;
+  }
+}

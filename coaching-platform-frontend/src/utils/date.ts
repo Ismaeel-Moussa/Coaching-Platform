@@ -1,37 +1,28 @@
-export const formatDate = (iso: string): string => {
-  try {
-    return new Date(iso).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  } catch {
-    return iso;
-  }
+/**
+ * Returns today's date in ISO format: YYYY-MM-DD (local time, not UTC).
+ */
+export const getTodayIso = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
-export const formatDateTime = (iso: string): string => {
-  try {
-    return new Date(iso).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return iso;
-  }
+/**
+ * Formats an ISO date string for display (e.g. "Jun 22, 2026")
+ */
+export const formatDateDisplay = (isoDate: string): string => {
+  return new Date(isoDate).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 };
 
-export const isExpired = (iso: string): boolean => {
-  try {
-    return new Date(iso) < new Date();
-  } catch {
-    return false;
-  }
-};
-
-export const getToday = (): string => {
-  return new Date().toISOString().split('T')[0];
+/**
+ * Returns the day of week name for an ISO date string.
+ */
+export const getDayOfWeek = (isoDate: string): string => {
+  return new Date(isoDate).toLocaleDateString('en-US', { weekday: 'long' });
 };

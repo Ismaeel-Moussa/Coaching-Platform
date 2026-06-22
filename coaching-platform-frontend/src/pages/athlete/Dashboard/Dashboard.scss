@@ -1,0 +1,363 @@
+.dashboard {
+  padding: var(--space-md);
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+
+  &--error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    gap: 12px;
+    color: var(--color-red);
+
+    .material-symbols-outlined { font-size: 48px; }
+    p { font-size: 16px; color: var(--color-text-secondary); }
+  }
+
+  // ── Header ──────────────────────────────────────────────────────────────────
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  &__greeting {
+    font-family: var(--font-heading);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+  }
+
+  &__name { color: var(--color-navy); }
+
+  &__date {
+    font-size: 14px;
+    color: var(--color-text-tertiary);
+    margin-top: 4px;
+  }
+
+  &__streak {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--color-navy);
+    border: 2px solid var(--color-gold);
+    border-radius: var(--radius-lg);
+    padding: 10px 20px;
+    animation: pulse-gold 2s infinite;
+  }
+
+  &__streak-flame {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  &__streak-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__streak-count {
+    font-family: var(--font-data);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-gold);
+    line-height: 1;
+  }
+
+  &__streak-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: var(--font-data);
+    letter-spacing: 0.05em;
+  }
+
+  // ── Bento Grid ──────────────────────────────────────────────────────────────
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: var(--space-sm);
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // ── Cards ───────────────────────────────────────────────────────────────────
+  &__card {
+    background: var(--color-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: box-shadow var(--transition-base);
+
+    &:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    // Macros card spans both rows on desktop
+    &--macros {
+      grid-row: 1 / 3;
+
+      @media (max-width: 900px) {
+        grid-row: auto;
+      }
+    }
+
+    &--session {
+      background: var(--color-navy);
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 160px;
+        height: 160px;
+        background: rgba(253, 192, 3, 0.07);
+        border-radius: 50%;
+        pointer-events: none;
+      }
+    }
+
+    &--targets {}
+    &--stats {}
+  }
+
+  &__card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .material-symbols-outlined {
+      color: var(--color-gold);
+      font-size: 20px;
+    }
+  }
+
+  &__card-title {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    flex: 1;
+
+    &--inverse {
+      color: var(--color-text-inverse);
+    }
+  }
+
+  &__card-sub {
+    font-size: 12px;
+    color: var(--color-gold-text);
+    background: var(--color-gold-bg);
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+  }
+
+  // Macro bars
+  &__macro-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+  }
+
+  &__skeleton-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+  }
+
+  &__log-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    background: var(--color-gold);
+    border: none;
+    border-radius: var(--radius-btn);
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-navy);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+
+    .material-symbols-outlined { font-size: 18px; }
+
+    &:hover {
+      background: var(--color-gold-dim);
+      box-shadow: var(--shadow-gold);
+    }
+  }
+
+  // Session card
+  &__session-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(253, 192, 3, 0.15);
+    border-radius: var(--radius-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .material-symbols-outlined {
+      font-size: 28px;
+      color: var(--color-gold);
+    }
+  }
+
+  &__session-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__session-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-data);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    width: fit-content;
+
+    .material-symbols-outlined { font-size: 16px; }
+
+    &.status--none {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.6);
+    }
+    &.status--active {
+      background: var(--color-gold-bg);
+      color: var(--color-gold);
+      animation: pulse-gold 2s infinite;
+    }
+    &.status--completed {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+    }
+    &.status--missed {
+      background: var(--color-red-bg);
+      color: var(--color-red);
+    }
+  }
+
+  &__session-hint {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.5;
+  }
+
+  &__start-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px;
+    background: var(--color-gold);
+    border: none;
+    border-radius: var(--radius-btn);
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-navy);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+
+    .material-symbols-outlined { font-size: 18px; }
+
+    &:hover:not(:disabled) {
+      background: var(--color-gold-dim);
+      box-shadow: var(--shadow-gold);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  // Rings
+  &__rings {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  // Goal / stats card
+  &__goal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: var(--color-navy);
+    border-radius: var(--radius-card);
+    flex: 1;
+  }
+
+  &__goal-label {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-gold);
+    text-align: center;
+  }
+
+  &__streak-stats {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  &__streak-stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__streak-stat-val {
+    font-family: var(--font-data);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-navy);
+  }
+
+  &__streak-stat-label {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+    text-align: center;
+  }
+
+  &__streak-divider {
+    width: 1px;
+    height: 40px;
+    background: var(--color-border);
+  }
+}
