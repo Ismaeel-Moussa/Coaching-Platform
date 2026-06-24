@@ -105,6 +105,48 @@
     color: var(--color-gold-text);
   }
 
+  // ── Simple body (WarmUp / CoolDown) ─────────────────────────────────────────
+  &__done-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;           // push to right end of the title-row
+    flex-shrink: 0;
+    padding: 9px 20px;
+    background: transparent;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-btn);
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), color var(--transition-fast),
+      background-color var(--transition-fast);
+
+    .material-symbols-outlined {
+      font-size: 16px;
+    }
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-success);
+      color: var(--color-success);
+      background: rgba(18, 183, 106, 0.06);
+    }
+
+    &--checked {
+      border-color: rgba(18, 183, 106, 0.4);
+      color: var(--color-success);
+      background: rgba(18, 183, 106, 0.06);
+      cursor: default;
+    }
+
+    &:disabled:not(&--checked) {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
   // ── Set Rows ─────────────────────────────────────────────────────────────────
   &__sets {
     padding: 0;

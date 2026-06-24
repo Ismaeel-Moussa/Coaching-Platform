@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Tooltip, Popover } from 'antd';
 import { useLogSet } from '../../hooks/useWorkout/useWorkout';
-import type { TemplateExerciseDto, SetLogDto } from '../../types/Workout';
-import type { LogSetForm } from '../../types/Workout';
+import type { TemplateExerciseDto, SetLogDto, LogSetForm } from '../../types/Workout';
 import { ExerciseSection } from '../../types/Workout';
 import './ExerciseCard.scss';
 
@@ -19,6 +18,9 @@ const SECTION_LABELS: Record<ExerciseSection, { label: string; className: string
   [ExerciseSection.CoolDown]: { label: 'Cool-Down', className: 'exercise-card__badge--cooldown' },
 };
 
+// Sections that don't use weight/reps — show a simple "Mark as Done" toggle
+const SIMPLE_SECTIONS: ExerciseSection[] = [ExerciseSection.WarmUp, ExerciseSection.CoolDown];
+
 const ExerciseCard: React.FC<ExerciseCardProps> = ({
   exercise,
   loggedSets,
@@ -27,7 +29,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
 }) => {
   const { mutate: logSet, isPending } = useLogSet();
 
-  // Local input state: one row per target set — [{ weight, reps }, ...]
   const [setInputs, setSetInputs] = useState<Array<{ weight: string; reps: string }>>(() =>
     Array.from({ length: exercise.targetSets }, (_, i) => {
       const existing = loggedSets.find(
@@ -40,21 +41,19 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
     }),
   );
 
-  const isSetLogged = (setIndex: number) => {
-    return loggedSets.some(
+  const isSetLogged = (setIndex: number) =>
+    loggedSets.some(
       (s) => s.exerciseId === exercise.exercise.id && s.setNumber === setIndex + 1,
     );
-  };
 
-  const allSetsLogged = Array.from({ length: exercise.targetSets }, (_, i) =>
-    isSetLogged(i),
-  ).every(Boolean);
+  const isSimple = SIMPLE_SECTIONS.includes(exercise.section);
 
-  const handleInputChange = (
-    setIndex: number,
-    field: 'weight' | 'reps',
-    value: string,
-  ) => {
+  // Simple sections: done = any log entry exists for this exercise
+  const allSetsLogged = isSimple
+    ? loggedSets.some((s) => s.exerciseId === exercise.exercise.id)
+    : Array.from({ length: exercise.targetSets }, (_, i) => isSetLogged(i)).every(Boolean);
+
+  const handleInputChange = (setIndex: number, field: 'weight' | 'reps', value: string) => {
     setSetInputs((prev) => {
       const next = [...prev];
       next[setIndex] = { ...next[setIndex], [field]: value };
@@ -66,9 +65,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
     const { weight, reps } = setInputs[setIndex];
     const weightNum = parseFloat(weight);
     const repsNum = parseInt(reps, 10);
-
     if (isNaN(weightNum) || isNaN(repsNum) || repsNum < 1) return;
-
     const form: LogSetForm = {
       workoutLogId,
       exerciseId: exercise.exercise.id,
@@ -77,6 +74,18 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
       reps: repsNum,
     };
     logSet(form);
+  };
+
+  // WarmUp / CoolDown: log weightKg=0, reps=1 as a completion signal
+  const handleToggleDone = () => {
+    if (allSetsLogged) return;
+    logSet({
+      workoutLogId,
+      exerciseId: exercise.exercise.id,
+      setNumber: 1,
+      weightKg: 0,
+      reps: 1,
+    });
   };
 
   const sectionMeta = SECTION_LABELS[exercise.section];
@@ -90,7 +99,21 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
             {sectionMeta.label}
           </span>
           <h3 className="exercise-card__name">{exercise.exercise.name}</h3>
-          {allSetsLogged && (
+          {/* Done button inline for WarmUp/CoolDown */}
+          {isSimple && (
+            <button
+              className={`exercise-card__done-btn ${allSetsLogged ? 'exercise-card__done-btn--checked' : ''}`}
+              onClick={handleToggleDone}
+              disabled={isPending || allSetsLogged}
+              id={`done-btn-exercise-${exercise.exercise.id}`}
+            >
+              <span className="material-symbols-outlined">
+                {allSetsLogged ? 'check_circle' : 'radio_button_unchecked'}
+              </span>
+              {allSetsLogged ? 'Done' : 'Mark as Done'}
+            </button>
+          )}
+          {!isSimple && allSetsLogged && (
             <span className="exercise-card__done-check material-symbols-outlined">
               check_circle
             </span>
@@ -101,84 +124,88 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
           <span className="mono exercise-card__target">
             {exercise.targetSets} × {exercise.targetReps}
           </span>
-          {exercise.restSeconds && (
+          {exercise.restSeconds != null && (
             <span className="exercise-card__rest mono">
               <span className="material-symbols-outlined">timer</span>
               {exercise.restSeconds}s rest
             </span>
           )}
-          {exercise.progressiveOverloadTargetKg && (
+          {!isSimple && exercise.progressiveOverloadTargetKg != null && (
             <span className="exercise-card__overload mono">
               <span className="material-symbols-outlined">trending_up</span>
               Target: {exercise.progressiveOverloadTargetKg}kg
             </span>
           )}
-          {exercise.exercise.equipmentRequired && (
-            <span className="exercise-card__equipment">
-              <span className="material-symbols-outlined">fitness_center</span>
-              {exercise.exercise.equipmentRequired}
-            </span>
-          )}
+          {exercise.exercise.equipmentRequired &&
+            exercise.exercise.equipmentRequired !== 'None' && (
+              <span className="exercise-card__equipment">
+                <span className="material-symbols-outlined">fitness_center</span>
+                {exercise.exercise.equipmentRequired}
+              </span>
+            )}
         </div>
       </div>
 
-      {/* ── Set Rows ── */}
-      <div className="exercise-card__sets">
-        <div className="exercise-card__sets-header">
-          <span>Set</span>
-          <span>Weight (kg)</span>
-          <span>Reps</span>
-          <span></span>
-        </div>
+      {/* ── Body: full set table for Main only ── */}
+      {!isSimple && (
+        /* Main — full set logging table */
+        <div className="exercise-card__sets">
+          <div className="exercise-card__sets-header">
+            <span>Set</span>
+            <span>Weight (kg)</span>
+            <span>Reps</span>
+            <span></span>
+          </div>
 
-        {Array.from({ length: exercise.targetSets }, (_, i) => {
-          const logged = isSetLogged(i);
-          return (
-            <div
-              key={i}
-              className={`exercise-card__set-row ${logged ? 'exercise-card__set-row--logged' : ''}`}
-            >
-              <span className="mono exercise-card__set-num">{i + 1}</span>
-              <input
-                type="number"
-                min={0}
-                step={0.5}
-                placeholder="0"
-                value={setInputs[i]?.weight ?? ''}
-                onChange={(e) => handleInputChange(i, 'weight', e.target.value)}
-                disabled={logged}
-                className="exercise-card__input"
-                id={`weight-exercise-${exercise.exercise.id}-set-${i + 1}`}
-              />
-              <input
-                type="number"
-                min={1}
-                step={1}
-                placeholder="0"
-                value={setInputs[i]?.reps ?? ''}
-                onChange={(e) => handleInputChange(i, 'reps', e.target.value)}
-                disabled={logged}
-                className="exercise-card__input"
-                id={`reps-exercise-${exercise.exercise.id}-set-${i + 1}`}
-              />
-              {logged ? (
-                <span className="exercise-card__logged-icon material-symbols-outlined">
-                  check_circle
-                </span>
-              ) : (
-                <button
-                  className="exercise-card__log-btn"
-                  onClick={() => handleLogSet(i)}
-                  disabled={isPending || !setInputs[i]?.weight || !setInputs[i]?.reps}
-                  id={`log-set-btn-exercise-${exercise.exercise.id}-set-${i + 1}`}
-                >
-                  Log
-                </button>
-              )}
-            </div>
-          );
-        })}
-      </div>
+          {Array.from({ length: exercise.targetSets }, (_, i) => {
+            const logged = isSetLogged(i);
+            return (
+              <div
+                key={i}
+                className={`exercise-card__set-row ${logged ? 'exercise-card__set-row--logged' : ''}`}
+              >
+                <span className="mono exercise-card__set-num">{i + 1}</span>
+                <input
+                  type="number"
+                  min={0}
+                  step={0.5}
+                  placeholder="0"
+                  value={setInputs[i]?.weight ?? ''}
+                  onChange={(e) => handleInputChange(i, 'weight', e.target.value)}
+                  disabled={logged}
+                  className="exercise-card__input"
+                  id={`weight-exercise-${exercise.exercise.id}-set-${i + 1}`}
+                />
+                <input
+                  type="number"
+                  min={1}
+                  step={1}
+                  placeholder="0"
+                  value={setInputs[i]?.reps ?? ''}
+                  onChange={(e) => handleInputChange(i, 'reps', e.target.value)}
+                  disabled={logged}
+                  className="exercise-card__input"
+                  id={`reps-exercise-${exercise.exercise.id}-set-${i + 1}`}
+                />
+                {logged ? (
+                  <span className="exercise-card__logged-icon material-symbols-outlined">
+                    check_circle
+                  </span>
+                ) : (
+                  <button
+                    className="exercise-card__log-btn"
+                    onClick={() => handleLogSet(i)}
+                    disabled={isPending || !setInputs[i]?.weight || !setInputs[i]?.reps}
+                    id={`log-set-btn-exercise-${exercise.exercise.id}-set-${i + 1}`}
+                  >
+                    Log
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* ── Footer Actions ── */}
       <div className="exercise-card__footer">
@@ -190,7 +217,10 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
             title="Instructions"
             trigger="click"
           >
-            <button className="exercise-card__action-btn" id={`instructions-btn-${exercise.exercise.id}`}>
+            <button
+              className="exercise-card__action-btn"
+              id={`instructions-btn-${exercise.exercise.id}`}
+            >
               <span className="material-symbols-outlined">info</span>
               Instructions
             </button>
@@ -200,7 +230,9 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
           <Tooltip title="Watch demo video">
             <button
               className="exercise-card__action-btn exercise-card__action-btn--video"
-              onClick={() => onVideoPlay(exercise.exercise.youTubeVideoId!, exercise.exercise.name)}
+              onClick={() =>
+                onVideoPlay(exercise.exercise.youTubeVideoId!, exercise.exercise.name)
+              }
               id={`video-btn-${exercise.exercise.id}`}
             >
               <span className="material-symbols-outlined">play_circle</span>
