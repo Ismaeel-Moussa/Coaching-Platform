@@ -29,7 +29,7 @@ const VideoDemoModal: React.FC<VideoDemoModalProps> = ({
       width={720}
       centered
       className="video-demo-modal"
-      destroyOnClose
+      destroyOnHidden
     >
       {videoId ? (
         <div className="video-demo-modal__embed">

@@ -136,7 +136,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
       footer={null}
       width={600}
       className="add-food-modal"
-      destroyOnClose
+      destroyOnHidden
     >
       <div className="add-food-modal__body">
         {/* Meal type selector */}
