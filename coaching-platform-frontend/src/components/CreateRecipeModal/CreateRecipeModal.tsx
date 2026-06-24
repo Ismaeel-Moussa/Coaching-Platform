@@ -137,7 +137,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose }) 
       footer={null}
       width={680}
       className="create-recipe-modal"
-      destroyOnClose
+      destroyOnHidden
     >
       <div className="create-recipe-modal__body">
         <Steps
