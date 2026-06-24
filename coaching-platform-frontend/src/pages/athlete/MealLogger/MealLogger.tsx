@@ -73,10 +73,24 @@ const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType,
                   {entry.quantityGrams}g
                 </span>
               </div>
-              <span className="mono meal-section__macro">{entry.protein.toFixed(1)}g</span>
-              <span className="mono meal-section__macro">{entry.carbs.toFixed(1)}g</span>
-              <span className="mono meal-section__macro">{entry.fat.toFixed(1)}g</span>
-              <span className="mono meal-section__macro meal-section__macro--kcal">{Math.round(entry.calories)}</span>
+              <div className="meal-section__row-macros">
+                <span className="mono meal-section__macro">
+                  <span className="meal-section__macro-label">P:</span>
+                  {entry.protein.toFixed(1)}g
+                </span>
+                <span className="mono meal-section__macro">
+                  <span className="meal-section__macro-label">C:</span>
+                  {entry.carbs.toFixed(1)}g
+                </span>
+                <span className="mono meal-section__macro">
+                  <span className="meal-section__macro-label">F:</span>
+                  {entry.fat.toFixed(1)}g
+                </span>
+                <span className="mono meal-section__macro meal-section__macro--kcal">
+                  {Math.round(entry.calories)}
+                  <span className="meal-section__kcal-suffix"> kcal</span>
+                </span>
+              </div>
               <Popconfirm
                 title="Remove this entry?"
                 onConfirm={() => removeMutation.mutate(entry.id)}
@@ -93,11 +107,24 @@ const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType,
           {/* Subtotals */}
           <div className="meal-section__subtotal">
             <span className="meal-section__subtotal-label">Subtotal</span>
-            <span className="mono">{subtotals.p.toFixed(1)}g</span>
-            <span className="mono">{subtotals.c.toFixed(1)}g</span>
-            <span className="mono">{subtotals.f.toFixed(1)}g</span>
-            <span className="mono meal-section__subtotal-kcal">{Math.round(subtotals.cal)} kcal</span>
-            <span />
+            <div className="meal-section__subtotal-macros">
+              <span className="mono">
+                <span className="meal-section__macro-label">P:</span>
+                {subtotals.p.toFixed(1)}g
+              </span>
+              <span className="mono">
+                <span className="meal-section__macro-label">C:</span>
+                {subtotals.c.toFixed(1)}g
+              </span>
+              <span className="mono">
+                <span className="meal-section__macro-label">F:</span>
+                {subtotals.f.toFixed(1)}g
+              </span>
+              <span className="mono meal-section__subtotal-kcal">
+                {Math.round(subtotals.cal)} kcal
+              </span>
+            </div>
+            <span className="meal-section__subtotal-spacer" />
           </div>
         </div>
       )}

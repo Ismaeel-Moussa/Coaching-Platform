@@ -351,4 +351,47 @@
     height: 40px;
     background: var(--color-border);
   }
+
+  @media (max-width: 480px) {
+    padding: var(--space-sm);
+    gap: var(--space-sm);
+
+    &__header {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+    }
+
+    &__greeting {
+      font-size: 20px;
+    }
+
+    &__date {
+      font-size: 12px;
+    }
+
+    &__streak {
+      width: auto;
+      padding: 6px 12px;
+      gap: 8px;
+    }
+
+    &__streak-flame {
+      font-size: 20px;
+    }
+
+    &__streak-count {
+      font-size: 18px;
+    }
+
+    &__streak-label {
+      font-size: 9px;
+    }
+
+    &__card {
+      padding: var(--space-sm);
+    }
+  }
 }
