@@ -19,5 +19,10 @@ public class ServicesModule : Module
         builder.RegisterType<MealLogService>().As<IMealLogService>().InstancePerLifetimeScope();
         builder.RegisterType<RecipeService>().As<IRecipeService>().InstancePerLifetimeScope();
         builder.RegisterType<AthleteService>().As<IAthleteService>().InstancePerLifetimeScope();
+
+        // ─── Day 3: Workouts & Supplements ───────────────────────────────
+        builder.RegisterType<ExerciseService>().As<IExerciseService>().InstancePerLifetimeScope();
+        builder.RegisterType<WorkoutLogService>().As<IWorkoutLogService>().InstancePerLifetimeScope();
+        builder.RegisterType<SupplementService>().As<ISupplementService>().InstancePerLifetimeScope();
     }
 }
