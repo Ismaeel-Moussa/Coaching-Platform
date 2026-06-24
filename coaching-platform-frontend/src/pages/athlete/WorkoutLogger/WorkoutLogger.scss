@@ -223,8 +223,13 @@
   }
 
   &__cards {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    align-items: start;
+
+    @media (min-width: 900px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 }
