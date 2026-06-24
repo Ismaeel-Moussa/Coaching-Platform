@@ -1,0 +1,230 @@
+.workout-logger {
+  padding: var(--space-md);
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+
+  // ── Header ──────────────────────────────────────────────────────────────────
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    font-family: var(--font-heading);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  &__sub {
+    font-size: 13px;
+    color: var(--color-text-tertiary);
+    margin-top: 4px;
+  }
+
+  // ── Info Card ────────────────────────────────────────────────────────────────
+  &__info-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow-sm);
+  }
+
+  &__info-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+
+    .material-symbols-outlined {
+      font-size: 16px;
+      color: var(--color-text-tertiary);
+    }
+  }
+
+  &__completed-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(18, 183, 106, 0.1);
+    border: 1px solid rgba(18, 183, 106, 0.3);
+    border-radius: var(--radius-full);
+    color: var(--color-success);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 700;
+
+    .material-symbols-outlined {
+      font-size: 16px;
+    }
+  }
+
+  // ── Skeleton ────────────────────────────────────────────────────────────────
+  &__skeleton-cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+
+    .ant-skeleton {
+      background: var(--color-white);
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+  }
+
+  // ── No Program / Rest Day ────────────────────────────────────────────────────
+  &__no-program,
+  &__rest-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 64px 24px;
+    background: var(--color-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-xl);
+    text-align: center;
+
+    h2 {
+      font-family: var(--font-heading);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    p {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      max-width: 400px;
+      line-height: 1.6;
+    }
+  }
+
+  &__no-program-icon,
+  &__rest-icon {
+    font-size: 56px;
+    color: var(--color-border);
+  }
+
+  &__rest-icon {
+    color: var(--color-gold);
+  }
+
+  // ── Content ──────────────────────────────────────────────────────────────────
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  // ── Complete Zone ────────────────────────────────────────────────────────────
+  &__complete-zone {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-sm) 0;
+  }
+
+  &__complete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 40px;
+    background: var(--color-navy);
+    color: var(--color-gold);
+    border: 2px solid var(--color-navy);
+    border-radius: var(--radius-btn);
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: background-color var(--transition-base), transform var(--transition-fast),
+      box-shadow var(--transition-base);
+
+    .material-symbols-outlined {
+      font-size: 20px;
+    }
+
+    &:hover:not(:disabled) {
+      background: var(--color-navy-light);
+      box-shadow: var(--shadow-gold);
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// ── Workout Section ───────────────────────────────────────────────────────────
+.workout-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: var(--radius-card);
+    border-left: 4px solid transparent;
+
+    .material-symbols-outlined {
+      font-size: 20px;
+    }
+
+    &--warmup {
+      background: rgba(11, 173, 240, 0.08);
+      border-left-color: #0ba5ec;
+      color: #0ba5ec;
+    }
+
+    &--main {
+      background: rgba(253, 192, 3, 0.1);
+      border-left-color: var(--color-gold);
+      color: var(--color-gold-text);
+    }
+
+    &--cooldown {
+      background: rgba(120, 80, 255, 0.08);
+      border-left-color: #7c3aed;
+      color: #7c3aed;
+    }
+  }
+
+  &__title {
+    font-family: var(--font-heading);
+    font-size: 17px;
+    font-weight: 700;
+    flex: 1;
+  }
+
+  &__count {
+    font-size: 11px;
+    opacity: 0.7;
+  }
+
+  &__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
