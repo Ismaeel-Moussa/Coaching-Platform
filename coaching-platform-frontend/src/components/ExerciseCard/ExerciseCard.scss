@@ -300,4 +300,40 @@
       }
     }
   }
+
+  @media (max-width: 480px) {
+    &__header {
+      padding: 12px 16px 8px;
+    }
+    &__done-btn {
+      padding: 5px 12px;
+      font-size: 12px;
+      gap: 6px;
+
+      .material-symbols-outlined {
+        font-size: 14px;
+      }
+    }
+    &__footer {
+      padding: 8px 16px;
+    }
+    &__sets-header {
+      grid-template-columns: 32px 1fr 1fr 64px;
+      padding: 6px 16px;
+      gap: 4px;
+    }
+    &__set-row {
+      grid-template-columns: 32px 1fr 1fr 64px;
+      padding: 8px 16px;
+      gap: 4px;
+    }
+    &__input {
+      padding: 5px 6px;
+      font-size: 13px;
+    }
+    &__log-btn {
+      padding: 6px 8px;
+      font-size: 11px;
+    }
+  }
 }
