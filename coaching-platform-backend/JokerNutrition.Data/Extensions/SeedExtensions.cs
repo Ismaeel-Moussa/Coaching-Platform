@@ -349,5 +349,230 @@ public static class SeedExtensions
                 await context.SaveChangesAsync();
             }
         }
+
+        // ─── Exercises (30+ with YouTube video IDs) ───────────────────────
+        if (!await context.Exercises.AnyAsync())
+        {
+            var exercises = new List<Exercise>
+            {
+                // ── Chest ──
+                new() { Name = "Barbell Bench Press",         Instructions = "Lie flat, grip slightly wider than shoulder-width, lower bar to mid-chest and press up.", PrimaryMuscle = MuscleGroup.Chest, EquipmentRequired = "Barbell, Bench",    YouTubeVideoId = "rT7DgCr-3pg", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Incline Dumbbell Press",      Instructions = "Set bench to 30-45°, press dumbbells from shoulder level to lockout.", PrimaryMuscle = MuscleGroup.Chest, EquipmentRequired = "Dumbbells, Incline Bench", YouTubeVideoId = "8iPEnn-ltC8", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Cable Fly",                   Instructions = "Stand between cables at chest height, bring hands together in an arc motion.", PrimaryMuscle = MuscleGroup.Chest, EquipmentRequired = "Cable Machine",          YouTubeVideoId = "Iwe6AmxVf7o", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Push-Up",                     Instructions = "Keep body straight, lower chest to floor and push back up.",                PrimaryMuscle = MuscleGroup.Chest, EquipmentRequired = "None",                    YouTubeVideoId = "IODxDxX7oi4", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Dumbbell Fly",                Instructions = "Lie flat, extend arms wide then bring dumbbells together over chest.",       PrimaryMuscle = MuscleGroup.Chest, EquipmentRequired = "Dumbbells, Bench",        YouTubeVideoId = "eozdVDA78K0", IsActive = true, CreatedAt = DateTime.UtcNow },
+
+                // ── Back ──
+                new() { Name = "Pull-Up",                     Instructions = "Hang from bar, pull chin above bar, lower with control.",                    PrimaryMuscle = MuscleGroup.Back,  EquipmentRequired = "Pull-up Bar",             YouTubeVideoId = "eGo4IYlbE5g", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Barbell Bent-Over Row",       Instructions = "Hinge at hips, row bar to lower chest, keep back neutral.",                  PrimaryMuscle = MuscleGroup.Back,  EquipmentRequired = "Barbell",                 YouTubeVideoId = "G8l_8chR5BE", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Seated Cable Row",            Instructions = "Sit upright, pull handle to lower abdomen, squeeze shoulder blades.",        PrimaryMuscle = MuscleGroup.Back,  EquipmentRequired = "Cable Machine",           YouTubeVideoId = "GZbfZ033f74", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Lat Pulldown",                Instructions = "Grip bar wide, pull to upper chest, keep chest up throughout.",              PrimaryMuscle = MuscleGroup.Back,  EquipmentRequired = "Cable Machine",           YouTubeVideoId = "CAwf7n6Luuc", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Single-Arm Dumbbell Row",     Instructions = "Knee on bench, row dumbbell to hip, keep elbow tight.",                      PrimaryMuscle = MuscleGroup.Back,  EquipmentRequired = "Dumbbell, Bench",         YouTubeVideoId = "pYcpY20QaE8", IsActive = true, CreatedAt = DateTime.UtcNow },
+
+                // ── Shoulders ──
+                new() { Name = "Overhead Press (Barbell)",   Instructions = "Press barbell from shoulder height to full lockout overhead.",                PrimaryMuscle = MuscleGroup.Shoulders, EquipmentRequired = "Barbell",             YouTubeVideoId = "2yjwXTZQDDI", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Dumbbell Lateral Raise",     Instructions = "Raise dumbbells to shoulder height with slight bend at elbow.",               PrimaryMuscle = MuscleGroup.Shoulders, EquipmentRequired = "Dumbbells",           YouTubeVideoId = "3VcKaXpzqRo", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Face Pull",                  Instructions = "Pull rope to face level, flare elbows out, squeeze rear delts.",              PrimaryMuscle = MuscleGroup.Shoulders, EquipmentRequired = "Cable Machine, Rope", YouTubeVideoId = "rep-qVOkqgk", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Arnold Press",               Instructions = "Start with palms facing you, rotate and press overhead simultaneously.",       PrimaryMuscle = MuscleGroup.Shoulders, EquipmentRequired = "Dumbbells",           YouTubeVideoId = "6Z15_WdXmVw", IsActive = true, CreatedAt = DateTime.UtcNow },
+
+                // ── Arms ──
+                new() { Name = "Barbell Curl",               Instructions = "Stand upright, curl bar from hips to chin, lower slowly.",                   PrimaryMuscle = MuscleGroup.Arms, EquipmentRequired = "Barbell",                   YouTubeVideoId = "kwG2ipFRgfo", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Hammer Curl",                Instructions = "Neutral grip, curl dumbbell keeping wrist straight throughout.",              PrimaryMuscle = MuscleGroup.Arms, EquipmentRequired = "Dumbbells",                 YouTubeVideoId = "zC3nLlEvin4", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Tricep Pushdown (Cable)",    Instructions = "Push rope or bar down until arms fully extended, squeeze triceps.",           PrimaryMuscle = MuscleGroup.Arms, EquipmentRequired = "Cable Machine",             YouTubeVideoId = "2-LAMcpzODU", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Skull Crusher",              Instructions = "Lie flat, lower barbell to forehead, extend arms to lockout.",               PrimaryMuscle = MuscleGroup.Arms, EquipmentRequired = "Barbell, Bench",            YouTubeVideoId = "d_KZxkY_0cM", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Preacher Curl",              Instructions = "Rest upper arm on pad, curl from full extension to chin level.",              PrimaryMuscle = MuscleGroup.Arms, EquipmentRequired = "Preacher Curl Bench",       YouTubeVideoId = "fIWP-FRFNU0", IsActive = true, CreatedAt = DateTime.UtcNow },
+
+                // ── Legs ──
+                new() { Name = "Barbell Squat",              Instructions = "Bar on upper traps, squat until thighs parallel, drive through heels.",      PrimaryMuscle = MuscleGroup.Legs, EquipmentRequired = "Barbell, Squat Rack",       YouTubeVideoId = "ultWZbUMPL8", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Romanian Deadlift",          Instructions = "Hinge at hips with slight knee bend, lower bar along legs until hamstring stretch.", PrimaryMuscle = MuscleGroup.Legs, EquipmentRequired = "Barbell",           YouTubeVideoId = "JCXUYuzwNrM", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Leg Press",                  Instructions = "Feet shoulder-width on platform, lower to 90°, press through heels.",        PrimaryMuscle = MuscleGroup.Legs, EquipmentRequired = "Leg Press Machine",         YouTubeVideoId = "IZxyjW7MPJQ", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Leg Curl (Machine)",         Instructions = "Lie prone, curl heels to glutes, lower with control.",                       PrimaryMuscle = MuscleGroup.Legs, EquipmentRequired = "Leg Curl Machine",          YouTubeVideoId = "1Tq3QdYUuHs", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Walking Lunge",              Instructions = "Step forward, lower knee near floor, drive up and step through.",             PrimaryMuscle = MuscleGroup.Legs, EquipmentRequired = "Dumbbells (optional)",      YouTubeVideoId = "L8fvypPrzzs", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Standing Calf Raise",        Instructions = "Stand on platform edge, raise heels as high as possible, lower fully.",      PrimaryMuscle = MuscleGroup.Legs, EquipmentRequired = "Calf Raise Machine",        YouTubeVideoId = "c5Kv6-fnTj8", IsActive = true, CreatedAt = DateTime.UtcNow },
+
+                // ── Cardio / Warm-up / Cool-down ──
+                new() { Name = "Treadmill Walk",             Instructions = "Moderate pace, 5-10 minutes as warm-up or active recovery.",                 PrimaryMuscle = MuscleGroup.Cardio, EquipmentRequired = "Treadmill",              YouTubeVideoId = null,          IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Jump Rope",                  Instructions = "Keep elbows in, rotate wrists, land softly on balls of feet.",               PrimaryMuscle = MuscleGroup.Cardio, EquipmentRequired = "Jump Rope",              YouTubeVideoId = "u3zgHI8QnqE", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Band Pull-Apart",            Instructions = "Hold band shoulder-width, pull apart horizontally to chest height.",          PrimaryMuscle = MuscleGroup.Shoulders, EquipmentRequired = "Resistance Band",     YouTubeVideoId = "Gi2GEMv-OA0", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Dead Bug",                   Instructions = "Lie flat, extend opposite arm/leg simultaneously while keeping lower back pressed.", PrimaryMuscle = MuscleGroup.Core, EquipmentRequired = "None",           YouTubeVideoId = "n12gj-2-0XU", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new() { Name = "Plank",                      Instructions = "Hold rigid straight-body position on forearms, brace core.",                 PrimaryMuscle = MuscleGroup.Core,  EquipmentRequired = "None",                    YouTubeVideoId = "ASdvN_XEl_c", IsActive = true, CreatedAt = DateTime.UtcNow },
+            };
+
+            context.Exercises.AddRange(exercises);
+            await context.SaveChangesAsync();
+        }
+
+        // ─── PPL Workout Template ─────────────────────────────────────────
+        if (!await context.WorkoutTemplates.AnyAsync())
+        {
+            var coach = await context.Coaches.FirstOrDefaultAsync();
+            if (coach != null)
+            {
+                // Helper to look up exercise by partial name
+                var ex = await context.Exercises.ToListAsync();
+                Exercise? E(string name) => ex.FirstOrDefault(e => e.Name.Contains(name));
+
+                var template = new WorkoutTemplate
+                {
+                    Name = "Joker 6-Day PPL",
+                    Description = "Push/Pull/Legs split designed for muscle hypertrophy and strength. Repeat twice per week.",
+                    CreatedByCoachId = coach.Id,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    Days = new List<WorkoutTemplateDay>
+                    {
+                        // ── Day 1: Push Day 1 ─────────────────────────────
+                        new()
+                        {
+                            DayNumber = 1, DayLabel = "Push Day 1", IsRestDay = false,
+                            Exercises = new List<TemplateExercise>
+                            {
+                                new() { ExerciseId = E("Treadmill Walk")!.Id,        Section = ExerciseSection.WarmUp,  OrderIndex = 1, TargetSets = 1, TargetReps = "5 min",  RestSeconds = null },
+                                new() { ExerciseId = E("Band Pull-Apart")!.Id,       Section = ExerciseSection.WarmUp,  OrderIndex = 2, TargetSets = 2, TargetReps = "15",     RestSeconds = 30 },
+                                new() { ExerciseId = E("Barbell Bench Press")!.Id,   Section = ExerciseSection.Main,    OrderIndex = 3, TargetSets = 4, TargetReps = "5",      RestSeconds = 180, ProgressiveOverloadTargetKg = 80m },
+                                new() { ExerciseId = E("Incline Dumbbell Press")!.Id,Section = ExerciseSection.Main,    OrderIndex = 4, TargetSets = 3, TargetReps = "8-12",   RestSeconds = 90 },
+                                new() { ExerciseId = E("Cable Fly")!.Id,             Section = ExerciseSection.Main,    OrderIndex = 5, TargetSets = 3, TargetReps = "12-15",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Overhead Press")!.Id,        Section = ExerciseSection.Main,    OrderIndex = 6, TargetSets = 3, TargetReps = "8-10",   RestSeconds = 90 },
+                                new() { ExerciseId = E("Lateral Raise")!.Id,         Section = ExerciseSection.Main,    OrderIndex = 7, TargetSets = 3, TargetReps = "15-20",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Tricep Pushdown")!.Id,       Section = ExerciseSection.Main,    OrderIndex = 8, TargetSets = 3, TargetReps = "12-15",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Skull Crusher")!.Id,         Section = ExerciseSection.Main,    OrderIndex = 9, TargetSets = 3, TargetReps = "10-12",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Dead Bug")!.Id,              Section = ExerciseSection.CoolDown,OrderIndex = 10,TargetSets = 2, TargetReps = "10/side",RestSeconds = 30 },
+                                new() { ExerciseId = E("Plank")!.Id,                 Section = ExerciseSection.CoolDown,OrderIndex = 11,TargetSets = 2, TargetReps = "60s",    RestSeconds = 30 },
+                            }
+                        },
+
+                        // ── Day 2: Pull Day 1 ─────────────────────────────
+                        new()
+                        {
+                            DayNumber = 2, DayLabel = "Pull Day 1", IsRestDay = false,
+                            Exercises = new List<TemplateExercise>
+                            {
+                                new() { ExerciseId = E("Treadmill Walk")!.Id,        Section = ExerciseSection.WarmUp,  OrderIndex = 1, TargetSets = 1, TargetReps = "5 min",  RestSeconds = null },
+                                new() { ExerciseId = E("Band Pull-Apart")!.Id,       Section = ExerciseSection.WarmUp,  OrderIndex = 2, TargetSets = 2, TargetReps = "15",     RestSeconds = 30 },
+                                new() { ExerciseId = E("Pull-Up")!.Id,               Section = ExerciseSection.Main,    OrderIndex = 3, TargetSets = 4, TargetReps = "6-8",    RestSeconds = 120 },
+                                new() { ExerciseId = E("Barbell Bent-Over Row")!.Id, Section = ExerciseSection.Main,    OrderIndex = 4, TargetSets = 4, TargetReps = "6",      RestSeconds = 150, ProgressiveOverloadTargetKg = 70m },
+                                new() { ExerciseId = E("Seated Cable Row")!.Id,      Section = ExerciseSection.Main,    OrderIndex = 5, TargetSets = 3, TargetReps = "10-12",  RestSeconds = 90 },
+                                new() { ExerciseId = E("Lat Pulldown")!.Id,          Section = ExerciseSection.Main,    OrderIndex = 6, TargetSets = 3, TargetReps = "10-12",  RestSeconds = 90 },
+                                new() { ExerciseId = E("Face Pull")!.Id,             Section = ExerciseSection.Main,    OrderIndex = 7, TargetSets = 3, TargetReps = "15-20",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Barbell Curl")!.Id,          Section = ExerciseSection.Main,    OrderIndex = 8, TargetSets = 3, TargetReps = "8-12",   RestSeconds = 60 },
+                                new() { ExerciseId = E("Hammer Curl")!.Id,           Section = ExerciseSection.Main,    OrderIndex = 9, TargetSets = 3, TargetReps = "10-12",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Dead Bug")!.Id,              Section = ExerciseSection.CoolDown,OrderIndex = 10,TargetSets = 2, TargetReps = "10/side",RestSeconds = 30 },
+                            }
+                        },
+
+                        // ── Day 3: Legs Day 1 ─────────────────────────────
+                        new()
+                        {
+                            DayNumber = 3, DayLabel = "Legs Day 1", IsRestDay = false,
+                            Exercises = new List<TemplateExercise>
+                            {
+                                new() { ExerciseId = E("Treadmill Walk")!.Id,        Section = ExerciseSection.WarmUp,  OrderIndex = 1, TargetSets = 1, TargetReps = "5 min",  RestSeconds = null },
+                                new() { ExerciseId = E("Barbell Squat")!.Id,         Section = ExerciseSection.Main,    OrderIndex = 2, TargetSets = 4, TargetReps = "5",      RestSeconds = 180, ProgressiveOverloadTargetKg = 100m },
+                                new() { ExerciseId = E("Romanian Deadlift")!.Id,     Section = ExerciseSection.Main,    OrderIndex = 3, TargetSets = 3, TargetReps = "8-10",   RestSeconds = 120 },
+                                new() { ExerciseId = E("Leg Press")!.Id,             Section = ExerciseSection.Main,    OrderIndex = 4, TargetSets = 3, TargetReps = "10-12",  RestSeconds = 90 },
+                                new() { ExerciseId = E("Leg Curl")!.Id,              Section = ExerciseSection.Main,    OrderIndex = 5, TargetSets = 3, TargetReps = "12-15",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Standing Calf Raise")!.Id,   Section = ExerciseSection.Main,    OrderIndex = 6, TargetSets = 4, TargetReps = "15-20",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Plank")!.Id,                 Section = ExerciseSection.CoolDown,OrderIndex = 7, TargetSets = 2, TargetReps = "60s",    RestSeconds = 30 },
+                            }
+                        },
+
+                        // ── Day 4: Push Day 2 ─────────────────────────────
+                        new()
+                        {
+                            DayNumber = 4, DayLabel = "Push Day 2", IsRestDay = false,
+                            Exercises = new List<TemplateExercise>
+                            {
+                                new() { ExerciseId = E("Jump Rope")!.Id,             Section = ExerciseSection.WarmUp,  OrderIndex = 1, TargetSets = 1, TargetReps = "3 min",  RestSeconds = null },
+                                new() { ExerciseId = E("Band Pull-Apart")!.Id,       Section = ExerciseSection.WarmUp,  OrderIndex = 2, TargetSets = 2, TargetReps = "15",     RestSeconds = 30 },
+                                new() { ExerciseId = E("Arnold Press")!.Id,          Section = ExerciseSection.Main,    OrderIndex = 3, TargetSets = 4, TargetReps = "10-12",  RestSeconds = 90 },
+                                new() { ExerciseId = E("Incline Dumbbell Press")!.Id,Section = ExerciseSection.Main,    OrderIndex = 4, TargetSets = 3, TargetReps = "10-12",  RestSeconds = 90 },
+                                new() { ExerciseId = E("Dumbbell Fly")!.Id,          Section = ExerciseSection.Main,    OrderIndex = 5, TargetSets = 3, TargetReps = "12-15",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Lateral Raise")!.Id,         Section = ExerciseSection.Main,    OrderIndex = 6, TargetSets = 4, TargetReps = "15-20",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Push-Up")!.Id,               Section = ExerciseSection.Main,    OrderIndex = 7, TargetSets = 3, TargetReps = "To Fail",RestSeconds = 60 },
+                                new() { ExerciseId = E("Skull Crusher")!.Id,         Section = ExerciseSection.Main,    OrderIndex = 8, TargetSets = 3, TargetReps = "10-12",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Dead Bug")!.Id,              Section = ExerciseSection.CoolDown,OrderIndex = 9, TargetSets = 2, TargetReps = "10/side",RestSeconds = 30 },
+                            }
+                        },
+
+                        // ── Day 5: Pull Day 2 ─────────────────────────────
+                        new()
+                        {
+                            DayNumber = 5, DayLabel = "Pull Day 2", IsRestDay = false,
+                            Exercises = new List<TemplateExercise>
+                            {
+                                new() { ExerciseId = E("Jump Rope")!.Id,             Section = ExerciseSection.WarmUp,  OrderIndex = 1, TargetSets = 1, TargetReps = "3 min",  RestSeconds = null },
+                                new() { ExerciseId = E("Single-Arm Dumbbell Row")!.Id,Section = ExerciseSection.Main,   OrderIndex = 2, TargetSets = 4, TargetReps = "8-12",   RestSeconds = 90 },
+                                new() { ExerciseId = E("Lat Pulldown")!.Id,          Section = ExerciseSection.Main,    OrderIndex = 3, TargetSets = 3, TargetReps = "10-12",  RestSeconds = 90 },
+                                new() { ExerciseId = E("Seated Cable Row")!.Id,      Section = ExerciseSection.Main,    OrderIndex = 4, TargetSets = 3, TargetReps = "12-15",  RestSeconds = 90 },
+                                new() { ExerciseId = E("Face Pull")!.Id,             Section = ExerciseSection.Main,    OrderIndex = 5, TargetSets = 3, TargetReps = "15-20",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Preacher Curl")!.Id,         Section = ExerciseSection.Main,    OrderIndex = 6, TargetSets = 3, TargetReps = "10-12",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Hammer Curl")!.Id,           Section = ExerciseSection.Main,    OrderIndex = 7, TargetSets = 3, TargetReps = "12-15",  RestSeconds = 60 },
+                                new() { ExerciseId = E("Plank")!.Id,                 Section = ExerciseSection.CoolDown,OrderIndex = 8, TargetSets = 2, TargetReps = "60s",    RestSeconds = 30 },
+                            }
+                        },
+
+                        // ── Day 6: Legs Day 2 ─────────────────────────────
+                        new()
+                        {
+                            DayNumber = 6, DayLabel = "Legs Day 2", IsRestDay = false,
+                            Exercises = new List<TemplateExercise>
+                            {
+                                new() { ExerciseId = E("Treadmill Walk")!.Id,        Section = ExerciseSection.WarmUp,  OrderIndex = 1, TargetSets = 1, TargetReps = "5 min",  RestSeconds = null },
+                                new() { ExerciseId = E("Barbell Squat")!.Id,         Section = ExerciseSection.Main,    OrderIndex = 2, TargetSets = 3, TargetReps = "8-10",   RestSeconds = 120 },
+                                new() { ExerciseId = E("Walking Lunge")!.Id,         Section = ExerciseSection.Main,    OrderIndex = 3, TargetSets = 3, TargetReps = "12/leg", RestSeconds = 90 },
+                                new() { ExerciseId = E("Leg Press")!.Id,             Section = ExerciseSection.Main,    OrderIndex = 4, TargetSets = 3, TargetReps = "12-15",  RestSeconds = 90 },
+                                new() { ExerciseId = E("Romanian Deadlift")!.Id,     Section = ExerciseSection.Main,    OrderIndex = 5, TargetSets = 3, TargetReps = "10-12",  RestSeconds = 90 },
+                                new() { ExerciseId = E("Standing Calf Raise")!.Id,   Section = ExerciseSection.Main,    OrderIndex = 6, TargetSets = 3, TargetReps = "20",     RestSeconds = 60 },
+                                new() { ExerciseId = E("Dead Bug")!.Id,              Section = ExerciseSection.CoolDown,OrderIndex = 7, TargetSets = 2, TargetReps = "10/side",RestSeconds = 30 },
+                                new() { ExerciseId = E("Plank")!.Id,                 Section = ExerciseSection.CoolDown,OrderIndex = 8, TargetSets = 2, TargetReps = "60s",    RestSeconds = 30 },
+                            }
+                        },
+                    }
+                };
+
+                context.WorkoutTemplates.Add(template);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        // ─── ClientProgram – Assign PPL template to demo athlete ──────────
+        if (!await context.ClientPrograms.AnyAsync())
+        {
+            var coach = await context.Coaches.FirstOrDefaultAsync();
+            var athlete = await context.Athletes.FirstOrDefaultAsync();
+            var template = await context.WorkoutTemplates.FirstOrDefaultAsync();
+
+            if (coach != null && athlete != null && template != null)
+            {
+                var program = new ClientProgram
+                {
+                    AthleteId = athlete.Id,
+                    WorkoutTemplateId = template.Id,
+                    AssignedByCoachId = coach.Id,
+                    StartDate = DateTime.UtcNow.Date,
+                    IsActive = true
+                };
+                context.ClientPrograms.Add(program);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        // ─── Supplement Schedules for Demo Athlete ────────────────────────
+        if (!await context.SupplementSchedules.AnyAsync())
+        {
+            var athlete = await context.Athletes.FirstOrDefaultAsync();
+            if (athlete != null)
+            {
+                var supplements = new List<SupplementSchedule>
+                {
+                    new() { AthleteId = athlete.Id, Name = "Creatine Monohydrate", Type = SupplementType.Essential, Dosage = "5g daily", Notes = "Mix with water or shake post-workout.", IsActive = true },
+                    new() { AthleteId = athlete.Id, Name = "Omega-3 Fish Oil",     Type = SupplementType.Essential, Dosage = "2 caps (1g EPA/DHA)", Notes = "Take with a meal to reduce fishy aftertaste.", IsActive = true },
+                    new() { AthleteId = athlete.Id, Name = "Multivitamin",         Type = SupplementType.Essential, Dosage = "1 tablet daily", Notes = "Take with breakfast.", IsActive = true },
+                    new() { AthleteId = athlete.Id, Name = "Vitamin D3",           Type = SupplementType.Optional,  Dosage = "5000 IU daily", Notes = "Best taken with a fat-containing meal for absorption.", IsActive = true },
+                };
+                context.SupplementSchedules.AddRange(supplements);
+                await context.SaveChangesAsync();
+            }
+        }
     }
 }
