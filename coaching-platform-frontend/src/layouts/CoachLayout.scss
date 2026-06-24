@@ -320,4 +320,187 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
       }
     }
   }
+
+  // ── Mobile layout styling (Desktop defaults) ──────────────────────────────
+  &__mobile-header {
+    display: none;
+  }
+
+  &__mobile-hamburger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-btn);
+    transition: all var(--transition-fast);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--color-gold);
+    }
+  }
+
+  // ── Responsive (Mobile / Tablet <= 768px) ──────────────────────────────────
+  @media (max-width: 768px) {
+    --mobile-header-height: 56px;
+
+    &__sidebar {
+      display: none !important;
+    }
+
+    &__main {
+      margin-left: 0 !important;
+      padding: var(--space-md) var(--space-sm) !important;
+      padding-top: calc(var(--mobile-header-height) + var(--space-md)) !important;
+    }
+
+    &__mobile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--mobile-header-height);
+      background-color: var(--color-navy);
+      padding: 0 var(--space-sm);
+      z-index: 999;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+      .coach-layout__logo-brand {
+        opacity: 1;
+        flex: unset;
+      }
+      .coach-layout__logo-info {
+        opacity: 1;
+        width: auto;
+      }
+      .coach-layout__logo-text {
+        color: var(--color-text-inverse);
+      }
+    }
+  }
+}
+
+// ── Mobile Coach Drawer Custom Overrides ────────────────────────────────────
+.coach-layout__mobile-drawer {
+  .ant-drawer-content {
+    background-color: var(--color-navy) !important;
+  }
+
+  .ant-drawer-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 16px 24px;
+
+    .ant-drawer-title {
+      color: var(--color-text-inverse) !important;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .ant-drawer-close {
+      color: rgba(255, 255, 255, 0.45) !important;
+      &:hover {
+        color: var(--color-gold) !important;
+      }
+    }
+  }
+
+  .coach-layout__drawer-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 24px;
+    margin-bottom: 16px;
+  }
+
+  .coach-layout__avatar--large {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+    background: var(--color-navy-mid);
+    border: 2px solid var(--color-gold);
+  }
+
+  .coach-layout__drawer-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    h4 {
+      margin: 0;
+      font-size: 15px;
+      color: var(--color-text-inverse);
+    }
+    p {
+      margin: 0;
+      font-size: 11px;
+      color: var(--color-gold);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  .coach-layout__drawer-divider {
+    border: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 16px 0;
+  }
+
+  .coach-layout__drawer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 12px;
+  }
+
+  .coach-layout__drawer-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    color: rgba(255, 255, 255, 0.65);
+    border-radius: var(--radius-btn);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--color-text-inverse);
+    }
+
+    &--active {
+      color: var(--color-gold);
+      background: var(--color-gold-bg);
+    }
+
+    &--logout {
+      margin-top: 16px;
+      color: rgba(239, 68, 68, 0.85);
+
+      &:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: rgb(239, 68, 68);
+      }
+    }
+  }
 }

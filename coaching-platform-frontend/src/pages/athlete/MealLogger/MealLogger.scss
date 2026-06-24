@@ -1,10 +1,16 @@
 .meal-logger {
   padding: var(--space-md);
   max-width: var(--content-max-width);
+  width: 100%;
+  min-width: 0;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+
+  @media (max-width: 480px) {
+    padding: var(--space-xs);
+  }
 
   // ── Header ──────────────────────────────────────────────────────────────────
   &__header {
@@ -38,11 +44,14 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+    width: 100%;
+    min-width: 0;
   }
 
   &__summary-header {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
 
     .material-symbols-outlined {
@@ -90,6 +99,8 @@
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
+    width: 100%;
+    min-width: 0;
   }
 
   &__tabs {
@@ -97,6 +108,18 @@
       background: var(--surface-container-low);
       margin: 0;
       padding: 0 16px;
+
+      @media (max-width: 480px) {
+        padding: 0 8px;
+      }
+    }
+
+    .ant-tabs-tab {
+      @media (max-width: 480px) {
+        padding: 12px 6px !important;
+        margin-inline-start: 0 !important;
+        margin-inline-end: 8px !important; // Sleek 8px gap between tabs on mobile
+      }
     }
 
     .ant-tabs-tab-active .ant-tabs-tab-btn {
@@ -119,8 +142,17 @@
     font-family: var(--font-body);
     font-size: 14px;
 
+    @media (max-width: 480px) {
+      font-size: 12px;
+      gap: 4px;
+    }
+
     .material-symbols-outlined {
       font-size: 16px;
+
+      @media (max-width: 480px) {
+        font-size: 14px;
+      }
     }
   }
 }
@@ -131,6 +163,10 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  @media (max-width: 480px) {
+    padding: 12px 8px;
+  }
 
   &__empty {
     padding: 24px 0;
@@ -178,6 +214,8 @@
       grid-template-areas:
         "name delete"
         "macros macros";
+      gap: 6px 12px;
+      padding: 10px 8px;
     }
   }
 
@@ -186,6 +224,10 @@
     flex-direction: column;
     gap: 2px;
     min-width: 0;
+
+    @media (max-width: 640px) {
+      grid-area: name;
+    }
   }
 
   &__food-name {
@@ -202,6 +244,19 @@
     color: var(--color-text-tertiary);
   }
 
+  &__row-macros {
+    display: contents;
+
+    @media (max-width: 640px) {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      grid-area: macros;
+      margin-top: 4px;
+    }
+  }
+
   &__macro {
     font-size: 12px;
     color: var(--color-text-secondary);
@@ -210,6 +265,36 @@
     &--kcal {
       color: var(--color-navy);
       font-weight: 600;
+
+      @media (max-width: 640px) {
+        background: var(--surface-container-low);
+        padding: 2px 8px;
+        border-radius: var(--radius-full);
+      }
+    }
+  }
+
+  &__macro-label {
+    display: none;
+
+    @media (max-width: 640px) {
+      display: inline;
+      font-size: 11px;
+      font-family: var(--font-body);
+      color: var(--color-text-tertiary);
+      font-weight: 500;
+      margin-right: 2px;
+    }
+  }
+
+  &__kcal-suffix {
+    display: none;
+
+    @media (max-width: 640px) {
+      display: inline;
+      font-size: 10px;
+      font-weight: 400;
+      color: var(--color-text-secondary);
     }
   }
 
@@ -225,6 +310,11 @@
     cursor: pointer;
     color: var(--color-text-tertiary);
     transition: color var(--transition-fast), background-color var(--transition-fast);
+
+    @media (max-width: 640px) {
+      grid-area: delete;
+      justify-self: end;
+    }
 
     .material-symbols-outlined { font-size: 16px; }
 
@@ -242,6 +332,15 @@
     padding: 10px 14px;
     background: var(--color-navy);
     border-top: 2px solid var(--color-gold);
+
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "label"
+        "macros";
+      gap: 10px;
+      padding: 10px 8px;
+    }
   }
 
   &__subtotal-label {
@@ -249,6 +348,34 @@
     font-size: 13px;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.8);
+
+    @media (max-width: 640px) {
+      grid-area: label;
+    }
+  }
+
+  &__subtotal-macros {
+    display: contents;
+
+    @media (max-width: 640px) {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      grid-area: macros;
+      width: 100%;
+
+      .mono {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 12px;
+      }
+
+      .meal-section__macro-label {
+        display: inline;
+        color: rgba(255, 255, 255, 0.45);
+        font-size: 11px;
+      }
+    }
   }
 
   &__subtotal .mono {
@@ -260,6 +387,12 @@
   &__subtotal-kcal {
     color: var(--color-gold) !important;
     font-weight: 700 !important;
+  }
+
+  &__subtotal-spacer {
+    @media (max-width: 640px) {
+      display: none;
+    }
   }
 
   &__add-btn {
