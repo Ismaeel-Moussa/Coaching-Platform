@@ -1,3 +1,6 @@
+using JokerNutrition.Business.DTOs.Coach;
+using System.Collections.Generic;
+
 namespace JokerNutrition.Business.DTOs.Diary;
 
 public class AthleteDashboardDto
@@ -9,6 +12,8 @@ public class AthleteDashboardDto
     /// "NoProgram" | "Completed" | "InProgress" | "Rest"
     /// </summary>
     public string TodaysWorkoutStatus { get; set; } = "NoProgram";
+
+    public List<CoachFeedbackNoteDto> RecentFeedbackNotes { get; set; } = new();
 }
 
 public class AthleteInfoDto

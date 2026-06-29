@@ -8,6 +8,7 @@ import RoleGuard from './RoleGuard';
 import AuthLayout from '../layouts/AuthLayout';
 import AthleteLayout from '../layouts/AthleteLayout';
 import CoachLayout from '../layouts/CoachLayout';
+import { NotificationProvider } from '../contexts/NotificationContext';
 
 // Auth pages (eager — small, critical path)
 import SignIn from '../pages/auth/SignIn/SignIn';
@@ -34,6 +35,7 @@ const ExerciseLibraryAdmin = lazy(() => import('../pages/coach/ExerciseLibraryAd
 const FoodRecipeAdmin = lazy(() => import('../pages/coach/FoodRecipeAdmin/FoodRecipeAdmin'));
 const InvitationManagement = lazy(() => import('../pages/coach/InvitationManagement/InvitationManagement'));
 const Profile = lazy(() => import('../pages/shared/Profile/Profile'));
+const Notifications = lazy(() => import('../pages/shared/Notifications/Notifications'));
 
 const PageLoader = () => (
   <div className="page-loader">
@@ -63,7 +65,9 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <RoleGuard allowedRoles={['Athlete']}>
-          <AthleteLayout />
+          <NotificationProvider>
+            <AthleteLayout />
+          </NotificationProvider>
         </RoleGuard>
       </ProtectedRoute>
     ),
@@ -125,6 +129,14 @@ export const router = createBrowserRouter([
           </Suspense>
         ),
       },
+      {
+        path: 'notifications',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <Notifications />
+          </Suspense>
+        ),
+      },
     ],
   },
 
@@ -134,7 +146,9 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <RoleGuard allowedRoles={['Coach', 'Admin']}>
-          <CoachLayout />
+          <NotificationProvider>
+            <CoachLayout />
+          </NotificationProvider>
         </RoleGuard>
       </ProtectedRoute>
     ),
@@ -209,6 +223,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <Profile />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'notifications',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <Notifications />
           </Suspense>
         ),
       },

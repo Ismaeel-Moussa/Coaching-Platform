@@ -32,10 +32,13 @@ export interface MacroSummaryDto {
   stepsTarget: number;
 }
 
+import type { CoachFeedbackNoteDto } from './CoachHub';
+
 export interface AthleteDashboardDto {
   athlete: AthleteInfoDto;
   today: MacroSummaryDto;
   todaysWorkoutStatus: TodaysWorkoutStatus;
+  recentFeedbackNotes?: CoachFeedbackNoteDto[];
 }
 
 export interface MacroTargetDto {

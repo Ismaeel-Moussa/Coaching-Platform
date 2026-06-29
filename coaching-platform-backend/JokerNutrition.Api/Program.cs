@@ -7,6 +7,7 @@ using JokerNutrition.Api.Autofac;
 using JokerNutrition.Api.Converters;
 using JokerNutrition.Api.Extensions;
 using JokerNutrition.Api.Filters;
+using JokerNutrition.Business.Hubs;
 using JokerNutrition.Business.Autofac;
 using JokerNutrition.Business.Configurations;
 using JokerNutrition.Business.Helpers;
@@ -18,6 +19,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.SignalR;
 using Serilog;
 using Serilog.Events;
 
@@ -77,6 +79,10 @@ try
                   .AllowAnyHeader()
                   .AllowCredentials());
     });
+
+    // 2b. SignalR
+    builder.Services.AddSignalR();
+    builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
     // 3. Serilog
     builder.Host.UseSerilog();
@@ -150,6 +156,20 @@ try
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
     builder.Services.AddAuthorization();
@@ -191,6 +211,7 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
+    app.MapHub<NotificationHub>("/hubs/notifications");
 
     // 15. Health check endpoint
     app.MapGet("/api/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
