@@ -3,7 +3,7 @@ import { Skeleton, Checkbox } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { useGetSupplements, useToggleSupplement } from '../../../hooks/useSupplements/useSupplements';
 import { SupplementType, type SupplementDto } from '../../../types/Supplement';
-import { getTodayIso } from '../../../utils/date';
+import { getTodayIso, parseUtcDate } from '../../../utils/date';
 import './SupplementsTracker.scss';
 
 // ── Supplement Row ────────────────────────────────────────────────────────────
@@ -19,7 +19,7 @@ const SupplementRow: React.FC<SupplementRowProps> = ({ supplement, onToggle, isL
   };
 
   const takenAtFormatted = supplement.takenAt
-    ? new Date(supplement.takenAt).toLocaleTimeString('en-GB', {
+    ? parseUtcDate(supplement.takenAt).toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit',
       })

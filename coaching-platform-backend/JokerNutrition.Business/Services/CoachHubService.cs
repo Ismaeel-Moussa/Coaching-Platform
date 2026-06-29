@@ -65,7 +65,9 @@ public class CoachHubService : _BaseService, ICoachHubService
     public async Task<CoachDashboardDto> GetDashboardAsync()
     {
         var coach = await GetCoachAsync();
-        var athletes = await GetCoachAthletesAsync(coach.Id);
+        var athletes = LoggedInUser.Role == "Admin"
+            ? await _athleteRepo.Query().Include(a => a.User).ToListAsync()
+            : await GetCoachAthletesAsync(coach.Id);
         var athleteIds = athletes.Select(a => a.Id).ToList();
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -120,7 +122,9 @@ public class CoachHubService : _BaseService, ICoachHubService
     public async Task<PagedResult<LiveFeedItemDto>> GetLiveFeedAsync(int page, int pageSize)
     {
         var coach = await GetCoachAsync();
-        var athleteIds = await GetCoachAthleteIdsAsync(coach.Id);
+        var athleteIds = LoggedInUser.Role == "Admin"
+            ? await _athleteRepo.Query().Select(a => a.Id).ToListAsync()
+            : await GetCoachAthleteIdsAsync(coach.Id);
 
         var query = _workoutLogRepo.Query()
             .Include(w => w.Athlete).ThenInclude(a => a.User)
@@ -149,7 +153,9 @@ public class CoachHubService : _BaseService, ICoachHubService
     public async Task<List<ComplianceItemDto>> GetComplianceRosterAsync()
     {
         var coach = await GetCoachAsync();
-        var athletes = await GetCoachAthletesAsync(coach.Id);
+        var athletes = LoggedInUser.Role == "Admin"
+            ? await _athleteRepo.Query().Include(a => a.User).ToListAsync()
+            : await GetCoachAthletesAsync(coach.Id);
         var athleteIds = athletes.Select(a => a.Id).ToList();
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -180,7 +186,9 @@ public class CoachHubService : _BaseService, ICoachHubService
     public async Task<PagedResult<RosterItemDto>> GetRosterAsync(int page, int pageSize, string? filter)
     {
         var coach = await GetCoachAsync();
-        var athletes = await GetCoachAthletesAsync(coach.Id);
+        var athletes = LoggedInUser.Role == "Admin"
+            ? await _athleteRepo.Query().Include(a => a.User).ToListAsync()
+            : await GetCoachAthletesAsync(coach.Id);
         var athleteIds = athletes.Select(a => a.Id).ToList();
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -373,6 +381,9 @@ public class CoachHubService : _BaseService, ICoachHubService
 
     private async Task EnsureAthleteInRosterAsync(int coachId, int athleteId)
     {
+        if (LoggedInUser.Role == "Admin")
+            return;
+
         var belongs = await _athleteRepo.Query()
             .AnyAsync(a => a.Id == athleteId && a.AssignedCoachId == coachId);
 

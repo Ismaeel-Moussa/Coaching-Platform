@@ -1,0 +1,231 @@
+.client-roster {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__title {
+    font-size: 28px;
+    color: var(--color-navy);
+    margin-bottom: 4px;
+  }
+
+  &__subtitle {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+
+  &__controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  &__search-wrapper {
+    position: relative;
+    max-width: 320px;
+    width: 100%;
+
+    @media (max-width: 768px) {
+      max-width: none;
+    }
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-tertiary);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  &__search-input {
+    padding-left: 36px !important;
+    height: 40px;
+    border-radius: var(--radius-btn);
+  }
+
+  &__tabs {
+    display: flex;
+    background-color: var(--surface-container-low);
+    padding: 4px;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-border-light);
+  }
+
+  &__tab {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-btn);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+
+    &--active {
+      background-color: var(--color-white);
+      color: var(--color-navy);
+      box-shadow: var(--shadow-sm);
+    }
+
+    &:hover:not(&--active) {
+      color: var(--color-text-primary);
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+  }
+
+  &__table-container {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  &__error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    text-align: center;
+    color: var(--color-text-secondary);
+
+    span {
+      font-size: 48px;
+      color: var(--color-red);
+      margin-bottom: 12px;
+    }
+  }
+
+  &__pagination {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: var(--space-xs);
+  }
+}
+
+// Roster Ant Design Table Customization
+.roster-table {
+  .ant-table-row {
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+
+    &:hover {
+      background-color: var(--surface-container-low) !important;
+    }
+  }
+
+  .ant-table-thead > tr > th {
+    background-color: var(--surface-container-low) !important;
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    color: var(--color-navy) !important;
+    border-bottom: 1px solid var(--color-border-light) !important;
+  }
+
+  &__athlete-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__athlete-name {
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  &__program-text {
+    font-weight: 500;
+    color: var(--color-navy);
+
+    &--none {
+      color: var(--color-text-tertiary);
+      font-style: italic;
+    }
+  }
+
+  &__compliance {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 180px;
+  }
+
+  &__compliance-bar-track {
+    height: 6px;
+    flex-grow: 1;
+    background-color: var(--surface-container);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+
+  &__compliance-bar-fill {
+    height: 100%;
+    background-color: var(--color-gold);
+    border-radius: var(--radius-full);
+
+    &--alert {
+      background-color: var(--color-red);
+    }
+  }
+
+  &__compliance-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    min-width: 40px;
+    text-align: right;
+
+    &--alert {
+      color: var(--color-red);
+    }
+  }
+
+  &__date-text {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+  }
+
+  &__action-btn {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 13px;
+    color: var(--color-gold-text) !important;
+
+    &:hover {
+      color: var(--color-gold-dim) !important;
+    }
+  }
+}
+
+.roster-tag {
+  font-family: var(--font-heading) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  padding: 2px 8px !important;
+  border-radius: var(--radius-xs) !important;
+}

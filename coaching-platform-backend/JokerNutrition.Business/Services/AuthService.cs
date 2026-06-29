@@ -115,7 +115,7 @@ public class AuthService : _BaseService, IAuthService
             await _athleteRepo.CreateAsync(athlete);
             await _athleteRepo.SaveChangesAsync();
         }
-        else if (invitation.Role == "Coach")
+        else if (invitation.Role == "Coach" || invitation.Role == "Admin")
         {
             var coach = new Coach { UserId = user.Id };
             await _coachRepo.CreateAsync(coach);
