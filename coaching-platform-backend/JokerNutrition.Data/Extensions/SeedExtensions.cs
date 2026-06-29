@@ -24,9 +24,10 @@ public static class SeedExtensions
 
         // ─── Admin User ───────────────────────────────────────────────────
         const string adminEmail = "admin@jokernutrition.com";
-        if (await userManager.FindByEmailAsync(adminEmail) == null)
+        var admin = await userManager.FindByEmailAsync(adminEmail);
+        if (admin == null)
         {
-            var admin = new User
+            admin = new User
             {
                 UserName = adminEmail,
                 Email = adminEmail,
@@ -38,6 +39,20 @@ public static class SeedExtensions
             };
             await userManager.CreateAsync(admin, "Admin@Joker123!");
             await userManager.AddToRoleAsync(admin, "Admin");
+        }
+
+        // Ensure Admin has a Coach profile (since they manage the Coach Hub as well)
+        var adminCoach = await context.Coaches.FirstOrDefaultAsync(c => c.UserId == admin.Id);
+        if (adminCoach == null)
+        {
+            var coach = new Coach
+            {
+                UserId = admin.Id,
+                Bio = "Platform administrator and elite coaching coordinator.",
+                IsActive = true
+            };
+            context.Coaches.Add(coach);
+            await context.SaveChangesAsync();
         }
 
         // ─── Demo Coach ───────────────────────────────────────────────────
