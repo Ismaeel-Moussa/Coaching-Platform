@@ -1,8 +1,270 @@
-import React from 'react';
-const CoachDashboard: React.FC = () => (
-  <div id="coach-dashboard-page" style={{ padding: 32, textAlign: 'center' }}>
-    <h2 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-navy)', marginBottom: 8 }}>Coach Dashboard</h2>
-    <p style={{ color: 'var(--color-text-secondary)' }}>Full implementation in Day 4.</p>
-  </div>
-);
+import React, { useState } from 'react';
+import { Skeleton, Empty, Button } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import {
+  useGetCoachDashboard,
+  useGetLiveFeed,
+  useGetCompliance,
+} from '../../../hooks/useCoachHub/useCoachHub';
+import LiveFeedItem from '../../../components/LiveFeedItem/LiveFeedItem';
+import ComplianceBar from '../../../components/ComplianceBar/ComplianceBar';
+import './CoachDashboard.scss';
+
+const CoachDashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const [feedPage, setFeedPage] = useState<number>(1);
+  const FEED_PAGE_SIZE = 10;
+
+  // Fetch data using TanStack React Query
+  const {
+    data: dashboardData,
+    isLoading: isDashboardLoading,
+    error: dashboardError,
+  } = useGetCoachDashboard();
+
+  const {
+    data: feedData,
+    isLoading: isFeedLoading,
+    error: feedError,
+  } = useGetLiveFeed(feedPage, FEED_PAGE_SIZE);
+
+  const {
+    data: complianceData,
+    isLoading: isComplianceLoading,
+    error: complianceError,
+  } = useGetCompliance();
+
+  const handleRosterClick = () => {
+    navigate('/coach/roster');
+  };
+
+  const handleNextPage = () => {
+    if (feedData && feedData.hasNextPage) {
+      setFeedPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (feedPage > 1) {
+      setFeedPage((prev) => prev - 1);
+    }
+  };
+
+  const hasErrors = dashboardError || feedError || complianceError;
+
+  if (hasErrors) {
+    return (
+      <div className="coach-dashboard coach-dashboard--error">
+        <span className="material-symbols-outlined">error_outline</span>
+        <h2>Error Loading Dashboard</h2>
+        <p>There was a problem loading the coaching data. Please check your connection or refresh the page.</p>
+        <Button type="primary" onClick={() => window.location.reload()}>
+          Refresh Page
+        </Button>
+      </div>
+    );
+  }
+
+  // Calculate SVG ring stroke properties
+  const completionPercent = dashboardData?.avgWorkoutCompletionPercent ?? 0;
+  const radius = 32;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (completionPercent / 100) * circumference;
+
+  return (
+    <div id="coach-dashboard-page" className="coach-dashboard animate-fade-in">
+      {/* Header */}
+      <div className="coach-dashboard__header">
+        <div>
+          <h1 className="coach-dashboard__title">Coach Dashboard</h1>
+          <p className="coach-dashboard__subtitle">Monitor athlete progress and compliance in real-time</p>
+        </div>
+        <button className="coach-dashboard__action-btn" onClick={handleRosterClick}>
+          <span className="material-symbols-outlined">group</span>
+          View Client Roster
+        </button>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="coach-dashboard__kpis">
+        {/* KPI 1: Active Athletes */}
+        <div className="coach-dashboard__kpi-card">
+          <div className="coach-dashboard__kpi-icon coach-dashboard__kpi-icon--navy">
+            <span className="material-symbols-outlined">groups</span>
+          </div>
+          <div className="coach-dashboard__kpi-info">
+            <span className="coach-dashboard__kpi-label">Active Athletes</span>
+            {isDashboardLoading ? (
+              <Skeleton.Input active size="small" style={{ width: 80 }} />
+            ) : (
+              <span className="coach-dashboard__kpi-value mono">
+                {dashboardData?.activeAthleteCount ?? 0}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* KPI 2: Workout Completion Rate */}
+        <div className="coach-dashboard__kpi-card">
+          <div className="coach-dashboard__kpi-chart">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <circle
+                cx="40"
+                cy="40"
+                r={radius}
+                fill="transparent"
+                stroke="var(--surface-container)"
+                strokeWidth="6"
+              />
+              <circle
+                cx="40"
+                cy="40"
+                r={radius}
+                fill="transparent"
+                stroke="var(--color-gold)"
+                strokeWidth="6"
+                strokeDasharray={circumference}
+                strokeDashoffset={isDashboardLoading ? circumference : strokeDashoffset}
+                strokeLinecap="round"
+                transform="rotate(-90 40 40)"
+                style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+              />
+            </svg>
+            <div className="coach-dashboard__kpi-chart-text mono">
+              {isDashboardLoading ? '...' : `${Math.round(completionPercent)}%`}
+            </div>
+          </div>
+          <div className="coach-dashboard__kpi-info">
+            <span className="coach-dashboard__kpi-label">Workout Completion</span>
+            <span className="coach-dashboard__kpi-sub">Weekly average</span>
+          </div>
+        </div>
+
+        {/* KPI 3: Pending Check-ins */}
+        <div className={`coach-dashboard__kpi-card ${
+          (dashboardData?.pendingCheckInsCount ?? 0) > 0 ? 'coach-dashboard__kpi-card--alert' : ''
+        }`}>
+          <div className={`coach-dashboard__kpi-icon ${
+            (dashboardData?.pendingCheckInsCount ?? 0) > 0 
+              ? 'coach-dashboard__kpi-icon--red' 
+              : 'coach-dashboard__kpi-icon--navy'
+          }`}>
+            <span className="material-symbols-outlined">pending_actions</span>
+          </div>
+          <div className="coach-dashboard__kpi-info">
+            <span className="coach-dashboard__kpi-label">Pending Check-ins</span>
+            {isDashboardLoading ? (
+              <Skeleton.Input active size="small" style={{ width: 80 }} />
+            ) : (
+              <div className="coach-dashboard__kpi-value-wrapper">
+                <span className="coach-dashboard__kpi-value mono">
+                  {dashboardData?.pendingCheckInsCount ?? 0}
+                </span>
+                {(dashboardData?.pendingCheckInsCount ?? 0) > 0 && (
+                  <span className="coach-dashboard__kpi-alert-badge">Action Required</span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Panels Grid */}
+      <div className="coach-dashboard__grid">
+        
+        {/* Left Panel: Real-Time Live Feed */}
+        <div className="coach-dashboard__panel coach-dashboard__panel--feed">
+          <div className="coach-dashboard__panel-header">
+            <div className="coach-dashboard__panel-title-wrapper">
+              <span className="material-symbols-outlined">bolt</span>
+              <h2>Real-Time Live Feed</h2>
+            </div>
+            <span className="coach-dashboard__pulse-indicator" title="Monitoring active logs"></span>
+          </div>
+
+          <div className="coach-dashboard__panel-body">
+            {isFeedLoading && feedPage === 1 ? (
+              <div className="coach-dashboard__loading-stack">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} active avatar paragraph={{ rows: 2 }} />
+                ))}
+              </div>
+            ) : feedData && feedData.items.length > 0 ? (
+              <div className="coach-dashboard__feed-list">
+                {feedData.items.map((item, idx) => (
+                  <LiveFeedItem key={`${item.athleteId}-${item.date}-${idx}`} item={item} />
+                ))}
+              </div>
+            ) : (
+              <Empty description="No workout logs found." style={{ padding: '40px 0' }} />
+            )}
+          </div>
+
+          {/* Pagination controls for Feed */}
+          {feedData && feedData.totalCount > FEED_PAGE_SIZE && (
+            <div className="coach-dashboard__panel-footer">
+              <button
+                className="coach-dashboard__page-btn"
+                onClick={handlePrevPage}
+                disabled={feedPage === 1}
+              >
+                <span className="material-symbols-outlined">chevron_left</span>
+                Previous
+              </button>
+              <span className="coach-dashboard__page-num mono">
+                Page {feedPage} of {feedData.totalPages}
+              </span>
+              <button
+                className="coach-dashboard__page-btn"
+                onClick={handleNextPage}
+                disabled={!feedData.hasNextPage}
+              >
+                Next
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Right Panel: Nutrition Compliance */}
+        <div className="coach-dashboard__panel coach-dashboard__panel--compliance">
+          <div className="coach-dashboard__panel-header">
+            <div className="coach-dashboard__panel-title-wrapper">
+              <span className="material-symbols-outlined">restaurant</span>
+              <h2>Today's Compliance</h2>
+            </div>
+          </div>
+
+          <div className="coach-dashboard__panel-body">
+            {isComplianceLoading ? (
+              <div className="coach-dashboard__loading-stack">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} active paragraph={{ rows: 1 }} title={true} />
+                ))}
+              </div>
+            ) : complianceData && complianceData.length > 0 ? (
+              <div className="coach-dashboard__compliance-list">
+                {complianceData.map((item) => (
+                  <ComplianceBar
+                    key={item.athleteId}
+                    athleteId={item.athleteId}
+                    athleteName={item.athleteName}
+                    consumed={item.consumedCalories}
+                    target={item.targetCalories}
+                    isOverTarget={item.isOverCalorieTarget}
+                    compliancePercent={item.compliancePercent}
+                  />
+                ))}
+              </div>
+            ) : (
+              <Empty description="No compliance logs for today yet." style={{ padding: '40px 0' }} />
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
 export default CoachDashboard;
