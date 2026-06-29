@@ -15,6 +15,13 @@
 
   &__avatar-container {
     flex-shrink: 0;
+    cursor: pointer;
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+
+    &:hover {
+      opacity: 0.85;
+      transform: scale(1.02);
+    }
   }
 
   &__avatar {
@@ -57,6 +64,13 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+
+    &:hover {
+      color: var(--color-navy);
+      text-decoration: underline;
+    }
   }
 
   &__time {
