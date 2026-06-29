@@ -23,6 +23,22 @@ const AthleteDashboard: React.FC = () => {
   const updateWaterMutation = useUpdateWater(today);
   const updateStepsMutation = useUpdateSteps(today);
 
+  React.useEffect(() => {
+    if (window.location.hash === '#coach-feedback' && data) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById('coach-feedback-card');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+          element.classList.add('pulse-highlight');
+          setTimeout(() => {
+            element.classList.remove('pulse-highlight');
+          }, 2000);
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [data, window.location.hash]);
+
   const handleAddWater = () => {
     if (!data) return;
     const newTotal = parseFloat(
@@ -237,6 +253,39 @@ const AthleteDashboard: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* ── Card 5: Coach Feedback ── */}
+        <div id="coach-feedback-card" className="dashboard__card dashboard__card--feedback">
+          <div className="dashboard__card-header">
+            <span className="material-symbols-outlined">chat</span>
+            <h2 className="dashboard__card-title">Coach Feedback</h2>
+          </div>
+          {isLoading ? (
+            <Skeleton active paragraph={{ rows: 3 }} title={false} />
+          ) : data?.recentFeedbackNotes && data.recentFeedbackNotes.length > 0 ? (
+            <div className="dashboard__feedback-list">
+              {data.recentFeedbackNotes.map((note: any) => (
+                <div key={note.id} className="dashboard__feedback-item">
+                  <div className="dashboard__feedback-date">
+                    {new Date(note.createdAt).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </div>
+                  <p className="dashboard__feedback-text">{note.noteText}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="dashboard__feedback-empty">
+              <span className="material-symbols-outlined">forum</span>
+              <p>No feedback notes from your coach yet.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

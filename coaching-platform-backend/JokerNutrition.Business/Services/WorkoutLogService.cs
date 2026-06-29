@@ -27,6 +27,7 @@ public class WorkoutLogService : _BaseService, IWorkoutLogService
     private readonly IClientProgramRepository _clientProgramRepo;
     private readonly IWorkoutLogRepository _workoutLogRepo;
     private readonly IExerciseSetLogRepository _setLogRepo;
+    private readonly INotificationService _notificationService;
 
     public WorkoutLogService(
         IPrincipal principal,
@@ -35,7 +36,8 @@ public class WorkoutLogService : _BaseService, IWorkoutLogService
         IAthleteRepository athleteRepo,
         IClientProgramRepository clientProgramRepo,
         IWorkoutLogRepository workoutLogRepo,
-        IExerciseSetLogRepository setLogRepo)
+        IExerciseSetLogRepository setLogRepo,
+        INotificationService notificationService)
         : base(principal, logger)
     {
         _context = context;
@@ -43,6 +45,7 @@ public class WorkoutLogService : _BaseService, IWorkoutLogService
         _clientProgramRepo = clientProgramRepo;
         _workoutLogRepo = workoutLogRepo;
         _setLogRepo = setLogRepo;
+        _notificationService = notificationService;
     }
 
     // ─── Get Today's Workout ──────────────────────────────────────────
@@ -176,6 +179,17 @@ public class WorkoutLogService : _BaseService, IWorkoutLogService
         _athleteRepo.Update(athlete);
 
         await _workoutLogRepo.SaveChangesAsync();
+
+        // Push real-time silent update to coach
+        var coachUserId = await _athleteRepo.Query()
+            .Where(a => a.Id == athlete.Id && a.AssignedCoachId.HasValue)
+            .Select(a => a.AssignedCoach!.UserId)
+            .FirstOrDefaultAsync();
+
+        if (coachUserId > 0)
+        {
+            await _notificationService.SendDirectUpdateAsync(coachUserId, "AthleteActivity", new { type = "WorkoutCompleted", athleteId = athlete.Id });
+        }
     }
 
     // ─── Exercise History (progressive overload) ──────────────────────

@@ -32,6 +32,7 @@ public class AuthService : _BaseService, IAuthService
     private readonly IAthleteRepository _athleteRepo;
     private readonly ICoachRepository _coachRepo;
     private readonly IEmailService _emailService;
+    private readonly INotificationService _notificationService;
     private readonly AppSettings _appSettings;
 
     public AuthService(
@@ -44,7 +45,8 @@ public class AuthService : _BaseService, IAuthService
         IAthleteRepository athleteRepo,
         ICoachRepository coachRepo,
         IEmailService emailService,
-        IOptions<AppSettings> appSettings)
+        IOptions<AppSettings> appSettings,
+        INotificationService notificationService)
         : base(principal, logger)
     {
         _userManager = userManager;
@@ -55,6 +57,7 @@ public class AuthService : _BaseService, IAuthService
         _coachRepo = coachRepo;
         _emailService = emailService;
         _appSettings = appSettings.Value;
+        _notificationService = notificationService;
     }
 
     public async Task<AuthTokenDto> LoginAsync(LoginForm form)
@@ -126,6 +129,17 @@ public class AuthService : _BaseService, IAuthService
         invitation.Status = InvitationStatus.Accepted;
         _invitationRepo.Update(invitation);
         await _invitationRepo.SaveChangesAsync();
+
+        // Push real-time update to coach
+        if (invitation.Role == "Athlete" && invitation.IssuedByCoachId > 0)
+        {
+            var coach = await _coachRepo.Query()
+                .FirstOrDefaultAsync(c => c.Id == invitation.IssuedByCoachId);
+            if (coach != null)
+            {
+                await _notificationService.SendDirectUpdateAsync(coach.UserId, "AthleteActivity", new { type = "InvitationAccepted", athleteUserId = user.Id });
+            }
+        }
 
         _logger.LogInformation("User {Email} registered with role {Role}", user.Email, invitation.Role);
 
