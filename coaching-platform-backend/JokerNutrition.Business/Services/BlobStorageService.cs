@@ -10,6 +10,7 @@ namespace JokerNutrition.Business.Services;
 public interface IBlobStorageService
 {
     Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType);
+    Task DeleteFileAsync(string fileUrl);
 }
 
 public class BlobStorageService : IBlobStorageService
@@ -57,6 +58,48 @@ public class BlobStorageService : IBlobStorageService
         {
             _logger.LogWarning(ex, "Azure Blob Storage upload failed. Falling back to simulated local file storage.");
             return await SaveLocalFileAsync(fileStream, fileName);
+        }
+    }
+
+    public async Task DeleteFileAsync(string fileUrl)
+    {
+        if (string.IsNullOrEmpty(fileUrl)) return;
+
+        try
+        {
+            if (fileUrl.Contains("/uploads/"))
+            {
+                var fileName = fileUrl.Substring(fileUrl.LastIndexOf("/uploads/") + "/uploads/".Length);
+                var uploadsDir = Path.Combine(_hostingEnv.ContentRootPath, "wwwroot", "uploads");
+                var filePath = Path.Combine(uploadsDir, fileName);
+
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                    _logger.LogInformation("Deleted old local file: {FilePath}", filePath);
+                }
+            }
+            else
+            {
+                if (Uri.TryCreate(fileUrl, UriKind.Absolute, out var uri))
+                {
+                    var blobServiceClient = new BlobServiceClient(_settings.ConnectionString);
+                    var containerClient = blobServiceClient.GetBlobContainerClient(_settings.ContainerName);
+                    
+                    var blobName = uri.Segments.Last();
+                    var blobClient = containerClient.GetBlobClient(blobName);
+                    
+                    var deleted = await blobClient.DeleteIfExistsAsync();
+                    if (deleted)
+                    {
+                        _logger.LogInformation("Deleted old Azure blob: {BlobName}", blobName);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting file from storage: {FileUrl}", fileUrl);
         }
     }
 

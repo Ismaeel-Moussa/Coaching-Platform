@@ -70,10 +70,12 @@ public class ProfileController : ControllerBase
 
         using (var stream = file.OpenReadStream())
         {
+            var currentProfile = await _profileService.GetProfileAsync();
+            var oldAvatarUrl = currentProfile.ProfilePictureUrl;
+
             var url = await _blobStorageService.UploadFileAsync(stream, file.FileName, file.ContentType);
             
             // Automatically update user's profile picture url in db
-            var currentProfile = await _profileService.GetProfileAsync();
             var updateForm = new UpdateProfileForm
             {
                 FirstName = currentProfile.FirstName,
@@ -85,6 +87,12 @@ public class ProfileController : ControllerBase
                 TargetGoal = currentProfile.TargetGoal
             };
             var updatedUser = await _profileService.UpdateProfileAsync(updateForm);
+
+            // Clean up the old profile picture to avoid storage bloat
+            if (!string.IsNullOrEmpty(oldAvatarUrl))
+            {
+                await _blobStorageService.DeleteFileAsync(oldAvatarUrl);
+            }
 
             return Ok(new { url, user = updatedUser });
         }
