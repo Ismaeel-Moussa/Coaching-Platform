@@ -119,6 +119,13 @@ const AthleteLayout: React.FC = () => {
 
       {/* ── Mobile Layout Elements (visible on mobile <= 768px) ── */}
       <header className="athlete-layout__mobile-header">
+        <button
+          className="athlete-layout__mobile-hamburger"
+          onClick={() => setMoreDrawerOpen(true)}
+          aria-label="Open navigation menu"
+        >
+          <span className="material-symbols-outlined">menu</span>
+        </button>
         <div className="athlete-layout__logo-brand">
           <div className="athlete-layout__logo-icon">JN</div>
           <span className="athlete-layout__logo-text">JOKER NUTRITION</span>
