@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { LiveFeedItemDto } from '../../types/CoachHub';
 import { formatRelativeTime } from '../../utils/date';
 import './LiveFeedItem.scss';
@@ -26,6 +27,8 @@ const STATUS_CONFIG = {
 };
 
 const LiveFeedItem: React.FC<LiveFeedItemProps> = ({ item }) => {
+  const navigate = useNavigate();
+
   const getInitials = (name: string) => {
     const parts = name.trim().split(/\s+/);
     if (parts.length >= 2) {
@@ -34,11 +37,20 @@ const LiveFeedItem: React.FC<LiveFeedItemProps> = ({ item }) => {
     return parts[0] ? parts[0][0].toUpperCase() : '';
   };
 
+  const handleAthleteClick = () => {
+    if (item.athleteId) {
+      navigate(`/coach/roster/${item.athleteId}`);
+    }
+  };
+
   const config = STATUS_CONFIG[item.status] || STATUS_CONFIG.InProgress;
 
   return (
     <div className="live-feed-item">
-      <div className="live-feed-item__avatar-container">
+      <div 
+        className="live-feed-item__avatar-container"
+        onClick={handleAthleteClick}
+      >
         {item.athleteAvatarUrl ? (
           <img
             src={item.athleteAvatarUrl}
@@ -54,7 +66,12 @@ const LiveFeedItem: React.FC<LiveFeedItemProps> = ({ item }) => {
 
       <div className="live-feed-item__content">
         <div className="live-feed-item__header">
-          <span className="live-feed-item__name">{item.athleteName}</span>
+          <span 
+            className="live-feed-item__name"
+            onClick={handleAthleteClick}
+          >
+            {item.athleteName}
+          </span>
           <span className="live-feed-item__time">
             {item.status === 'Completed' && item.completedAt
               ? formatRelativeTime(item.completedAt)
