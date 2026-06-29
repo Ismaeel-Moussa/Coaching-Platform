@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Tooltip, Drawer } from 'antd';
+import { useQueryClient } from '@tanstack/react-query';
 import './AthleteLayout.scss';
 
 const athleteNavItems = [
@@ -25,6 +26,7 @@ const STORAGE_KEY = 'athlete-sidebar-collapsed';
 const AthleteLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
 
@@ -42,6 +44,7 @@ const AthleteLayout: React.FC = () => {
   };
 
   const handleLogout = () => {
+    queryClient.clear();
     localStorage.clear();
     navigate('/sign-in', { replace: true });
   };
@@ -136,10 +139,10 @@ const AthleteLayout: React.FC = () => {
           <span className="athlete-layout__logo-text">JOKER NUTRITION</span>
         </div>
         {user && (
-          <button 
+          <NavLink 
+            to="/athlete/profile"
             className="athlete-layout__mobile-avatar-btn" 
-            onClick={() => setMoreDrawerOpen(true)}
-            aria-label="Open menu"
+            aria-label="Open profile"
           >
             <div className="athlete-layout__avatar">
               {user.profilePictureUrl ? (
@@ -148,7 +151,7 @@ const AthleteLayout: React.FC = () => {
                 `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
               )}
             </div>
-          </button>
+          </NavLink>
         )}
       </header>
 

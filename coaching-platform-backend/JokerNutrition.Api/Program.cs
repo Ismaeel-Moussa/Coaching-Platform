@@ -185,6 +185,7 @@ try
 
     // 14. Middleware pipeline
     app.UseCors("AllowFrontend");
+    app.UseStaticFiles();
     app.UseHttpsRedirection();
     app.UseIpRateLimiting();
     app.UseAuthentication();
@@ -203,6 +204,13 @@ try
             await dbContext.Database.MigrateAsync();
         }
         await app.SeedMockDataAsync();
+
+        // Ensure static upload folder exists locally
+        var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "uploads");
+        if (!Directory.Exists(uploadsPath))
+        {
+            Directory.CreateDirectory(uploadsPath);
+        }
     }
 
     app.Run();

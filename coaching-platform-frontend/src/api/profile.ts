@@ -16,3 +16,19 @@ export const changePassword = async (form: ChangePasswordForm): Promise<{ messag
   const response = await axiosInstance.put<{ message: string }>('/profile/change-password', form);
   return response.data;
 };
+
+export const uploadAvatar = async (file: File): Promise<{ url: string; user: AuthUserDto }> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const response = await axiosInstance.post<{ url: string; user: AuthUserDto }>(
+    '/profile/upload-avatar',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
+  );
+  return response.data;
+};

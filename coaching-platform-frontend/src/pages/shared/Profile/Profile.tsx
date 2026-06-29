@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Spin, Alert } from 'antd';
-import { useGetProfile, useUpdateProfile, useChangePassword } from '../../../hooks/useProfile/useProfile';
+import { useGetProfile, useUpdateProfile, useChangePassword, useUploadAvatar } from '../../../hooks/useProfile/useProfile';
 import './Profile.scss';
 
 const Profile: React.FC = () => {
   const { data: profile, isLoading, error } = useGetProfile();
   const updateProfileMutation = useUpdateProfile();
   const changePasswordMutation = useChangePassword();
+  const uploadAvatarMutation = useUploadAvatar();
 
   const [activeTab, setActiveTab] = useState<'info' | 'password' | 'stats'>('info');
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadAvatarMutation.mutate(file, {
+        onSuccess: (data) => {
+          setProfilePictureUrl(data.url);
+        }
+      });
+    }
+  };
 
   // Form states for profile update
   const [firstName, setFirstName] = useState('');
@@ -91,7 +103,8 @@ const Profile: React.FC = () => {
   if (isLoading) {
     return (
       <div className="profile-page-loader">
-        <Spin size="large" tip="Loading Profile Details..." />
+        <Spin size="large" />
+        <div className="profile-page-loader__text">Loading Profile Details...</div>
       </div>
     );
   }
@@ -122,7 +135,27 @@ const Profile: React.FC = () => {
             ) : (
               <span className="profile-page__avatar-initials">{userInitials}</span>
             )}
+            
+            {/* Loading spinner overlay */}
+            {uploadAvatarMutation.isPending && (
+              <div className="profile-page__avatar-loading">
+                <Spin size="small" />
+              </div>
+            )}
           </div>
+          
+          {/* File input overlay trigger */}
+          <label htmlFor="avatar-file-input" className="profile-page__avatar-trigger" title="Upload Photo">
+            <span className="material-symbols-outlined">photo_camera</span>
+            <input
+              id="avatar-file-input"
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+              disabled={uploadAvatarMutation.isPending}
+            />
+          </label>
         </div>
         <div className="profile-page__header-info">
           <h1 className="profile-page__name">{profile.firstName} {profile.lastName}</h1>
@@ -144,18 +177,18 @@ const Profile: React.FC = () => {
           Edit Info
         </button>
         <button
-          className={`profile-page__tab-btn ${activeTab === 'password' ? 'profile-page__tab-btn--active' : ''}`}
-          onClick={() => setActiveTab('password')}
-        >
-          <span className="material-symbols-outlined">lock_reset</span>
-          Change Password
-        </button>
-        <button
           className={`profile-page__tab-btn ${activeTab === 'stats' ? 'profile-page__tab-btn--active' : ''}`}
           onClick={() => setActiveTab('stats')}
         >
           <span className="material-symbols-outlined">query_stats</span>
           Insights
+        </button>
+        <button
+          className={`profile-page__tab-btn ${activeTab === 'password' ? 'profile-page__tab-btn--active' : ''}`}
+          onClick={() => setActiveTab('password')}
+        >
+          <span className="material-symbols-outlined">lock_reset</span>
+          Change Password
         </button>
       </nav>
 
@@ -187,17 +220,6 @@ const Profile: React.FC = () => {
                   required
                 />
               </div>
-            </div>
-
-            <div className="profile-page__form-group">
-              <label htmlFor="profilePictureUrl">Profile Picture URL</label>
-              <input
-                id="profilePictureUrl"
-                type="url"
-                placeholder="https://example.com/avatar.jpg"
-                value={profilePictureUrl}
-                onChange={(e) => setProfilePictureUrl(e.target.value)}
-              />
             </div>
 
             {profile.role !== 'Athlete' ? (

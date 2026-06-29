@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Tooltip, Drawer } from 'antd';
+import { useQueryClient } from '@tanstack/react-query';
 import './CoachLayout.scss';
 
 const coachNavItems = [
@@ -17,6 +18,7 @@ const STORAGE_KEY = 'coach-sidebar-collapsed';
 
 const CoachLayout: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
 
@@ -34,6 +36,7 @@ const CoachLayout: React.FC = () => {
   };
 
   const handleLogout = () => {
+    queryClient.clear();
     localStorage.clear();
     navigate('/sign-in', { replace: true });
   };
@@ -129,13 +132,15 @@ const CoachLayout: React.FC = () => {
           </div>
         </div>
         {user && (
-          <div className="coach-layout__avatar">
-            {user.profilePictureUrl ? (
-              <img src={user.profilePictureUrl} alt="avatar" className="coach-layout__avatar-img" />
-            ) : (
-              `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
-            )}
-          </div>
+          <NavLink to="/coach/profile" className="coach-layout__mobile-avatar-btn" aria-label="Open profile">
+            <div className="coach-layout__avatar">
+              {user.profilePictureUrl ? (
+                <img src={user.profilePictureUrl} alt="avatar" className="coach-layout__avatar-img" />
+              ) : (
+                `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
+              )}
+            </div>
+          </NavLink>
         )}
       </header>
 
