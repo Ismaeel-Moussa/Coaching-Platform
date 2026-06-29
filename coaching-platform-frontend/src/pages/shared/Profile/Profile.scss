@@ -47,12 +47,59 @@
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(253, 192, 3, 0.15);
     flex-shrink: 0;
+    position: relative;
   }
 
   &__avatar-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  &__avatar-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(11, 19, 43, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+
+    .ant-spin-dot-item {
+      background-color: var(--color-gold) !important;
+    }
+  }
+
+  &__avatar-trigger {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background: var(--color-gold);
+    border: 2px solid var(--color-white);
+    color: var(--color-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+    z-index: 3;
+
+    span {
+      font-size: 16px;
+    }
+
+    &:hover {
+      background: var(--color-gold-dim);
+      transform: scale(1.08);
+      box-shadow: var(--shadow-gold);
+    }
   }
 
   &__avatar-initials {
@@ -353,10 +400,15 @@
 }
 
 .profile-page-loader {
-  .ant-spin-text {
-    color: var(--color-gold-text) !important;
-    margin-top: 12px;
+  flex-direction: column;
+  gap: 16px;
+
+  &__text {
+    color: var(--color-gold-text);
+    font-size: 14px;
+    font-weight: 500;
   }
+
   .ant-spin-dot-item {
     background-color: var(--color-gold) !important;
   }
