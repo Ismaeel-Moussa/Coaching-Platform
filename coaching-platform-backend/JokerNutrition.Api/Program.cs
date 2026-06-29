@@ -4,6 +4,7 @@ using AspNetCoreRateLimit;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using JokerNutrition.Api.Autofac;
+using JokerNutrition.Api.Converters;
 using JokerNutrition.Api.Extensions;
 using JokerNutrition.Api.Filters;
 using JokerNutrition.Business.Autofac;
@@ -153,8 +154,13 @@ try
 
     builder.Services.AddAuthorization();
 
-    // 11. Controllers
-    builder.Services.AddControllers();
+    // 11. Controllers (with UTC DateTime converters to ensure Z suffix)
+    builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
+            options.JsonSerializerOptions.Converters.Add(new UtcNullableDateTimeConverter());
+        });
     builder.Services.AddHttpClient();
     builder.Services.AddHttpContextAccessor();
 
