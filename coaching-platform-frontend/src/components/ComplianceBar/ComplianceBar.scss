@@ -1,0 +1,103 @@
+.compliance-bar {
+  padding: 12px 16px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+    background-color: var(--surface-container-lowest);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  &__name {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 14px;
+  }
+
+  &__stats {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  &__consumed {
+    font-weight: 600;
+    color: var(--color-text-primary);
+
+    &--over {
+      color: var(--color-red);
+    }
+  }
+
+  &__divider {
+    color: var(--color-border-strong);
+  }
+
+  &__target {
+    color: var(--color-text-tertiary);
+  }
+
+  &__track-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__track {
+    height: 8px;
+    flex-grow: 1;
+    background-color: var(--surface-container);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    position: relative;
+  }
+
+  &__fill {
+    height: 100%;
+    background-color: var(--color-gold);
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow);
+
+    &--exceeded {
+      background-color: var(--color-red);
+    }
+  }
+
+  &__fill-overflow {
+    height: 100%;
+    background-color: var(--color-red-bright);
+    position: absolute;
+    top: 0;
+    transition: width var(--transition-slow);
+  }
+
+  &__alert-icon {
+    color: var(--color-red);
+    font-size: 18px;
+    flex-shrink: 0;
+    animation: pulse-red 2s infinite;
+  }
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
