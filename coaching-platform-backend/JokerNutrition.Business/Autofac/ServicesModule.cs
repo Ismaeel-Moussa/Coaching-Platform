@@ -24,5 +24,8 @@ public class ServicesModule : Module
         builder.RegisterType<ExerciseService>().As<IExerciseService>().InstancePerLifetimeScope();
         builder.RegisterType<WorkoutLogService>().As<IWorkoutLogService>().InstancePerLifetimeScope();
         builder.RegisterType<SupplementService>().As<ISupplementService>().InstancePerLifetimeScope();
+
+        // ─── Day 4: Coach Operations Hub ─────────────────────────────────
+        builder.RegisterType<CoachHubService>().As<ICoachHubService>().InstancePerLifetimeScope();
     }
 }
