@@ -23,6 +23,7 @@ public class MealLogService : _BaseService, IMealLogService
     private readonly IRecipeRepository _recipeRepo;
     private readonly IAthleteRepository _athleteRepo;
     private readonly IDiaryService _diaryService;
+    private readonly INotificationService _notificationService;
 
     public MealLogService(
         IPrincipal principal,
@@ -31,7 +32,8 @@ public class MealLogService : _BaseService, IMealLogService
         IFoodRepository foodRepo,
         IRecipeRepository recipeRepo,
         IAthleteRepository athleteRepo,
-        IDiaryService diaryService)
+        IDiaryService diaryService,
+        INotificationService notificationService)
         : base(principal, logger)
     {
         _mealLogRepo = mealLogRepo;
@@ -39,6 +41,7 @@ public class MealLogService : _BaseService, IMealLogService
         _recipeRepo = recipeRepo;
         _athleteRepo = athleteRepo;
         _diaryService = diaryService;
+        _notificationService = notificationService;
     }
 
     public async Task<MealLogDto> LogFoodAsync(LogFoodForm form)
@@ -104,6 +107,19 @@ public class MealLogService : _BaseService, IMealLogService
         await _mealLogRepo.CreateAsync(log);
         await _mealLogRepo.SaveChangesAsync();
 
+        if (athlete.AssignedCoachId.HasValue)
+        {
+            var coachUserId = await _athleteRepo.Query()
+                .Where(a => a.Id == athlete.Id)
+                .Select(a => a.AssignedCoach!.UserId)
+                .FirstOrDefaultAsync();
+
+            if (coachUserId > 0)
+            {
+                await _notificationService.SendDirectUpdateAsync(coachUserId, "AthleteActivity", new { type = "MealLogged", athleteId = athlete.Id });
+            }
+        }
+
         return DiaryMapper.Map(log);
     }
 
@@ -121,5 +137,18 @@ public class MealLogService : _BaseService, IMealLogService
 
         _mealLogRepo.Delete(log);
         await _mealLogRepo.SaveChangesAsync();
+
+        if (athlete.AssignedCoachId.HasValue)
+        {
+            var coachUserId = await _athleteRepo.Query()
+                .Where(a => a.Id == athlete.Id)
+                .Select(a => a.AssignedCoach!.UserId)
+                .FirstOrDefaultAsync();
+
+            if (coachUserId > 0)
+            {
+                await _notificationService.SendDirectUpdateAsync(coachUserId, "AthleteActivity", new { type = "MealRemoved", athleteId = athlete.Id });
+            }
+        }
     }
 }

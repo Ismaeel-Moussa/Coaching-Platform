@@ -29,5 +29,6 @@ public class ServicesModule : Module
         builder.RegisterType<CoachHubService>().As<ICoachHubService>().InstancePerLifetimeScope();
         builder.RegisterType<ProfileService>().As<IProfileService>().InstancePerLifetimeScope();
         builder.RegisterType<BlobStorageService>().As<IBlobStorageService>().InstancePerLifetimeScope();
+        builder.RegisterType<NotificationService>().As<INotificationService>().InstancePerLifetimeScope();
     }
 }
