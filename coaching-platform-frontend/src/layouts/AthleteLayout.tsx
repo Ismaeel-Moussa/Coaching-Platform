@@ -10,6 +10,7 @@ const athleteNavItems = [
   { path: '/athlete/supplements', icon: 'medication', label: 'Supplements' },
   { path: '/athlete/recipes', icon: 'menu_book', label: 'Recipes' },
   { path: '/athlete/check-in', icon: 'assignment', label: 'Check-In' },
+  { path: '/athlete/profile', icon: 'person', label: 'Profile' },
 ];
 
 const mobileBottomNavItems = [
@@ -98,15 +99,19 @@ const AthleteLayout: React.FC = () => {
         <div className="athlete-layout__sidebar-footer">
           {user && (
             <Tooltip title={collapsed ? `${user.firstName} ${user.lastName}` : ''} placement="right">
-              <div className="athlete-layout__user">
+              <NavLink to="/athlete/profile" className="athlete-layout__user">
                 <div className="athlete-layout__avatar">
-                  {user.firstName?.[0]}{user.lastName?.[0]}
+                  {user.profilePictureUrl ? (
+                    <img src={user.profilePictureUrl} alt="avatar" className="athlete-layout__avatar-img" />
+                  ) : (
+                    `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
+                  )}
                 </div>
                 <div className="athlete-layout__user-info">
                   <span className="athlete-layout__user-name">{user.firstName} {user.lastName}</span>
                   <span className="athlete-layout__user-role">Athlete</span>
                 </div>
-              </div>
+              </NavLink>
             </Tooltip>
           )}
           <Tooltip title={collapsed ? 'Sign out' : ''} placement="right">
@@ -137,7 +142,11 @@ const AthleteLayout: React.FC = () => {
             aria-label="Open menu"
           >
             <div className="athlete-layout__avatar">
-              {user.firstName?.[0]}{user.lastName?.[0]}
+              {user.profilePictureUrl ? (
+                <img src={user.profilePictureUrl} alt="avatar" className="athlete-layout__avatar-img" />
+              ) : (
+                `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
+              )}
             </div>
           </button>
         )}
@@ -177,7 +186,11 @@ const AthleteLayout: React.FC = () => {
           {user && (
             <>
               <div className="athlete-layout__avatar athlete-layout__avatar--large">
-                {user.firstName?.[0]}{user.lastName?.[0]}
+                {user.profilePictureUrl ? (
+                  <img src={user.profilePictureUrl} alt="avatar" className="athlete-layout__avatar-img" />
+                ) : (
+                  `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
+                )}
               </div>
               <div className="athlete-layout__drawer-user-info">
                 <h4>{user.firstName} {user.lastName}</h4>
@@ -203,6 +216,14 @@ const AthleteLayout: React.FC = () => {
           >
             <span className="material-symbols-outlined">assignment</span>
             <span>Weekly Check-In</span>
+          </NavLink>
+          <NavLink
+            to="/athlete/profile"
+            className={({ isActive }) => `athlete-layout__drawer-item ${isActive ? 'athlete-layout__drawer-item--active' : ''}`}
+            onClick={() => setMoreDrawerOpen(false)}
+          >
+            <span className="material-symbols-outlined">person</span>
+            <span>Profile</span>
           </NavLink>
           <button 
             className="athlete-layout__drawer-item athlete-layout__drawer-item--logout"
