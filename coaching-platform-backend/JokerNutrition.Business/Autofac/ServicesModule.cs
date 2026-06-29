@@ -27,5 +27,7 @@ public class ServicesModule : Module
 
         // ─── Day 4: Coach Operations Hub ─────────────────────────────────
         builder.RegisterType<CoachHubService>().As<ICoachHubService>().InstancePerLifetimeScope();
+        builder.RegisterType<ProfileService>().As<IProfileService>().InstancePerLifetimeScope();
+        builder.RegisterType<BlobStorageService>().As<IBlobStorageService>().InstancePerLifetimeScope();
     }
 }

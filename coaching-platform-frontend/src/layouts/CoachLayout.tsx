@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Tooltip, Drawer } from 'antd';
+import { useQueryClient } from '@tanstack/react-query';
 import './CoachLayout.scss';
 
 const coachNavItems = [
@@ -10,12 +11,14 @@ const coachNavItems = [
   { path: '/coach/food-admin', icon: 'restaurant_menu', label: 'Food & Recipes' },
   { path: '/coach/template-builder', icon: 'view_week', label: 'Template Builder' },
   { path: '/coach/invitations', icon: 'mail', label: 'Invitations' },
+  { path: '/coach/profile', icon: 'person', label: 'Profile' },
 ];
 
 const STORAGE_KEY = 'coach-sidebar-collapsed';
 
 const CoachLayout: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
 
@@ -33,6 +36,7 @@ const CoachLayout: React.FC = () => {
   };
 
   const handleLogout = () => {
+    queryClient.clear();
     localStorage.clear();
     navigate('/sign-in', { replace: true });
   };
@@ -88,15 +92,19 @@ const CoachLayout: React.FC = () => {
         <div className="coach-layout__sidebar-footer">
           {user && (
             <Tooltip title={collapsed ? `${user.firstName} ${user.lastName}` : ''} placement="right">
-              <div className="coach-layout__user">
+              <NavLink to="/coach/profile" className="coach-layout__user">
                 <div className="coach-layout__avatar">
-                  {user.firstName?.[0]}{user.lastName?.[0]}
+                  {user.profilePictureUrl ? (
+                    <img src={user.profilePictureUrl} alt="avatar" className="coach-layout__avatar-img" />
+                  ) : (
+                    `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
+                  )}
                 </div>
                 <div className="coach-layout__user-info">
                   <span className="coach-layout__user-name">{user.firstName} {user.lastName}</span>
                   <span className="coach-layout__user-role">{user.role}</span>
                 </div>
-              </div>
+              </NavLink>
             </Tooltip>
           )}
           <Tooltip title={collapsed ? 'Sign out' : ''} placement="right">
@@ -124,9 +132,15 @@ const CoachLayout: React.FC = () => {
           </div>
         </div>
         {user && (
-          <div className="coach-layout__avatar">
-            {user.firstName?.[0]}{user.lastName?.[0]}
-          </div>
+          <NavLink to="/coach/profile" className="coach-layout__mobile-avatar-btn" aria-label="Open profile">
+            <div className="coach-layout__avatar">
+              {user.profilePictureUrl ? (
+                <img src={user.profilePictureUrl} alt="avatar" className="coach-layout__avatar-img" />
+              ) : (
+                `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
+              )}
+            </div>
+          </NavLink>
         )}
       </header>
 
@@ -148,7 +162,11 @@ const CoachLayout: React.FC = () => {
           {user && (
             <>
               <div className="coach-layout__avatar coach-layout__avatar--large">
-                {user.firstName?.[0]}{user.lastName?.[0]}
+                {user.profilePictureUrl ? (
+                  <img src={user.profilePictureUrl} alt="avatar" className="coach-layout__avatar-img" />
+                ) : (
+                  `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
+                )}
               </div>
               <div className="coach-layout__drawer-user-info">
                 <h4>{user.firstName} {user.lastName}</h4>

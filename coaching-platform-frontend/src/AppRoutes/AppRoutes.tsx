@@ -33,6 +33,7 @@ const WorkoutTemplateBuilder = lazy(() => import('../pages/coach/WorkoutTemplate
 const ExerciseLibraryAdmin = lazy(() => import('../pages/coach/ExerciseLibraryAdmin/ExerciseLibraryAdmin'));
 const FoodRecipeAdmin = lazy(() => import('../pages/coach/FoodRecipeAdmin/FoodRecipeAdmin'));
 const InvitationManagement = lazy(() => import('../pages/coach/InvitationManagement/InvitationManagement'));
+const Profile = lazy(() => import('../pages/shared/Profile/Profile'));
 
 const PageLoader = () => (
   <div className="page-loader">
@@ -116,6 +117,14 @@ export const router = createBrowserRouter([
           </Suspense>
         ),
       },
+      {
+        path: 'profile',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <Profile />
+          </Suspense>
+        ),
+      },
     ],
   },
 
@@ -192,6 +201,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <InvitationManagement />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'profile',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <Profile />
           </Suspense>
         ),
       },
