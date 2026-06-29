@@ -333,6 +333,24 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     margin: 0;
   }
 
+  &__mobile-hamburger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-btn);
+    transition: all var(--transition-fast);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--color-gold);
+    }
+  }
+
   // ── Responsive (Mobile / Tablet <= 768px) ──────────────────────────────────
   @media (max-width: 768px) {
     --mobile-header-height: 56px;
@@ -365,6 +383,7 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
 
       .athlete-layout__logo-brand {
         opacity: 1;
+        flex: unset;
       }
       .athlete-layout__logo-text {
         opacity: 1;
