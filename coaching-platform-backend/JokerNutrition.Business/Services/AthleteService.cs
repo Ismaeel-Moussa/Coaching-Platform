@@ -28,6 +28,8 @@ public class AthleteService : _BaseService, IAthleteService
     private readonly IDailyDiaryRepository _diaryRepo;
     private readonly IWorkoutLogRepository _workoutLogRepo;
     private readonly IDiaryService _diaryService;
+    private readonly INotificationService _notificationService;
+    private readonly ICoachFeedbackNoteRepository _feedbackNoteRepo;
 
     public AthleteService(
         IPrincipal principal,
@@ -38,7 +40,9 @@ public class AthleteService : _BaseService, IAthleteService
         IMealLogRepository mealLogRepo,
         IDailyDiaryRepository diaryRepo,
         IWorkoutLogRepository workoutLogRepo,
-        IDiaryService diaryService)
+        IDiaryService diaryService,
+        INotificationService notificationService,
+        ICoachFeedbackNoteRepository feedbackNoteRepo)
         : base(principal, logger)
     {
         _athleteRepo = athleteRepo;
@@ -48,6 +52,8 @@ public class AthleteService : _BaseService, IAthleteService
         _diaryRepo = diaryRepo;
         _workoutLogRepo = workoutLogRepo;
         _diaryService = diaryService;
+        _notificationService = notificationService;
+        _feedbackNoteRepo = feedbackNoteRepo;
     }
 
     public async Task<AthleteDashboardDto> GetDashboardAsync()
@@ -79,6 +85,14 @@ public class AthleteService : _BaseService, IAthleteService
             _ => "NoProgram"
         };
 
+        // Fetch recent coach feedback notes
+        var feedbackNotes = await _feedbackNoteRepo.Query()
+            .Include(n => n.Coach).ThenInclude(c => c.User)
+            .Where(n => n.AthleteId == athlete.Id)
+            .OrderByDescending(n => n.CreatedAt)
+            .Take(5)
+            .ToListAsync();
+
         return new AthleteDashboardDto
         {
             Athlete = new AthleteInfoDto
@@ -92,7 +106,8 @@ public class AthleteService : _BaseService, IAthleteService
                 ProfilePictureUrl = athlete.User.ProfilePictureUrl
             },
             Today = macroSummary,
-            TodaysWorkoutStatus = workoutStatus
+            TodaysWorkoutStatus = workoutStatus,
+            RecentFeedbackNotes = feedbackNotes.Select(CoachHubMapper.MapFeedbackNote).ToList()
         };
     }
 
@@ -155,6 +170,17 @@ public class AthleteService : _BaseService, IAthleteService
 
         await _macroTargetRepo.CreateAsync(target);
         await _macroTargetRepo.SaveChangesAsync();
+
+        var athlete = await _athleteRepo.Query()
+            .FirstOrDefaultAsync(a => a.Id == athleteId);
+        if (athlete != null)
+        {
+            await _notificationService.CreateAndSendNotificationAsync(
+                athlete.UserId,
+                NotificationType.MacroAlert,
+                $"Coach {coach.User.FirstName} updated your daily macro targets."
+            );
+        }
 
         var coachName = $"{coach.User.FirstName} {coach.User.LastName}";
         return MacroTargetMapper.Map(target, coachName);

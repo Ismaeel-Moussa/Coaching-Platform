@@ -33,7 +33,7 @@ public class CoachHubService : _BaseService, ICoachHubService
     private readonly IClientCheckInRepository _checkInRepo;
     private readonly IClientProgramRepository _clientProgramRepo;
     private readonly ICoachFeedbackNoteRepository _feedbackNoteRepo;
-    private readonly INotificationRepository _notificationRepo;
+    private readonly INotificationService _notificationService;
 
     public CoachHubService(
         IPrincipal principal,
@@ -46,7 +46,7 @@ public class CoachHubService : _BaseService, ICoachHubService
         IClientCheckInRepository checkInRepo,
         IClientProgramRepository clientProgramRepo,
         ICoachFeedbackNoteRepository feedbackNoteRepo,
-        INotificationRepository notificationRepo)
+        INotificationService notificationService)
         : base(principal, logger)
     {
         _coachRepo = coachRepo;
@@ -57,7 +57,7 @@ public class CoachHubService : _BaseService, ICoachHubService
         _checkInRepo = checkInRepo;
         _clientProgramRepo = clientProgramRepo;
         _feedbackNoteRepo = feedbackNoteRepo;
-        _notificationRepo = notificationRepo;
+        _notificationService = notificationService;
     }
 
     // ─── Dashboard ────────────────────────────────────────────────────
@@ -315,23 +315,16 @@ public class CoachHubService : _BaseService, ICoachHubService
         await _feedbackNoteRepo.CreateAsync(note);
         await _feedbackNoteRepo.SaveChangesAsync();
 
-        // Create in-app notification for the athlete
         var athleteUserId = await _athleteRepo.Query()
             .Where(a => a.Id == athleteId)
             .Select(a => a.UserId)
             .FirstAsync();
 
-        var notification = new Notification
-        {
-            RecipientUserId = athleteUserId,
-            Type = NotificationType.CoachNote,
-            Message = $"Your coach left you a new feedback note.",
-            IsRead = false,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        await _notificationRepo.CreateAsync(notification);
-        await _notificationRepo.SaveChangesAsync();
+        await _notificationService.CreateAndSendNotificationAsync(
+            athleteUserId,
+            NotificationType.CoachNote,
+            $"Your coach left you a new feedback note: \"{note.NoteText}\""
+        );
 
         // Reload with coach navigation prop for mapping
         var saved = await _feedbackNoteRepo.Query()

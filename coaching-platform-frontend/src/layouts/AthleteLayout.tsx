@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Tooltip, Drawer } from 'antd';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNotifications } from '../contexts/NotificationContext';
 import './AthleteLayout.scss';
 
 const athleteNavItems = [
@@ -11,6 +12,7 @@ const athleteNavItems = [
   { path: '/athlete/supplements', icon: 'medication', label: 'Supplements' },
   { path: '/athlete/recipes', icon: 'menu_book', label: 'Recipes' },
   { path: '/athlete/check-in', icon: 'assignment', label: 'Check-In' },
+  { path: '/athlete/notifications', icon: 'notifications', label: 'Notifications' },
   { path: '/athlete/profile', icon: 'person', label: 'Profile' },
 ];
 
@@ -27,6 +29,7 @@ const AthleteLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const { unreadCount } = useNotifications();
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
 
@@ -93,6 +96,9 @@ const AthleteLayout: React.FC = () => {
               >
                 <span className="material-symbols-outlined">{item.icon}</span>
                 <span className="athlete-layout__nav-label">{item.label}</span>
+                {item.path === '/athlete/notifications' && unreadCount > 0 && (
+                  <span className="athlete-layout__badge">{unreadCount}</span>
+                )}
               </NavLink>
             </Tooltip>
           ))}
@@ -138,21 +144,33 @@ const AthleteLayout: React.FC = () => {
           <div className="athlete-layout__logo-icon">JN</div>
           <span className="athlete-layout__logo-text">JOKER NUTRITION</span>
         </div>
-        {user && (
-          <NavLink 
-            to="/athlete/profile"
-            className="athlete-layout__mobile-avatar-btn" 
-            aria-label="Open profile"
+        <div className="athlete-layout__mobile-header-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
+          <NavLink
+            to="/athlete/notifications"
+            className="athlete-layout__mobile-notification-btn"
+            aria-label="View notifications"
           >
-            <div className="athlete-layout__avatar">
-              {user.profilePictureUrl ? (
-                <img src={user.profilePictureUrl} alt="avatar" className="athlete-layout__avatar-img" />
-              ) : (
-                `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
-              )}
-            </div>
+            <span className="material-symbols-outlined">notifications</span>
+            {unreadCount > 0 && (
+              <span className="athlete-layout__mobile-badge">{unreadCount}</span>
+            )}
           </NavLink>
-        )}
+          {user && (
+            <NavLink 
+              to="/athlete/profile"
+              className="athlete-layout__mobile-avatar-btn" 
+              aria-label="Open profile"
+            >
+              <div className="athlete-layout__avatar">
+                {user.profilePictureUrl ? (
+                  <img src={user.profilePictureUrl} alt="avatar" className="athlete-layout__avatar-img" />
+                ) : (
+                  `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
+                )}
+              </div>
+            </NavLink>
+          )}
+        </div>
       </header>
 
       <nav className="athlete-layout__mobile-nav">
