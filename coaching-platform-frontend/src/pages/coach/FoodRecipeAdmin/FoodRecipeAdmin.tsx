@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
-import { Tabs, Table, Button, Input, Select, Space, Popconfirm, Modal, Form, InputNumber, Empty } from 'antd';
+import { Tabs, Table, Button, Input, Select, Space, Popconfirm, Modal, Form, InputNumber, Empty, Radio, Tag } from 'antd';
 import { useSearchFoods, useCreateFood, useUpdateFood, useDeleteFood } from '../../../hooks/useFoods/useFoods';
 import { useGetRecipes, useDeleteRecipe } from '../../../hooks/useRecipes/useRecipes';
 import BulkImportModal from '../../../components/BulkImportModal/BulkImportModal';
 import CreateRecipeModal from '../../../components/CreateRecipeModal/CreateRecipeModal';
 import RecipeCard from '../../../components/RecipeCard/RecipeCard';
-import type { FoodDto, FoodCategory, CreateFoodForm } from '../../../types/Food';
+import type { FoodDto, FoodCategory, FoodState, CreateFoodForm } from '../../../types/Food';
 import type { RecipeDto, GetRecipesParams } from '../../../types/Recipe';
 import { RecipeCategory } from '../../../types/Recipe';
 import './FoodRecipeAdmin.scss';
 
 const FOOD_CATEGORIES: FoodCategory[] = ['Protein', 'Carbs', 'Fat', 'Vegetable', 'Dairy', 'Fruit'];
+const FOOD_STATES: { label: string; value: FoodState; color: string; icon: string }[] = [
+  { label: 'Raw',    value: 'Raw',    color: 'green',  icon: '🥩' },
+  { label: 'Cooked', value: 'Cooked', color: 'orange', icon: '🍳' },
+  { label: 'Dry',    value: 'Dry',    color: 'gold',   icon: '🌾' },
+];
 const RECIPE_CATEGORIES = [
   { label: 'All Recipes', value: 'All' },
   { label: 'Muscle Building', value: RecipeCategory.MuscleBuilding.toString() },
@@ -24,6 +29,7 @@ const FoodRecipeAdmin: React.FC = () => {
   // Foods state
   const [foodSearch, setFoodSearch] = useState<string>('');
   const [foodCategory, setFoodCategory] = useState<FoodCategory | undefined>(undefined);
+  const [foodState, setFoodState] = useState<FoodState | undefined>(undefined);
   const [foodPage, setFoodPage] = useState<number>(1);
   const [isFoodModalVisible, setIsFoodModalVisible] = useState<boolean>(false);
   const [editingFood, setEditingFood] = useState<FoodDto | null>(null);
@@ -39,6 +45,7 @@ const FoodRecipeAdmin: React.FC = () => {
   const { data: foodsData, isLoading: isFoodsLoading } = useSearchFoods({
     search: foodSearch || undefined,
     category: foodCategory,
+    state: foodState,
     page: foodPage,
     pageSize: 15,
   });
@@ -56,6 +63,7 @@ const FoodRecipeAdmin: React.FC = () => {
   const handleAddFoodClick = () => {
     setEditingFood(null);
     foodForm.resetFields();
+    foodForm.setFieldsValue({ state: 'Raw' });
     setIsFoodModalVisible(true);
   };
 
@@ -100,6 +108,19 @@ const FoodRecipeAdmin: React.FC = () => {
       dataIndex: 'category',
       key: 'category',
       render: (cat: string) => <span className="food-table__category font-data">{cat}</span>,
+    },
+    {
+      title: 'State',
+      dataIndex: 'state',
+      key: 'state',
+      render: (state: FoodState) => {
+        const s = FOOD_STATES.find((x) => x.value === state);
+        return (
+          <Tag color={s?.color ?? 'default'} style={{ fontWeight: 600, letterSpacing: 0.3 }}>
+            {s?.icon} {state ?? 'Raw'}
+          </Tag>
+        );
+      },
     },
     {
       title: 'Calories / 100g',
@@ -166,7 +187,7 @@ const FoodRecipeAdmin: React.FC = () => {
     <div id="food-recipe-admin-page" className="food-recipe-admin animate-fade-in">
       <div className="food-recipe-admin__header">
         <div>
-          <h1 className="food-recipe-admin__title">Nutrition & Content Admin</h1>
+          <h1 className="food-recipe-admin__title">Nutrition &amp; Content Admin</h1>
           <p className="food-recipe-admin__subtitle">Manage master food databases and premium recipes</p>
         </div>
       </div>
@@ -204,6 +225,24 @@ const FoodRecipeAdmin: React.FC = () => {
                       allowClear
                       style={{ width: 160 }}
                       options={FOOD_CATEGORIES.map((cat) => ({ label: cat, value: cat }))}
+                    />
+                    <Select
+                      placeholder="State"
+                      value={foodState}
+                      onChange={(val) => {
+                        setFoodState(val);
+                        setFoodPage(1);
+                      }}
+                      allowClear
+                      style={{ width: 130 }}
+                      options={FOOD_STATES.map((s) => ({
+                        label: (
+                          <span>
+                            {s.icon} {s.label}
+                          </span>
+                        ),
+                        value: s.value,
+                      }))}
                     />
                   </div>
                   <Space>
@@ -317,6 +356,20 @@ const FoodRecipeAdmin: React.FC = () => {
           </Form.Item>
           <Form.Item name="category" label="Category" rules={[{ required: true, message: 'Select category' }]}>
             <Select placeholder="Select category" options={FOOD_CATEGORIES.map((c) => ({ label: c, value: c }))} />
+          </Form.Item>
+          <Form.Item
+            name="state"
+            label="Food State"
+            rules={[{ required: true, message: 'Select food state' }]}
+            initialValue="Raw"
+          >
+            <Radio.Group buttonStyle="solid">
+              {FOOD_STATES.map((s) => (
+                <Radio.Button key={s.value} value={s.value}>
+                  {s.icon} {s.label}
+                </Radio.Button>
+              ))}
+            </Radio.Group>
           </Form.Item>
           <Form.Item name="caloriesPer100g" label="Calories per 100g" rules={[{ required: true, message: 'Enter calories' }]}>
             <InputNumber min={0} placeholder="e.g. 160" style={{ width: '100%' }} />
