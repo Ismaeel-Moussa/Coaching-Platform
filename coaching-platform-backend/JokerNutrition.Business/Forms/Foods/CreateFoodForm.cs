@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using JokerNutrition.Data.Enums;
 
 namespace JokerNutrition.Business.Forms.Foods;
 
@@ -9,6 +10,8 @@ public class CreateFoodForm
 
     [MaxLength(100)]
     public string? Category { get; set; }   // "Protein" | "Carb" | "Fat" | "Dairy" | "Vegetable" | "Fruit"
+
+    public FoodState State { get; set; } = FoodState.Raw;
 
     [Range(0, 9000)]
     public decimal CaloriesPer100g { get; set; }
