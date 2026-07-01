@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
-import { getRecipes, createRecipe, quickAddRecipeToDiary } from '../../api/recipe';
+import { getRecipes, createRecipe, quickAddRecipeToDiary, deleteRecipe } from '../../api/recipe';
 import type { RecipeDto, RecipesPagedResult, CreateRecipeForm, GetRecipesParams } from '../../types/Recipe';
 
 export const useGetRecipes = (params: GetRecipesParams, enabled = true) =>
@@ -36,3 +36,16 @@ export const useQuickAddRecipe = (date: string) => {
     onError: () => antMessage.error('Failed to add recipe to diary.'),
   });
 };
+
+export const useDeleteRecipe = () => {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, number>({
+    mutationFn: deleteRecipe,
+    onSuccess: () => {
+      antMessage.success('Recipe deleted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['recipes'] });
+    },
+    onError: () => antMessage.error('Failed to delete recipe.'),
+  });
+};
+

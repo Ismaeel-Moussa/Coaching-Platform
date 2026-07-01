@@ -1,6 +1,6 @@
 // ── Food Types ─────────────────────────────────────────────────────────────────
 
-export type FoodCategory = 'Protein' | 'Carbs' | 'Fat' | 'Vegetable' | 'Dairy';
+export type FoodCategory = 'Protein' | 'Carbs' | 'Fat' | 'Vegetable' | 'Dairy' | 'Fruit';
 
 export interface FoodDto {
   id: number;
@@ -30,3 +30,20 @@ export interface SearchFoodsParams {
   page?: number;
   pageSize?: number;
 }
+
+export interface CreateFoodForm {
+  name: string;
+  category: FoodCategory;
+  caloriesPer100g: number;
+  proteinPer100g: number;
+  carbsPer100g: number;
+  fatPer100g: number;
+  fiberPer100g: number;
+}
+
+export interface BulkImportResultDto {
+  insertedCount: number;
+  skippedCount: number;
+  errors: string[];
+}
+

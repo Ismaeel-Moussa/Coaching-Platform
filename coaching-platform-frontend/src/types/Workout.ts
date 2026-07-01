@@ -92,3 +92,70 @@ export interface LogSetForm {
 export interface CompleteWorkoutForm {
   workoutLogId: number;
 }
+
+// ── Day 5 Workout Template Builder Types ─────────────────────────────────────
+
+export interface WorkoutTemplateSummaryDto {
+  id: number;
+  name: string;
+  description: string | null;
+  coachName: string;
+  dayCount: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface WorkoutTemplateExerciseDto {
+  id?: number;
+  exerciseId: number;
+  exerciseName?: string;
+  youTubeVideoId?: string | null;
+  section: 'WarmUp' | 'Main' | 'CoolDown';
+  orderIndex: number;
+  targetSets: number;
+  targetReps: string;
+  restSeconds?: number | null;
+  progressiveOverloadTargetKg?: number | null;
+}
+
+export interface WorkoutTemplateDayDto {
+  id?: number;
+  dayNumber: number;
+  dayLabel: string;
+  isRestDay: boolean;
+  exercises: WorkoutTemplateExerciseDto[];
+}
+
+export interface WorkoutTemplateDto {
+  id: number;
+  name: string;
+  description: string | null;
+  coachName: string;
+  isActive: boolean;
+  createdAt: string;
+  days: WorkoutTemplateDayDto[];
+}
+
+export interface CreateWorkoutTemplateForm {
+  name: string;
+  description?: string;
+  days: {
+    dayNumber: number;
+    dayLabel: string;
+    isRestDay: boolean;
+    exercises: {
+      exerciseId: number;
+      section: 'WarmUp' | 'Main' | 'CoolDown';
+      orderIndex: number;
+      targetSets: number;
+      targetReps: string;
+      restSeconds?: number | null;
+      progressiveOverloadTargetKg?: number | null;
+    }[];
+  }[];
+}
+
+export interface AssignTemplateForm {
+  athleteIds: number[];
+}
+

@@ -33,3 +33,8 @@ export const quickAddRecipeToDiary = async (
   );
   return response.data;
 };
+
+export const deleteRecipe = async (id: number): Promise<void> => {
+  await axiosInstance.delete(`/recipes/${id}`);
+};
+
