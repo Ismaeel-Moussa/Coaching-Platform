@@ -1,0 +1,91 @@
+.invitation-management {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  &__title {
+    font-size: 28px;
+    color: var(--color-navy);
+    margin-bottom: 4px;
+  }
+
+  &__subtitle {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+
+  &__add-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--color-gold) !important;
+    color: var(--color-navy) !important;
+    border: none !important;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    text-transform: uppercase;
+    height: auto !important;
+    padding: 10px 20px !important;
+    border-radius: var(--radius-btn) !important;
+
+    span {
+      font-size: 20px;
+    }
+
+    &:hover {
+      background-color: var(--color-gold-dim) !important;
+    }
+  }
+
+  &__table {
+    background-color: var(--color-white);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+}
+
+.invite-table {
+  &__email {
+    color: var(--color-navy);
+  }
+
+  &__role-badge {
+    padding: 2px 8px;
+    border-radius: var(--radius-btn);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+
+    &--athlete {
+      background-color: rgba(253, 192, 3, 0.15);
+      color: var(--color-gold-text);
+    }
+
+    &--coach {
+      background-color: var(--surface-container);
+      color: var(--color-navy);
+    }
+
+    &--admin {
+      background-color: rgba(186, 26, 26, 0.1);
+      color: var(--color-red);
+    }
+  }
+}
