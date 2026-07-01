@@ -1,0 +1,177 @@
+.food-recipe-admin {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__title {
+    font-size: 28px;
+    color: var(--color-navy);
+    margin-bottom: 4px;
+  }
+
+  &__subtitle {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+
+  &__tabs {
+    .ant-tabs-nav-list {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .ant-tabs-tab-active .ant-tabs-tab-btn {
+      color: var(--color-navy) !important;
+    }
+
+    .ant-tabs-ink-bar {
+      background-color: var(--color-navy) !important;
+    }
+  }
+
+  &__tab-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-top: var(--space-xs);
+  }
+
+  &__controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    background-color: var(--color-white);
+    padding: 16px 20px;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow-sm);
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  &__filters {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: var(--radius-btn);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    text-transform: uppercase;
+
+    span {
+      font-size: 18px;
+    }
+
+    &--navy {
+      background-color: var(--color-navy) !important;
+      color: #fff !important;
+      border: none !important;
+
+      &:hover {
+        background-color: var(--color-navy-light) !important;
+      }
+    }
+  }
+
+  &__table {
+    background-color: var(--color-white);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  &__recipe-tabs {
+    flex-grow: 1;
+
+    .ant-tabs-nav {
+      margin-bottom: 0 !important;
+
+      &::before {
+        border-bottom: none !important;
+      }
+    }
+  }
+
+  &__recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+  }
+
+  &__recipe-card-wrapper {
+    position: relative;
+
+    &:hover {
+      .food-recipe-admin__recipe-overlay-actions {
+        opacity: 1;
+      }
+    }
+  }
+
+  &__recipe-overlay-actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    z-index: 10;
+  }
+}
+
+.food-table {
+  &__name {
+    color: var(--color-navy);
+  }
+
+  &__category {
+    background-color: var(--surface-container);
+    color: var(--color-navy);
+    padding: 2px 6px;
+    border-radius: var(--radius-btn);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  &__action-btn {
+    color: var(--color-text-secondary);
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      color: var(--color-navy);
+      background-color: var(--surface-container-low);
+    }
+  }
+}

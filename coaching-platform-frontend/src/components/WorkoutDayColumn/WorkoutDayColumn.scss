@@ -1,0 +1,195 @@
+.workout-day-column {
+  min-height: 400px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-card);
+  transition: all var(--transition-fast);
+  overflow: hidden;
+
+  &--over {
+    border-color: var(--color-gold);
+    background-color: rgba(253, 192, 3, 0.05);
+    box-shadow: 0 0 0 2px rgba(253, 192, 3, 0.2);
+  }
+
+  &--rest-day {
+    opacity: 0.8;
+  }
+
+  &__card {
+    background: transparent;
+
+    .ant-card-head {
+      border-bottom: 1px solid var(--surface-container);
+      padding: 12px 16px;
+      min-height: auto;
+    }
+
+    .ant-card-head-title {
+      padding: 0;
+    }
+
+    .ant-card-body {
+      padding: 16px;
+    }
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  &__day-num {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  &__day-label {
+    font-size: 16px;
+    color: var(--color-navy);
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 700;
+  }
+
+  &__rest-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__toggle-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+
+  &__rest-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+    color: var(--color-text-secondary);
+    text-align: center;
+    gap: 8px;
+
+    span {
+      font-size: 32px;
+      color: var(--color-border-strong);
+    }
+
+    p {
+      font-size: 13px;
+      font-weight: 600;
+    }
+  }
+
+  &__empty-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-btn);
+    color: var(--color-text-secondary);
+    gap: 8px;
+
+    span {
+      font-size: 32px;
+      color: var(--color-border-strong);
+    }
+
+    p {
+      font-size: 13px;
+    }
+  }
+
+  &__exercise-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__exercise-item {
+    background-color: var(--surface-container-low);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-btn);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__exercise-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  &__exercise-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-navy);
+    font-family: var(--font-heading);
+  }
+
+  &__remove-btn {
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__exercise-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__field-label {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+  }
+
+  &__select {
+    width: 100%;
+    .ant-select-selector {
+      border-radius: 4px !important;
+    }
+  }
+
+  &__fields-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  &__input,
+  &__input-number {
+    width: 100% !important;
+    border-radius: 4px !important;
+    font-family: var(--font-data);
+    font-size: 12px;
+
+    input {
+      padding: 0 4px !important;
+    }
+  }
+}

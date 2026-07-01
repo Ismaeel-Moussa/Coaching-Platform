@@ -1,0 +1,59 @@
+.draggable-exercise {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-btn);
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+  margin-bottom: var(--space-xs);
+
+  &:hover {
+    border-color: var(--color-navy);
+    box-shadow: 0 4px 12px rgba(11, 19, 43, 0.08);
+  }
+
+  &--dragging {
+    cursor: grabbing;
+    box-shadow: 0 8px 24px rgba(11, 19, 43, 0.15);
+  }
+
+  &__drag-handle {
+    display: flex;
+    align-items: center;
+    color: var(--color-border-strong);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  &__name {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__muscle-badge {
+    align-self: flex-start;
+    font-family: var(--font-data);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-navy);
+    background-color: var(--surface-container);
+    padding: 2px 6px;
+    border-radius: var(--radius-btn);
+    text-transform: uppercase;
+  }
+}
