@@ -109,6 +109,7 @@ export interface WorkoutTemplateExerciseDto {
   id?: number;
   exerciseId: number;
   exerciseName?: string;
+  exercise?: ExerciseDto;
   youTubeVideoId?: string | null;
   section: 'WarmUp' | 'Main' | 'CoolDown';
   orderIndex: number;

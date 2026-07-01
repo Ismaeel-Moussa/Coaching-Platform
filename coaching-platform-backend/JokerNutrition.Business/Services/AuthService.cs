@@ -130,7 +130,7 @@ public class AuthService : _BaseService, IAuthService
         _invitationRepo.Update(invitation);
         await _invitationRepo.SaveChangesAsync();
 
-        // Push real-time update to coach
+        // Push real-time update and notification to coach
         if (invitation.Role == "Athlete" && invitation.IssuedByCoachId > 0)
         {
             var coach = await _coachRepo.Query()
@@ -138,6 +138,12 @@ public class AuthService : _BaseService, IAuthService
             if (coach != null)
             {
                 await _notificationService.SendDirectUpdateAsync(coach.UserId, "AthleteActivity", new { type = "InvitationAccepted", athleteUserId = user.Id });
+                
+                await _notificationService.CreateAndSendNotificationAsync(
+                    coach.UserId,
+                    NotificationType.InvitationAccepted,
+                    $"Athlete {user.FirstName} {user.LastName} has accepted your invitation."
+                );
             }
         }
 

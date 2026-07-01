@@ -235,6 +235,19 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
 
         template.IsActive = false;
         _templateRepo.Update(template);
+
+        // Deactivate all athlete programs that reference this template,
+        // so athletes are no longer on a program pointing to a deleted template.
+        var affectedPrograms = await _clientProgramRepo.Query()
+            .Where(p => p.WorkoutTemplateId == id && p.IsActive)
+            .ToListAsync();
+
+        foreach (var program in affectedPrograms)
+        {
+            program.IsActive = false;
+            _clientProgramRepo.Update(program);
+        }
+
         await _templateRepo.SaveChangesAsync();
     }
 
