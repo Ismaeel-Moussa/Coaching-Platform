@@ -30,5 +30,8 @@ public class ServicesModule : Module
         builder.RegisterType<ProfileService>().As<IProfileService>().InstancePerLifetimeScope();
         builder.RegisterType<BlobStorageService>().As<IBlobStorageService>().InstancePerLifetimeScope();
         builder.RegisterType<NotificationService>().As<INotificationService>().InstancePerLifetimeScope();
+
+        // ─── Day 5: Admin Libraries & Template Builder ────────────────────
+        builder.RegisterType<WorkoutTemplateService>().As<IWorkoutTemplateService>().InstancePerLifetimeScope();
     }
 }
