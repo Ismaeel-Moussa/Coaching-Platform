@@ -53,6 +53,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/sign-in', element: <SignIn /> },
       { path: '/join-the-team', element: <JoinTheTeam /> },
+      { path: '/register', element: <JoinTheTeam /> },
       { path: '/invalid-invite', element: <InvalidInvite /> },
       { path: '/forgot-password', element: <ForgotPassword /> },
       { path: '/reset-password', element: <ResetPassword /> },
