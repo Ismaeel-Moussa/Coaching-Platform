@@ -1,11 +1,13 @@
 // ── Food Types ─────────────────────────────────────────────────────────────────
 
 export type FoodCategory = 'Protein' | 'Carbs' | 'Fat' | 'Vegetable' | 'Dairy' | 'Fruit';
+export type FoodState = 'Raw' | 'Cooked' | 'Dry';
 
 export interface FoodDto {
   id: number;
   name: string;
   category: FoodCategory;
+  state: FoodState;
   caloriesPer100g: number;
   proteinPer100g: number;
   carbsPer100g: number;
@@ -27,6 +29,7 @@ export interface FoodsPagedResult {
 export interface SearchFoodsParams {
   search?: string;
   category?: FoodCategory;
+  state?: FoodState;
   page?: number;
   pageSize?: number;
 }
@@ -34,6 +37,7 @@ export interface SearchFoodsParams {
 export interface CreateFoodForm {
   name: string;
   category: FoodCategory;
+  state: FoodState;
   caloriesPer100g: number;
   proteinPer100g: number;
   carbsPer100g: number;
