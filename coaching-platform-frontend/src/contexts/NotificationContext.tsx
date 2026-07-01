@@ -108,7 +108,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       // Show browser/app toast notification (mostly for athletes, since coaches do not get persistent notifications)
       notification.info({
-        message: newNotif.type === 'MacroAlert' ? 'Nutrition Update' : 'New Feedback',
+        message: newNotif.type === 'MacroAlert' 
+          ? 'Nutrition Update' 
+          : (newNotif.message.includes('workout program template assigned') ? 'Workout Update' : 'New Feedback'),
         description: newNotif.message,
         placement: 'topRight',
         duration: 4.5,
@@ -139,7 +141,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         await connection.start();
         setConnectionState('Connected');
         console.log('SignalR connected successfully to NotificationHub.');
-      } catch (err) {
+      } catch (err: any) {
+        // Suppress expected abort errors from React StrictMode mounting/unmounting in dev
+        if (err?.name === 'AbortError' || err?.message?.includes('stopped')) {
+          return;
+        }
         console.error('SignalR Connection Error:', err);
         setConnectionState('Failed');
       }

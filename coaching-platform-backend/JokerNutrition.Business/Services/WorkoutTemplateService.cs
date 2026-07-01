@@ -5,6 +5,7 @@ using JokerNutrition.Business.Forms.Workouts;
 using JokerNutrition.Business.Mappers;
 using JokerNutrition.Data.Contexts;
 using JokerNutrition.Data.Entities;
+using JokerNutrition.Data.Enums;
 using JokerNutrition.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,7 @@ public interface IWorkoutTemplateService
     Task<WorkoutTemplateDto> CreateTemplateAsync(CreateWorkoutTemplateForm form);
     Task<WorkoutTemplateDto> UpdateTemplateAsync(int id, CreateWorkoutTemplateForm form);
     Task<(int assignedCount, string message)> AssignTemplateAsync(int templateId, AssignTemplateForm form);
+    Task DeleteTemplateAsync(int id);
 }
 
 public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
@@ -26,6 +28,7 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
     private readonly IWorkoutTemplateRepository _templateRepo;
     private readonly ICoachRepository _coachRepo;
     private readonly IClientProgramRepository _clientProgramRepo;
+    private readonly INotificationService _notificationService;
 
     public WorkoutTemplateService(
         IPrincipal principal,
@@ -33,24 +36,24 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
         JokerNutritionContext context,
         IWorkoutTemplateRepository templateRepo,
         ICoachRepository coachRepo,
-        IClientProgramRepository clientProgramRepo)
+        IClientProgramRepository clientProgramRepo,
+        INotificationService notificationService)
         : base(principal, logger)
     {
         _context = context;
         _templateRepo = templateRepo;
         _coachRepo = coachRepo;
         _clientProgramRepo = clientProgramRepo;
+        _notificationService = notificationService;
     }
 
     // ─── List (summary, paged) ────────────────────────────────────────
     public async Task<PagedResult<WorkoutTemplateSummaryDto>> GetTemplatesAsync(int page, int pageSize)
     {
-        var coachId = await GetCoachIdAsync();
-
         var query = _templateRepo.Query()
             .Include(t => t.CreatedByCoach).ThenInclude(c => c.User)
             .Include(t => t.Days)
-            .Where(t => t.IsActive && t.CreatedByCoachId == coachId);
+            .Where(t => t.IsActive);
 
         var totalCount = await query.CountAsync();
 
@@ -130,29 +133,30 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
         template.Name = form.Name;
         template.Description = form.Description;
 
-        // Remove old days + exercises
-        _context.Set<TemplateExercise>().RemoveRange(template.Days.SelectMany(d => d.Exercises));
-        _context.Set<WorkoutTemplateDay>().RemoveRange(template.Days);
+        // Clear old days (cascade deletes old days and exercises)
+        template.Days.Clear();
 
         // Add new days + exercises
-        template.Days = form.Days.Select(dayForm => new WorkoutTemplateDay
+        foreach (var dayForm in form.Days)
         {
-            DayNumber = dayForm.DayNumber,
-            DayLabel = dayForm.DayLabel,
-            IsRestDay = dayForm.IsRestDay,
-            Exercises = dayForm.Exercises.Select(exForm => new TemplateExercise
+            template.Days.Add(new WorkoutTemplateDay
             {
-                ExerciseId = exForm.ExerciseId,
-                Section = exForm.Section,
-                OrderIndex = exForm.OrderIndex,
-                TargetSets = exForm.TargetSets,
-                TargetReps = exForm.TargetReps,
-                RestSeconds = exForm.RestSeconds,
-                ProgressiveOverloadTargetKg = exForm.ProgressiveOverloadTargetKg
-            }).ToList()
-        }).ToList();
+                DayNumber = dayForm.DayNumber,
+                DayLabel = dayForm.DayLabel,
+                IsRestDay = dayForm.IsRestDay,
+                Exercises = dayForm.Exercises.Select(exForm => new TemplateExercise
+                {
+                    ExerciseId = exForm.ExerciseId,
+                    Section = exForm.Section,
+                    OrderIndex = exForm.OrderIndex,
+                    TargetSets = exForm.TargetSets,
+                    TargetReps = exForm.TargetReps,
+                    RestSeconds = exForm.RestSeconds,
+                    ProgressiveOverloadTargetKg = exForm.ProgressiveOverloadTargetKg
+                }).ToList()
+            });
+        }
 
-        _templateRepo.Update(template);
         await _templateRepo.SaveChangesAsync();
 
         return await GetTemplateByIdAsync(template.Id);
@@ -196,7 +200,42 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
 
         await _clientProgramRepo.SaveChangesAsync();
 
+        foreach (var athleteId in form.AthleteIds)
+        {
+            try
+            {
+                var athleteUserId = await _context.Athletes
+                    .Where(a => a.Id == athleteId)
+                    .Select(a => a.UserId)
+                    .FirstOrDefaultAsync();
+
+                if (athleteUserId != 0)
+                {
+                    await _notificationService.CreateAndSendNotificationAsync(
+                        athleteUserId,
+                        NotificationType.CoachNote,
+                        $"New workout program template assigned: {template.Name}"
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send notification to athlete {AthleteId} for workout template assignment.", athleteId);
+            }
+        }
+
         return (count, $"Template assigned to {count} athlete(s) successfully.");
+    }
+
+    // ─── Delete (soft delete) ─────────────────────────────────────────
+    public async Task DeleteTemplateAsync(int id)
+    {
+        var template = await _templateRepo.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException($"Workout template {id} not found.");
+
+        template.IsActive = false;
+        _templateRepo.Update(template);
+        await _templateRepo.SaveChangesAsync();
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────

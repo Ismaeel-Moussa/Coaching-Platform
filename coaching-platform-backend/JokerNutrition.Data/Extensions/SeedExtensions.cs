@@ -582,8 +582,8 @@ public static class SeedExtensions
                 {
                     new() { AthleteId = athlete.Id, Name = "Creatine Monohydrate", Type = SupplementType.Essential, Dosage = "5g daily", Notes = "Mix with water or shake post-workout.", IsActive = true },
                     new() { AthleteId = athlete.Id, Name = "Omega-3 Fish Oil",     Type = SupplementType.Essential, Dosage = "2 caps (1g EPA/DHA)", Notes = "Take with a meal to reduce fishy aftertaste.", IsActive = true },
-                    new() { AthleteId = athlete.Id, Name = "Multivitamin",         Type = SupplementType.Essential, Dosage = "1 tablet daily", Notes = "Take with breakfast.", IsActive = true },
-                    new() { AthleteId = athlete.Id, Name = "Vitamin D3",           Type = SupplementType.Optional,  Dosage = "5000 IU daily", Notes = "Best taken with a fat-containing meal for absorption.", IsActive = true },
+                    new() { AthleteId = athlete.Id, Name = "Multivitamin",         Type = SupplementType.Optional,  Dosage = "1 tablet daily", Notes = "Take with breakfast.", IsActive = true },
+                    new() { AthleteId = athlete.Id, Name = "Vitamin D3",           Type = SupplementType.Essential, Dosage = "5000 IU daily", Notes = "Best taken with a fat-containing meal for absorption.", IsActive = true },
                 };
                 context.SupplementSchedules.AddRange(supplements);
                 await context.SaveChangesAsync();

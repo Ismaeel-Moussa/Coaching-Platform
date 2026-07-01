@@ -21,6 +21,7 @@ public interface ICoachHubService
     Task<AthleteDeepProfileDto> GetAthleteDeepProfileAsync(int athleteId);
     Task<CoachFeedbackNoteDto> SaveFeedbackNoteAsync(int athleteId, SaveFeedbackNoteForm form);
     Task<List<WeightHistoryPointDto>> GetWeightHistoryAsync(int athleteId);
+    Task SetMacroTargetsAsync(int athleteId, SetMacroTargetsForm form);
 }
 
 public class CoachHubService : _BaseService, ICoachHubService
@@ -347,6 +348,85 @@ public class CoachHubService : _BaseService, ICoachHubService
             .ToListAsync();
 
         return checkIns.Select(CoachHubMapper.MapWeightPoint).ToList();
+    }
+
+    // ─── Set Macro Targets ───────────────────────────────────────────
+
+    public async Task SetMacroTargetsAsync(int athleteId, SetMacroTargetsForm form)
+    {
+        var coach = await GetCoachAsync();
+        await EnsureAthleteInRosterAsync(coach.Id, athleteId);
+
+        // Deactivate existing targets
+        var currentTargets = await _macroTargetRepo.Query()
+            .Where(t => t.AthleteId == athleteId && t.IsActive)
+            .ToListAsync();
+
+        var activeTarget = currentTargets.FirstOrDefault();
+
+        bool nutritionChanged = activeTarget == null ||
+            activeTarget.TargetCalories != form.TargetCalories ||
+            activeTarget.TargetProtein != form.TargetProtein ||
+            activeTarget.TargetCarbs != form.TargetCarbs ||
+            activeTarget.TargetFat != form.TargetFat;
+
+        bool activityChanged = activeTarget == null ||
+            activeTarget.WaterLitersTarget != form.WaterLitersTarget ||
+            activeTarget.StepsTarget != form.StepsTarget;
+
+        foreach (var target in currentTargets)
+        {
+            target.IsActive = false;
+            _macroTargetRepo.Update(target);
+        }
+
+        // Create new targets
+        var newTarget = new MacroTarget
+        {
+            AthleteId = athleteId,
+            SetByCoachId = coach.Id,
+            TargetCalories = form.TargetCalories,
+            TargetProtein = form.TargetProtein,
+            TargetCarbs = form.TargetCarbs,
+            TargetFat = form.TargetFat,
+            WaterLitersTarget = form.WaterLitersTarget,
+            StepsTarget = form.StepsTarget,
+            IsActive = true,
+            SetAt = DateTime.UtcNow
+        };
+
+        await _macroTargetRepo.CreateAsync(newTarget);
+        await _macroTargetRepo.SaveChangesAsync();
+
+        // Notify Athlete
+        var athleteUserId = await _athleteRepo.Query()
+            .Where(a => a.Id == athleteId)
+            .Select(a => a.UserId)
+            .FirstAsync();
+
+        string notificationMessage;
+        if (nutritionChanged && activityChanged)
+        {
+            notificationMessage = $"Daily targets updated: {Math.Round(form.TargetCalories)} kcal, {Math.Round(form.TargetProtein)}g P, {Math.Round(form.TargetCarbs)}g C, {Math.Round(form.TargetFat)}g F, {form.WaterLitersTarget.ToString("0.#")}L Water, {form.StepsTarget} Steps.";
+        }
+        else if (nutritionChanged)
+        {
+            notificationMessage = $"Daily nutrition targets updated: {Math.Round(form.TargetCalories)} kcal, {Math.Round(form.TargetProtein)}g P, {Math.Round(form.TargetCarbs)}g C, {Math.Round(form.TargetFat)}g F.";
+        }
+        else if (activityChanged)
+        {
+            notificationMessage = $"Daily activity targets updated: {form.WaterLitersTarget.ToString("0.#")}L Water, {form.StepsTarget} Steps.";
+        }
+        else
+        {
+            notificationMessage = "Daily targets updated.";
+        }
+
+        await _notificationService.CreateAndSendNotificationAsync(
+            athleteUserId,
+            NotificationType.MacroAlert,
+            notificationMessage
+        );
     }
 
     // ─── Private helpers ──────────────────────────────────────────────
