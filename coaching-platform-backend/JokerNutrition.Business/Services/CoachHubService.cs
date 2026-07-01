@@ -396,6 +396,24 @@ public class CoachHubService : _BaseService, ICoachHubService
         };
 
         await _macroTargetRepo.CreateAsync(newTarget);
+
+        // Update today's DailyDiary snapshot so the athlete dashboard reflects
+        // the new targets immediately (diary rows cache targets at creation time).
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var todayDiary = await _diaryRepo.Query()
+            .FirstOrDefaultAsync(d => d.AthleteId == athleteId && d.Date == today);
+
+        if (todayDiary is not null)
+        {
+            todayDiary.TargetCalories = form.TargetCalories;
+            todayDiary.TargetProtein = form.TargetProtein;
+            todayDiary.TargetCarbs = form.TargetCarbs;
+            todayDiary.TargetFat = form.TargetFat;
+            todayDiary.WaterLitersTarget = form.WaterLitersTarget;
+            todayDiary.StepsTarget = form.StepsTarget;
+            _diaryRepo.Update(todayDiary);
+        }
+
         await _macroTargetRepo.SaveChangesAsync();
 
         // Notify Athlete
