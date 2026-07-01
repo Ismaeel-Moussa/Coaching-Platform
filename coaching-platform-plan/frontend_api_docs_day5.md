@@ -4,7 +4,7 @@
 **API Base URL**: `https://localhost:7001`
 All endpoint URLs below are relative to this base. All request and response bodies use the `application/json` format unless otherwise noted.
 
-> [!NOTE]
+> [!NOTE] 
 > All endpoints in this document require a Coach or Admin JWT in the Authorization header unless marked **Public**:
 > `Authorization: Bearer <accessToken>`
 
