@@ -106,11 +106,22 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setNotifications((prev) => [newNotif, ...prev]);
       setUnreadCount((prev) => prev + 1);
 
-      // Show browser/app toast notification (mostly for athletes, since coaches do not get persistent notifications)
+      // Show browser/app toast notification
+      const getToastTitle = (notif: NotificationDto) => {
+        if (notif.type === 'MacroAlert') return 'Nutrition Update';
+        if (notif.type === 'InvitationAccepted') return 'Roster Update';
+        if (notif.type === 'WorkoutCompleted') return 'Workout Completed';
+        if (notif.type === 'CheckInSubmitted') return 'Check-In Submitted';
+        if (notif.type === 'CoachNote') {
+          return notif.message.toLowerCase().includes('workout program template assigned') 
+            ? 'Workout Update' 
+            : 'New Feedback';
+        }
+        return 'New Notification';
+      };
+
       notification.info({
-        message: newNotif.type === 'MacroAlert' 
-          ? 'Nutrition Update' 
-          : (newNotif.message.includes('workout program template assigned') ? 'Workout Update' : 'New Feedback'),
+        message: getToastTitle(newNotif),
         description: newNotif.message,
         placement: 'topRight',
         duration: 4.5,

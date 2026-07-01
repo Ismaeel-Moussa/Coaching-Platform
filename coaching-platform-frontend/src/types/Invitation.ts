@@ -1,20 +1,26 @@
 export type InvitationRole = 'Athlete' | 'Coach' | 'Admin';
 
-// Enum matches backend C# enum integer values
+// Enum matches backend C# enum values (handles both string from API and number from legacy/mock)
 export const InvitationStatus = {
-  Pending: 0,
-  Accepted: 1,
-  Expired: 2,
-  Revoked: 3,
+  Pending: 'Pending',
+  Accepted: 'Accepted',
+  Expired: 'Expired',
+  Revoked: 'Revoked',
 } as const;
 
-export type InvitationStatusValue = (typeof InvitationStatus)[keyof typeof InvitationStatus];
+export type InvitationStatusValue = 
+  | typeof InvitationStatus[keyof typeof InvitationStatus]
+  | 0 | 1 | 2 | 3;
 
 export const InvitationStatusLabel: Record<InvitationStatusValue, string> = {
   [InvitationStatus.Pending]: 'Pending',
   [InvitationStatus.Accepted]: 'Accepted',
   [InvitationStatus.Expired]: 'Expired',
   [InvitationStatus.Revoked]: 'Revoked',
+  0: 'Pending',
+  1: 'Accepted',
+  2: 'Expired',
+  3: 'Revoked',
 };
 
 export interface InvitationDto {

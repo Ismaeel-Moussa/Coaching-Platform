@@ -35,6 +35,8 @@ const Notifications: React.FC = () => {
         return 'fitness_center';
       case 'CheckInSubmitted':
         return 'assignment';
+      case 'InvitationAccepted':
+        return 'person_add';
       default:
         return 'notifications';
     }
@@ -53,6 +55,8 @@ const Notifications: React.FC = () => {
         return <Tag color="success">Workout</Tag>;
       case 'CheckInSubmitted':
         return <Tag color="cyan">Check-In</Tag>;
+      case 'InvitationAccepted':
+        return <Tag color="purple">Roster</Tag>;
       default:
         return <Tag color="default">General</Tag>;
     }
@@ -151,6 +155,8 @@ const Notifications: React.FC = () => {
                   if (isCoachPath) navigate('/coach/dashboard');
                 } else if (notif.type === 'MacroAlert') {
                   if (!isCoachPath) navigate('/athlete/dashboard');
+                } else if (notif.type === 'InvitationAccepted') {
+                  if (isCoachPath) navigate('/coach/roster');
                 }
               }}
             >
