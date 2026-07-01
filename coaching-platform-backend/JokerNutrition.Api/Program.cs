@@ -180,6 +180,7 @@ try
         {
             options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
             options.JsonSerializerOptions.Converters.Add(new UtcNullableDateTimeConverter());
+            options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         });
     builder.Services.AddHttpClient();
     builder.Services.AddHttpContextAccessor();

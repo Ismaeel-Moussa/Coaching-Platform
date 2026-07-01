@@ -68,4 +68,14 @@ public class WorkoutTemplatesController : ControllerBase
         var (count, message) = await _templateService.AssignTemplateAsync(id, form);
         return Ok(new { assignedCount = count, message });
     }
+
+    /// <summary>
+    /// Soft-delete a workout template (set IsActive = false).
+    /// </summary>
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _templateService.DeleteTemplateAsync(id);
+        return NoContent();
+    }
 }

@@ -31,6 +31,7 @@ const CoachDashboard = lazy(() => import('../pages/coach/CoachDashboard/CoachDas
 const ClientRoster = lazy(() => import('../pages/coach/ClientRoster/ClientRoster'));
 const ClientDetail = lazy(() => import('../pages/coach/ClientDetail/ClientDetail'));
 const WorkoutTemplateBuilder = lazy(() => import('../pages/coach/WorkoutTemplateBuilder/WorkoutTemplateBuilder'));
+const AthleteAssignmentHub = lazy(() => import('../pages/coach/AthleteAssignmentHub/AthleteAssignmentHub'));
 const ExerciseLibraryAdmin = lazy(() => import('../pages/coach/ExerciseLibraryAdmin/ExerciseLibraryAdmin'));
 const FoodRecipeAdmin = lazy(() => import('../pages/coach/FoodRecipeAdmin/FoodRecipeAdmin'));
 const InvitationManagement = lazy(() => import('../pages/coach/InvitationManagement/InvitationManagement'));
@@ -176,6 +177,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <ClientDetail />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'athlete-hub',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <AthleteAssignmentHub />
           </Suspense>
         ),
       },

@@ -12,8 +12,11 @@ namespace JokerNutrition.Business.Services;
 public interface ISupplementService
 {
     Task<List<SupplementDto>> GetScheduleAsync();
+    Task<List<SupplementDto>> GetAthleteScheduleAsync(int athleteId);
     Task<SupplementDto> ToggleTakenAsync(ToggleSupplementForm form);
     Task<SupplementDto> AssignSupplementAsync(AssignSupplementForm form);
+    Task<SupplementDto> UpdateSupplementAsync(int id, UpdateSupplementForm form);
+    Task DeleteSupplementAsync(int id);
 }
 
 public class SupplementService : _BaseService, ISupplementService
@@ -43,6 +46,31 @@ public class SupplementService : _BaseService, ISupplementService
 
         var schedules = await _scheduleRepo.Query()
             .Where(s => s.AthleteId == athlete.Id && s.IsActive)
+            .OrderBy(s => s.Type)
+            .ThenBy(s => s.Name)
+            .ToListAsync();
+
+        var todayLogs = await _logRepo.Query()
+            .Where(l => schedules.Select(s => s.Id).Contains(l.SupplementScheduleId)
+                        && l.Date == today)
+            .ToListAsync();
+
+        return schedules
+            .Select(s =>
+            {
+                var log = todayLogs.FirstOrDefault(l => l.SupplementScheduleId == s.Id);
+                return SupplementMapper.Map(s, log);
+            })
+            .ToList();
+    }
+
+    // ─── Get a specific athlete's supplement schedule (for coach) ────
+    public async Task<List<SupplementDto>> GetAthleteScheduleAsync(int athleteId)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        var schedules = await _scheduleRepo.Query()
+            .Where(s => s.AthleteId == athleteId && s.IsActive)
             .OrderBy(s => s.Type)
             .ThenBy(s => s.Name)
             .ToListAsync();
@@ -112,6 +140,36 @@ public class SupplementService : _BaseService, ISupplementService
         await _scheduleRepo.SaveChangesAsync();
 
         return SupplementMapper.Map(schedule, null);
+    }
+
+    // ─── Update supplement (for coach) ───────────────────────────────
+    public async Task<SupplementDto> UpdateSupplementAsync(int id, UpdateSupplementForm form)
+    {
+        var schedule = await _scheduleRepo.Query()
+            .FirstOrDefaultAsync(s => s.Id == id && s.IsActive)
+            ?? throw new KeyNotFoundException("Supplement schedule not found.");
+
+        schedule.Name = form.Name;
+        schedule.Type = form.Type;
+        schedule.Dosage = form.Dosage;
+        schedule.Notes = form.Notes;
+
+        _scheduleRepo.Update(schedule);
+        await _scheduleRepo.SaveChangesAsync();
+
+        return SupplementMapper.Map(schedule, null);
+    }
+
+    // ─── Delete supplement (for coach) ───────────────────────────────
+    public async Task DeleteSupplementAsync(int id)
+    {
+        var schedule = await _scheduleRepo.Query()
+            .FirstOrDefaultAsync(s => s.Id == id && s.IsActive)
+            ?? throw new KeyNotFoundException("Supplement schedule not found.");
+
+        schedule.IsActive = false;
+        _scheduleRepo.Update(schedule);
+        await _scheduleRepo.SaveChangesAsync();
     }
 
     // ─── Private helpers ──────────────────────────────────────────────

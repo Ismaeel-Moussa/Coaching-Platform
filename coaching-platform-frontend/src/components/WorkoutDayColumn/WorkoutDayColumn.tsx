@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { Card, Switch, Select, Input, Button, InputNumber } from 'antd';
 import type { WorkoutTemplateExerciseDto } from '../../types/Workout';
@@ -12,6 +12,8 @@ interface WorkoutDayColumnProps {
   onToggleRestDay: (dayNumber: number, isRestDay: boolean) => void;
   onUpdateExercise: (dayNumber: number, exerciseIndex: number, updatedFields: Partial<WorkoutTemplateExerciseDto>) => void;
   onRemoveExercise: (dayNumber: number, exerciseIndex: number) => void;
+  onUpdateDayLabel: (dayNumber: number, newLabel: string) => void;
+  onRemoveDay: (dayNumber: number) => void;
 }
 
 const SECTIONS = [
@@ -28,6 +30,8 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
   onToggleRestDay,
   onUpdateExercise,
   onRemoveExercise,
+  onUpdateDayLabel,
+  onRemoveDay,
 }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: `day-${dayNumber}`,
@@ -35,6 +39,31 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
       dayNumber,
     },
   });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedValue, setEditedValue] = useState(dayLabel);
+
+  useEffect(() => {
+    setEditedValue(dayLabel);
+  }, [dayLabel]);
+
+  const handleSave = () => {
+    if (editedValue.trim() && editedValue.trim() !== dayLabel) {
+      onUpdateDayLabel(dayNumber, editedValue.trim());
+    } else {
+      setEditedValue(dayLabel);
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      setEditedValue(dayLabel);
+      setIsEditing(false);
+    }
+  };
 
   return (
     <div
@@ -46,24 +75,54 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
       <Card
         title={
           <div className="workout-day-column__header">
-            <div>
+            <div className="workout-day-column__title-section">
               <span className="workout-day-column__day-num mono">Day {dayNumber}</span>
-              <h3 className="workout-day-column__day-label">{dayLabel}</h3>
+              {isEditing ? (
+                <Input
+                  size="small"
+                  value={editedValue}
+                  onChange={(e) => setEditedValue(e.target.value)}
+                  onBlur={handleSave}
+                  onKeyDown={handleKeyDown}
+                  autoFocus
+                  className="workout-day-column__label-input"
+                />
+              ) : (
+                <h3
+                  className="workout-day-column__day-label editable"
+                  onClick={() => setIsEditing(true)}
+                  title="Click to edit day label"
+                >
+                  {dayLabel}
+                  <span className="material-symbols-outlined edit-icon" style={{ fontSize: 14, marginLeft: 4 }}>edit</span>
+                </h3>
+              )}
             </div>
-            <div className="workout-day-column__rest-toggle">
-              <span className="workout-day-column__toggle-text">Rest</span>
-              <Switch
+            <div className="workout-day-column__header-actions">
+              <div className="workout-day-column__rest-toggle">
+                <span className="workout-day-column__toggle-text">Rest</span>
+                <Switch
+                  size="small"
+                  checked={isRestDay}
+                  onChange={(checked) => onToggleRestDay(dayNumber, checked)}
+                  checkedChildren="ON"
+                  unCheckedChildren="OFF"
+                />
+              </div>
+              <Button
+                type="text"
+                danger
                 size="small"
-                checked={isRestDay}
-                onChange={(checked) => onToggleRestDay(dayNumber, checked)}
-                checkedChildren="ON"
-                unCheckedChildren="OFF"
+                onClick={() => onRemoveDay(dayNumber)}
+                className="workout-day-column__delete-day-btn"
+                icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>}
+                title="Remove this day"
               />
             </div>
           </div>
         }
         className="workout-day-column__card"
-        bordered={false}
+        variant="borderless"
       >
         {isRestDay ? (
           <div className="workout-day-column__rest-body">
@@ -102,7 +161,7 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
                           options={SECTIONS}
                           onChange={(val) => onUpdateExercise(dayNumber, idx, { section: val as any })}
                           className="workout-day-column__select"
-                          popupClassName="workout-day-column__dropdown"
+                          classNames={{ popup: { root: 'workout-day-column__dropdown' } }}
                         />
                       </div>
 

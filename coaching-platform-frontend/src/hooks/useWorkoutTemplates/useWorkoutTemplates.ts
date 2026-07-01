@@ -7,6 +7,7 @@ import {
   createWorkoutTemplate,
   updateWorkoutTemplate,
   assignWorkoutTemplate,
+  deleteWorkoutTemplate,
   type PagedWorkoutTemplateSummaryResult,
   type GetWorkoutTemplatesParams,
 } from '../../api/workoutTemplate';
@@ -73,11 +74,29 @@ export const useAssignTemplate = () => {
     onSuccess: (data) => {
       antMessage.success(data.message || 'Template assigned successfully!');
       queryClient.invalidateQueries({ queryKey: ['workout-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['coach-roster'] });
     },
     onError: (error) => {
       const msg =
         (error.response?.data as { message?: string })?.message ??
         'Failed to assign template.';
+      antMessage.error(msg);
+    },
+  });
+};
+
+export const useDeleteTemplate = () => {
+  const queryClient = useQueryClient();
+  return useMutation<void, AxiosError, number>({
+    mutationFn: (id) => deleteWorkoutTemplate(id),
+    onSuccess: () => {
+      antMessage.success('Template deleted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['workout-templates'] });
+    },
+    onError: (error) => {
+      const msg =
+        (error.response?.data as { message?: string })?.message ??
+        'Failed to delete template.';
       antMessage.error(msg);
     },
   });
