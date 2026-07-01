@@ -22,7 +22,10 @@ const Notifications: React.FC = () => {
     return true;
   });
 
-  const getNotifIcon = (type: string) => {
+  const getNotifIcon = (type: string, message: string) => {
+    if (type === 'CoachNote' && message.toLowerCase().includes('workout program template assigned')) {
+      return 'fitness_center';
+    }
     switch (type) {
       case 'MacroAlert':
         return 'nutrition';
@@ -32,12 +35,17 @@ const Notifications: React.FC = () => {
         return 'fitness_center';
       case 'CheckInSubmitted':
         return 'assignment';
+      case 'InvitationAccepted':
+        return 'person_add';
       default:
         return 'notifications';
     }
   };
 
-  const getNotifTag = (type: string) => {
+  const getNotifTag = (type: string, message: string) => {
+    if (type === 'CoachNote' && message.toLowerCase().includes('workout program template assigned')) {
+      return <Tag color="success">Workout</Tag>;
+    }
     switch (type) {
       case 'MacroAlert':
         return <Tag color="blue">Nutrition</Tag>;
@@ -47,6 +55,8 @@ const Notifications: React.FC = () => {
         return <Tag color="success">Workout</Tag>;
       case 'CheckInSubmitted':
         return <Tag color="cyan">Check-In</Tag>;
+      case 'InvitationAccepted':
+        return <Tag color="purple">Roster</Tag>;
       default:
         return <Tag color="default">General</Tag>;
     }
@@ -136,24 +146,30 @@ const Notifications: React.FC = () => {
                 }
                 const isCoachPath = window.location.pathname.startsWith('/coach');
                 if (notif.type === 'CoachNote') {
-                  navigate(isCoachPath ? '/coach/roster' : '/athlete/dashboard#coach-feedback');
+                  if (notif.message.toLowerCase().includes('workout program template assigned')) {
+                    navigate(isCoachPath ? '/coach/roster' : '/athlete/workouts');
+                  } else {
+                    navigate(isCoachPath ? '/coach/roster' : '/athlete/dashboard#coach-feedback');
+                  }
                 } else if (notif.type === 'WorkoutCompleted' || notif.type === 'CheckInSubmitted') {
                   if (isCoachPath) navigate('/coach/dashboard');
                 } else if (notif.type === 'MacroAlert') {
                   if (!isCoachPath) navigate('/athlete/dashboard');
+                } else if (notif.type === 'InvitationAccepted') {
+                  if (isCoachPath) navigate('/coach/roster');
                 }
               }}
             >
               <div className="notifications-page__item-icon-wrapper">
                 <span className="material-symbols-outlined notifications-page__item-icon">
-                  {getNotifIcon(notif.type)}
+                  {getNotifIcon(notif.type, notif.message)}
                 </span>
                 {!notif.isRead && <span className="notifications-page__item-dot" />}
               </div>
 
               <div className="notifications-page__item-content">
                 <div className="notifications-page__item-meta">
-                  {getNotifTag(notif.type)}
+                  {getNotifTag(notif.type, notif.message)}
                   <span className="notifications-page__item-time">
                     {formatTimestamp(notif.createdAt)}
                   </span>

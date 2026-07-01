@@ -77,5 +77,6 @@ public enum NotificationType
     CheckInSubmitted,
     WorkoutCompleted,
     CoachNote,
-    MacroAlert
+    MacroAlert,
+    InvitationAccepted
 }

@@ -49,4 +49,37 @@ public class SupplementsController : ControllerBase
         var result = await _supplementService.AssignSupplementAsync(form);
         return Created(string.Empty, result);
     }
+
+    /// <summary>
+    /// Get supplement schedule for a specific athlete (Coach or Admin only).
+    /// </summary>
+    [HttpGet("athlete/{athleteId:int}")]
+    [Authorize(Roles = "Coach,Admin")]
+    public async Task<IActionResult> GetAthleteSchedule(int athleteId)
+    {
+        var result = await _supplementService.GetAthleteScheduleAsync(athleteId);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Update an existing supplement schedule (Coach or Admin only).
+    /// </summary>
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = "Coach,Admin")]
+    public async Task<IActionResult> UpdateSupplement(int id, [FromBody] UpdateSupplementForm form)
+    {
+        var result = await _supplementService.UpdateSupplementAsync(id, form);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Delete a supplement schedule item (Coach or Admin only).
+    /// </summary>
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Coach,Admin")]
+    public async Task<IActionResult> DeleteSupplement(int id)
+    {
+        await _supplementService.DeleteSupplementAsync(id);
+        return NoContent();
+    }
 }

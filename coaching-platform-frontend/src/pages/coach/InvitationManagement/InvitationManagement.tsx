@@ -7,16 +7,20 @@ import {
   useRevokeInvitation,
 } from '../../../hooks/useInvitations/useInvitations';
 import { InvitationStatus, InvitationStatusLabel } from '../../../types/Invitation';
-import type { InvitationDto, InvitationRole } from '../../../types/Invitation';
+import type { InvitationDto, InvitationRole, InvitationStatusValue } from '../../../types/Invitation';
 import './InvitationManagement.scss';
 
 const ROLE_OPTIONS: InvitationRole[] = ['Athlete', 'Coach', 'Admin'];
 
-const STATUS_BADGES: Record<number, { status: 'default' | 'success' | 'processing' | 'error' | 'warning'; text: string }> = {
+const STATUS_BADGES: Record<InvitationStatusValue, { status: 'default' | 'success' | 'processing' | 'error' | 'warning'; text: string }> = {
   [InvitationStatus.Pending]: { status: 'warning', text: 'Pending' },
   [InvitationStatus.Accepted]: { status: 'success', text: 'Accepted' },
   [InvitationStatus.Expired]: { status: 'default', text: 'Expired' },
   [InvitationStatus.Revoked]: { status: 'error', text: 'Revoked' },
+  0: { status: 'warning', text: 'Pending' },
+  1: { status: 'success', text: 'Accepted' },
+  2: { status: 'default', text: 'Expired' },
+  3: { status: 'error', text: 'Revoked' },
 };
 
 const InvitationManagement: React.FC = () => {
@@ -91,7 +95,7 @@ const InvitationManagement: React.FC = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status: number) => {
+      render: (status: InvitationStatusValue) => {
         const badgeInfo = STATUS_BADGES[status] || { status: 'default', text: 'Unknown' };
         return <Badge status={badgeInfo.status} text={badgeInfo.text} className="mono" />;
       },
@@ -106,9 +110,9 @@ const InvitationManagement: React.FC = () => {
       title: 'Actions',
       key: 'actions',
       render: (_: any, record: InvitationDto) => {
-        const isPending = record.status === InvitationStatus.Pending;
-        const isExpired = record.status === InvitationStatus.Expired;
-        const isRevoked = record.status === InvitationStatus.Revoked;
+        const isPending = record.status === InvitationStatus.Pending || record.status === 0;
+        const isExpired = record.status === InvitationStatus.Expired || record.status === 2;
+        const isRevoked = record.status === InvitationStatus.Revoked || record.status === 3;
 
         return (
           <Space size="middle">
@@ -124,7 +128,7 @@ const InvitationManagement: React.FC = () => {
             <Tooltip title="Resend Email Invitation">
               <Button
                 type="text"
-                disabled={record.status === InvitationStatus.Accepted}
+                disabled={record.status === InvitationStatus.Accepted || record.status === 1}
                 onClick={() => handleResend(record.id)}
                 loading={resendMutation.isPending && resendMutation.variables === record.id}
                 icon={<span className="material-symbols-outlined" style={{ fontSize: 18 }}>send</span>}

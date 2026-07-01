@@ -39,6 +39,15 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    gap: 8px;
+  }
+
+  &__title-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0; // prevent overflow
   }
 
   &__day-num {
@@ -55,6 +64,49 @@
     margin: 0;
     font-family: var(--font-heading);
     font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &.editable {
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      border-bottom: 1px dashed transparent;
+      transition: border-color var(--transition-fast);
+
+      &:hover {
+        border-color: var(--color-gold);
+
+        .edit-icon {
+          opacity: 1;
+          color: var(--color-gold);
+        }
+      }
+
+      .edit-icon {
+        opacity: 0.3;
+        transition: opacity var(--transition-fast);
+      }
+    }
+  }
+
+  &__label-input {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 14px !important;
+    border-radius: var(--radius-btn) !important;
+    border-color: var(--color-gold) !important;
+    color: var(--color-navy);
+    height: 24px;
+    padding: 0 4px !important;
+  }
+
+  &__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
   }
 
   &__rest-toggle {
@@ -67,6 +119,20 @@
     font-size: 12px;
     font-weight: 600;
     color: var(--color-text-secondary);
+  }
+
+  &__delete-day-btn {
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50% !important;
+
+    &:hover {
+      background-color: var(--surface-container-high) !important;
+    }
   }
 
   &__rest-body {

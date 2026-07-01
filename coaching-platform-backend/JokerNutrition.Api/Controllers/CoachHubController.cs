@@ -106,4 +106,14 @@ public class CoachHubController : ControllerBase
         var result = await _coachHubService.GetWeightHistoryAsync(id);
         return Ok(result);
     }
+
+    /// <summary>
+    /// Create or update nutritional/biometric targets for the specified athlete.
+    /// </summary>
+    [HttpPut("athletes/{id:int}/targets")]
+    public async Task<IActionResult> SaveAthleteTargets(int id, [FromBody] SetMacroTargetsForm form)
+    {
+        await _coachHubService.SetMacroTargetsAsync(id, form);
+        return NoContent();
+    }
 }

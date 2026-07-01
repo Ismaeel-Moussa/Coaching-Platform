@@ -106,9 +106,22 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setNotifications((prev) => [newNotif, ...prev]);
       setUnreadCount((prev) => prev + 1);
 
-      // Show browser/app toast notification (mostly for athletes, since coaches do not get persistent notifications)
+      // Show browser/app toast notification
+      const getToastTitle = (notif: NotificationDto) => {
+        if (notif.type === 'MacroAlert') return 'Nutrition Update';
+        if (notif.type === 'InvitationAccepted') return 'Roster Update';
+        if (notif.type === 'WorkoutCompleted') return 'Workout Completed';
+        if (notif.type === 'CheckInSubmitted') return 'Check-In Submitted';
+        if (notif.type === 'CoachNote') {
+          return notif.message.toLowerCase().includes('workout program template assigned') 
+            ? 'Workout Update' 
+            : 'New Feedback';
+        }
+        return 'New Notification';
+      };
+
       notification.info({
-        message: newNotif.type === 'MacroAlert' ? 'Nutrition Update' : 'New Feedback',
+        message: getToastTitle(newNotif),
         description: newNotif.message,
         placement: 'topRight',
         duration: 4.5,
@@ -139,7 +152,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         await connection.start();
         setConnectionState('Connected');
         console.log('SignalR connected successfully to NotificationHub.');
-      } catch (err) {
+      } catch (err: any) {
+        // Suppress expected abort errors from React StrictMode mounting/unmounting in dev
+        if (err?.name === 'AbortError' || err?.message?.includes('stopped')) {
+          return;
+        }
         console.error('SignalR Connection Error:', err);
         setConnectionState('Failed');
       }
