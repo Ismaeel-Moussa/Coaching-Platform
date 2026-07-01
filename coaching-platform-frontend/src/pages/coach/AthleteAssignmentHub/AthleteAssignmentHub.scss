@@ -1,0 +1,628 @@
+.athlete-assignment-hub {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+
+  // ── Page Header ────────────────────────────────────────────────────────
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: var(--space-sm);
+  }
+
+  &__title {
+    font-size: 26px;
+    font-family: var(--font-heading);
+    color: var(--color-navy);
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 28px;
+      background: linear-gradient(180deg, var(--color-gold), var(--color-gold-dim));
+      border-radius: var(--radius-full);
+    }
+  }
+
+  &__subtitle {
+    color: var(--color-text-tertiary);
+    font-size: 13.5px;
+    margin-left: 14px;
+  }
+
+  // ── Athlete Selector Card ───────────────────────────────────────────────
+  &__selector-card {
+    background: var(--color-white);
+    padding: 20px 24px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    @media (max-width: 640px) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+    }
+  }
+
+  &__select-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    max-width: 420px;
+
+    @media (max-width: 640px) {
+      max-width: 100%;
+    }
+  }
+
+  &__select-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-btn);
+    background: var(--color-gold-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    .material-symbols-outlined {
+      font-size: 18px !important;
+      color: var(--color-gold-text);
+    }
+  }
+
+  &__select-wrapper {
+    flex: 1;
+    width: 100%;
+  }
+
+  &__select {
+    width: 100%;
+
+    .ant-select-selector {
+      border-radius: var(--radius-btn) !important;
+      border-color: var(--color-border) !important;
+      height: 38px !important;
+      display: flex;
+      align-items: center;
+      background-color: var(--surface-container-low) !important;
+      font-weight: 500;
+
+      &:hover {
+        border-color: var(--color-gold) !important;
+      }
+    }
+
+    &.ant-select-focused .ant-select-selector {
+      border-color: var(--color-gold) !important;
+      box-shadow: 0 0 0 2px rgba(253, 192, 3, 0.2) !important;
+    }
+  }
+
+  &__divider {
+    width: 1px;
+    height: 40px;
+    background: var(--color-border-light);
+    flex-shrink: 0;
+
+    @media (max-width: 640px) {
+      display: none;
+    }
+  }
+
+  &__selected-athlete-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: fadeIn var(--transition-base) both;
+  }
+
+  &__avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+
+    .ant-avatar {
+      width: 48px !important;
+      height: 48px !important;
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      border: 2px solid var(--color-gold) !important;
+      box-shadow: 0 0 0 3px rgba(253, 192, 3, 0.15);
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 1px;
+      right: 1px;
+      width: 10px;
+      height: 10px;
+      background: var(--color-success);
+      border-radius: 50%;
+      border: 2px solid var(--color-white);
+    }
+  }
+
+  &__athlete-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  &__athlete-name {
+    font-size: 15px;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    color: var(--color-navy);
+    line-height: 1.2;
+  }
+
+  &__athlete-goal {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-gold-text);
+    background: var(--color-gold-bg);
+    border: 1px solid rgba(253, 192, 3, 0.25);
+    border-radius: var(--radius-full);
+    padding: 1px 8px;
+  }
+
+  // ── Empty State ─────────────────────────────────────────────────────────
+  &__empty-state {
+    background: var(--color-white);
+    padding: 72px 24px;
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--color-border);
+    text-align: center;
+
+    .empty-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--surface-container-low);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+
+      .material-symbols-outlined {
+        font-size: 36px !important;
+        color: var(--color-border-strong);
+      }
+    }
+
+    h3 {
+      font-size: 17px;
+      color: var(--color-navy);
+      margin-bottom: 8px;
+    }
+
+    p {
+      color: var(--color-text-tertiary);
+      font-size: 13.5px;
+      max-width: 380px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+  }
+
+  // ── Main Grid ───────────────────────────────────────────────────────────
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    align-items: start;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  // ── Cards ───────────────────────────────────────────────────────────────
+  &__card {
+    background: var(--color-white) !important;
+    border: 1px solid var(--color-border-light) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-sm) !important;
+    overflow: hidden;
+    transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+
+    &:hover {
+      box-shadow: var(--shadow-md) !important;
+      border-color: rgba(198, 198, 206, 0.8) !important;
+    }
+
+    // Override AntD Card padding
+    .ant-card-head {
+      padding: 0 !important;
+      border-bottom: 1px solid var(--surface-container) !important;
+      min-height: unset !important;
+    }
+
+    .ant-card-head-title {
+      padding: 0 !important;
+    }
+
+    .ant-card-body {
+      padding: 20px !important;
+    }
+  }
+
+  &__card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, var(--surface-container-low) 0%, var(--color-white) 100%);
+
+    .icon-bubble {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-btn);
+      background: var(--color-gold-bg);
+      border: 1px solid rgba(253, 192, 3, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      .material-symbols-outlined {
+        font-size: 17px !important;
+        color: var(--color-gold-text);
+      }
+    }
+
+    h3 {
+      font-size: 14.5px;
+      color: var(--color-navy);
+      margin: 0;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      letter-spacing: 0.1px;
+    }
+  }
+
+  // ── Workout Program Card ────────────────────────────────────────────────
+  &__current-program {
+    background: linear-gradient(135deg, var(--surface-container-low) 0%, rgba(253, 192, 3, 0.04) 100%);
+    padding: 16px;
+    border-radius: var(--radius-card);
+    border: 1px solid rgba(253, 192, 3, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__program-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .program-label {
+      font-size: 10px;
+      color: var(--color-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+
+    .program-name {
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--font-heading);
+      color: var(--color-navy);
+    }
+  }
+
+  &__no-program {
+    color: var(--color-text-tertiary);
+    font-size: 13.5px;
+    text-align: center;
+    padding: 20px 0 12px;
+    line-height: 1.6;
+  }
+
+  // ── Nutrition Targets ───────────────────────────────────────────────────
+  &__macro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  &__macro-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  &__macro-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+
+    .macro-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    &--calories .macro-dot  { background: #f97316; }
+    &--protein  .macro-dot  { background: #3b82f6; }
+    &--carbs    .macro-dot  { background: #a855f7; }
+    &--fat      .macro-dot  { background: #22c55e; }
+  }
+
+  // ── Form Elements ───────────────────────────────────────────────────────
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  &__form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .ant-input-number {
+      width: 100% !important;
+      border-radius: var(--radius-btn) !important;
+      border-color: var(--color-border) !important;
+
+      &:hover {
+        border-color: var(--color-gold) !important;
+      }
+
+      &-focused {
+        border-color: var(--color-gold) !important;
+        box-shadow: 0 0 0 2px rgba(253, 192, 3, 0.2) !important;
+      }
+    }
+  }
+
+  &__field-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.02em;
+  }
+
+  // ── Submit Button ───────────────────────────────────────────────────────
+  &__submit-btn {
+    width: 100%;
+    height: 38px !important;
+    border-radius: var(--radius-btn) !important;
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--color-navy), var(--color-navy-mid)) !important;
+    color: var(--color-white) !important;
+    border: none !important;
+    transition: all var(--transition-fast) !important;
+
+    &:hover,
+    &:focus,
+    &:active {
+      color: var(--color-white) !important;
+      background: linear-gradient(135deg, var(--color-navy-light), var(--color-navy)) !important;
+    }
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(11, 19, 43, 0.25) !important;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  // ── Supplements ─────────────────────────────────────────────────────────
+  &__add-supplement-btn {
+    width: 100%;
+    height: 38px !important;
+    border-radius: var(--radius-btn) !important;
+    border: 1.5px dashed var(--color-border) !important;
+    font-weight: 600 !important;
+    font-size: 12.5px !important;
+    color: var(--color-text-secondary) !important;
+    transition: all var(--transition-fast) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px;
+
+    &:hover {
+      border-color: var(--color-gold) !important;
+      color: var(--color-gold-text) !important;
+      background: var(--color-gold-bg) !important;
+    }
+  }
+
+  &__supplements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 340px;
+    overflow-y: auto;
+    padding-right: 2px;
+    margin-top: 4px;
+  }
+
+  &__supplement-item {
+    background: var(--surface-container-low);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-card);
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+    animation: fadeIn var(--transition-base) both;
+
+    &:hover {
+      background: var(--color-white);
+      border-color: rgba(198, 198, 206, 0.85);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+
+  &__supplement-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    flex: 1;
+
+    .sup-name-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .sup-name {
+      font-weight: 700;
+      font-family: var(--font-heading);
+      color: var(--color-navy);
+      font-size: 14px;
+    }
+
+    .sup-type-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 8px;
+      border-radius: var(--radius-full);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+
+      &--essential {
+        background: rgba(249, 115, 22, 0.1);
+        color: #c2410c;
+        border: 1px solid rgba(249, 115, 22, 0.2);
+      }
+
+      &--optional {
+        background: rgba(59, 130, 246, 0.1);
+        color: #1d4ed8;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+      }
+    }
+
+    .sup-dosage {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      font-weight: 500;
+
+      .material-symbols-outlined {
+        font-size: 13px !important;
+        color: var(--color-text-tertiary);
+      }
+    }
+
+    .sup-notes {
+      font-size: 11.5px;
+      color: var(--color-text-tertiary);
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
+    }
+  }
+
+  &__supplement-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+
+    .ant-btn {
+      opacity: 0.5;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+
+      &:hover {
+        opacity: 1;
+        transform: scale(1.15);
+      }
+    }
+  }
+
+  &__no-supplements {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--color-text-tertiary);
+    font-size: 13px;
+
+    .material-symbols-outlined {
+      font-size: 32px !important;
+      color: var(--color-border);
+      display: block;
+      margin-bottom: 8px;
+    }
+  }
+}
+
+// ── Supplement Modal Form ─────────────────────────────────────────────────────
+.supplement-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 0;
+
+  .athlete-assignment-hub__form-field {
+    .ant-input,
+    .ant-input-textarea textarea,
+    .ant-select-selector {
+      border-radius: var(--radius-btn) !important;
+
+      &:hover {
+        border-color: var(--color-gold) !important;
+      }
+    }
+  }
+}

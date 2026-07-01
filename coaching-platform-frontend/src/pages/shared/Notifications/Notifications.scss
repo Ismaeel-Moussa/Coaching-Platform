@@ -41,12 +41,13 @@
 
   &__read-all-btn {
     border-radius: var(--radius-btn);
-    background-color: var(--color-navy) !important;
-    border-color: var(--color-navy) !important;
+    background-color: var(--color-gold) !important;
+    border-color: var(--color-gold) !important;
+    color: var(--color-navy) !important;
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-weight: 500;
+    font-weight: 600;
     height: 38px;
 
     .btn-icon {
@@ -54,8 +55,9 @@
     }
 
     &:hover {
-      background-color: var(--color-navy-light) !important;
-      border-color: var(--color-navy-light) !important;
+      background-color: var(--color-gold-dim) !important;
+      border-color: var(--color-gold-dim) !important;
+      color: var(--color-navy) !important;
     }
   }
 

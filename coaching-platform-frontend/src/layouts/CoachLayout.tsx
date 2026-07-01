@@ -8,6 +8,7 @@ import './CoachLayout.scss';
 const coachNavItems = [
   { path: '/coach/dashboard', icon: 'analytics', label: 'Dashboard' },
   { path: '/coach/roster', icon: 'group', label: 'Client Roster' },
+  { path: '/coach/athlete-hub', icon: 'assignment_ind', label: 'Athlete Hub' },
   { path: '/coach/exercise-library', icon: 'fitness_center', label: 'Exercise Library' },
   { path: '/coach/food-admin', icon: 'restaurant_menu', label: 'Food & Recipes' },
   { path: '/coach/template-builder', icon: 'view_week', label: 'Template Builder' },

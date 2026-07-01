@@ -50,3 +50,7 @@ export const assignWorkoutTemplate = async (
   );
   return response.data;
 };
+
+export const deleteWorkoutTemplate = async (id: number): Promise<void> => {
+  await axiosInstance.delete(`/workout-templates/${id}`);
+};
