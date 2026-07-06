@@ -88,6 +88,12 @@ public class AuditLogMapping : IEntityTypeConfiguration<AuditLog>
         builder.Property(al => al.Action).HasMaxLength(100).IsRequired();
         builder.Property(al => al.EntityType).HasMaxLength(100).IsRequired();
         builder.Property(al => al.EntityId).HasMaxLength(50);
+        builder.Property(al => al.PerformedByName).HasMaxLength(200);
+        builder.Property(al => al.IpAddress).HasMaxLength(45);        // IPv6 max
         builder.Property(al => al.Details).HasMaxLength(2000);
+
+        // Indexes for fast querying
+        builder.HasIndex(al => new { al.UserId, al.CreatedAt });
+        builder.HasIndex(al => new { al.EntityType, al.EntityId });
     }
 }
