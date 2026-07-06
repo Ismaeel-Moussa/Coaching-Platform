@@ -49,6 +49,7 @@ export const useLogin = () => {
       navigate(getRoleRoute(data.user.role), { replace: true });
     },
     onError: (error) => {
+      if (error.response?.status === 429 || (error.response?.status && error.response.status >= 500)) return;
       const msg =
         (error.response?.data as { message?: string })?.message ??
         'Invalid email or password. Please try again.';
@@ -69,6 +70,7 @@ export const useRegister = () => {
       navigate(getRoleRoute(data.user.role), { replace: true });
     },
     onError: (error) => {
+      if (error.response?.status === 429 || (error.response?.status && error.response.status >= 500)) return;
       const msg =
         (error.response?.data as { message?: string })?.message ??
         'Registration failed. Please check your details and try again.';
@@ -92,6 +94,7 @@ export const useForgotPassword = () => {
   return useMutation<{ message: string }, AxiosError, ForgotPasswordForm>({
     mutationFn: forgotPassword,
     onError: (error) => {
+      if (error.response?.status === 429 || (error.response?.status && error.response.status >= 500)) return;
       const msg =
         (error.response?.data as { message?: string })?.message ??
         'Something went wrong. Please try again.';
@@ -111,6 +114,7 @@ export const useResetPassword = () => {
       navigate('/sign-in', { replace: true });
     },
     onError: (error) => {
+      if (error.response?.status === 429 || (error.response?.status && error.response.status >= 500)) return;
       const msg =
         (error.response?.data as { message?: string })?.message ??
         'Reset failed. Your link may have expired.';

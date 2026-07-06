@@ -1,5 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary';
 import './AuthLayout.scss';
 
 const AuthLayout: React.FC = () => {
@@ -43,7 +44,9 @@ const AuthLayout: React.FC = () => {
       {/* Right form panel */}
       <div className="auth-layout__form-panel">
         <div className="auth-layout__form-container">
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </div>
       </div>
     </div>
