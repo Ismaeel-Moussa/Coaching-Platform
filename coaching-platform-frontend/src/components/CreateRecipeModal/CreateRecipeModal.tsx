@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Modal, Steps, Input, Select, InputNumber, Button, Spin, Empty, Form,
+  Modal, Steps, Input, Select, InputNumber, Button, Spin, Empty, Form, message
 } from 'antd';
 import { useSearchFoods } from '../../hooks/useFoods/useFoods';
-import { useCreateRecipe } from '../../hooks/useRecipes/useRecipes';
+import { useCreateRecipe, useUpdateRecipe, useUploadRecipeImage } from '../../hooks/useRecipes/useRecipes';
 import { calcMacroPreview } from '../../utils/macroCalc';
 import { FoodState, FOOD_STATE_LABELS } from '../../types/Diary';
-import { RecipeCategory, RECIPE_CATEGORY_LABELS, type CreateRecipeIngredient } from '../../types/Recipe';
+import { RecipeCategory, RECIPE_CATEGORY_LABELS, type CreateRecipeIngredient, type RecipeDto, type RecipeIngredientDto } from '../../types/Recipe';
 import type { FoodDto } from '../../types/Food';
 import './CreateRecipeModal.scss';
 
@@ -22,9 +22,10 @@ interface IngredientEntry {
 interface CreateRecipeModalProps {
   open: boolean;
   onClose: () => void;
+  recipeToEdit?: RecipeDto | null;
 }
 
-const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose }) => {
+const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, recipeToEdit }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [ingredients, setIngredients] = useState<IngredientEntry[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,8 +41,48 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose }) 
   const [prepTime, setPrepTime] = useState<number>(5);
   const [cookTime, setCookTime] = useState<number>(0);
   const [servings, setServings] = useState<number>(1);
+  const [recipeImageFile, setRecipeImageFile] = useState<File | null>(null);
+  const [recipeImagePreview, setRecipeImagePreview] = useState<string | null>(null);
+  const [recipeVideoUrl, setRecipeVideoUrl] = useState<string>('');
 
   const createMutation = useCreateRecipe();
+  const updateMutation = useUpdateRecipe();
+  const uploadImageMutation = useUploadRecipeImage();
+
+  // Prefill in Edit Mode
+  useEffect(() => {
+    if (recipeToEdit && open) {
+      setRecipeName(recipeToEdit.name);
+      setRecipeDesc(recipeToEdit.description || '');
+      setRecipeCategory(recipeToEdit.category);
+      setPrepTime(recipeToEdit.prepTimeMinutes);
+      setCookTime(recipeToEdit.cookTimeMinutes);
+      setServings(recipeToEdit.servings);
+      setRecipeVideoUrl(recipeToEdit.videoUrl || '');
+      setRecipeImagePreview(recipeToEdit.imageUrl || null);
+      
+      const mappedIngredients: IngredientEntry[] = recipeToEdit.ingredients.map((ing: RecipeIngredientDto) => {
+        const qty = ing.quantityGrams || 100;
+        return {
+          food: {
+            id: ing.foodId,
+            name: ing.foodName,
+            category: 'Protein',
+            state: ing.state === 1 ? 'Cooked' : ing.state === 2 ? 'Dry' : 'Raw',
+            caloriesPer100g: (ing.calories * 100) / qty,
+            proteinPer100g: (ing.protein * 100) / qty,
+            carbsPer100g: (ing.carbs * 100) / qty,
+            fatPer100g: (ing.fat * 100) / qty,
+            fiberPer100g: 0,
+            isCustom: false,
+          },
+          quantityGrams: qty,
+          state: ing.state === 1 ? FoodState.Cooked : ing.state === 2 ? FoodState.Dry : FoodState.Raw,
+        };
+      });
+      setIngredients(mappedIngredients);
+    }
+  }, [recipeToEdit, open]);
 
   // Debounce
   useEffect(() => {
@@ -86,23 +127,61 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose }) 
   // ── Step 3: Submit ───────────────────────────────────────────────────────────
   const handleSave = () => {
     if (!recipeName.trim() || ingredients.length === 0) return;
+    if (!recipeToEdit && !recipeImageFile) return;
+
     const formIngredients: CreateRecipeIngredient[] = ingredients.map((ing) => ({
       foodId: ing.food.id,
       quantityGrams: ing.quantityGrams,
       state: ing.state,
     }));
-    createMutation.mutate(
-      {
-        name: recipeName.trim(),
-        description: recipeDesc.trim() || undefined,
-        category: recipeCategory,
-        prepTimeMinutes: prepTime,
-        cookTimeMinutes: cookTime,
-        servings,
-        ingredients: formIngredients,
-      },
-      { onSuccess: handleClose },
-    );
+
+    const payload = {
+      name: recipeName.trim(),
+      description: recipeDesc.trim() || undefined,
+      category: recipeCategory,
+      prepTimeMinutes: prepTime,
+      cookTimeMinutes: cookTime,
+      servings,
+      videoUrl: recipeVideoUrl.trim() || undefined,
+      ingredients: formIngredients,
+    };
+
+    const handlePhotoUploadAfterSave = (recipeId: number, successMsg: string) => {
+      if (recipeImageFile) {
+        uploadImageMutation.mutate(
+          { recipeId, imageFile: recipeImageFile },
+          {
+            onSuccess: () => {
+              message.success(successMsg);
+              handleClose();
+            },
+          },
+        );
+      } else {
+        message.success(successMsg);
+        handleClose();
+      }
+    };
+
+    if (recipeToEdit) {
+      updateMutation.mutate(
+        { id: recipeToEdit.id, form: payload },
+        {
+          onSuccess: (updatedRecipe: RecipeDto) => {
+            handlePhotoUploadAfterSave(updatedRecipe.id, 'Recipe updated successfully!');
+          },
+        },
+      );
+    } else {
+      createMutation.mutate(
+        payload,
+        {
+          onSuccess: (newRecipe: RecipeDto) => {
+            handlePhotoUploadAfterSave(newRecipe.id, 'Recipe created successfully with photo!');
+          },
+        },
+      );
+    }
   };
 
   const handleClose = () => {
@@ -119,6 +198,9 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose }) 
     setPrepTime(5);
     setCookTime(0);
     setServings(1);
+    setRecipeImageFile(null);
+    setRecipeImagePreview(null);
+    setRecipeVideoUrl('');
     onClose();
   };
 
@@ -131,7 +213,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose }) 
       title={
         <div className="create-recipe-modal__title">
           <span className="material-symbols-outlined">menu_book</span>
-          Create Custom Recipe
+          {recipeToEdit ? 'Edit Custom Recipe' : 'Create Custom Recipe'}
         </div>
       }
       footer={null}
@@ -316,13 +398,62 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose }) 
                   <InputNumber value={servings} onChange={(v) => setServings(v ?? 1)} min={1} size="large" style={{ width: '100%' }} />
                 </Form.Item>
               </div>
+
+              <Form.Item label={recipeToEdit ? "Recipe Photo (Optional)" : "Recipe Photo (Required)"} required={!recipeToEdit}>
+                <div className="create-recipe-modal__photo-upload">
+                  {recipeImagePreview ? (
+                    <div className="create-recipe-modal__photo-preview-container">
+                      <img src={recipeImagePreview} alt="Recipe Preview" className="create-recipe-modal__photo-preview" />
+                      <Button
+                        type="text"
+                        danger
+                        onClick={() => {
+                          setRecipeImageFile(null);
+                          setRecipeImagePreview(null);
+                        }}
+                        className="create-recipe-modal__photo-remove"
+                      >
+                        <span className="material-symbols-outlined">delete</span> Remove Photo
+                      </Button>
+                    </div>
+                  ) : (
+                    <label className="create-recipe-modal__photo-label">
+                      <span className="material-symbols-outlined text-gold">add_a_photo</span>
+                      <span>Click to upload recipe photo</span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/jpg"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setRecipeImageFile(file);
+                            setRecipeImagePreview(URL.createObjectURL(file));
+                          }
+                        }}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                  )}
+                </div>
+              </Form.Item>
+
+              <Form.Item label="Video Link (Optional)">
+                <Input
+                  id="create-recipe-video-input"
+                  value={recipeVideoUrl}
+                  onChange={(e) => setRecipeVideoUrl(e.target.value)}
+                  placeholder="e.g. https://www.youtube.com/watch?v=..."
+                  size="large"
+                  prefix={<span className="material-symbols-outlined text-gold">smart_display</span>}
+                />
+              </Form.Item>
             </Form>
             <div className="create-recipe-modal__nav">
               <Button onClick={() => setCurrentStep(0)} size="large">← Back</Button>
               <Button
                 type="primary"
                 onClick={() => setCurrentStep(2)}
-                disabled={!recipeName.trim()}
+                disabled={!recipeName.trim() || (!recipeImageFile && !recipeImagePreview)}
                 size="large"
               >
                 Preview & Save →
@@ -335,6 +466,12 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose }) 
         {currentStep === 2 && (
           <div className="create-recipe-modal__step animate-fade-in">
             <div className="create-recipe-modal__preview-card">
+              {recipeImagePreview && (
+                <div className="create-recipe-modal__preview-image-wrapper">
+                  <img src={recipeImagePreview} alt={recipeName} className="create-recipe-modal__preview-image" />
+                </div>
+              )}
+
               <div className="create-recipe-modal__preview-header">
                 <h3 className="create-recipe-modal__preview-name">{recipeName}</h3>
                 <span className="create-recipe-modal__preview-category">
@@ -346,6 +483,12 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose }) 
               <div className="create-recipe-modal__preview-meta">
                 <span><span className="material-symbols-outlined">schedule</span> {prepTime + cookTime} min</span>
                 <span><span className="material-symbols-outlined">dining</span> {servings} serving{servings > 1 ? 's' : ''}</span>
+                {recipeVideoUrl && (
+                  <span className="create-recipe-modal__preview-video-link">
+                    <span className="material-symbols-outlined text-gold">smart_display</span>
+                    <a href={recipeVideoUrl} target="_blank" rel="noopener noreferrer">Video Link</a>
+                  </span>
+                )}
               </div>
 
               {/* Macro summary */}
@@ -380,13 +523,13 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose }) 
             </div>
 
             <div className="create-recipe-modal__nav">
-              <Button onClick={() => setCurrentStep(1)} size="large">← Back</Button>
+              <Button onClick={() => setCurrentStep(1)} size="large" disabled={createMutation.isPending || updateMutation.isPending || uploadImageMutation.isPending}>← Back</Button>
               <Button
                 id="create-recipe-save-btn"
                 type="primary"
                 size="large"
                 onClick={handleSave}
-                loading={createMutation.isPending}
+                loading={createMutation.isPending || updateMutation.isPending || uploadImageMutation.isPending}
               >
                 Save Recipe
               </Button>

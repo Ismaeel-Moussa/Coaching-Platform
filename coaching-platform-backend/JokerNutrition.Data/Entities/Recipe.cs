@@ -21,6 +21,9 @@ public class Recipe
     public decimal TotalCarbs { get; set; }
     public decimal TotalFat { get; set; }
 
+    public string? ImageUrl { get; set; }
+    public string? VideoUrl { get; set; }
+
     public ICollection<RecipeIngredient> Ingredients { get; set; } = new List<RecipeIngredient>();
 }
 

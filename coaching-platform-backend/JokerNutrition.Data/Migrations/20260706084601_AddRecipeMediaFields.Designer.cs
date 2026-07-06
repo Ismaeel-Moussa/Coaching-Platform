@@ -4,6 +4,7 @@ using JokerNutrition.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JokerNutrition.Data.Migrations
 {
     [DbContext(typeof(JokerNutritionContext))]
-    partial class JokerNutritionContextModelSnapshot : ModelSnapshot
+    [Migration("20260706084601_AddRecipeMediaFields")]
+    partial class AddRecipeMediaFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
