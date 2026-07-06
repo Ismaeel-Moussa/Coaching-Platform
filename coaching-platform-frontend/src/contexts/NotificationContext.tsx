@@ -2,7 +2,8 @@ import React, { createContext, useContext, useEffect, useState, useRef } from 'r
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { notification } from 'antd';
 import { useQueryClient } from '@tanstack/react-query';
-import { getNotifications, markAsRead, markAllAsRead, type NotificationDto } from '../api/notifications';
+import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from '../api/notifications';
+import type { NotificationDto } from '../types/Notification';
 
 interface NotificationContextType {
   notifications: NotificationDto[];
@@ -35,9 +36,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!token) return;
     try {
       setLoading(true);
-      const data = await getNotifications();
-      setNotifications(data);
-      setUnreadCount(data.filter((n) => !n.isRead).length);
+      const data = await getNotifications(1, 50); // Get first 50 notifications
+      setNotifications(data.items);
+      const countData = await getUnreadCount();
+      setUnreadCount(countData.unreadCount);
     } catch (err) {
       console.error('Error fetching notifications:', err);
     } finally {
@@ -75,6 +77,23 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setNotifications([]);
       setUnreadCount(0);
     }
+  }, [token]);
+
+  // Poll for unread count every 30 seconds to keep the badge current
+  useEffect(() => {
+    if (!token) return;
+
+    const pollUnreadCount = async () => {
+      try {
+        const countData = await getUnreadCount();
+        setUnreadCount(countData.unreadCount);
+      } catch (err) {
+        console.error('Error polling unread notifications count:', err);
+      }
+    };
+
+    const interval = setInterval(pollUnreadCount, 30000);
+    return () => clearInterval(interval);
   }, [token]);
 
   // Manage SignalR Connection

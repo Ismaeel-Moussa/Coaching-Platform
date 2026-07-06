@@ -1,0 +1,107 @@
+.subjective-slider {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--surface-container);
+  gap: 10px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__label {
+    font-family: var(--font-body);
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-size: 15px;
+  }
+
+  &__status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__status-text {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    font-family: var(--font-body);
+  }
+
+  &__value {
+    font-weight: 600;
+    font-size: 14px;
+    padding: 2px 8px;
+    border-radius: var(--radius-btn);
+    min-width: 28px;
+    text-align: center;
+    transition: all 0.2s ease;
+
+    &--low {
+      background-color: var(--error-container, #ffdad6);
+      color: var(--color-red);
+    }
+
+    &--mid {
+      background-color: #fff1b8; // soft gold-yellow background
+      color: var(--color-gold-text);
+    }
+
+    &--high {
+      background-color: #d9f7be; // soft green background
+      color: var(--color-success);
+    }
+  }
+
+  &__slider-wrapper {
+    padding: 0 4px;
+  }
+
+  &__marks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-top: -4px;
+    padding: 0 4px;
+  }
+
+  // Ant Design Slider Custom Styling overrides
+  .subjective-slider__slider {
+    margin: 8px 0;
+
+    .ant-slider-rail {
+      background-color: var(--surface-container-high) !important;
+      height: 6px;
+    }
+
+    .ant-slider-track {
+      background-color: var(--color-gold) !important;
+      height: 6px;
+    }
+
+    .ant-slider-handle {
+      border: 2px solid var(--color-gold) !important;
+      background-color: var(--surface-container-lowest) !important;
+      width: 18px;
+      height: 18px;
+      margin-top: -6px;
+
+      &:focus, &:hover {
+        box-shadow: 0 0 0 4px rgba(253, 192, 3, 0.2) !important;
+        border-color: var(--color-gold) !important;
+      }
+
+      &::after {
+        background-color: var(--color-gold) !important;
+        inset: 4px !important;
+      }
+    }
+  }
+}
