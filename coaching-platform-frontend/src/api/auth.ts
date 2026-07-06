@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { message as antMessage } from 'antd';
+import { getRateLimitMessage } from '../utils/rateLimitMessages';
 import type {
   AuthTokenDto,
   LoginForm,
@@ -16,6 +18,23 @@ const authApi = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+authApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+    if (status === 429) {
+      const msg = getRateLimitMessage(error.config?.url);
+      antMessage.error(msg);
+      return Promise.reject(error);
+    }
+    if (status >= 500) {
+      antMessage.error('Server error. Please try again later.');
+      return Promise.reject(error);
+    }
+    return Promise.reject(error);
+  }
+);
 
 // ── Auth API functions ────────────────────────────────────────────────────────
 
