@@ -150,8 +150,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // Coaches listen to AthleteActivity silent invalidation events
     if (isCoach) {
       connection.on('AthleteActivity', (event: { type: string; athleteId: number; athleteUserId?: number }) => {
-        console.log('Received athlete activity event in real-time:', event);
-
         // Invalidate coach dashboards, compliance, feed & rosters to update live in background
         queryClient.invalidateQueries({ queryKey: ['coach-dashboard'] });
         queryClient.invalidateQueries({ queryKey: ['coach-roster'] });
@@ -170,7 +168,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       try {
         await connection.start();
         setConnectionState('Connected');
-        console.log('SignalR connected successfully to NotificationHub.');
       } catch (err: any) {
         // Suppress expected abort errors from React StrictMode mounting/unmounting in dev
         if (err?.name === 'AbortError' || err?.message?.includes('stopped')) {
@@ -189,7 +186,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     });
 
     connection.onreconnected((connectionId) => {
-      console.log('SignalR reconnected successfully. Connection ID:', connectionId);
       setConnectionState('Connected');
       fetchNotifications();
     });

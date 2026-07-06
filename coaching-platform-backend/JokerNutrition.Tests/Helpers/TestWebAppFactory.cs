@@ -1,10 +1,13 @@
+using Autofac;
 using JokerNutrition.Data.Contexts;
 using JokerNutrition.Data.Entities;
 using JokerNutrition.Data.Entities.Identities;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace JokerNutrition.Tests.Helpers;
 
@@ -15,6 +18,17 @@ namespace JokerNutrition.Tests.Helpers;
 public class TestWebAppFactory : WebApplicationFactory<Program>
 {
     private static int _dbCounter;
+
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        // Register fake email service in Autofac to override the real one
+        builder.ConfigureContainer<ContainerBuilder>(cb =>
+        {
+            cb.RegisterType<FakeEmailService>().As<JokerNutrition.Business.Services.IEmailService>().InstancePerLifetimeScope();
+        });
+
+        return base.CreateHost(builder);
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -33,16 +47,67 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
             services.AddDbContext<JokerNutritionContext>(opts =>
                 opts.UseInMemoryDatabase(dbName));
 
+            // Bypass the .NET 10 PipeWriter.UnflushedBytes bug in TestServer
+            services.PostConfigure<Microsoft.AspNetCore.Mvc.MvcOptions>(options =>
+            {
+                options.OutputFormatters.Insert(0, new TestJsonOutputFormatter());
+            });
+
             // Ensure the DB is created and seeded with minimal test data
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<JokerNutritionContext>();
+            var hasher = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.IPasswordHasher<User>>();
             db.Database.EnsureCreated();
-            SeedTestData(db);
+            SeedTestData(db, hasher);
         });
     }
 
-    private static void SeedTestData(JokerNutritionContext db)
+    /// <summary>
+    /// Custom text formatter that writes JSON directly to the Response Stream (bypassing PipeWriter).
+    /// </summary>
+    private class TestJsonOutputFormatter : Microsoft.AspNetCore.Mvc.Formatters.TextOutputFormatter
+    {
+        public TestJsonOutputFormatter()
+        {
+            SupportedMediaTypes.Add("application/json");
+            SupportedMediaTypes.Add("text/json");
+            SupportedMediaTypes.Add("application/*+json");
+            SupportedEncodings.Add(System.Text.Encoding.UTF8);
+        }
+
+        public override async Task WriteResponseBodyAsync(
+            Microsoft.AspNetCore.Mvc.Formatters.OutputFormatterWriteContext context, 
+            System.Text.Encoding selectedEncoding)
+        {
+            var response = context.HttpContext.Response;
+            if (context.Object != null)
+            {
+                var services = context.HttpContext.RequestServices;
+                var mvcJsonOptions = services?.GetService<Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.Mvc.JsonOptions>>()?.Value;
+                
+                var options = mvcJsonOptions?.JsonSerializerOptions ?? new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                    DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+                };
+
+                await System.Text.Json.JsonSerializer.SerializeAsync(
+                    response.Body, 
+                    context.Object, 
+                    context.ObjectType ?? context.Object.GetType(),
+                    options);
+            }
+        }
+    }
+
+    private class FakeEmailService : JokerNutrition.Business.Services.IEmailService
+    {
+        public Task SendInvitationEmailAsync(string toEmail, string inviteUrl, string role) => Task.CompletedTask;
+        public Task SendPasswordResetEmailAsync(string toEmail, string resetUrl) => Task.CompletedTask;
+    }
+
+    private static void SeedTestData(JokerNutritionContext db, Microsoft.AspNetCore.Identity.IPasswordHasher<User> hasher)
     {
         // Roles
         if (!db.Roles.Any())
@@ -68,10 +133,10 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
                 FirstName = "Test",
                 LastName = "Coach",
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                // BCrypt of "Coach@Test123!" — pre-computed to avoid Identity dependency
-                PasswordHash = "AQAAAAIAAYagAAAAEKVIRSiRGJlD3JBHVSvlBMORlV+5kYmADnf63eiNGx5rnBfx4XS38cUHFzpCnN6R2w=="
+                SecurityStamp = Guid.NewGuid().ToString(),
+                CreatedAt = DateTime.UtcNow
             };
+            coach.PasswordHash = hasher.HashPassword(coach, "Coach@Test123!");
             db.Users.Add(coach);
             db.UserRoles.Add(new UserRole { UserId = 1, RoleId = 2 });
             db.Coaches.Add(new Coach { Id = 1, UserId = 1, IsActive = true });
@@ -91,9 +156,10 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
                 FirstName = "Test",
                 LastName = "Athlete",
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                PasswordHash = "AQAAAAIAAYagAAAAEKVIRSiRGJlD3JBHVSvlBMORlV+5kYmADnf63eiNGx5rnBfx4XS38cUHFzpCnN6R2w=="
+                SecurityStamp = Guid.NewGuid().ToString(),
+                CreatedAt = DateTime.UtcNow
             };
+            athlete.PasswordHash = hasher.HashPassword(athlete, "Athlete@Test123!");
             db.Users.Add(athlete);
             db.UserRoles.Add(new UserRole { UserId = 2, RoleId = 3 });
             db.Athletes.Add(new Athlete { Id = 1, UserId = 2, AssignedCoachId = 1 });
@@ -102,3 +168,4 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
         db.SaveChanges();
     }
 }
+

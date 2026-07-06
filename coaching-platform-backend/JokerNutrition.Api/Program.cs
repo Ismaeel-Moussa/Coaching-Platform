@@ -9,6 +9,7 @@ using JokerNutrition.Api.Extensions;
 using JokerNutrition.Api.Filters;
 using JokerNutrition.Business.Hubs;
 using JokerNutrition.Business.Autofac;
+using JokerNutrition.Business.BackgroundServices;
 using JokerNutrition.Business.Configurations;
 using JokerNutrition.Business.Helpers;
 using JokerNutrition.Data.Autofac;
@@ -119,9 +120,6 @@ try
     builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
     builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
     {
-        // Register DbContext
-        containerBuilder.RegisterType<JokerNutritionContext>().InstancePerLifetimeScope();
-
         // Register JwtTokenHelper
         containerBuilder.RegisterType<JwtTokenHelper>().As<IJwtTokenHelper>().InstancePerLifetimeScope();
 
@@ -198,6 +196,9 @@ try
     builder.Services.AddInMemoryRateLimiting();
     builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
+    // 12b. Hosted Background Services
+    builder.Services.AddHostedService<TokenCleanupHostedService>();
+
     // ─── Build ───────────────────────────────────────────────────────────────
     var app = builder.Build();
 
@@ -211,6 +212,32 @@ try
             c.RoutePrefix = "swagger";
         });
     }
+    else
+    {
+        app.UseExceptionHandler(errorApp =>
+        {
+            errorApp.Run(async context =>
+            {
+                var exceptionHandlerFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+                if (exceptionHandlerFeature?.Error != null)
+                {
+                    Console.WriteLine($"[GLOBAL EXCEPTION] {exceptionHandlerFeature.Error}");
+                }
+
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = "application/json";
+                var responseObj = new
+                {
+                    statusCode = 500,
+                    message = "An unexpected error occurred.",
+                    timestamp = DateTime.UtcNow
+                };
+                var jsonBytes = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(responseObj);
+                await context.Response.Body.WriteAsync(jsonBytes);
+            });
+        });
+        app.UseHsts();
+    }
 
     // 14. Middleware pipeline
     app.UseCors("AllowFrontend");
@@ -223,28 +250,28 @@ try
     app.MapHub<NotificationHub>("/hubs/notifications");
 
     // 15. Enriched health check endpoint — includes DB ping
-    app.MapGet("/api/health", async (JokerNutrition.Data.Contexts.JokerNutritionContext db) =>
+    app.MapGet("/api/health", async (Microsoft.AspNetCore.Http.HttpContext httpContext, JokerNutrition.Data.Contexts.JokerNutritionContext db) =>
     {
+        bool canConnect = false;
         try
         {
-            var canConnect = await db.Database.CanConnectAsync();
-            return Results.Ok(new
-            {
-                status = canConnect ? "healthy" : "degraded",
-                database = canConnect ? "connected" : "unreachable",
-                timestamp = DateTime.UtcNow
-            });
+            canConnect = await db.Database.CanConnectAsync();
         }
-        catch (Exception ex)
+        catch
         {
-            return Results.Ok(new
-            {
-                status = "degraded",
-                database = "error",
-                error = ex.Message,
-                timestamp = DateTime.UtcNow
-            });
+            // ignore
         }
+
+        var responseObj = new
+        {
+            status = canConnect ? "healthy" : "degraded",
+            database = canConnect ? "connected" : "unreachable",
+            timestamp = DateTime.UtcNow
+        };
+
+        httpContext.Response.StatusCode = 200;
+        httpContext.Response.ContentType = "application/json";
+        await System.Text.Json.JsonSerializer.SerializeAsync(httpContext.Response.Body, responseObj);
     });
 
     // 16. Migrate and seed mock data in dev
