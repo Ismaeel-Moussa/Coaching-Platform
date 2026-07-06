@@ -2,4 +2,5 @@
   <Project Path="JokerNutrition.Api/JokerNutrition.Api.csproj" />
   <Project Path="JokerNutrition.Business/JokerNutrition.Business.csproj" />
   <Project Path="JokerNutrition.Data/JokerNutrition.Data.csproj" />
+  <Project Path="JokerNutrition.Tests/JokerNutrition.Tests.csproj" />
 </Solution>
