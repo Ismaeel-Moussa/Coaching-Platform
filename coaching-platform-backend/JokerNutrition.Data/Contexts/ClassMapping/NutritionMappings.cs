@@ -61,6 +61,8 @@ public class DailyDiaryMapping : IEntityTypeConfiguration<DailyDiary>
         builder.Property(d => d.WaterLitersConsumed).HasPrecision(5, 2);
         builder.Property(d => d.WaterLitersTarget).HasPrecision(5, 2);
         builder.HasOne(d => d.Athlete).WithMany(a => a.Diaries).HasForeignKey(d => d.AthleteId).OnDelete(DeleteBehavior.Cascade);
+        // Ensure one diary per athlete per date
+        builder.HasIndex(d => new { d.AthleteId, d.Date }).IsUnique();
     }
 }
 
@@ -95,5 +97,7 @@ public class MacroTargetMapping : IEntityTypeConfiguration<MacroTarget>
         builder.Property(mt => mt.WaterLitersTarget).HasPrecision(5, 2);
         builder.HasOne(mt => mt.Athlete).WithMany(a => a.MacroTargets).HasForeignKey(mt => mt.AthleteId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(mt => mt.SetByCoach).WithMany().HasForeignKey(mt => mt.SetByCoachId).OnDelete(DeleteBehavior.Restrict);
+        // Fast lookup for active targets by athlete
+        builder.HasIndex(mt => new { mt.AthleteId, mt.IsActive });
     }
 }

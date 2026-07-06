@@ -68,13 +68,21 @@ try
                 Array.Empty<string>()
             }
         });
+
+        // Wire up XML doc comments for Swagger UI
+        var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        if (File.Exists(xmlPath))
+            c.IncludeXmlComments(xmlPath);
     });
 
-    // 2. CORS
+    // 2. CORS — origins driven by configuration (lock in Production via appsettings.Production.json)
+    var corsOrigins = builder.Configuration.GetSection("CorsAllowedOrigins").Get<string[]>()
+        ?? ["http://localhost:5173"];
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowFrontend", policy =>
-            policy.WithOrigins("http://localhost:5173")
+            policy.WithOrigins(corsOrigins)
                   .AllowAnyMethod()
                   .AllowAnyHeader()
                   .AllowCredentials());
@@ -214,8 +222,30 @@ try
     app.MapControllers();
     app.MapHub<NotificationHub>("/hubs/notifications");
 
-    // 15. Health check endpoint
-    app.MapGet("/api/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+    // 15. Enriched health check endpoint — includes DB ping
+    app.MapGet("/api/health", async (JokerNutrition.Data.Contexts.JokerNutritionContext db) =>
+    {
+        try
+        {
+            var canConnect = await db.Database.CanConnectAsync();
+            return Results.Ok(new
+            {
+                status = canConnect ? "healthy" : "degraded",
+                database = canConnect ? "connected" : "unreachable",
+                timestamp = DateTime.UtcNow
+            });
+        }
+        catch (Exception ex)
+        {
+            return Results.Ok(new
+            {
+                status = "degraded",
+                database = "error",
+                error = ex.Message,
+                timestamp = DateTime.UtcNow
+            });
+        }
+    });
 
     // 16. Migrate and seed mock data in dev
     if (app.Environment.IsDevelopment())
