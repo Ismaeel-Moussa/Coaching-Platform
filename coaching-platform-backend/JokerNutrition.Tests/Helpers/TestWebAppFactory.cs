@@ -37,12 +37,13 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<JokerNutritionContext>();
+            var hasher = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.IPasswordHasher<User>>();
             db.Database.EnsureCreated();
-            SeedTestData(db);
+            SeedTestData(db, hasher);
         });
     }
 
-    private static void SeedTestData(JokerNutritionContext db)
+    private static void SeedTestData(JokerNutritionContext db, Microsoft.AspNetCore.Identity.IPasswordHasher<User> hasher)
     {
         // Roles
         if (!db.Roles.Any())
@@ -68,10 +69,9 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
                 FirstName = "Test",
                 LastName = "Coach",
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                // BCrypt of "Coach@Test123!" — pre-computed to avoid Identity dependency
-                PasswordHash = "AQAAAAIAAYagAAAAEKVIRSiRGJlD3JBHVSvlBMORlV+5kYmADnf63eiNGx5rnBfx4XS38cUHFzpCnN6R2w=="
+                CreatedAt = DateTime.UtcNow
             };
+            coach.PasswordHash = hasher.HashPassword(coach, "Coach@Test123!");
             db.Users.Add(coach);
             db.UserRoles.Add(new UserRole { UserId = 1, RoleId = 2 });
             db.Coaches.Add(new Coach { Id = 1, UserId = 1, IsActive = true });
@@ -91,9 +91,9 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
                 FirstName = "Test",
                 LastName = "Athlete",
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                PasswordHash = "AQAAAAIAAYagAAAAEKVIRSiRGJlD3JBHVSvlBMORlV+5kYmADnf63eiNGx5rnBfx4XS38cUHFzpCnN6R2w=="
+                CreatedAt = DateTime.UtcNow
             };
+            athlete.PasswordHash = hasher.HashPassword(athlete, "Athlete@Test123!");
             db.Users.Add(athlete);
             db.UserRoles.Add(new UserRole { UserId = 2, RoleId = 3 });
             db.Athletes.Add(new Athlete { Id = 1, UserId = 2, AssignedCoachId = 1 });

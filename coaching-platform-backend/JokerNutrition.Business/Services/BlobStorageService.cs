@@ -124,6 +124,9 @@ public class BlobStorageService : IBlobStorageService
         }
 
         // Return local hosting static file path
-        return $"http://localhost:7000/uploads/{uniqueFileName}";
+        var baseUrl = !string.IsNullOrEmpty(_settings.LocalFallbackBaseUrl)
+            ? _settings.LocalFallbackBaseUrl.TrimEnd('/')
+            : "http://localhost:7000";
+        return $"{baseUrl}/uploads/{uniqueFileName}";
     }
 }
