@@ -3,6 +3,7 @@ import type {
   RecipeDto,
   RecipesPagedResult,
   CreateRecipeForm,
+  UpdateRecipeForm,
   GetRecipesParams,
 } from '../types/Recipe';
 import type { DailyDiaryDto } from '../types/Diary';
@@ -22,6 +23,11 @@ export const createRecipe = async (form: CreateRecipeForm): Promise<RecipeDto> =
   return response.data;
 };
 
+export const updateRecipe = async (id: number, form: UpdateRecipeForm): Promise<RecipeDto> => {
+  const response = await axiosInstance.put<RecipeDto>(`/recipes/${id}`, form);
+  return response.data;
+};
+
 export const quickAddRecipeToDiary = async (
   id: number,
   mealType: number,
@@ -36,5 +42,24 @@ export const quickAddRecipeToDiary = async (
 
 export const deleteRecipe = async (id: number): Promise<void> => {
   await axiosInstance.delete(`/recipes/${id}`);
+};
+
+export const uploadRecipeImage = async (
+  recipeId: number,
+  imageFile: File,
+): Promise<RecipeDto> => {
+  const formData = new FormData();
+  formData.append('image', imageFile);
+
+  const response = await axiosInstance.post<RecipeDto>(
+    `/recipes/${recipeId}/image`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
+  return response.data;
 };
 

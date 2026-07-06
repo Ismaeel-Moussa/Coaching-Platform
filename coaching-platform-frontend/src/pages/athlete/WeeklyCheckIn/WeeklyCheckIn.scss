@@ -1,0 +1,269 @@
+.weekly-check-in {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-md) var(--space-sm);
+
+  &__header {
+    margin-bottom: var(--space-lg);
+  }
+
+  &__title {
+    font-family: var(--font-heading);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--color-navy);
+    margin-bottom: 4px;
+  }
+
+  &__subtitle {
+    font-size: 15px;
+    color: var(--color-text-secondary);
+  }
+
+  &__steps-wrapper {
+    background-color: var(--surface-container-lowest);
+    padding: var(--space-md);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--surface-container);
+    margin-bottom: var(--space-md);
+  }
+
+  // Ant Design Steps Styling Customizations
+  .weekly-check-in__steps {
+    .ant-steps-item-process {
+      .ant-steps-item-icon {
+        background-color: var(--color-navy) !important;
+        border-color: var(--color-navy) !important;
+
+        .ant-steps-icon {
+          color: #ffffff !important;
+        }
+      }
+    }
+
+    .ant-steps-item-finish {
+      .ant-steps-item-icon {
+        border-color: var(--color-gold) !important;
+        background-color: var(--color-gold) !important;
+
+        .ant-steps-icon {
+          color: var(--color-text-primary) !important;
+        }
+      }
+
+      .ant-steps-item-tail::after {
+        background-color: var(--color-gold) !important;
+      }
+    }
+
+    .ant-steps-item-wait {
+      .ant-steps-item-icon {
+        border-color: var(--color-border) !important;
+        background-color: var(--surface-container) !important;
+      }
+    }
+  }
+
+  &__card {
+    background-color: var(--surface-container-lowest) !important;
+    border-radius: var(--radius-card) !important;
+    border: 1px solid var(--surface-container) !important;
+    box-shadow: 0 4px 12px rgba(11, 19, 43, 0.04);
+    padding: var(--space-sm);
+
+    &--confirm {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 400px;
+    }
+  }
+
+  &__section-title {
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-navy);
+    margin-bottom: 4px;
+  }
+
+  &__section-desc {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-md);
+  }
+
+  &__form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+  }
+
+  &__form-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  &__subsection-title {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-navy);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: var(--space-xs);
+    border-bottom: 2px solid var(--surface-container-high);
+    padding-bottom: 8px;
+
+    span {
+      font-size: 20px;
+    }
+  }
+
+  &__biometrics-list, &__sliders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__photos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+
+    &--split {
+      justify-content: space-between;
+    }
+  }
+
+  &__next-btn, &__done-btn {
+    background-color: var(--color-navy) !important;
+    border-color: var(--color-navy) !important;
+    color: #ffffff !important;
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 24px !important;
+    border-radius: var(--radius-btn) !important;
+
+    &:hover {
+      background-color: var(--color-navy-light) !important;
+      border-color: var(--color-navy-light) !important;
+    }
+
+    &:disabled {
+      background-color: var(--surface-container-high) !important;
+      border-color: var(--surface-container-high) !important;
+      color: var(--color-border-strong) !important;
+    }
+
+    span {
+      font-size: 18px;
+    }
+  }
+
+  &__skip-btn {
+    color: var(--color-text-secondary) !important;
+    font-family: var(--font-body);
+    font-weight: 500;
+
+    &:hover {
+      color: var(--color-navy) !important;
+    }
+  }
+  &__confirm-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
+
+    @media (max-width: 576px) {
+      flex-direction: column;
+      width: 100%;
+      gap: 12px;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+
+  &__resubmit-btn {
+    border-color: var(--color-navy) !important;
+    color: var(--color-navy) !important;
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0 24px !important;
+    border-radius: var(--radius-btn) !important;
+
+    &:hover {
+      border-color: var(--color-navy-light) !important;
+      color: var(--color-navy-light) !important;
+      background-color: var(--surface-container-low) !important;
+    }
+  }
+}
+
+@media (max-width: 992px) {
+  .weekly-check-in {
+    &__form-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+    }
+
+    &__photos-grid {
+      grid-template-columns: 1fr;
+      max-width: 400px;
+      margin: var(--space-md) auto 0;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .weekly-check-in {
+    padding: var(--space-xs) 4px;
+
+    &__actions {
+      flex-direction: column-reverse;
+      align-items: stretch;
+      gap: 12px;
+      margin-top: var(--space-md);
+
+      button {
+        width: 100% !important;
+        justify-content: center;
+        height: 44px;
+      }
+    }
+
+    &__card {
+      padding: var(--space-sm) var(--space-xs) !important;
+    }
+
+    &__title {
+      font-size: 24px;
+    }
+
+    &__steps-wrapper {
+      padding: var(--space-sm) var(--space-xs);
+    }
+  }
+}

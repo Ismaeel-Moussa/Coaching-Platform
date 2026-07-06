@@ -17,6 +17,8 @@ public class RecipeDto
     public decimal TotalCarbs { get; set; }
     public decimal TotalFat { get; set; }
     public DateTime CreatedAt { get; set; }
+    public string? ImageUrl { get; set; }
+    public string? VideoUrl { get; set; }
     public List<RecipeIngredientDto> Ingredients { get; set; } = new();
 }
 

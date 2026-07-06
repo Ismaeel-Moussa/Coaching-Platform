@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Skeleton, Input, Button, Avatar, Card, Breadcrumb, Empty } from 'antd';
+import { Skeleton, Input, Button, Avatar, Card, Breadcrumb, Empty, Pagination, Modal, Tag, Progress, Divider } from 'antd';
 import {
   ResponsiveContainer,
   LineChart,
@@ -14,11 +14,152 @@ import {
   useGetAthleteProfile,
   useSaveFeedbackNote,
 } from '../../../hooks/useCoachHub/useCoachHub';
+import { useGetCheckInHistory, useAddCoachNotes } from '../../../hooks/useCheckIn/useCheckIn';
 import { formatDateDisplay } from '../../../utils/date';
 import type { CoachFeedbackNoteDto } from '../../../types/CoachHub';
 import './ClientDetail.scss';
 
 const { TextArea } = Input;
+
+const CheckInCard: React.FC<{ checkIn: any; onPhotoClick: (url: string) => void }> = ({
+  checkIn,
+  onPhotoClick,
+}) => {
+  const [notes, setNotes] = useState<string>(checkIn.coachNotes || '');
+  const addCoachNotesMutation = useAddCoachNotes(checkIn.id);
+
+  const handleSaveCheckInNotes = () => {
+    if (!notes.trim()) return;
+    addCoachNotesMutation.mutate({ notes: notes.trim() });
+  };
+
+  const getSliderTrackColor = (val: number) => {
+    if (val <= 3) return 'var(--color-red)';
+    if (val <= 6) return 'var(--color-gold)';
+    return 'var(--color-success)';
+  };
+
+  return (
+    <div className="checkin-card-item">
+      <div className="checkin-card-item__header">
+        <div className="checkin-card-item__week-title">
+          Week of {formatDateDisplay(checkIn.weekOf)}
+        </div>
+        <div className="checkin-card-item__submit-time mono">
+          Submitted: {new Date(checkIn.submittedAt).toLocaleString()}
+        </div>
+      </div>
+
+      <div className="checkin-card-item__body">
+        {/* Biometrics */}
+        <div className="checkin-card-item__section">
+          <h4 className="checkin-card-item__section-title">Measurements</h4>
+          <div className="checkin-card-item__biometrics-grid mono">
+            <div className="checkin-card-item__metric">
+              <span className="label">Weight</span>
+              <span className="value">{checkIn.weightKg} kg</span>
+            </div>
+            <div className="checkin-card-item__metric">
+              <span className="label">Waist</span>
+              <span className="value">{checkIn.waistCm ? `${checkIn.waistCm} cm` : 'N/A'}</span>
+            </div>
+            <div className="checkin-card-item__metric">
+              <span className="label">Chest</span>
+              <span className="value">{checkIn.chestCm ? `${checkIn.chestCm} cm` : 'N/A'}</span>
+            </div>
+            <div className="checkin-card-item__metric">
+              <span className="label">Thigh</span>
+              <span className="value">{checkIn.thighCm ? `${checkIn.thighCm} cm` : 'N/A'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Well-being sliders */}
+        <div className="checkin-card-item__section">
+          <h4 className="checkin-card-item__section-title">Subjective Well-being</h4>
+          <div className="checkin-card-item__subjective-list">
+            {[
+              { label: 'Sleep Quality', val: checkIn.sleepQuality },
+              { label: 'Energy Level', val: checkIn.energyLevel },
+              { label: 'Gut Health', val: checkIn.gutHealth },
+              { label: 'Training Stress', val: checkIn.trainingStress },
+            ].map((marker) => (
+              <div className="checkin-card-item__subjective-row" key={marker.label}>
+                <span className="label">{marker.label}</span>
+                <div className="progress-container">
+                  <Progress
+                    percent={marker.val * 10}
+                    strokeColor={getSliderTrackColor(marker.val)}
+                    format={() => `${marker.val}/10`}
+                    size="small"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Photos */}
+        <div className="checkin-card-item__section checkin-card-item__section--photos">
+          <h4 className="checkin-card-item__section-title">Progress Photos</h4>
+          <div className="checkin-card-item__photos-row">
+            {checkIn.photos && checkIn.photos.length > 0 ? (
+              checkIn.photos.map((photo: any) => (
+                <div
+                  className="checkin-card-item__photo-thumb"
+                  key={photo.id}
+                  onClick={() => onPhotoClick(photo.signedDownloadUrl)}
+                >
+                  <img src={photo.signedDownloadUrl} alt={`${photo.angle} view`} />
+                  <span className="angle-label">{photo.angle}</span>
+                </div>
+              ))
+            ) : (
+              <div className="checkin-card-item__no-photos">
+                <span className="material-symbols-outlined">hide_image</span>
+                <span>No photos</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <Divider style={{ margin: '16px 0' }} />
+
+      {/* Coach Notes */}
+      <div className="checkin-card-item__feedback-section">
+        <h4 className="checkin-card-item__section-title">Check-In Review & Adjustment Notes</h4>
+        <div className="checkin-card-item__notes-form">
+          <TextArea
+            rows={2}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Provide feedback, nutrition tweaks, or program adjustments for this check-in..."
+            maxLength={2000}
+            disabled={addCoachNotesMutation.isPending}
+          />
+          <div className="checkin-card-item__notes-actions">
+            {checkIn.coachReviewedAt && (
+              <span className="reviewed-at-text mono">
+                Reviewed: {new Date(checkIn.coachReviewedAt).toLocaleDateString()}
+              </span>
+            )}
+            <Button
+              type="primary"
+              size="small"
+              onClick={handleSaveCheckInNotes}
+              loading={addCoachNotesMutation.isPending}
+              disabled={notes.trim() === (checkIn.coachNotes || '').trim() || !notes.trim()}
+              className="save-checkin-notes-btn"
+            >
+              Save Review
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ClientDetail: React.FC = () => {
   const { athleteId } = useParams<{ athleteId: string }>();
@@ -31,12 +172,30 @@ const ClientDetail: React.FC = () => {
   const [noteText, setNoteText] = useState<string>('');
   const [notesList, setNotesList] = useState<CoachFeedbackNoteDto[]>([]);
 
+  // Check-In History Pagination & Lightbox Photo State
+  const [historyPage, setHistoryPage] = useState<number>(1);
+  const { data: checkInHistory, isLoading: isHistoryLoading } = useGetCheckInHistory(historyPage, 5, id);
+  const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
+
   // Keep notes synchronized when profile loads
   useEffect(() => {
     if (profile?.feedbackNotes) {
       setNotesList(profile.feedbackNotes);
     }
   }, [profile]);
+
+  // Hash scroll check for check-in history section
+  useEffect(() => {
+    if (window.location.hash === '#check-in-history' && !isHistoryLoading) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById('check-in-history-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [window.location.hash, isHistoryLoading]);
 
   const handleSaveNote = () => {
     if (!noteText.trim()) return;
@@ -310,8 +469,63 @@ const ClientDetail: React.FC = () => {
             </div>
 
           </div>
+
+          {/* Check-In History Full Width Section */}
+          <div id="check-in-history-section" className="client-detail__history-section">
+            <div className="client-detail__card">
+              <div className="client-detail__card-header">
+                <span className="material-symbols-outlined text-gold">assignment_turned_in</span>
+                <h3>Weekly Check-In History</h3>
+              </div>
+              {isHistoryLoading ? (
+                <div style={{ padding: '20px' }}>
+                  <Skeleton active paragraph={{ rows: 6 }} />
+                </div>
+              ) : checkInHistory?.items && checkInHistory.items.length > 0 ? (
+                <div className="client-detail__history-list">
+                  {checkInHistory.items.map((checkIn) => (
+                    <CheckInCard
+                      key={checkIn.id}
+                      checkIn={checkIn}
+                      onPhotoClick={(url) => setLightboxPhoto(url)}
+                    />
+                  ))}
+                  <div className="client-detail__history-pagination">
+                    <Pagination
+                      current={historyPage}
+                      pageSize={5}
+                      total={checkInHistory.totalCount}
+                      onChange={(page) => setHistoryPage(page)}
+                      showSizeChanger={false}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <Empty description="No weekly check-ins submitted yet." style={{ padding: '40px 0' }} />
+              )}
+            </div>
+          </div>
+
         </div>
       ) : null}
+
+      {/* Lightbox Modal */}
+      <Modal
+        open={!!lightboxPhoto}
+        onCancel={() => setLightboxPhoto(null)}
+        footer={null}
+        width={800}
+        centered
+        styles={{ body: { padding: 0 } }}
+      >
+        {lightboxPhoto && (
+          <img
+            src={lightboxPhoto}
+            alt="Enlarged progress preview"
+            style={{ width: '100%', height: 'auto', display: 'block' }}
+          />
+        )}
+      </Modal>
     </div>
   );
 };

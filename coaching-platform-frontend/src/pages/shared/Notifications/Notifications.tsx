@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button, Tag, Segmented, Skeleton, Empty, Tooltip } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../../contexts/NotificationContext';
+import { getRoster } from '../../../api/coachHub';
 import './Notifications.scss';
 
 const Notifications: React.FC = () => {
@@ -140,7 +141,7 @@ const Notifications: React.FC = () => {
               className={`notifications-page__item ${
                 !notif.isRead ? 'notifications-page__item--unread' : ''
               }`}
-              onClick={() => {
+              onClick={async () => {
                 if (!notif.isRead) {
                   markNotificationRead(notif.id);
                 }
@@ -151,7 +152,27 @@ const Notifications: React.FC = () => {
                   } else {
                     navigate(isCoachPath ? '/coach/roster' : '/athlete/dashboard#coach-feedback');
                   }
-                } else if (notif.type === 'WorkoutCompleted' || notif.type === 'CheckInSubmitted') {
+                } else if (notif.type === 'CheckInSubmitted') {
+                  if (isCoachPath) {
+                    const match = notif.message.match(/^(.*?) (submitted|updated) their weekly check-in\.$/);
+                    if (match) {
+                      const athleteName = match[1].trim();
+                      try {
+                        const rosterData = await getRoster(1, 100);
+                        const athlete = rosterData.items.find(
+                          (a) => a.athleteName.trim().toLowerCase() === athleteName.toLowerCase()
+                        );
+                        if (athlete) {
+                          navigate(`/coach/roster/${athlete.athleteId}#check-in-history`);
+                          return;
+                        }
+                      } catch (err) {
+                        console.error('Error fetching roster to locate notification athlete:', err);
+                      }
+                    }
+                    navigate('/coach/roster');
+                  }
+                } else if (notif.type === 'WorkoutCompleted') {
                   if (isCoachPath) navigate('/coach/dashboard');
                 } else if (notif.type === 'MacroAlert') {
                   if (!isCoachPath) navigate('/athlete/dashboard');

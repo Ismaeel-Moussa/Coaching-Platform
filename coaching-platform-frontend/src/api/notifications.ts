@@ -1,17 +1,14 @@
 import axiosInstance from './axiosInstance';
-
-export interface NotificationDto {
-  id: number;
-  recipientUserId: number;
-  type: string;
-  message: string;
-  isRead: boolean;
-  createdAt: string;
-}
+import type { NotificationDto } from '../types/Notification';
 
 export const getNotifications = async (isRead?: boolean): Promise<NotificationDto[]> => {
   const params = isRead !== undefined ? { isRead } : {};
   const response = await axiosInstance.get<NotificationDto[]>('/notifications', { params });
+  return response.data;
+};
+
+export const getUnreadCount = async (): Promise<{ unreadCount: number }> => {
+  const response = await axiosInstance.get<{ unreadCount: number }>('/notifications/count');
   return response.data;
 };
 
