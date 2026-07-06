@@ -75,6 +75,13 @@ public class NotificationService : _BaseService, INotificationService
         return result;
     }
 
+    public async Task<int> GetUnreadCountAsync()
+    {
+        var userId = LoggedInUser.Id;
+        return await _notificationRepo.Query()
+            .CountAsync(n => n.RecipientUserId == userId && !n.IsRead);
+    }
+
     public async Task MarkAsReadAsync(int notificationId)
     {
         var userId = LoggedInUser.Id;

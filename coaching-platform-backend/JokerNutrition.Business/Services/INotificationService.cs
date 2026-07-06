@@ -9,6 +9,7 @@ public interface INotificationService
 {
     Task CreateAndSendNotificationAsync(int recipientUserId, NotificationType type, string message);
     Task<List<NotificationDto>> GetUserNotificationsAsync(bool? isRead = null);
+    Task<int> GetUnreadCountAsync();
     Task MarkAsReadAsync(int notificationId);
     Task MarkAllAsReadAsync();
     Task SendDirectUpdateAsync(int recipientUserId, string method, object data);
