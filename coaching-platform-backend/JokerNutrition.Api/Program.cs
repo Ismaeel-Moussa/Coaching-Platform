@@ -119,9 +119,6 @@ try
     builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
     builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
     {
-        // Register DbContext
-        containerBuilder.RegisterType<JokerNutritionContext>().InstancePerLifetimeScope();
-
         // Register JwtTokenHelper
         containerBuilder.RegisterType<JwtTokenHelper>().As<IJwtTokenHelper>().InstancePerLifetimeScope();
 
@@ -210,6 +207,26 @@ try
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "Joker Nutrition API v1");
             c.RoutePrefix = "swagger";
         });
+    }
+    else
+    {
+        app.UseExceptionHandler(errorApp =>
+        {
+            errorApp.Run(async context =>
+            {
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = "application/json";
+                var responseObj = new
+                {
+                    statusCode = 500,
+                    message = "An unexpected error occurred.",
+                    timestamp = DateTime.UtcNow
+                };
+                var jsonBytes = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(responseObj);
+                await context.Response.Body.WriteAsync(jsonBytes);
+            });
+        });
+        app.UseHsts();
     }
 
     // 14. Middleware pipeline
