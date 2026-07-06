@@ -3,6 +3,8 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Tooltip, Drawer } from 'antd';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNotifications } from '../contexts/NotificationContext';
+import HealthBanner from '../components/HealthBanner/HealthBanner';
+import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary';
 import './AthleteLayout.scss';
 
 const athleteNavItems = [
@@ -261,7 +263,10 @@ const AthleteLayout: React.FC = () => {
 
       {/* Main content */}
       <main className="athlete-layout__main">
-        <Outlet />
+        <HealthBanner />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
     </div>
   );

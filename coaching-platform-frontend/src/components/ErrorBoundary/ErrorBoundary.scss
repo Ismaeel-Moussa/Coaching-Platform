@@ -1,0 +1,96 @@
+.error-boundary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: var(--space-md, 24px);
+  background-color: var(--background-color, #f9f9ff);
+
+  &__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: var(--color-white, #ffffff);
+    padding: var(--space-xl, 40px) var(--space-lg, 32px);
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: var(--shadow-lg);
+    max-width: 480px;
+    width: 100%;
+    border: 1px solid var(--color-border-light, rgba(198, 198, 206, 0.5));
+  }
+
+  &__logo {
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-navy, #0b132b);
+    margin-bottom: var(--space-md, 24px);
+    letter-spacing: 0.1em;
+    background: linear-gradient(135deg, var(--color-navy), var(--color-navy-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  &__icon {
+    font-size: 56px;
+    color: var(--color-red, #ba1a1a);
+    margin-bottom: var(--space-sm, 16px);
+  }
+
+  &__title {
+    font-family: var(--font-heading);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-navy, #0b132b);
+    margin-bottom: var(--space-xs, 8px);
+  }
+
+  &__message {
+    font-size: 15px;
+    color: var(--color-text-secondary, #45464d);
+    margin-bottom: var(--space-md, 24px);
+    line-height: 1.5;
+  }
+
+  &__debug {
+    font-family: var(--font-data, monospace);
+    font-size: 12px;
+    background-color: var(--surface-container-low, #f1f3ff);
+    color: var(--color-red-bright, #dc2626);
+    padding: var(--space-xs, 8px) var(--space-sm, 16px);
+    border-radius: var(--radius-card, 8px);
+    max-height: 120px;
+    overflow-y: auto;
+    width: 100%;
+    text-align: left;
+    margin-bottom: var(--space-md, 24px);
+    border: 1px solid var(--surface-variant, #dce2f7);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  &__button {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 600;
+    background-color: var(--color-gold, #fdc003);
+    color: var(--color-navy, #0b132b);
+    border: none;
+    padding: 12px 28px;
+    border-radius: var(--radius-btn, 4px);
+    cursor: pointer;
+    transition: background-color var(--transition-fast, 150ms ease), transform var(--transition-fast, 150ms ease);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    &:hover {
+      background-color: var(--color-gold-dim, #fabd00);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}

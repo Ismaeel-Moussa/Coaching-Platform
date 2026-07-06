@@ -3,6 +3,8 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Tooltip, Drawer } from 'antd';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNotifications } from '../contexts/NotificationContext';
+import HealthBanner from '../components/HealthBanner/HealthBanner';
+import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary';
 import './CoachLayout.scss';
 
 const coachNavItems = [
@@ -222,7 +224,10 @@ const CoachLayout: React.FC = () => {
 
       {/* Main content */}
       <main className="coach-layout__main">
-        <Outlet />
+        <HealthBanner />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
     </div>
   );
