@@ -546,11 +546,16 @@
       font-weight: 700 !important;
       text-transform: uppercase !important;
       font-size: 11px !important;
-      background-color: var(--color-navy) !important;
-      border-color: var(--color-navy) !important;
 
-      &:hover {
-        background-color: var(--color-navy-light) !important;
+      &:not(:disabled) {
+        background-color: var(--color-navy) !important;
+        border-color: var(--color-navy) !important;
+        color: #ffffff !important;
+
+        &:hover {
+          background-color: var(--color-navy-light) !important;
+          border-color: var(--color-navy-light) !important;
+        }
       }
     }
   }

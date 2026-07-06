@@ -36,8 +36,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!token) return;
     try {
       setLoading(true);
-      const data = await getNotifications(1, 50); // Get first 50 notifications
-      setNotifications(data.items);
+      const data = await getNotifications(); // Get all notifications as flat array
+      setNotifications(data);
       const countData = await getUnreadCount();
       setUnreadCount(countData.unreadCount);
     } catch (err) {
