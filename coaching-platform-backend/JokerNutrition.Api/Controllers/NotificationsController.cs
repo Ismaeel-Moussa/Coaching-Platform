@@ -31,6 +31,16 @@ public class NotificationsController : ControllerBase
     }
 
     /// <summary>
+    /// Returns the unread notification count for the sidebar badge.
+    /// </summary>
+    [HttpGet("count")]
+    public async Task<IActionResult> GetUnreadCount()
+    {
+        var count = await _notificationService.GetUnreadCountAsync();
+        return Ok(new { unreadCount = count });
+    }
+
+    /// <summary>
     /// Marks a specific notification as read.
     /// </summary>
     [HttpPatch("{id:int}/read")]
