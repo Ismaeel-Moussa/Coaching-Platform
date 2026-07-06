@@ -3,6 +3,7 @@ using JokerNutrition.Business.Forms.Recipes;
 using JokerNutrition.Business.Services;
 using JokerNutrition.Data.Enums;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JokerNutrition.Api.Controllers;
@@ -47,6 +48,27 @@ public class RecipesController : ControllerBase
     {
         var result = await _recipeService.CreateRecipeAsync(form);
         return Created("", result);
+    }
+
+    /// <summary>Update an existing recipe metadata and ingredients.</summary>
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = "Athlete,Admin")]
+    public async Task<IActionResult> UpdateRecipe(int id, [FromBody] UpdateRecipeForm form)
+    {
+        var result = await _recipeService.UpdateRecipeAsync(id, form);
+        return Ok(result);
+    }
+
+    /// <summary>Upload a recipe image.</summary>
+    [HttpPost("{id:int}/image")]
+    [Authorize(Roles = "Athlete,Admin")]
+    public async Task<IActionResult> UploadRecipeImage(int id, IFormFile image)
+    {
+        if (image == null || image.Length == 0)
+            return BadRequest("No image file provided.");
+
+        var result = await _recipeService.UploadRecipeImageAsync(id, image);
+        return Ok(result);
     }
 
     /// <summary>Quick-add a full recipe to today's diary under a specified meal type.</summary>

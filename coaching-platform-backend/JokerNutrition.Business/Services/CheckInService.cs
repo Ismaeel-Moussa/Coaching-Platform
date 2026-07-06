@@ -103,6 +103,8 @@ public class CheckInService : _BaseService, ICheckInService
         else
         {
             existing!.SubmittedAt = DateTime.UtcNow;
+            existing.CoachNotes = null;
+            existing.CoachReviewedAt = null;
         }
 
         // Apply form values
@@ -126,8 +128,8 @@ public class CheckInService : _BaseService, ICheckInService
 
         await _checkInRepo.SaveChangesAsync();
 
-        // Notify the coach only on the first submission
-        if (isNew && athlete.AssignedCoachId.HasValue)
+        // Notify the coach on submission or update
+        if (athlete.AssignedCoachId.HasValue)
         {
             var coach = await _coachRepo.Query()
                 .Include(c => c.User)
@@ -136,10 +138,14 @@ public class CheckInService : _BaseService, ICheckInService
             if (coach is not null)
             {
                 var athleteName = $"{athlete.User.FirstName} {athlete.User.LastName}";
+                var notificationMsg = isNew
+                    ? $"{athleteName} submitted their weekly check-in."
+                    : $"{athleteName} updated their weekly check-in.";
+
                 await _notificationService.CreateAndSendNotificationAsync(
                     coach.UserId,
                     NotificationType.CheckInSubmitted,
-                    $"{athleteName} submitted their weekly check-in.");
+                    notificationMsg);
             }
         }
 

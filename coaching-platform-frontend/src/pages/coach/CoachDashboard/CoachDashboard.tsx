@@ -141,9 +141,12 @@ const CoachDashboard: React.FC = () => {
         </div>
 
         {/* KPI 3: Pending Check-ins */}
-        <div className={`coach-dashboard__kpi-card ${
-          (dashboardData?.pendingCheckInsCount ?? 0) > 0 ? 'coach-dashboard__kpi-card--alert' : ''
-        }`}>
+        <div 
+          className={`coach-dashboard__kpi-card coach-dashboard__kpi-card--clickable ${
+            (dashboardData?.pendingCheckInsCount ?? 0) > 0 ? 'coach-dashboard__kpi-card--alert' : ''
+          }`}
+          onClick={() => navigate('/coach/roster?filter=NoRecentCheckIn')}
+        >
           <div className={`coach-dashboard__kpi-icon ${
             (dashboardData?.pendingCheckInsCount ?? 0) > 0 
               ? 'coach-dashboard__kpi-icon--red' 

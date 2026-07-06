@@ -37,6 +37,8 @@ export interface RecipeDto {
   totalCarbs: number;
   totalFat: number;
   createdAt: string;
+  imageUrl?: string;
+  videoUrl?: string;
   ingredients: RecipeIngredientDto[];
 }
 
@@ -63,8 +65,11 @@ export interface CreateRecipeForm {
   prepTimeMinutes: number;
   cookTimeMinutes: number;
   servings: number;
+  videoUrl?: string;
   ingredients: CreateRecipeIngredient[];
 }
+
+export type UpdateRecipeForm = CreateRecipeForm;
 
 export interface GetRecipesParams {
   category?: RecipeCategory;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Table, Input, Tag, Avatar, Button, Pagination } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useGetRoster } from '../../../hooks/useCoachHub/useCoachHub';
 import { formatRelativeTime } from '../../../utils/date';
 import './ClientRoster.scss';
@@ -9,7 +9,16 @@ type ActiveTab = 'All' | 'ComplianceAlert' | 'NoRecentCheckIn';
 
 const ClientRoster: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<ActiveTab>('All');
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const initialFilter = searchParams.get('filter') as ActiveTab || 'All';
+  const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
+    if (initialFilter === 'ComplianceAlert' || initialFilter === 'NoRecentCheckIn') {
+      return initialFilter;
+    }
+    return 'All';
+  });
+
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const PAGE_SIZE = 10;
@@ -160,19 +169,31 @@ const ClientRoster: React.FC = () => {
         <div className="client-roster__tabs">
           <button
             className={`client-roster__tab ${activeTab === 'All' ? 'client-roster__tab--active' : ''}`}
-            onClick={() => { setActiveTab('All'); setCurrentPage(1); }}
+            onClick={() => {
+              setActiveTab('All');
+              setCurrentPage(1);
+              setSearchParams({});
+            }}
           >
             All Clients
           </button>
           <button
             className={`client-roster__tab ${activeTab === 'ComplianceAlert' ? 'client-roster__tab--active' : ''}`}
-            onClick={() => { setActiveTab('ComplianceAlert'); setCurrentPage(1); }}
+            onClick={() => {
+              setActiveTab('ComplianceAlert');
+              setCurrentPage(1);
+              setSearchParams({ filter: 'ComplianceAlert' });
+            }}
           >
             Compliance Alerts
           </button>
           <button
             className={`client-roster__tab ${activeTab === 'NoRecentCheckIn' ? 'client-roster__tab--active' : ''}`}
-            onClick={() => { setActiveTab('NoRecentCheckIn'); setCurrentPage(1); }}
+            onClick={() => {
+              setActiveTab('NoRecentCheckIn');
+              setCurrentPage(1);
+              setSearchParams({ filter: 'NoRecentCheckIn' });
+            }}
           >
             No Recent Check-in
           </button>

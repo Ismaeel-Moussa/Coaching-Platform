@@ -38,6 +38,7 @@ const FoodRecipeAdmin: React.FC = () => {
   // Recipes state
   const [recipeCategory, setRecipeCategory] = useState<string>('All');
   const [isRecipeModalVisible, setIsRecipeModalVisible] = useState<boolean>(false);
+  const [editingRecipe, setEditingRecipe] = useState<RecipeDto | null>(null);
 
   const [foodForm] = Form.useForm();
 
@@ -298,7 +299,10 @@ const FoodRecipeAdmin: React.FC = () => {
                   />
                   <Button
                     type="primary"
-                    onClick={() => setIsRecipeModalVisible(true)}
+                    onClick={() => {
+                      setEditingRecipe(null);
+                      setIsRecipeModalVisible(true);
+                    }}
                     icon={<span className="material-symbols-outlined">restaurant_menu</span>}
                     className="food-recipe-admin__btn food-recipe-admin__btn--navy"
                   >
@@ -320,6 +324,16 @@ const FoodRecipeAdmin: React.FC = () => {
                       <div key={recipe.id} className="food-recipe-admin__recipe-card-wrapper">
                         <RecipeCard recipe={recipe} />
                         <div className="food-recipe-admin__recipe-overlay-actions">
+                          <Button
+                            type="primary"
+                            shape="circle"
+                            icon={<span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit</span>}
+                            onClick={() => {
+                              setEditingRecipe(recipe);
+                              setIsRecipeModalVisible(true);
+                            }}
+                            style={{ backgroundColor: 'var(--color-gold)', borderColor: 'var(--color-gold)', color: 'var(--color-navy)' }}
+                          />
                           <Popconfirm
                             title="Delete this recipe?"
                             onConfirm={() => handleDeleteRecipe(recipe.id)}
@@ -398,7 +412,11 @@ const FoodRecipeAdmin: React.FC = () => {
       {/* Recipe Wizard Modal */}
       <CreateRecipeModal
         open={isRecipeModalVisible}
-        onClose={() => setIsRecipeModalVisible(false)}
+        onClose={() => {
+          setIsRecipeModalVisible(false);
+          setEditingRecipe(null);
+        }}
+        recipeToEdit={editingRecipe}
       />
     </div>
   );

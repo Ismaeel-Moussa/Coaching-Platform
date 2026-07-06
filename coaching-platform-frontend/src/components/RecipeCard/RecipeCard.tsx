@@ -23,20 +23,40 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onQuickAdd, onViewDetai
 
   return (
     <div className="recipe-card" onClick={() => onViewDetails?.(recipe)}>
-      {/* Color band header */}
-      <div
-        className="recipe-card__band"
-        style={{ backgroundColor: categoryColor }}
-      >
-        <span className="recipe-card__band-label">
-          {RECIPE_CATEGORY_LABELS[recipe.category]}
-        </span>
-        {recipe.isJokerRecipe && (
-          <span className="recipe-card__joker-badge">
-            <span className="material-symbols-outlined">verified</span>
-            Joker
-          </span>
+      {/* Recipe Image or Placeholder with Overlays */}
+      <div className="recipe-card__image-wrapper">
+        {recipe.imageUrl ? (
+          <img src={recipe.imageUrl} alt={recipe.name} className="recipe-card__image" />
+        ) : (
+          <div className="recipe-card__image-placeholder">
+            <span className="material-symbols-outlined">restaurant</span>
+          </div>
         )}
+
+        {/* Floating Badges Overlay */}
+        <div className="recipe-card__overlay">
+          <span
+            className="recipe-card__category-badge"
+            style={{ backgroundColor: categoryColor }}
+          >
+            {RECIPE_CATEGORY_LABELS[recipe.category]}
+          </span>
+          <div className="recipe-card__band-badges">
+            {recipe.videoUrl && (
+              <a
+                className="recipe-card__video-badge"
+                href={recipe.videoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title="Watch Recipe Video"
+              >
+                <span className="material-symbols-outlined">smart_display</span>
+                Watch
+              </a>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Body */}

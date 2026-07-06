@@ -8,6 +8,7 @@ using JokerNutrition.Business.Mappers;
 using JokerNutrition.Data.Entities;
 using JokerNutrition.Data.Enums;
 using JokerNutrition.Data.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -18,6 +19,8 @@ public interface IRecipeService
     Task<PagedResult<RecipeDto>> GetRecipesAsync(RecipeCategory? category, string? search, int page, int pageSize);
     Task<RecipeDto> GetRecipeByIdAsync(int id);
     Task<RecipeDto> CreateRecipeAsync(CreateRecipeForm form);
+    Task<RecipeDto> UpdateRecipeAsync(int recipeId, UpdateRecipeForm form);
+    Task<RecipeDto> UploadRecipeImageAsync(int recipeId, IFormFile image);
     Task<DailyDiaryDto> QuickAddToDiaryAsync(int recipeId, MealType mealType);
 }
 
@@ -28,6 +31,7 @@ public class RecipeService : _BaseService, IRecipeService
     private readonly IAthleteRepository _athleteRepo;
     private readonly IDiaryService _diaryService;
     private readonly IMealLogRepository _mealLogRepo;
+    private readonly IBlobStorageService _blobService;
 
     public RecipeService(
         IPrincipal principal,
@@ -36,7 +40,8 @@ public class RecipeService : _BaseService, IRecipeService
         IFoodRepository foodRepo,
         IAthleteRepository athleteRepo,
         IDiaryService diaryService,
-        IMealLogRepository mealLogRepo)
+        IMealLogRepository mealLogRepo,
+        IBlobStorageService blobService)
         : base(principal, logger)
     {
         _recipeRepo = recipeRepo;
@@ -44,6 +49,7 @@ public class RecipeService : _BaseService, IRecipeService
         _athleteRepo = athleteRepo;
         _diaryService = diaryService;
         _mealLogRepo = mealLogRepo;
+        _blobService = blobService;
     }
 
     public async Task<PagedResult<RecipeDto>> GetRecipesAsync(RecipeCategory? category, string? search, int page, int pageSize)
@@ -115,8 +121,9 @@ public class RecipeService : _BaseService, IRecipeService
             PrepTimeMinutes = form.PrepTimeMinutes,
             CookTimeMinutes = form.CookTimeMinutes,
             Servings = form.Servings,
-            IsJokerRecipe = false,
+            IsJokerRecipe = LoggedInUser.Role == "Admin",
             CreatedByAthleteId = athlete?.Id,
+            VideoUrl = form.VideoUrl,
             CreatedAt = DateTime.UtcNow,
             TotalCalories = totalCal,
             TotalProtein = totalPro,
@@ -132,6 +139,95 @@ public class RecipeService : _BaseService, IRecipeService
         };
 
         await _recipeRepo.CreateAsync(recipe);
+        await _recipeRepo.SaveChangesAsync();
+
+        return RecipeMapper.Map(recipe);
+    }
+
+    public async Task<RecipeDto> UpdateRecipeAsync(int recipeId, UpdateRecipeForm form)
+    {
+        var userId = LoggedInUser.Id;
+        var athlete = await _athleteRepo.Query()
+            .FirstOrDefaultAsync(a => a.UserId == userId);
+
+        var recipe = await _recipeRepo.Query()
+            .Include(r => r.Ingredients)
+            .FirstOrDefaultAsync(r => r.Id == recipeId)
+            ?? throw new KeyNotFoundException($"Recipe {recipeId} not found.");
+
+        if (LoggedInUser.Role != "Admin")
+        {
+            if (recipe.CreatedByAthleteId != athlete?.Id)
+            {
+                throw new UnauthorizedAccessException("You do not have permission to edit this recipe.");
+            }
+        }
+
+        recipe.Name = form.Name;
+        recipe.Description = form.Description;
+        recipe.Category = form.Category;
+        recipe.PrepTimeMinutes = form.PrepTimeMinutes;
+        recipe.CookTimeMinutes = form.CookTimeMinutes;
+        recipe.Servings = form.Servings;
+        recipe.VideoUrl = form.VideoUrl;
+
+        recipe.Ingredients.Clear();
+
+        var foodIds = form.Ingredients.Select(i => i.FoodId).Distinct().ToList();
+        var foods = await _foodRepo.Query()
+            .Where(f => foodIds.Contains(f.Id))
+            .ToDictionaryAsync(f => f.Id);
+
+        var ingredientTuples = form.Ingredients
+            .Select(i => (foods[i.FoodId], i.QuantityGrams, i.State));
+
+        var (totalCal, totalPro, totalCarb, totalFat) = MacroCalculatorHelper.CalculateRecipeTotals(ingredientTuples);
+
+        recipe.TotalCalories = totalCal;
+        recipe.TotalProtein = totalPro;
+        recipe.TotalCarbs = totalCarb;
+        recipe.TotalFat = totalFat;
+
+        recipe.Ingredients = form.Ingredients.Select(i => new RecipeIngredient
+        {
+            RecipeId = recipe.Id,
+            FoodId = i.FoodId,
+            Food = foods[i.FoodId],
+            QuantityGrams = i.QuantityGrams,
+            State = i.State
+        }).ToList();
+
+        _recipeRepo.Update(recipe);
+        await _recipeRepo.SaveChangesAsync();
+
+        var updatedRecipe = await _recipeRepo.Query()
+            .Include(r => r.Ingredients).ThenInclude(i => i.Food)
+            .FirstOrDefaultAsync(r => r.Id == recipeId);
+
+        return RecipeMapper.Map(updatedRecipe!);
+    }
+
+    public async Task<RecipeDto> UploadRecipeImageAsync(int recipeId, IFormFile image)
+    {
+        var recipe = await _recipeRepo.Query()
+            .Include(r => r.Ingredients).ThenInclude(i => i.Food)
+            .FirstOrDefaultAsync(r => r.Id == recipeId)
+            ?? throw new KeyNotFoundException($"Recipe {recipeId} not found.");
+
+        if (!string.IsNullOrEmpty(recipe.ImageUrl))
+        {
+            await _blobService.DeleteFileAsync(recipe.ImageUrl);
+        }
+
+        var blobName = $"recipes/{recipeId}/image.jpg";
+        string imageUrl;
+        using (var stream = image.OpenReadStream())
+        {
+            imageUrl = await _blobService.UploadFileAsync(stream, blobName, image.ContentType);
+        }
+
+        recipe.ImageUrl = imageUrl;
+        _recipeRepo.Update(recipe);
         await _recipeRepo.SaveChangesAsync();
 
         return RecipeMapper.Map(recipe);
