@@ -1,0 +1,61 @@
+.health-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--color-warning-bg, rgba(247, 144, 9, 0.10));
+  border-bottom: 1px solid var(--color-warning, #f79009);
+  padding: 8px 16px;
+  color: var(--color-text-primary, #141b2b);
+  animation: slideDown 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-sm);
+
+  &__content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  &__icon {
+    color: var(--color-warning, #f79009);
+    font-size: 18px;
+  }
+
+  &__text {
+    line-height: 1.4;
+  }
+
+  &__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-full, 9999px);
+    color: var(--color-text-secondary, #45464d);
+    transition: background-color var(--transition-fast, 150ms ease), color var(--transition-fast, 150ms ease);
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--color-text-primary, #141b2b);
+    }
+
+    span {
+      font-size: 18px;
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

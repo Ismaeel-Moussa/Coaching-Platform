@@ -9,6 +9,7 @@ import AuthLayout from '../layouts/AuthLayout';
 import AthleteLayout from '../layouts/AthleteLayout';
 import CoachLayout from '../layouts/CoachLayout';
 import { NotificationProvider } from '../contexts/NotificationContext';
+import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary';
 
 // Auth pages (eager — small, critical path)
 import SignIn from '../pages/auth/SignIn/SignIn';

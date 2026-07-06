@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { message as antMessage } from 'antd';
+import { getRateLimitMessage } from '../utils/rateLimitMessages';
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
 
@@ -43,8 +45,20 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const status = error.response?.status;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (status === 429) {
+      const msg = getRateLimitMessage(originalRequest?.url);
+      antMessage.error(msg);
+      return Promise.reject(error);
+    }
+
+    if (status >= 500) {
+      antMessage.error('Server error. Please try again later.');
+      return Promise.reject(error);
+    }
+
+    if (status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
