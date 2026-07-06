@@ -28,5 +28,8 @@ public class RepositoriesModule : Module
         builder.RegisterType<NotificationRepository>().As<INotificationRepository>().InstancePerLifetimeScope();
         builder.RegisterType<UserRepository>().As<IUserRepository>().InstancePerLifetimeScope();
         builder.RegisterType<PasswordResetTokenRepository>().As<IPasswordResetTokenRepository>().InstancePerLifetimeScope();
+
+        // ─── Day 7: Audit ─────────────────────────────────────────────────
+        builder.RegisterType<AuditLogRepository>().As<IAuditLogRepository>().InstancePerLifetimeScope();
     }
 }

@@ -86,5 +86,7 @@ public class ExerciseSetLogMapping : IEntityTypeConfiguration<ExerciseSetLog>
         builder.Property(esl => esl.WeightKg).HasPrecision(6, 2);
         builder.HasOne(esl => esl.WorkoutLog).WithMany(wl => wl.Sets).HasForeignKey(esl => esl.WorkoutLogId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(esl => esl.Exercise).WithMany().HasForeignKey(esl => esl.ExerciseId).OnDelete(DeleteBehavior.Restrict);
+        // Fast lookup of all sets within a workout session
+        builder.HasIndex(esl => esl.WorkoutLogId);
     }
 }

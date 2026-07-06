@@ -172,3 +172,11 @@ public class PasswordResetTokenRepository : _BaseRepository<PasswordResetToken>,
     public PasswordResetTokenRepository(JokerNutritionContext context, ILogger<PasswordResetTokenRepository> logger)
         : base(context, logger) { }
 }
+
+// ─── AuditLog ──────────────────────────────────────────────────────
+public interface IAuditLogRepository : _IBaseRepository<AuditLog> { }
+public class AuditLogRepository : _BaseRepository<AuditLog>, IAuditLogRepository
+{
+    public AuditLogRepository(JokerNutritionContext context, ILogger<AuditLogRepository> logger)
+        : base(context, logger) { }
+}

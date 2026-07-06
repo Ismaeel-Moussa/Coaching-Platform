@@ -29,9 +29,11 @@ public class AuditLog
 {
     public int Id { get; set; }
     public int? UserId { get; set; }
+    public string? PerformedByName { get; set; }    // Denormalised for fast reads
     public string Action { get; set; } = string.Empty;
     public string EntityType { get; set; } = string.Empty;
     public string? EntityId { get; set; }
+    public string? IpAddress { get; set; }           // Caller's remote IP
     public string? Details { get; set; }
     public DateTime CreatedAt { get; set; }
 }

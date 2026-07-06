@@ -1,4 +1,4 @@
-using System.Security.Principal;
+﻿using System.Security.Principal;
 using JokerNutrition.Business.Configurations;
 using JokerNutrition.Business.DTOs.Auth;
 using JokerNutrition.Data.Enums;
@@ -7,6 +7,7 @@ using JokerNutrition.Business.Helpers;
 using JokerNutrition.Data.Entities;
 using JokerNutrition.Data.Entities.Identities;
 using JokerNutrition.Data.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -33,6 +34,8 @@ public class AuthService : _BaseService, IAuthService
     private readonly ICoachRepository _coachRepo;
     private readonly IEmailService _emailService;
     private readonly INotificationService _notificationService;
+    private readonly IAuditLogService _auditLogService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly AppSettings _appSettings;
 
     public AuthService(
@@ -46,7 +49,9 @@ public class AuthService : _BaseService, IAuthService
         ICoachRepository coachRepo,
         IEmailService emailService,
         IOptions<AppSettings> appSettings,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IAuditLogService auditLogService,
+        IHttpContextAccessor httpContextAccessor)
         : base(principal, logger)
     {
         _userManager = userManager;
@@ -58,6 +63,8 @@ public class AuthService : _BaseService, IAuthService
         _emailService = emailService;
         _appSettings = appSettings.Value;
         _notificationService = notificationService;
+        _auditLogService = auditLogService;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<AuthTokenDto> LoginAsync(LoginForm form)
@@ -74,6 +81,16 @@ public class AuthService : _BaseService, IAuthService
 
         var roles = await _userManager.GetRolesAsync(user);
         var role = roles.FirstOrDefault() ?? "Athlete";
+
+        // Audit: record successful login
+        var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        await _auditLogService.LogAsync(
+            userId: user.Id,
+            performedByName: $"{user.FirstName} {user.LastName}",
+            action: "Login",
+            entityType: "User",
+            entityId: user.Id.ToString(),
+            ipAddress: ip);
 
         return await IssueTokenPairAsync(user, role);
     }
@@ -170,6 +187,16 @@ public class AuthService : _BaseService, IAuthService
         var user = storedToken.User;
         var roles = await _userManager.GetRolesAsync(user);
         var role = roles.FirstOrDefault() ?? "Athlete";
+
+        // Audit: record successful login
+        var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        await _auditLogService.LogAsync(
+            userId: user.Id,
+            performedByName: $"{user.FirstName} {user.LastName}",
+            action: "Login",
+            entityType: "User",
+            entityId: user.Id.ToString(),
+            ipAddress: ip);
 
         return await IssueTokenPairAsync(user, role);
     }
