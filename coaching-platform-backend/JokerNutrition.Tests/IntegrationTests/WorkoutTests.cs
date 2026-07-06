@@ -26,7 +26,7 @@ public class WorkoutTests : IClassFixture<TestWebAppFactory>
         AuthHelpers.SetBearerToken(_client, token);
 
         // Act
-        var response = await _client.GetAsync("/api/workout-logs/today");
+        var response = await _client.GetAsync("/api/workouts/today");
 
         // Assert — 200 with data or 204 if no program assigned yet
         Assert.True(
@@ -41,7 +41,7 @@ public class WorkoutTests : IClassFixture<TestWebAppFactory>
         var token = await AuthHelpers.GetAccessTokenAsync(_client, "athlete@test.com", "Athlete@Test123!");
         AuthHelpers.SetBearerToken(_client, token);
 
-        var response = await _client.GetAsync("/api/workout-logs/history");
+        var response = await _client.GetAsync("/api/workouts/history");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
@@ -53,7 +53,7 @@ public class WorkoutTests : IClassFixture<TestWebAppFactory>
         var token = await AuthHelpers.GetAccessTokenAsync(_client, "coach@test.com", "Coach@Test123!");
         AuthHelpers.SetBearerToken(_client, token);
 
-        var response = await _client.GetAsync("/api/workout-logs/today");
+        var response = await _client.GetAsync("/api/workouts/today");
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -65,7 +65,7 @@ public class WorkoutTests : IClassFixture<TestWebAppFactory>
         AuthHelpers.SetBearerToken(_client, token);
 
         // Missing required fields
-        var response = await _client.PostAsJsonAsync("/api/workout-logs/log-set", new { });
+        var response = await _client.PostAsJsonAsync("/api/workouts/log-set", new { });
 
         // 400 Bad Request because exerciseId / weight / reps are required
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);

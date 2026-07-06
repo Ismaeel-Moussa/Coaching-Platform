@@ -1,10 +1,13 @@
+using Autofac;
 using JokerNutrition.Data.Contexts;
 using JokerNutrition.Data.Entities;
 using JokerNutrition.Data.Entities.Identities;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace JokerNutrition.Tests.Helpers;
 
@@ -15,6 +18,17 @@ namespace JokerNutrition.Tests.Helpers;
 public class TestWebAppFactory : WebApplicationFactory<Program>
 {
     private static int _dbCounter;
+
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        // Register fake email service in Autofac to override the real one
+        builder.ConfigureContainer<ContainerBuilder>(cb =>
+        {
+            cb.RegisterType<FakeEmailService>().As<JokerNutrition.Business.Services.IEmailService>().InstancePerLifetimeScope();
+        });
+
+        return base.CreateHost(builder);
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -33,6 +47,12 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
             services.AddDbContext<JokerNutritionContext>(opts =>
                 opts.UseInMemoryDatabase(dbName));
 
+            // Bypass the .NET 10 PipeWriter.UnflushedBytes bug in TestServer
+            services.PostConfigure<Microsoft.AspNetCore.Mvc.MvcOptions>(options =>
+            {
+                options.OutputFormatters.Insert(0, new TestJsonOutputFormatter());
+            });
+
             // Ensure the DB is created and seeded with minimal test data
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
@@ -41,6 +61,50 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
             db.Database.EnsureCreated();
             SeedTestData(db, hasher);
         });
+    }
+
+    /// <summary>
+    /// Custom text formatter that writes JSON directly to the Response Stream (bypassing PipeWriter).
+    /// </summary>
+    private class TestJsonOutputFormatter : Microsoft.AspNetCore.Mvc.Formatters.TextOutputFormatter
+    {
+        public TestJsonOutputFormatter()
+        {
+            SupportedMediaTypes.Add("application/json");
+            SupportedMediaTypes.Add("text/json");
+            SupportedMediaTypes.Add("application/*+json");
+            SupportedEncodings.Add(System.Text.Encoding.UTF8);
+        }
+
+        public override async Task WriteResponseBodyAsync(
+            Microsoft.AspNetCore.Mvc.Formatters.OutputFormatterWriteContext context, 
+            System.Text.Encoding selectedEncoding)
+        {
+            var response = context.HttpContext.Response;
+            if (context.Object != null)
+            {
+                var services = context.HttpContext.RequestServices;
+                var mvcJsonOptions = services?.GetService<Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.Mvc.JsonOptions>>()?.Value;
+                
+                var options = mvcJsonOptions?.JsonSerializerOptions ?? new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                    DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+                };
+
+                await System.Text.Json.JsonSerializer.SerializeAsync(
+                    response.Body, 
+                    context.Object, 
+                    context.ObjectType ?? context.Object.GetType(),
+                    options);
+            }
+        }
+    }
+
+    private class FakeEmailService : JokerNutrition.Business.Services.IEmailService
+    {
+        public Task SendInvitationEmailAsync(string toEmail, string inviteUrl, string role) => Task.CompletedTask;
+        public Task SendPasswordResetEmailAsync(string toEmail, string resetUrl) => Task.CompletedTask;
     }
 
     private static void SeedTestData(JokerNutritionContext db, Microsoft.AspNetCore.Identity.IPasswordHasher<User> hasher)
@@ -69,6 +133,7 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
                 FirstName = "Test",
                 LastName = "Coach",
                 IsActive = true,
+                SecurityStamp = Guid.NewGuid().ToString(),
                 CreatedAt = DateTime.UtcNow
             };
             coach.PasswordHash = hasher.HashPassword(coach, "Coach@Test123!");
@@ -91,6 +156,7 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
                 FirstName = "Test",
                 LastName = "Athlete",
                 IsActive = true,
+                SecurityStamp = Guid.NewGuid().ToString(),
                 CreatedAt = DateTime.UtcNow
             };
             athlete.PasswordHash = hasher.HashPassword(athlete, "Athlete@Test123!");
@@ -102,3 +168,4 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
         db.SaveChanges();
     }
 }
+
