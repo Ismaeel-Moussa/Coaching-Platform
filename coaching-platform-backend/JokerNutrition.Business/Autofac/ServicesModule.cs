@@ -33,5 +33,8 @@ public class ServicesModule : Module
 
         // ─── Day 5: Admin Libraries & Template Builder ────────────────────
         builder.RegisterType<WorkoutTemplateService>().As<IWorkoutTemplateService>().InstancePerLifetimeScope();
+
+        // ─── Day 6: Check-In System & Notifications ───────────────────────
+        builder.RegisterType<CheckInService>().As<ICheckInService>().InstancePerLifetimeScope();
     }
 }
