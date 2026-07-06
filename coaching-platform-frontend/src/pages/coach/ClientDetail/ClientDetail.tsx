@@ -184,6 +184,19 @@ const ClientDetail: React.FC = () => {
     }
   }, [profile]);
 
+  // Hash scroll check for check-in history section
+  useEffect(() => {
+    if (window.location.hash === '#check-in-history' && !isHistoryLoading) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById('check-in-history-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [window.location.hash, isHistoryLoading]);
+
   const handleSaveNote = () => {
     if (!noteText.trim()) return;
     saveNoteMutation.mutate(
@@ -458,7 +471,7 @@ const ClientDetail: React.FC = () => {
           </div>
 
           {/* Check-In History Full Width Section */}
-          <div className="client-detail__history-section">
+          <div id="check-in-history-section" className="client-detail__history-section">
             <div className="client-detail__card">
               <div className="client-detail__card-header">
                 <span className="material-symbols-outlined text-gold">assignment_turned_in</span>

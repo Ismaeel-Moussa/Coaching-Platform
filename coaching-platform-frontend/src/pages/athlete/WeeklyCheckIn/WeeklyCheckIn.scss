@@ -186,6 +186,40 @@
       color: var(--color-navy) !important;
     }
   }
+  &__confirm-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
+
+    @media (max-width: 576px) {
+      flex-direction: column;
+      width: 100%;
+      gap: 12px;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+
+  &__resubmit-btn {
+    border-color: var(--color-navy) !important;
+    color: var(--color-navy) !important;
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0 24px !important;
+    border-radius: var(--radius-btn) !important;
+
+    &:hover {
+      border-color: var(--color-navy-light) !important;
+      color: var(--color-navy-light) !important;
+      background-color: var(--surface-container-low) !important;
+    }
+  }
 }
 
 @media (max-width: 992px) {
@@ -199,6 +233,37 @@
       grid-template-columns: 1fr;
       max-width: 400px;
       margin: var(--space-md) auto 0;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .weekly-check-in {
+    padding: var(--space-xs) 4px;
+
+    &__actions {
+      flex-direction: column-reverse;
+      align-items: stretch;
+      gap: 12px;
+      margin-top: var(--space-md);
+
+      button {
+        width: 100% !important;
+        justify-content: center;
+        height: 44px;
+      }
+    }
+
+    &__card {
+      padding: var(--space-sm) var(--space-xs) !important;
+    }
+
+    &__title {
+      font-size: 24px;
+    }
+
+    &__steps-wrapper {
+      padding: var(--space-sm) var(--space-xs);
     }
   }
 }

@@ -12,6 +12,7 @@ const WeeklyCheckIn: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [checkInId, setCheckInId] = useState<number | null>(null);
+  const [hasExplicitlyChosenToResubmit, setHasExplicitlyChosenToResubmit] = useState<boolean>(false);
 
   // Step 1 Form States
   const [weightKg, setWeightKg] = useState<number | null>(null);
@@ -40,7 +41,6 @@ const WeeklyCheckIn: React.FC = () => {
   // Prefill check-in if there is a recent one to make life easier
   useEffect(() => {
     if (latestCheckIn) {
-      // If submitted in the current ISO week (or just use latest values as a baseline)
       setWeightKg(latestCheckIn.weightKg);
       setWaistCm(latestCheckIn.waistCm);
       setChestCm(latestCheckIn.chestCm);
@@ -51,6 +51,29 @@ const WeeklyCheckIn: React.FC = () => {
       setTrainingStress(latestCheckIn.trainingStress);
     }
   }, [latestCheckIn]);
+
+  // Jump to Confirmation if already submitted for current ISO week
+  useEffect(() => {
+    if (latestCheckIn && !hasExplicitlyChosenToResubmit) {
+      // Calculate Monday of current ISO week
+      const today = new Date();
+      const day = today.getDay();
+      const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+      const currentMonday = new Date(today.setDate(diff));
+      currentMonday.setHours(0, 0, 0, 0);
+
+      const checkInDate = new Date(latestCheckIn.weekOf);
+      const isThisWeek =
+        checkInDate.getFullYear() === currentMonday.getFullYear() &&
+        checkInDate.getMonth() === currentMonday.getMonth() &&
+        checkInDate.getDate() === currentMonday.getDate();
+
+      if (isThisWeek) {
+        setCheckInId(latestCheckIn.id);
+        setCurrentStep(2);
+      }
+    }
+  }, [latestCheckIn, hasExplicitlyChosenToResubmit]);
 
   // Mutations
   const submitCheckInMutation = useSubmitCheckIn();
@@ -296,31 +319,37 @@ const WeeklyCheckIn: React.FC = () => {
           <Card className="weekly-check-in__card weekly-check-in__card--confirm">
             <Result
               status="success"
-              title="Check-In Received!"
+              title={
+                submitCheckInMutation.isSuccess || uploadPhotosMutation.isSuccess
+                  ? "Check-In Received!"
+                  : "Check-in for this week submitted successfully!"
+              }
               subTitle="Your coach has been notified and will review your stats and photos shortly. Check back for custom feedback and adjustments."
-              extra={[
-                <Button
-                  type="primary"
-                  key="dashboard"
-                  onClick={() => navigate('/athlete/dashboard')}
-                  size="large"
-                  className="weekly-check-in__done-btn"
-                >
-                  Return to Dashboard
-                </Button>,
-                <Button
-                  key="history"
-                  onClick={() => {
-                    setCurrentStep(0);
-                    setFrontFile(null);
-                    setSideFile(null);
-                    setBackFile(null);
-                  }}
-                  size="large"
-                >
-                  Update/Resubmit Check-in
-                </Button>,
-              ]}
+              extra={
+                <div className="weekly-check-in__confirm-actions">
+                  <Button
+                    type="primary"
+                    onClick={() => navigate('/athlete/dashboard')}
+                    size="large"
+                    className="weekly-check-in__done-btn"
+                  >
+                    Return to Dashboard
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setHasExplicitlyChosenToResubmit(true);
+                      setCurrentStep(0);
+                      setFrontFile(null);
+                      setSideFile(null);
+                      setBackFile(null);
+                    }}
+                    size="large"
+                    className="weekly-check-in__resubmit-btn"
+                  >
+                    Resubmit Check-in
+                  </Button>
+                </div>
+              }
             />
           </Card>
         )}
