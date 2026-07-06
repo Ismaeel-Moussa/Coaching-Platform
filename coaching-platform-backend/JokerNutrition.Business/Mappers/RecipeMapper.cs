@@ -21,6 +21,8 @@ public static class RecipeMapper
         TotalCarbs = recipe.TotalCarbs,
         TotalFat = recipe.TotalFat,
         CreatedAt = recipe.CreatedAt,
+        ImageUrl = recipe.ImageUrl,
+        VideoUrl = recipe.VideoUrl,
         Ingredients = recipe.Ingredients.Select(MapIngredient).ToList()
     };
 
