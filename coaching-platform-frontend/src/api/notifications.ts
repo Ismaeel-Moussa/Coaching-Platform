@@ -1,24 +1,26 @@
 import axiosInstance from './axiosInstance';
+import type { NotificationDto } from '../types/Notification';
+import type { PagedResult } from '../types/CoachHub';
 
-export interface NotificationDto {
-  id: number;
-  recipientUserId: number;
-  type: string;
-  message: string;
-  isRead: boolean;
-  createdAt: string;
-}
+export const getNotifications = async (
+  page: number = 1,
+  pageSize: number = 20
+): Promise<PagedResult<NotificationDto>> => {
+  const response = await axiosInstance.get<PagedResult<NotificationDto>>('/notifications', {
+    params: { page, pageSize },
+  });
+  return response.data;
+};
 
-export const getNotifications = async (isRead?: boolean): Promise<NotificationDto[]> => {
-  const params = isRead !== undefined ? { isRead } : {};
-  const response = await axiosInstance.get<NotificationDto[]>('/notifications', { params });
+export const getUnreadCount = async (): Promise<{ unreadCount: number }> => {
+  const response = await axiosInstance.get<{ unreadCount: number }>('/notifications/count');
   return response.data;
 };
 
 export const markAsRead = async (id: number): Promise<void> => {
-  await axiosInstance.patch(`/notifications/${id}/read`);
+  await axiosInstance.put(`/notifications/${id}/read`);
 };
 
 export const markAllAsRead = async (): Promise<void> => {
-  await axiosInstance.patch('/notifications/read-all');
+  await axiosInstance.put('/notifications/read-all');
 };

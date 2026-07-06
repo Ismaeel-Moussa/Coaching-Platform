@@ -96,15 +96,33 @@ public class CheckInsController : ControllerBase
     /// Includes coach notes and signed photo download URLs.
     /// </summary>
     [HttpGet("history")]
-    [Authorize(Roles = "Athlete")]
-    public async Task<IActionResult> GetHistory([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    [Authorize(Roles = "Coach,Admin,Athlete")]
+    public async Task<IActionResult> GetHistory([FromQuery] int? athleteId = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var result = await _checkInService.GetMyCheckInHistoryAsync(new BasePaginationForm
+        if (athleteId.HasValue)
         {
-            Page = page,
-            PageSize = pageSize
-        });
-        return Ok(result);
+            if (User.IsInRole("Athlete"))
+                return Forbid();
+
+            var result = await _checkInService.GetCheckInHistoryAsync(athleteId.Value, new BasePaginationForm
+            {
+                Page = page,
+                PageSize = pageSize
+            });
+            return Ok(result);
+        }
+        else
+        {
+            if (!User.IsInRole("Athlete"))
+                return BadRequest("athleteId parameter is required for coaches/admins.");
+
+            var result = await _checkInService.GetMyCheckInHistoryAsync(new BasePaginationForm
+            {
+                Page = page,
+                PageSize = pageSize
+            });
+            return Ok(result);
+        }
     }
 
     /// <summary>
