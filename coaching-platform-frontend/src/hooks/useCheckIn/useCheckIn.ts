@@ -27,17 +27,18 @@ export const useSubmitCheckIn = () => {
   });
 };
 
-export const useUploadPhotos = (checkInId: number) => {
+export const useUploadPhotos = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (variables: {
+      checkInId: number;
       files: { Front?: File; Side?: File; Back?: File };
       onProgress?: (progress: number) => void;
-    }) => uploadPhotos(checkInId, variables.files, variables.onProgress),
-    onSuccess: () => {
+    }) => uploadPhotos(variables.checkInId, variables.files, variables.onProgress),
+    onSuccess: (data, variables) => {
       antMessage.success('Progress photos uploaded successfully!');
       queryClient.invalidateQueries({ queryKey: ['checkin-history'] });
-      queryClient.invalidateQueries({ queryKey: ['checkin-photos', checkInId] });
+      queryClient.invalidateQueries({ queryKey: ['checkin-photos', variables.checkInId] });
       queryClient.invalidateQueries({ queryKey: ['coach-athlete-profile'] });
     },
     onError: (err: any) => {

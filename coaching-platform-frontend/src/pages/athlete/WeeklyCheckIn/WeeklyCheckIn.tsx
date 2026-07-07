@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Steps, Button, Card, Divider, Alert, Space, Result } from 'antd';
+import { Steps, Button, Card, Divider, Alert, Space, Result, Progress } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import BiometricInputRow from '../../../components/BiometricInputRow/BiometricInputRow';
 import SubjectiveSlider from '../../../components/SubjectiveSlider/SubjectiveSlider';
@@ -8,11 +8,38 @@ import { useSubmitCheckIn, useUploadPhotos, useGetCheckInHistory } from '../../.
 import { formatDateDisplay } from '../../../utils/date';
 import './WeeklyCheckIn.scss';
 
+const PhotoPreview: React.FC<{ file: File | null; label: string }> = ({ file, label }) => {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (file) {
+      const objectUrl = URL.createObjectURL(file);
+      setUrl(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+    setUrl(null);
+  }, [file]);
+
+  return (
+    <div className="weekly-check-in__review-photo-item">
+      <h4>{label}</h4>
+      {url ? (
+        <img src={url} alt={`${label} Preview`} className="weekly-check-in__review-photo-img" />
+      ) : (
+        <div className="weekly-check-in__review-photo-empty">No photo selected</div>
+      )}
+    </div>
+  );
+};
+
 const WeeklyCheckIn: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [checkInId, setCheckInId] = useState<number | null>(null);
   const [hasExplicitlyChosenToResubmit, setHasExplicitlyChosenToResubmit] = useState<boolean>(false);
+  const [isSubmissionSuccessful, setIsSubmissionSuccessful] = useState<boolean>(false);
+  const [isAlreadySubmittedThisWeek, setIsAlreadySubmittedThisWeek] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Step 1 Form States
   const [weightKg, setWeightKg] = useState<number | null>(null);
@@ -71,18 +98,33 @@ const WeeklyCheckIn: React.FC = () => {
       if (isThisWeek) {
         setCheckInId(latestCheckIn.id);
         setCurrentStep(2);
+        setIsAlreadySubmittedThisWeek(true);
       }
     }
   }, [latestCheckIn, hasExplicitlyChosenToResubmit]);
 
   // Mutations
   const submitCheckInMutation = useSubmitCheckIn();
-  const uploadPhotosMutation = useUploadPhotos(checkInId || 0);
+  const uploadPhotosMutation = useUploadPhotos();
 
   const handleStep1Submit = () => {
     if (!weightKg) {
       return;
     }
+    setCurrentStep(1);
+  };
+
+  const handleStep2Submit = () => {
+    setCurrentStep(2);
+  };
+
+  const handleFinalSubmit = () => {
+    if (!weightKg) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setUploadProgress(0);
 
     submitCheckInMutation.mutate(
       {
@@ -97,41 +139,50 @@ const WeeklyCheckIn: React.FC = () => {
       },
       {
         onSuccess: (data) => {
-          setCheckInId(data.id);
-          setCurrentStep(1);
-        },
-      }
-    );
-  };
+          const newCheckInId = data.id;
+          setCheckInId(newCheckInId);
 
-  const handleStep2Submit = () => {
-    // If no photos selected, just go to Step 3
-    if (!frontFile && !sideFile && !backFile) {
-      setCurrentStep(2);
-      return;
-    }
+          const hasPhotos = frontFile || sideFile || backFile;
+          if (hasPhotos) {
+            setUploading(true);
+            setUploadProgress(10);
 
-    setUploading(true);
-    setUploadProgress(10);
-
-    uploadPhotosMutation.mutate(
-      {
-        files: {
-          Front: frontFile || undefined,
-          Side: sideFile || undefined,
-          Back: backFile || undefined,
-        },
-        onProgress: (progress) => {
-          setUploadProgress(progress);
-        },
-      },
-      {
-        onSuccess: () => {
-          setUploading(false);
-          setCurrentStep(2);
+            uploadPhotosMutation.mutate(
+              {
+                checkInId: newCheckInId,
+                files: {
+                  Front: frontFile || undefined,
+                  Side: sideFile || undefined,
+                  Back: backFile || undefined,
+                },
+                onProgress: (progress) => {
+                  setUploadProgress(progress);
+                },
+              },
+              {
+                onSuccess: () => {
+                  setUploading(false);
+                  setIsSubmitting(false);
+                  setIsSubmissionSuccessful(true);
+                  setHasExplicitlyChosenToResubmit(false);
+                },
+                onError: () => {
+                  setUploading(false);
+                  setIsSubmitting(false);
+                  // Succeed check-in even if photos failed
+                  setIsSubmissionSuccessful(true);
+                  setHasExplicitlyChosenToResubmit(false);
+                },
+              }
+            );
+          } else {
+            setIsSubmitting(false);
+            setIsSubmissionSuccessful(true);
+            setHasExplicitlyChosenToResubmit(false);
+          }
         },
         onError: () => {
-          setUploading(false);
+          setIsSubmitting(false);
         },
       }
     );
@@ -152,7 +203,7 @@ const WeeklyCheckIn: React.FC = () => {
           items={[
             { title: 'Biometrics & Subjective' },
             { title: 'Progress Photos' },
-            { title: 'Confirmation' },
+            { title: isAlreadySubmittedThisWeek || isSubmissionSuccessful ? 'Confirmation' : 'Review & Submit' },
           ]}
           className="weekly-check-in__steps"
         />
@@ -246,7 +297,6 @@ const WeeklyCheckIn: React.FC = () => {
               <Button
                 type="primary"
                 onClick={handleStep1Submit}
-                loading={submitCheckInMutation.isPending}
                 disabled={!weightKg}
                 className="weekly-check-in__next-btn"
                 size="large"
@@ -261,7 +311,7 @@ const WeeklyCheckIn: React.FC = () => {
           <Card className="weekly-check-in__card">
             <h2 className="weekly-check-in__section-title">Step 2: Progress Photos (Optional)</h2>
             <p className="weekly-check-in__section-desc">
-              Upload Front, Side, and Back photos in consistent lighting to track visual composition changes.
+              Select Front, Side, and Back photos in consistent lighting to track visual composition changes.
             </p>
 
             <div className="weekly-check-in__photos-grid">
@@ -270,24 +320,21 @@ const WeeklyCheckIn: React.FC = () => {
                 file={frontFile}
                 onFileSelect={setFrontFile}
                 onDelete={() => setFrontFile(null)}
-                uploading={uploading}
-                uploadProgress={uploadProgress}
+                uploading={false}
               />
               <PhotoUploadZone
                 angle="Side"
                 file={sideFile}
                 onFileSelect={setSideFile}
                 onDelete={() => setSideFile(null)}
-                uploading={uploading}
-                uploadProgress={uploadProgress}
+                uploading={false}
               />
               <PhotoUploadZone
                 angle="Back"
                 file={backFile}
                 onFileSelect={setBackFile}
                 onDelete={() => setBackFile(null)}
-                uploading={uploading}
-                uploadProgress={uploadProgress}
+                uploading={false}
               />
             </div>
 
@@ -295,35 +342,29 @@ const WeeklyCheckIn: React.FC = () => {
 
             <div className="weekly-check-in__actions weekly-check-in__actions--split">
               <Button
-                type="text"
-                onClick={() => setCurrentStep(2)}
-                disabled={uploading}
-                className="weekly-check-in__skip-btn"
+                onClick={() => setCurrentStep(0)}
+                className="weekly-check-in__back-btn"
+                size="large"
               >
-                Skip Photo Upload
+                <span className="material-symbols-outlined">arrow_back</span> Back
               </Button>
               <Button
                 type="primary"
                 onClick={handleStep2Submit}
-                loading={uploading}
                 className="weekly-check-in__next-btn"
                 size="large"
               >
-                Upload & Continue <span className="material-symbols-outlined">arrow_forward</span>
+                Next: Review & Submit <span className="material-symbols-outlined">arrow_forward</span>
               </Button>
             </div>
           </Card>
         )}
 
-        {currentStep === 2 && (
+        {currentStep === 2 && (isAlreadySubmittedThisWeek || isSubmissionSuccessful ? (
           <Card className="weekly-check-in__card weekly-check-in__card--confirm">
             <Result
               status="success"
-              title={
-                submitCheckInMutation.isSuccess || uploadPhotosMutation.isSuccess
-                  ? "Check-In Received!"
-                  : "Check-in for this week submitted successfully!"
-              }
+              title="Check-In Received!"
               subTitle="Your coach has been notified and will review your stats and photos shortly. Check back for custom feedback and adjustments."
               extra={
                 <div className="weekly-check-in__confirm-actions">
@@ -342,6 +383,8 @@ const WeeklyCheckIn: React.FC = () => {
                       setFrontFile(null);
                       setSideFile(null);
                       setBackFile(null);
+                      setIsSubmissionSuccessful(false);
+                      setIsAlreadySubmittedThisWeek(false);
                     }}
                     size="large"
                     className="weekly-check-in__resubmit-btn"
@@ -352,7 +395,102 @@ const WeeklyCheckIn: React.FC = () => {
               }
             />
           </Card>
-        )}
+        ) : (
+          <Card className="weekly-check-in__card">
+            <h2 className="weekly-check-in__section-title">Step 3: Review & Submit</h2>
+            <p className="weekly-check-in__section-desc">
+              Please review your inputs before submitting. Once submitted, your coach will be notified.
+            </p>
+
+            <div className="weekly-check-in__review-sections">
+              <div className="weekly-check-in__review-section">
+                <h3 className="weekly-check-in__subsection-title">
+                  <span className="material-symbols-outlined text-gold">scale</span> Biometrics Summary
+                </h3>
+                <div className="weekly-check-in__review-grid">
+                  <div className="weekly-check-in__review-item">
+                    <strong>Weight:</strong> <span>{weightKg} kg</span>
+                  </div>
+                  <div className="weekly-check-in__review-item">
+                    <strong>Waist:</strong> <span>{waistCm ? `${waistCm} cm` : 'Not provided'}</span>
+                  </div>
+                  <div className="weekly-check-in__review-item">
+                    <strong>Chest:</strong> <span>{chestCm ? `${chestCm} cm` : 'Not provided'}</span>
+                  </div>
+                  <div className="weekly-check-in__review-item">
+                    <strong>Thigh:</strong> <span>{thighCm ? `${thighCm} cm` : 'Not provided'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <Divider />
+
+              <div className="weekly-check-in__review-section">
+                <h3 className="weekly-check-in__subsection-title">
+                  <span className="material-symbols-outlined text-gold">favorite</span> Subjective Markers Summary (1-10)
+                </h3>
+                <div className="weekly-check-in__review-grid">
+                  <div className="weekly-check-in__review-item">
+                    <strong>Sleep Quality:</strong> <span>{sleepQuality}/10</span>
+                  </div>
+                  <div className="weekly-check-in__review-item">
+                    <strong>Energy Level:</strong> <span>{energyLevel}/10</span>
+                  </div>
+                  <div className="weekly-check-in__review-item">
+                    <strong>Gut Health:</strong> <span>{gutHealth}/10</span>
+                  </div>
+                  <div className="weekly-check-in__review-item">
+                    <strong>Training Stress:</strong> <span>{trainingStress}/10</span>
+                  </div>
+                </div>
+              </div>
+
+              <Divider />
+
+              <div className="weekly-check-in__review-section">
+                <h3 className="weekly-check-in__subsection-title">
+                  <span className="material-symbols-outlined text-gold">photo_camera</span> Selected Progress Photos
+                </h3>
+                <div className="weekly-check-in__review-photos">
+                  <PhotoPreview file={frontFile} label="Front View" />
+                  <PhotoPreview file={sideFile} label="Side View" />
+                  <PhotoPreview file={backFile} label="Back View" />
+                </div>
+              </div>
+            </div>
+
+            {uploading && (
+              <div style={{ marginTop: 24, padding: '0 16px' }}>
+                <Progress percent={uploadProgress} status="active" strokeColor="var(--color-gold)" />
+                <div style={{ textAlign: 'center', marginTop: 8, color: 'var(--color-text-secondary)', fontSize: 14 }}>
+                  Uploading progress photos ({uploadProgress}%)...
+                </div>
+              </div>
+            )}
+
+            <Divider />
+
+            <div className="weekly-check-in__actions weekly-check-in__actions--split">
+              <Button
+                onClick={() => setCurrentStep(1)}
+                disabled={isSubmitting}
+                className="weekly-check-in__back-btn"
+                size="large"
+              >
+                <span className="material-symbols-outlined">arrow_back</span> Back
+              </Button>
+              <Button
+                type="primary"
+                onClick={handleFinalSubmit}
+                loading={isSubmitting}
+                className="weekly-check-in__next-btn"
+                size="large"
+              >
+                Submit Check-In <span className="material-symbols-outlined">done</span>
+              </Button>
+            </div>
+          </Card>
+        ))}
       </div>
     </div>
   );
