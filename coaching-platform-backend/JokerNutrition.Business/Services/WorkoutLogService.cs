@@ -22,7 +22,6 @@ public interface IWorkoutLogService
 
 public class WorkoutLogService : _BaseService, IWorkoutLogService
 {
-    private readonly JokerNutritionContext _context;
     private readonly IAthleteRepository _athleteRepo;
     private readonly IClientProgramRepository _clientProgramRepo;
     private readonly IWorkoutLogRepository _workoutLogRepo;
@@ -32,7 +31,6 @@ public class WorkoutLogService : _BaseService, IWorkoutLogService
     public WorkoutLogService(
         IPrincipal principal,
         ILogger<WorkoutLogService> logger,
-        JokerNutritionContext context,
         IAthleteRepository athleteRepo,
         IClientProgramRepository clientProgramRepo,
         IWorkoutLogRepository workoutLogRepo,
@@ -40,7 +38,6 @@ public class WorkoutLogService : _BaseService, IWorkoutLogService
         INotificationService notificationService)
         : base(principal, logger)
     {
-        _context = context;
         _athleteRepo = athleteRepo;
         _clientProgramRepo = clientProgramRepo;
         _workoutLogRepo = workoutLogRepo;
