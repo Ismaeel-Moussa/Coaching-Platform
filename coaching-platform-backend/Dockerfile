@@ -3,14 +3,14 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy project files and restore dependencies
-COPY ["coaching-platform-backend/JokerNutrition.Api/JokerNutrition.Api.csproj", "coaching-platform-backend/JokerNutrition.Api/"]
-COPY ["coaching-platform-backend/JokerNutrition.Business/JokerNutrition.Business.csproj", "coaching-platform-backend/JokerNutrition.Business/"]
-COPY ["coaching-platform-backend/JokerNutrition.Data/JokerNutrition.Data.csproj", "coaching-platform-backend/JokerNutrition.Data/"]
-RUN dotnet restore "coaching-platform-backend/JokerNutrition.Api/JokerNutrition.Api.csproj"
+COPY ["JokerNutrition.Api/JokerNutrition.Api.csproj", "JokerNutrition.Api/"]
+COPY ["JokerNutrition.Business/JokerNutrition.Business.csproj", "JokerNutrition.Business/"]
+COPY ["JokerNutrition.Data/JokerNutrition.Data.csproj", "JokerNutrition.Data/"]
+RUN dotnet restore "JokerNutrition.Api/JokerNutrition.Api.csproj"
 
 # Copy backend files and build
-COPY coaching-platform-backend/ coaching-platform-backend/
-WORKDIR "/src/coaching-platform-backend/JokerNutrition.Api"
+COPY . .
+WORKDIR "/src/JokerNutrition.Api"
 RUN dotnet build "JokerNutrition.Api.csproj" -c Release -o /app/build
 
 # Publish stage
