@@ -111,7 +111,7 @@ try
 
     // 5. DbContext (SQL Server / LocalDB)
     builder.Services.AddDbContext<JokerNutritionContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
     // 6. MemoryCache (needed by rate limiting)
     builder.Services.AddMemoryCache();
@@ -274,14 +274,15 @@ try
         await System.Text.Json.JsonSerializer.SerializeAsync(httpContext.Response.Body, responseObj);
     });
 
-    // 16. Migrate and seed mock data in dev
+    // 16. Migrate database (always) and seed mock data in dev
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<JokerNutritionContext>();
+        await dbContext.Database.MigrateAsync();
+    }
+
     if (app.Environment.IsDevelopment())
     {
-        using (var scope = app.Services.CreateScope())
-        {
-            var dbContext = scope.ServiceProvider.GetRequiredService<JokerNutritionContext>();
-            await dbContext.Database.MigrateAsync();
-        }
         await app.SeedMockDataAsync();
 
         // Ensure static upload folder exists locally
