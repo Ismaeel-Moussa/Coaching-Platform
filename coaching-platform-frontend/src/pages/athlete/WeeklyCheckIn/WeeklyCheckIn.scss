@@ -220,6 +220,93 @@
       background-color: var(--surface-container-low) !important;
     }
   }
+
+  &__review-sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  &__review-section {
+    h3 {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-navy);
+      margin-bottom: var(--space-sm);
+    }
+  }
+
+  &__review-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-md);
+  }
+
+  &__review-item {
+    font-size: 15px;
+    background-color: var(--surface-container-low);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--surface-container);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    strong {
+      color: var(--color-text-secondary);
+      font-weight: 500;
+    }
+
+    span {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+  }
+
+  &__review-photos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+    margin-top: var(--space-sm);
+  }
+
+  &__review-photo-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      text-align: center;
+      margin: 0;
+    }
+  }
+
+  &__review-photo-img {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--surface-container-high);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  &__review-photo-empty {
+    width: 100%;
+    aspect-ratio: 3/4;
+    border-radius: var(--radius-card);
+    border: 2px dashed var(--color-border);
+    background-color: var(--surface-container-low);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    font-style: italic;
+  }
 }
 
 @media (max-width: 992px) {
@@ -233,6 +320,12 @@
       grid-template-columns: 1fr;
       max-width: 400px;
       margin: var(--space-md) auto 0;
+    }
+
+    &__review-photos {
+      grid-template-columns: 1fr;
+      max-width: 400px;
+      margin: var(--space-sm) auto 0;
     }
   }
 }
