@@ -111,7 +111,7 @@ try
 
     // 5. DbContext (SQL Server / LocalDB)
     builder.Services.AddDbContext<JokerNutritionContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
     // 6. MemoryCache (needed by rate limiting)
     builder.Services.AddMemoryCache();
