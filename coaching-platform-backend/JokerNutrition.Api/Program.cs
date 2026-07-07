@@ -109,9 +109,16 @@ try
     .AddEntityFrameworkStores<JokerNutritionContext>()
     .AddDefaultTokenProviders();
 
-    // 5. DbContext (SQL Server / LocalDB)
+    // 5. DbContext (PostgreSQL)
     builder.Services.AddDbContext<JokerNutritionContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        npgsqlOptions => npgsqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorCodesToAdd: null
+        )
+    ));
 
     // 6. MemoryCache (needed by rate limiting)
     builder.Services.AddMemoryCache();
