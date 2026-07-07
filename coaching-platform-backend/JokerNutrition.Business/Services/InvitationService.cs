@@ -72,9 +72,17 @@ public class InvitationService : _BaseService, IInvitationService
         await _invitationRepo.SaveChangesAsync();
 
         var inviteUrl = $"{_smtpSettings.SignUpBaseUrl}?token={token}";
-        await _emailService.SendInvitationEmailAsync(form.Email, inviteUrl, form.Role);
+        try
+        {
+            await _emailService.SendInvitationEmailAsync(form.Email, inviteUrl, form.Role);
+            _logger.LogInformation("Invitation email sent successfully to {Email}", form.Email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Invitation record created, but SMTP failed to send email to {Email}", form.Email);
+        }
 
-        _logger.LogInformation("Invitation created for {Email} as {Role}", form.Email, form.Role);
+        _logger.LogInformation("Invitation created in database for {Email} as {Role}", form.Email, form.Role);
 
         return InvitationMapper.ToDto(invitation, _smtpSettings);
     }
@@ -120,7 +128,15 @@ public class InvitationService : _BaseService, IInvitationService
         await _invitationRepo.SaveChangesAsync();
 
         var inviteUrl = $"{_smtpSettings.SignUpBaseUrl}?token={invitation.Token}";
-        await _emailService.SendInvitationEmailAsync(invitation.Email, inviteUrl, invitation.Role);
+        try
+        {
+            await _emailService.SendInvitationEmailAsync(invitation.Email, inviteUrl, invitation.Role);
+            _logger.LogInformation("Invitation email resent successfully to {Email}", invitation.Email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Invitation resent failed for SMTP send to {Email}", invitation.Email);
+        }
 
         return InvitationMapper.ToDto(invitation, _smtpSettings);
     }
