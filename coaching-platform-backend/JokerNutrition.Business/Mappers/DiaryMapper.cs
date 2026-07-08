@@ -22,7 +22,6 @@ public static class DiaryMapper
             Name = log.Recipe.Name
         },
         QuantityGrams = log.QuantityGrams,
-        State = log.State,
         Calories = log.Calories,
         Protein = log.Protein,
         Carbs = log.Carbs,

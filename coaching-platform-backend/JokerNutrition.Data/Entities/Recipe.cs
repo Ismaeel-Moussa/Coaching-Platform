@@ -35,5 +35,4 @@ public class RecipeIngredient
     public int FoodId { get; set; }
     public Food Food { get; set; } = null!;
     public decimal QuantityGrams { get; set; }
-    public FoodState State { get; set; }
 }
