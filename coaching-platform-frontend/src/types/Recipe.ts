@@ -16,7 +16,6 @@ export interface RecipeIngredientDto {
   foodId: number;
   foodName: string;
   quantityGrams: number;
-  state: number; // FoodState
   calories: number;
   protein: number;
   carbs: number;
@@ -55,7 +54,6 @@ export interface RecipesPagedResult {
 export interface CreateRecipeIngredient {
   foodId: number;
   quantityGrams: number;
-  state: number; // FoodState
 }
 
 export interface CreateRecipeForm {

@@ -5,7 +5,6 @@ import {
 import { useSearchFoods } from '../../hooks/useFoods/useFoods';
 import { useCreateRecipe, useUpdateRecipe, useUploadRecipeImage } from '../../hooks/useRecipes/useRecipes';
 import { calcMacroPreview } from '../../utils/macroCalc';
-import { FoodState, FOOD_STATE_LABELS } from '../../types/Diary';
 import { RecipeCategory, RECIPE_CATEGORY_LABELS, type CreateRecipeIngredient, type RecipeDto, type RecipeIngredientDto } from '../../types/Recipe';
 import type { FoodDto } from '../../types/Food';
 import './CreateRecipeModal.scss';
@@ -16,7 +15,6 @@ const { Option } = Select;
 interface IngredientEntry {
   food: FoodDto;
   quantityGrams: number;
-  state: FoodState;
 }
 
 interface CreateRecipeModalProps {
@@ -32,7 +30,6 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [pendingFood, setPendingFood] = useState<FoodDto | null>(null);
   const [pendingQty, setPendingQty] = useState<number>(100);
-  const [pendingState, setPendingState] = useState<FoodState>(FoodState.Raw);
 
   // Recipe metadata (Step 2)
   const [recipeName, setRecipeName] = useState('');
@@ -68,7 +65,6 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
             id: ing.foodId,
             name: ing.foodName,
             category: 'Protein',
-            state: ing.state === 1 ? 'Cooked' : ing.state === 2 ? 'Dry' : 'Raw',
             caloriesPer100g: (ing.calories * 100) / qty,
             proteinPer100g: (ing.protein * 100) / qty,
             carbsPer100g: (ing.carbs * 100) / qty,
@@ -77,7 +73,6 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
             isCustom: false,
           },
           quantityGrams: qty,
-          state: ing.state === 1 ? FoodState.Cooked : ing.state === 2 ? FoodState.Dry : FoodState.Raw,
         };
       });
       setIngredients(mappedIngredients);
@@ -98,7 +93,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
   // ── Computed totals ──────────────────────────────────────────────────────────
   const totals = ingredients.reduce(
     (acc, ing) => {
-      const p = calcMacroPreview(ing.food, ing.quantityGrams, ing.state);
+      const p = calcMacroPreview(ing.food, ing.quantityGrams);
       return {
         calories: acc.calories + p.calories,
         protein: acc.protein + p.protein,
@@ -112,12 +107,11 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
   // ── Step 1: Add ingredient ───────────────────────────────────────────────────
   const handleAddIngredient = () => {
     if (!pendingFood) return;
-    setIngredients((prev) => [...prev, { food: pendingFood, quantityGrams: pendingQty, state: pendingState }]);
+    setIngredients((prev) => [...prev, { food: pendingFood, quantityGrams: pendingQty }]);
     setPendingFood(null);
     setSearchTerm('');
     setDebouncedSearch('');
     setPendingQty(100);
-    setPendingState(FoodState.Raw);
   };
 
   const handleRemoveIngredient = (index: number) => {
@@ -132,7 +126,6 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
     const formIngredients: CreateRecipeIngredient[] = ingredients.map((ing) => ({
       foodId: ing.food.id,
       quantityGrams: ing.quantityGrams,
-      state: ing.state,
     }));
 
     const payload = {
@@ -191,7 +184,6 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
     setDebouncedSearch('');
     setPendingFood(null);
     setPendingQty(100);
-    setPendingState(FoodState.Raw);
     setRecipeName('');
     setRecipeDesc('');
     setRecipeCategory(RecipeCategory.Custom);
@@ -280,11 +272,6 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                       size="middle"
                       style={{ width: 130 }}
                     />
-                    <Select value={pendingState} onChange={setPendingState} size="middle" style={{ width: 110 }}>
-                      {([FoodState.Raw, FoodState.Cooked, FoodState.Dry] as FoodState[]).map((fs) => (
-                        <Option key={fs} value={fs}>{FOOD_STATE_LABELS[fs]}</Option>
-                      ))}
-                    </Select>
                     <Button type="primary" onClick={handleAddIngredient} size="middle">
                       Add
                     </Button>
@@ -306,12 +293,11 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                   <span />
                 </div>
                 {ingredients.map((ing, i) => {
-                  const p = calcMacroPreview(ing.food, ing.quantityGrams, ing.state);
+                  const p = calcMacroPreview(ing.food, ing.quantityGrams);
                   return (
                     <div key={i} className="create-recipe-modal__ingredient-row">
                       <div className="create-recipe-modal__ingredient-food">
                         <span className="create-recipe-modal__ingredient-name">{ing.food.name}</span>
-                        <span className="create-recipe-modal__ingredient-state">{FOOD_STATE_LABELS[ing.state]}</span>
                       </div>
                       <span className="mono create-recipe-modal__ingredient-qty">{ing.quantityGrams}g</span>
                       <span className="mono create-recipe-modal__ingredient-kcal">{Math.round(p.calories)}</span>
@@ -516,7 +502,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                 {ingredients.map((ing, i) => (
                   <div key={i} className="create-recipe-modal__preview-ingredient-row">
                     <span>{ing.food.name}</span>
-                    <span className="mono">{ing.quantityGrams}g ({FOOD_STATE_LABELS[ing.state]})</span>
+                    <span className="mono">{ing.quantityGrams}g</span>
                   </div>
                 ))}
               </div>

@@ -11,12 +11,6 @@ export enum MealType {
   PostWorkout = 7,
 }
 
-export enum FoodState {
-  Raw = 0,
-  Cooked = 1,
-  Dry = 2,
-}
-
 export const MEAL_TYPE_LABELS: Record<MealType, string> = {
   [MealType.Breakfast]: 'Breakfast',
   [MealType.Lunch]: 'Lunch',
@@ -26,12 +20,6 @@ export const MEAL_TYPE_LABELS: Record<MealType, string> = {
   [MealType.Iftar]: 'Iftar',
   [MealType.PreWorkout]: 'Pre-Workout',
   [MealType.PostWorkout]: 'Post-Workout',
-};
-
-export const FOOD_STATE_LABELS: Record<FoodState, string> = {
-  [FoodState.Raw]: 'Raw',
-  [FoodState.Cooked]: 'Cooked',
-  [FoodState.Dry]: 'Dry',
 };
 
 export interface MealLogFoodRef {
@@ -46,7 +34,6 @@ export interface MealLogDto {
   food: MealLogFoodRef | null;
   recipe: { id: number; name: string } | null;
   quantityGrams: number;
-  state: FoodState;
   calories: number;
   protein: number;
   carbs: number;
@@ -85,7 +72,6 @@ export interface LogFoodForm {
   foodId?: number | null;
   recipeId?: number | null;
   quantityGrams: number;
-  state: FoodState;
 }
 
 export interface UpdateWaterForm {

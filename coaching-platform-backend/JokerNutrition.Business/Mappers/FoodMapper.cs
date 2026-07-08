@@ -10,7 +10,6 @@ public static class FoodMapper
         Id = food.Id,
         Name = food.Name,
         Category = food.Category,
-        State = food.State.ToString(),
         CaloriesPer100g = food.CaloriesPer100g,
         ProteinPer100g = food.ProteinPer100g,
         CarbsPer100g = food.CarbsPer100g,

@@ -282,11 +282,11 @@ try
     });
 
     // 16. Migrate database (always) and seed mock data in dev
-    // using (var scope = app.Services.CreateScope())
-    // {
-    //     var dbContext = scope.ServiceProvider.GetRequiredService<JokerNutritionContext>();
-    //     await dbContext.Database.MigrateAsync();
-    // }
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<JokerNutritionContext>();
+        await dbContext.Database.MigrateAsync();
+    }
 
     if (app.Environment.IsDevelopment())
     {

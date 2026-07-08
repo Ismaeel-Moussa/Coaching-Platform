@@ -9,7 +9,6 @@ public class MealLogDto
     public FoodSummaryDto? Food { get; set; }
     public RecipeSummaryDto? Recipe { get; set; }
     public decimal QuantityGrams { get; set; }
-    public FoodState State { get; set; }
     public decimal Calories { get; set; }
     public decimal Protein { get; set; }
     public decimal Carbs { get; set; }
