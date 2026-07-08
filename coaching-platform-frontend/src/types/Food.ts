@@ -1,6 +1,6 @@
 // ── Food Types ─────────────────────────────────────────────────────────────────
 
-export type FoodCategory = 'Protein' | 'Carbs' | 'Fat' | 'Vegetable' | 'Dairy' | 'Fruit';
+export type FoodCategory = 'Protein' | 'Carbs' | 'Fat' | 'Vegetable' | 'Dairy' | 'Fruit' | 'Meat' | 'Bakery' | 'Cheese' | 'Poultry' | 'Nuts' | 'Oils' | 'Condiments' | 'Juice' | 'Snacks';
 export type FoodState = 'Raw' | 'Cooked' | 'Dry';
 
 export interface FoodDto {
