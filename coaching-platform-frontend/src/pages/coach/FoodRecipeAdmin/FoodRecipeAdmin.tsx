@@ -31,6 +31,7 @@ const FoodRecipeAdmin: React.FC = () => {
   const [foodCategory, setFoodCategory] = useState<FoodCategory | undefined>(undefined);
   const [foodState, setFoodState] = useState<FoodState | undefined>(undefined);
   const [foodPage, setFoodPage] = useState<number>(1);
+  const [foodPageSize, setFoodPageSize] = useState<number>(5);
   const [isFoodModalVisible, setIsFoodModalVisible] = useState<boolean>(false);
   const [editingFood, setEditingFood] = useState<FoodDto | null>(null);
   const [isBulkImportVisible, setIsBulkImportVisible] = useState<boolean>(false);
@@ -48,7 +49,7 @@ const FoodRecipeAdmin: React.FC = () => {
     category: foodCategory,
     state: foodState,
     page: foodPage,
-    pageSize: 15,
+    pageSize: foodPageSize,
   });
 
   const { data: recipesData, isLoading: isRecipesLoading } = useGetRecipes({
@@ -273,9 +274,17 @@ const FoodRecipeAdmin: React.FC = () => {
                   loading={isFoodsLoading}
                   pagination={{
                     current: foodPage,
-                    pageSize: 15,
+                    pageSize: foodPageSize,
                     total: foodsData?.totalCount || 0,
-                    onChange: (page) => setFoodPage(page),
+                    showSizeChanger: true,
+                    pageSizeOptions: ['5', '10', '15', '20'],
+                    onChange: (page, pageSize) => {
+                      setFoodPage(page);
+                      if (pageSize && pageSize !== foodPageSize) {
+                        setFoodPageSize(pageSize);
+                        setFoodPage(1);
+                      }
+                    },
                   }}
                   className="food-recipe-admin__table"
                 />
