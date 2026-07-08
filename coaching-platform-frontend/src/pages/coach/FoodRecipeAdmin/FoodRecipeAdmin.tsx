@@ -10,7 +10,7 @@ import type { RecipeDto, GetRecipesParams } from '../../../types/Recipe';
 import { RecipeCategory } from '../../../types/Recipe';
 import './FoodRecipeAdmin.scss';
 
-const FOOD_CATEGORIES: FoodCategory[] = ['Protein', 'Carbs', 'Fat', 'Vegetable', 'Dairy', 'Fruit'];
+const FOOD_CATEGORIES: FoodCategory[] = ['Protein', 'Carbs', 'Fat', 'Vegetable', 'Dairy', 'Fruit', 'Meat', 'Bakery', 'Cheese', 'Poultry', 'Nuts', 'Oils', 'Condiments', 'Juice', 'Snacks'];
 const FOOD_STATES: { label: string; value: FoodState; color: string; icon: string }[] = [
   { label: 'Raw',    value: 'Raw',    color: 'green',  icon: '🥩' },
   { label: 'Cooked', value: 'Cooked', color: 'orange', icon: '🍳' },
