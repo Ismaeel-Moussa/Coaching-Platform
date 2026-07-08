@@ -25,7 +25,7 @@ const FoodRecipeAdmin: React.FC = () => {
   const [foodSearch, setFoodSearch] = useState<string>('');
   const [foodCategory, setFoodCategory] = useState<FoodCategory | undefined>(undefined);
   const [foodPage, setFoodPage] = useState<number>(1);
-  const [foodPageSize, setFoodPageSize] = useState<number>(5);
+  const [foodPageSize, setFoodPageSize] = useState<number>(7);
   const [isFoodModalVisible, setIsFoodModalVisible] = useState<boolean>(false);
   const [editingFood, setEditingFood] = useState<FoodDto | null>(null);
   const [isBulkImportVisible, setIsBulkImportVisible] = useState<boolean>(false);
@@ -240,7 +240,7 @@ const FoodRecipeAdmin: React.FC = () => {
                     pageSize: foodPageSize,
                     total: foodsData?.totalCount || 0,
                     showSizeChanger: true,
-                    pageSizeOptions: ['5', '10', '15', '20'],
+                    pageSizeOptions: ['7', '10', '15', '20'],
                     onChange: (page, pageSize) => {
                       setFoodPage(page);
                       if (pageSize && pageSize !== foodPageSize) {
