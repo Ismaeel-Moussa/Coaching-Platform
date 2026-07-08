@@ -163,7 +163,7 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ visible, onCancel, on
                 rows={8}
                 value={pasteContent}
                 onChange={handlePasteChange}
-                placeholder="Name,Category,CaloriesPer100g,ProteinPer100g,CarbsPer100g,FatPer100g,FiberPer100g&#10;Chicken Breast,Protein,165,31,0,3.6,0&#10;Brown Rice,Carb,216,4.5,45,1.8,1.8"
+                placeholder="Name,Category,CaloriesPer100g,ProteinPer100g,CarbsPer100g,FatPer100g,FiberPer100g,State&#10;Chicken Breast,Protein,165,31,0,3.6,0,Raw&#10;Brown Rice,Carbs,365,7.1,80,0.7,0.4,Dry"
                 className="bulk-import-modal__paste-area font-data"
               />
             </Tabs.TabPane>
