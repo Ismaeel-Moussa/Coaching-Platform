@@ -10,13 +10,14 @@ public class JwtSettings
 
 public class SmtpSettings
 {
-    public string Host { get; set; } = string.Empty;
-    public int Port { get; set; } = 587;
-    public bool UseSsl { get; set; } = true;
-    public string Username { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
+    // Resend HTTP API (replaces direct SMTP — required for Render hosting)
+    public string ResendApiKey { get; set; } = string.Empty;
+
+    // Sender identity
     public string FromEmail { get; set; } = string.Empty;
     public string FromName { get; set; } = "Joker Nutrition";
+
+    // URLs
     public string SignUpBaseUrl { get; set; } = string.Empty;
     public string SupportEmail { get; set; } = string.Empty;
 }

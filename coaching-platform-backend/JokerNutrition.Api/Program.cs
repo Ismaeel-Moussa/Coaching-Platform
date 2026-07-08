@@ -1,6 +1,8 @@
 using System.Security.Principal;
 using System.Text;
 using AspNetCoreRateLimit;
+using Resend;
+using SerilogLog = Serilog.Log;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using JokerNutrition.Api.Autofac;
@@ -25,7 +27,7 @@ using Serilog;
 using Serilog.Events;
 
 // ─── Bootstrap Serilog ───────────────────────────────────────────────────────
-Log.Logger = new LoggerConfiguration()
+SerilogLog.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
@@ -148,6 +150,13 @@ try
     builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
     builder.Services.Configure<BlobStorageSettings>(builder.Configuration.GetSection("BlobStorageSettings"));
     builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+
+    // Register Resend email client (HTTP API — works on Render, unlike SMTP)
+    builder.Services.AddResend(o =>
+    {
+        o.ApiToken = builder.Configuration["SmtpSettings:ResendApiKey"]
+                     ?? throw new InvalidOperationException("SmtpSettings:ResendApiKey is not configured.");
+    });
 
     // 10. JWT Bearer Authentication
     var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
@@ -304,9 +313,9 @@ try
 }
 catch (Exception ex) when (ex.GetType().Name is not "HostAbortedException")
 {
-    Log.Fatal(ex, "Application startup failed.");
+    SerilogLog.Fatal(ex, "Application startup failed.");
 }
 finally
 {
-    Log.CloseAndFlush();
+    SerilogLog.CloseAndFlush();
 }
