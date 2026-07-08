@@ -18,5 +18,4 @@ public class RecipeIngredientForm
 {
     public int FoodId { get; set; }
     public decimal QuantityGrams { get; set; }
-    public FoodState State { get; set; } = FoodState.Raw;
 }

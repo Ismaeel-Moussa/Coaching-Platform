@@ -63,7 +63,7 @@ public class MealLogService : _BaseService, IMealLogService
             var food = await _foodRepo.GetByIdAsync(form.FoodId.Value)
                 ?? throw new KeyNotFoundException($"Food {form.FoodId} not found.");
 
-            var (cal, pro, carb, fat) = MacroCalculatorHelper.Calculate(food, form.QuantityGrams, form.State);
+            var (cal, pro, carb, fat) = MacroCalculatorHelper.Calculate(food, form.QuantityGrams);
 
             log = new MealLog
             {
@@ -72,7 +72,6 @@ public class MealLogService : _BaseService, IMealLogService
                 Food = food,
                 MealType = form.MealType,
                 QuantityGrams = form.QuantityGrams,
-                State = form.State,
                 Calories = cal,
                 Protein = pro,
                 Carbs = carb,
@@ -95,7 +94,6 @@ public class MealLogService : _BaseService, IMealLogService
                 Recipe = recipe,
                 MealType = form.MealType,
                 QuantityGrams = form.QuantityGrams,
-                State = form.State,
                 Calories = recipe.TotalCalories,
                 Protein = recipe.TotalProtein,
                 Carbs = recipe.TotalCarbs,

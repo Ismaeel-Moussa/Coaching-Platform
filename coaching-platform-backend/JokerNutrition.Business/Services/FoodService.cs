@@ -45,9 +45,6 @@ public class FoodService : _BaseService, IFoodService
         if (!string.IsNullOrWhiteSpace(form.Category))
             query = query.Where(f => f.Category == form.Category);
 
-        if (form.State.HasValue)
-            query = query.Where(f => f.State == form.State.Value);
-
         var totalCount = await query.CountAsync();
 
         var foods = await query
@@ -80,7 +77,6 @@ public class FoodService : _BaseService, IFoodService
         {
             Name = form.Name,
             Category = form.Category,
-            State = form.State,
             CaloriesPer100g = form.CaloriesPer100g,
             ProteinPer100g = form.ProteinPer100g,
             CarbsPer100g = form.CarbsPer100g,
@@ -102,7 +98,6 @@ public class FoodService : _BaseService, IFoodService
 
         food.Name = form.Name;
         food.Category = form.Category;
-        food.State = form.State;
         food.CaloriesPer100g = form.CaloriesPer100g;
         food.ProteinPer100g = form.ProteinPer100g;
         food.CarbsPer100g = form.CarbsPer100g;
@@ -180,19 +175,10 @@ public class FoodService : _BaseService, IFoodService
                 continue;
             }
 
-            // Parse optional 8th column: State (Raw | Cooked | Dry) — defaults to Raw
-            var state = FoodState.Raw;
-            if (cols.Length >= 8 && !string.IsNullOrWhiteSpace(cols[7].Trim()))
-            {
-                if (!Enum.TryParse<FoodState>(cols[7].Trim(), ignoreCase: true, out state))
-                    state = FoodState.Raw; // graceful fallback
-            }
-
             validFoods.Add(new Food
             {
                 Name = name,
                 Category = cols[1].Trim().Length > 0 ? cols[1].Trim() : null,
-                State = state,
                 CaloriesPer100g = cal,
                 ProteinPer100g = protein,
                 CarbsPer100g = carbs,

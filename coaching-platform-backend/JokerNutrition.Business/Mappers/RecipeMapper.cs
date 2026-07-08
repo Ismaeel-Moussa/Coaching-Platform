@@ -29,14 +29,13 @@ public static class RecipeMapper
     public static RecipeIngredientDto MapIngredient(RecipeIngredient ingredient)
     {
         var (cal, pro, carb, fat) = MacroCalculatorHelper.Calculate(
-            ingredient.Food, ingredient.QuantityGrams, ingredient.State);
+            ingredient.Food, ingredient.QuantityGrams);
 
         return new RecipeIngredientDto
         {
             FoodId = ingredient.FoodId,
             FoodName = ingredient.Food?.Name ?? string.Empty,
             QuantityGrams = ingredient.QuantityGrams,
-            State = ingredient.State,
             Calories = cal,
             Protein = pro,
             Carbs = carb,

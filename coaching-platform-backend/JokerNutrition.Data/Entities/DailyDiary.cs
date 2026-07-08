@@ -33,7 +33,6 @@ public class MealLog
     public Recipe? Recipe { get; set; }
     public MealType MealType { get; set; }
     public decimal QuantityGrams { get; set; }
-    public FoodState State { get; set; }
 
     public decimal Calories { get; set; }
     public decimal Protein { get; set; }
