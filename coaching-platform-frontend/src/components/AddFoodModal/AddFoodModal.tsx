@@ -4,7 +4,7 @@ import { useSearchFoods } from '../../hooks/useFoods/useFoods';
 import { useLogFood } from '../../hooks/useDiary/useDiary';
 import { useGetRecipes } from '../../hooks/useRecipes/useRecipes';
 import { calcMacroPreview } from '../../utils/macroCalc';
-import { MealType, FoodState, MEAL_TYPE_LABELS, FOOD_STATE_LABELS } from '../../types/Diary';
+import { MealType, MEAL_TYPE_LABELS } from '../../types/Diary';
 import type { FoodDto } from '../../types/Food';
 import type { RecipeDto } from '../../types/Recipe';
 import { RECIPE_CATEGORY_LABELS } from '../../types/Recipe';
@@ -32,7 +32,6 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
   const [selectedFood, setSelectedFood] = useState<FoodDto | null>(null);
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeDto | null>(null);
   const [quantity, setQuantity] = useState<number>(100);
-  const [state, setState] = useState<FoodState>(FoodState.Raw);
   const [mealType, setMealType] = useState<MealType>(defaultMealType);
 
   // Debounce search
@@ -54,7 +53,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
   const logFoodMutation = useLogFood(date);
 
   const preview = selectedFood
-    ? calcMacroPreview(selectedFood, quantity ?? 0, state)
+    ? calcMacroPreview(selectedFood, quantity ?? 0)
     : null;
 
   const handleTabChange = (tab: 'food' | 'recipe') => {
@@ -64,7 +63,6 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
     setSelectedFood(null);
     setSelectedRecipe(null);
     setQuantity(100);
-    setState(FoodState.Raw);
   };
 
   const handleAddFood = () => {
@@ -77,7 +75,6 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
           foodId: selectedFood.id,
           recipeId: null,
           quantityGrams: quantity,
-          state,
         },
         {
           onSuccess: () => {
@@ -95,7 +92,6 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
           foodId: null,
           recipeId: selectedRecipe.id,
           quantityGrams: totalWeight,
-          state: FoodState.Raw,
         },
         {
           onSuccess: () => {
@@ -112,7 +108,6 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
     setSelectedFood(null);
     setSelectedRecipe(null);
     setQuantity(100);
-    setState(FoodState.Raw);
     setMealType(defaultMealType);
     setActiveTab('food');
     onClose();
@@ -296,7 +291,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
             </div>
 
             <div className="add-food-modal__row">
-              <div className="add-food-modal__field add-food-modal__field--half">
+              <div className="add-food-modal__field" style={{ width: '100%' }}>
                 <label className="add-food-modal__label">Quantity (grams)</label>
                 <InputNumber
                   id="add-food-quantity-input"
@@ -308,20 +303,6 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                   style={{ width: '100%' }}
                   addonAfter="g"
                 />
-              </div>
-              <div className="add-food-modal__field add-food-modal__field--half">
-                <label className="add-food-modal__label">State</label>
-                <Select
-                  id="add-food-state-select"
-                  value={state}
-                  onChange={setState}
-                  size="large"
-                  style={{ width: '100%' }}
-                >
-                  {([FoodState.Raw, FoodState.Cooked, FoodState.Dry] as FoodState[]).map((fs) => (
-                    <Option key={fs} value={fs}>{FOOD_STATE_LABELS[fs]}</Option>
-                  ))}
-                </Select>
               </div>
             </div>
 

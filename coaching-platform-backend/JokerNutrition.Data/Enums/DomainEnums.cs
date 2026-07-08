@@ -12,12 +12,6 @@ public enum MealType
     PostWorkout
 }
 
-public enum FoodState
-{
-    Raw,
-    Cooked,
-    Dry
-}
 
 public enum RecipeCategory
 {

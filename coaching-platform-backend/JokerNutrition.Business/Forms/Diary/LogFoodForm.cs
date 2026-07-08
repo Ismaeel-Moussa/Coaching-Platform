@@ -9,5 +9,4 @@ public class LogFoodForm
     public int? FoodId { get; set; }
     public int? RecipeId { get; set; }
     public decimal QuantityGrams { get; set; }
-    public FoodState State { get; set; } = FoodState.Raw;
 }

@@ -109,7 +109,7 @@ public class RecipeService : _BaseService, IRecipeService
             .ToDictionaryAsync(f => f.Id);
 
         var ingredientTuples = form.Ingredients
-            .Select(i => (foods[i.FoodId], i.QuantityGrams, i.State));
+            .Select(i => (foods[i.FoodId], i.QuantityGrams));
 
         var (totalCal, totalPro, totalCarb, totalFat) = MacroCalculatorHelper.CalculateRecipeTotals(ingredientTuples);
 
@@ -133,8 +133,7 @@ public class RecipeService : _BaseService, IRecipeService
             {
                 FoodId = i.FoodId,
                 Food = foods[i.FoodId],
-                QuantityGrams = i.QuantityGrams,
-                State = i.State
+                QuantityGrams = i.QuantityGrams
             }).ToList()
         };
 
@@ -179,7 +178,7 @@ public class RecipeService : _BaseService, IRecipeService
             .ToDictionaryAsync(f => f.Id);
 
         var ingredientTuples = form.Ingredients
-            .Select(i => (foods[i.FoodId], i.QuantityGrams, i.State));
+            .Select(i => (foods[i.FoodId], i.QuantityGrams));
 
         var (totalCal, totalPro, totalCarb, totalFat) = MacroCalculatorHelper.CalculateRecipeTotals(ingredientTuples);
 
@@ -193,8 +192,7 @@ public class RecipeService : _BaseService, IRecipeService
             RecipeId = recipe.Id,
             FoodId = i.FoodId,
             Food = foods[i.FoodId],
-            QuantityGrams = i.QuantityGrams,
-            State = i.State
+            QuantityGrams = i.QuantityGrams
         }).ToList();
 
         _recipeRepo.Update(recipe);
@@ -255,7 +253,6 @@ public class RecipeService : _BaseService, IRecipeService
             Recipe = recipe,
             MealType = mealType,
             QuantityGrams = recipe.Ingredients.Sum(i => i.QuantityGrams),
-            State = FoodState.Raw,
             Calories = recipe.TotalCalories,
             Protein = recipe.TotalProtein,
             Carbs = recipe.TotalCarbs,

@@ -27,7 +27,6 @@ public class RecipeIngredientDto
     public int FoodId { get; set; }
     public string FoodName { get; set; } = string.Empty;
     public decimal QuantityGrams { get; set; }
-    public FoodState State { get; set; }
     public decimal Calories { get; set; }
     public decimal Protein { get; set; }
     public decimal Carbs { get; set; }
