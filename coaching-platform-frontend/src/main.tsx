@@ -6,9 +6,7 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './AppRoutes/AppRoutes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GlobalConfirmModalProvider } from './contexts/GlobalConfirmModalContext';
-import { injectSpeedInsights } from '@vercel/speed-insights';
-
-injectSpeedInsights();
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,7 +23,9 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <GlobalConfirmModalProvider>
         <RouterProvider router={router} />
+        <SpeedInsights />
       </GlobalConfirmModalProvider>
     </QueryClientProvider>
   </StrictMode>,
 );
+
