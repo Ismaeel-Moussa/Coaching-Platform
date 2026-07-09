@@ -1,10 +1,5 @@
 # 🃏 Joker Nutrition Coaching Platform
 
-<a href="https://www.jokernutrition.app" target="_blank" rel="noopener noreferrer">![Production URL](https://img.shields.io/badge/Live-www.jokernutrition.app-blueviolet?style=for-the-badge&logo=vercel)</a>
-[![Framework Backend](https://img.shields.io/badge/.NET-10.0-blue?style=for-the-badge&logo=dotnet)](https://dotnet.microsoft.com)
-[![Framework Frontend](https://img.shields.io/badge/React-19.0-blue?style=for-the-badge&logo=react)](https://react.dev)
-[![Database](https://img.shields.io/badge/PostgreSQL-16-blue?style=for-the-badge&logo=postgresql)](https://www.postgresql.org)
-
 **Joker Nutrition** is a state-of-the-art, high-performance coaching platform designed to connect fitness and nutrition coaches with athletes (clients). The platform delivers a premium, real-time, and mobile-friendly tracking experience that helps clients hit their goals and enables coaches to monitor compliance, adjust programs dynamically, and build workout/diet templates.
 
 🔗 **Live Platform URL:** <a href="https://www.jokernutrition.app" target="_blank" rel="noopener noreferrer">www.jokernutrition.app</a>
