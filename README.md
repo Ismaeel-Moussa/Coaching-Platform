@@ -1,0 +1,73 @@
+# 🃏 Joker Nutrition Coaching Platform
+
+[![Production URL](https://img.shields.io/badge/Live-www.jokernutrition.app-blueviolet?style=for-the-badge&logo=vercel)](https://www.jokernutrition.app)
+[![Framework Backend](https://img.shields.io/badge/.NET-10.0-blue?style=for-the-badge&logo=dotnet)](https://dotnet.microsoft.com)
+[![Framework Frontend](https://img.shields.io/badge/React-19.0-blue?style=for-the-badge&logo=react)](https://react.dev)
+[![Database](https://img.shields.io/badge/PostgreSQL-16-blue?style=for-the-badge&logo=postgresql)](https://www.postgresql.org)
+
+**Joker Nutrition** is a state-of-the-art, high-performance coaching platform designed to connect fitness and nutrition coaches with athletes (clients). The platform delivers a premium, real-time, and mobile-friendly tracking experience that helps clients hit their goals and enables coaches to monitor compliance, adjust programs dynamically, and build workout/diet templates.
+
+🔗 **Live Platform URL:** [www.jokernutrition.app](https://www.jokernutrition.app)
+
+---
+
+## 📩 Want to Try the Project?
+
+Contact us so we can send you an invitation to the website:
+
+*   **Email:** [support@jokernutrion.app](mailto:support@jokernutrion.app)
+
+
+---
+
+## 🌟 Key Features
+
+### 🏋️‍♂️ For Athletes (Clients)
+*   **Dynamic Dashboard:** Real-time calorie & macro rings (protein, carbs, fats), daily check-lists, and workout calendars.
+*   **Daily Meal Logger:** Extensive food database search, quick macro logger, and historical daily intake tracker.
+*   **Recipe Library:** Create, scale, and save custom recipes with automatic per-portion macronutrient calculations.
+*   **Workout Logger:** Record completed sets, reps, load, and notes. View exercise history and instruction guides in-app.
+*   **Weekly Check-In:** High-fidelity flow to record weight logs, submit subjective feedback metrics, and upload progress photos.
+*   **Supplements Tracker:** Time-scheduled supplement reminders and logs.
+
+### 📋 For Coaches
+*   **Coach Dashboard:** Central hub with pending weekly check-ins, client compliance alerts, and a real-time live activity feed.
+*   **Client Roster:** Clean overview of all athletes with custom filters and quick metrics.
+*   **Client Detail View:** Deep-dive into an athlete's historical weights, daily nutrition charts, chat history, and coach notes.
+*   **Workout Template Builder:** Drag-and-drop workflow tool to create reusable workout programs.
+*   **Athlete Assignment Hub:** Assign diet targets, meal frameworks, and workout templates to specific athletes.
+*   **Database Management:** Admin portals to manage the global exercise library and standard food items.
+*   **Invitation Management:** Invite clients via automated email invitations with secure signup tokens.
+
+---
+
+## 🛠️ Technology Stack
+
+### Frontend (`coaching-platform-frontend`)
+*   **Core:** React 19, TypeScript, Vite
+*   **UI Components:** Ant Design (AntD v5), Custom SCSS styles
+*   **State Management:** TanStack React Query (for API queries and caching)
+*   **Routing:** React Router v7
+*   **Icons:** Hugeicons React
+*   **Real-time Hubs:** ASP.NET Core SignalR Client (`@microsoft/signalr`)
+*   **Data Visualization:** Recharts (for biometric and nutrition history)
+*   **Performance:** Vite PWA capability, Vercel Speed Insights
+
+### Backend (`coaching-platform-backend`)
+*   **Runtime:** .NET 10 (ASP.NET Core Web API)
+*   **Dependency Injection:** Autofac & Autofac.Extensions.DependencyInjection
+*   **Database ORM:** Entity Framework Core (EF Core)
+*   **Database:** PostgreSQL (via `Npgsql`)
+*   **Real-time Communication:** SignalR WebSockets (Notification Hub)
+*   **Authentication:** JWT Bearer authentication, ASP.NET Core Identity
+*   **Logging:** Serilog (with file and console logging sinks)
+*   **Image Storage:** Azure Blob Storage for secure progress photo uploads
+*   **Emails:** Resend API integration
+*   **Security:** IP Rate Limiting (via `AspNetCoreRateLimit`)
+*   **Documentation:** Swagger UI (Swashbuckle)
+
+---
+
+## 📝 License
+
+This project is private and proprietary. All rights reserved. For any inquiries, please contact [support@jokernutrion.app](mailto:support@jokernutrion.app).
