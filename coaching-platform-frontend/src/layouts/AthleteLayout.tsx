@@ -67,7 +67,10 @@ const AthleteLayout: React.FC = () => {
         <div className="athlete-layout__sidebar-logo">
           <div className="athlete-layout__logo-brand">
             <div className="athlete-layout__logo-icon">JN</div>
-            <span className="athlete-layout__logo-text">JOKER NUTRITION</span>
+            <div className="athlete-layout__logo-info">
+              <span className="athlete-layout__logo-text">JOKER NUTRITION</span>
+              <span className="athlete-layout__logo-sub">Client Portal</span>
+            </div>
           </div>
           <button
             id="athlete-sidebar-toggle"
@@ -144,8 +147,12 @@ const AthleteLayout: React.FC = () => {
         </button>
         <div className="athlete-layout__logo-brand">
           <div className="athlete-layout__logo-icon">JN</div>
-          <span className="athlete-layout__logo-text">JOKER NUTRITION</span>
+          <div className="athlete-layout__logo-info">
+            <span className="athlete-layout__logo-text">JOKER NUTRITION</span>
+            <span className="athlete-layout__logo-sub">Client Portal</span>
+          </div>
         </div>
+
         <div className="athlete-layout__mobile-header-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
           <NavLink
             to="/athlete/notifications"
