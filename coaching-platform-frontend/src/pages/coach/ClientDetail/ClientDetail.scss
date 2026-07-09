@@ -1,10 +1,16 @@
 .client-detail {
+  width: 100%;
   max-width: var(--content-max-width);
   margin: 0 auto;
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    padding: var(--space-sm);
+  }
 
   &--error {
     align-items: center;
@@ -49,6 +55,11 @@
     box-shadow: var(--shadow-sm);
     padding: 24px;
 
+    @media (max-width: 480px) {
+      padding: 16px;
+    }
+
+
     &-header {
       display: flex;
       align-items: center;
@@ -90,6 +101,12 @@
     display: flex;
     align-items: center;
     gap: 20px;
+
+    @media (max-width: 576px) {
+      flex-direction: column;
+      text-align: center;
+      gap: 12px;
+    }
   }
 
   &__avatar-placeholder {
@@ -109,6 +126,10 @@
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
+
+    @media (max-width: 576px) {
+      justify-content: center;
+    }
   }
 
   &__badge-item {
@@ -136,6 +157,12 @@
 
     @media (max-width: 768px) {
       justify-content: space-around;
+    }
+
+    @media (max-width: 480px) {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
     }
   }
 
@@ -168,6 +195,10 @@
     width: 1px;
     height: 36px;
     background-color: rgba(255, 255, 255, 0.1);
+
+    @media (max-width: 480px) {
+      display: none;
+    }
   }
 
   // Grid
@@ -193,6 +224,11 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
   }
 
   &__target-item {
@@ -261,7 +297,12 @@
     max-height: 480px;
     overflow-y: auto;
     padding-right: 4px;
+
+    @media (max-width: 480px) {
+      max-height: 320px;
+    }
   }
+
 
   &__note-item {
     background-color: var(--surface-container-low);

@@ -1,10 +1,16 @@
 .athlete-assignment-hub {
+  width: 100%;
   max-width: var(--content-max-width);
   margin: 0 auto;
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    padding: var(--space-sm);
+  }
 
   // ── Page Header ────────────────────────────────────────────────────────
   &__header {
@@ -317,6 +323,16 @@
     justify-content: space-between;
     align-items: center;
     gap: 16px;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+      
+      .ant-btn {
+        width: 100%;
+      }
+    }
   }
 
   &__program-info {
@@ -353,6 +369,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   &__macro-field {
@@ -393,6 +413,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   &__form-field {
@@ -572,7 +596,12 @@
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 260px;
+
+      @media (max-width: 480px) {
+        max-width: 100%;
+      }
     }
+
   }
 
   &__supplement-actions {
@@ -588,6 +617,10 @@
       &:hover {
         opacity: 1;
         transform: scale(1.15);
+      }
+
+      @media (max-width: 768px) {
+        opacity: 1;
       }
     }
   }

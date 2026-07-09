@@ -7,6 +7,8 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
   display: flex;
   min-height: 100vh;
   background-color: var(--color-canvas);
+  max-width: 100%;
+  overflow-x: hidden;
 
   // ── Sidebar ──────────────────────────────────────────────────────────────
   &__sidebar {
@@ -271,9 +273,13 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
   &__main {
     margin-left: var(--sidebar-width);
     flex: 1;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
     min-height: 100vh;
     padding: var(--space-lg);
     transition: $sidebar-transition;
+    overflow-x: hidden;
   }
 
   // ── Collapsed state ───────────────────────────────────────────────────────
@@ -413,6 +419,75 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     align-items: center;
     text-decoration: none;
   }
+
+  &__badge {
+    background-color: var(--color-gold);
+    color: var(--color-navy);
+    font-size: 0.72rem;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    margin-left: auto;
+    line-height: 1;
+  }
+
+  &__mobile-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--space-sm) !important;
+
+    .coach-layout__mobile-notification-btn,
+    .coach-layout__mobile-avatar-btn {
+      position: relative !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin: 0 !important;
+    }
+  }
+
+  &__mobile-notification-btn {
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    position: relative;
+    border-radius: var(--radius-btn);
+    transition: all var(--transition-fast);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--color-gold);
+    }
+
+    .material-symbols-outlined {
+      font-size: 24px;
+    }
+  }
+
+  &__mobile-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: var(--color-gold);
+    color: var(--color-navy);
+    font-size: 0.62rem;
+    font-weight: 700;
+    min-width: 15px;
+    height: 15px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--color-navy);
+    line-height: 1;
+  }
 }
 
 // ── Mobile Coach Drawer Custom Overrides ────────────────────────────────────
@@ -529,75 +604,5 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
         color: rgb(239, 68, 68);
       }
     }
-  }
-
-  // ── Notifications UI Styling ──
-  &__badge {
-    background-color: var(--color-gold);
-    color: var(--color-navy);
-    font-size: 0.72rem;
-    font-weight: 700;
-    min-width: 18px;
-    height: 18px;
-    border-radius: var(--radius-full);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 4px;
-    margin-left: auto;
-    line-height: 1;
-  }
-
-  &__mobile-header-actions {
-    display: flex !important;
-    align-items: center !important;
-    gap: var(--space-sm) !important;
-
-    .coach-layout__mobile-notification-btn,
-    .coach-layout__mobile-avatar-btn {
-      position: relative !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      margin: 0 !important;
-    }
-  }
-
-  &__mobile-notification-btn {
-    color: rgba(255, 255, 255, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px;
-    position: relative;
-    border-radius: var(--radius-btn);
-    transition: all var(--transition-fast);
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--color-gold);
-    }
-
-    .material-symbols-outlined {
-      font-size: 24px;
-    }
-  }
-
-  &__mobile-badge {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    background-color: var(--color-gold);
-    color: var(--color-navy);
-    font-size: 0.62rem;
-    font-weight: 700;
-    min-width: 15px;
-    height: 15px;
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1.5px solid var(--color-navy);
-    line-height: 1;
   }
 }

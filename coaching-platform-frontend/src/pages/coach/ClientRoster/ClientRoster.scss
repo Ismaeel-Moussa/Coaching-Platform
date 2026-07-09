@@ -1,10 +1,16 @@
 .client-roster {
+  width: 100%;
   max-width: var(--content-max-width);
   margin: 0 auto;
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    padding: var(--space-sm);
+  }
 
   &__header {
     display: flex;
@@ -101,6 +107,163 @@
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
+
+    @media (max-width: 768px) {
+      background-color: transparent;
+      border: none;
+      box-shadow: none;
+      overflow: visible;
+    }
+  }
+
+  &__desktop-table {
+    @media (max-width: 768px) {
+      display: none !important;
+    }
+  }
+
+  &__mobile-cards {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+
+    @media (max-width: 768px) {
+      display: flex;
+    }
+  }
+
+  &__card-item {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    cursor: pointer;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-gold);
+    }
+  }
+
+  &__card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--surface-container-high);
+    padding-bottom: 10px;
+  }
+
+  &__card-athlete {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__card-name {
+    font-weight: 700;
+    color: var(--color-navy);
+    font-family: var(--font-heading);
+    font-size: 15px;
+  }
+
+  &__card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+
+    .label {
+      color: var(--color-text-tertiary);
+      font-weight: 500;
+    }
+
+    .value {
+      font-weight: 600;
+      color: var(--color-text-primary);
+
+      .none {
+        color: var(--color-text-tertiary);
+        font-style: italic;
+        font-weight: 400;
+      }
+    }
+
+    &--compliance {
+      align-items: center;
+
+      .compliance-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 140px;
+      }
+
+      .compliance-bar {
+        height: 6px;
+        flex-grow: 1;
+        background-color: var(--surface-container);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+      }
+
+      .compliance-fill {
+        height: 100%;
+        background-color: var(--color-gold);
+        border-radius: var(--radius-full);
+
+        &--alert {
+          background-color: var(--color-red);
+        }
+      }
+
+      .compliance-text {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--color-text-secondary);
+        min-width: 32px;
+        text-align: right;
+
+        &--alert {
+          color: var(--color-red);
+        }
+      }
+    }
+  }
+
+  &__card-footer {
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid var(--surface-container-high);
+    padding-top: var(--space-xs);
+
+    .view-profile-link {
+      padding: 0;
+      height: auto;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: var(--color-gold-text) !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+
+      &:hover {
+        color: var(--color-gold-dim) !important;
+      }
+    }
   }
 
   &__error {

@@ -182,8 +182,92 @@ const InvitationManagement: React.FC = () => {
             setPageSize(size);
           },
         }}
-        className="invitation-management__table"
+        className="invitation-management__table invitation-management__desktop-table"
       />
+      <div className="invitation-management__mobile-cards">
+        {data?.items.map((record) => {
+          const badgeInfo = STATUS_BADGES[record.status] || { status: 'default', text: 'Unknown' };
+          const isPending = record.status === InvitationStatus.Pending || record.status === 0;
+          const isExpired = record.status === InvitationStatus.Expired || record.status === 2;
+          const isRevoked = record.status === InvitationStatus.Revoked || record.status === 3;
+
+          return (
+            <div key={record.id} className="invitation-management__card-item">
+              <div className="invitation-management__card-header">
+                <strong className="invite-email">{record.email}</strong>
+                <span className={`invite-role-badge invite-role-badge--${record.role.toLowerCase()} font-data`}>
+                  {record.role}
+                </span>
+              </div>
+              <div className="invitation-management__card-body">
+                <div className="invitation-management__card-row">
+                  <span className="label">Status</span>
+                  <span className="value">
+                    <Badge status={badgeInfo.status} text={badgeInfo.text} className="mono" />
+                  </span>
+                </div>
+                <div className="invitation-management__card-row">
+                  <span className="label">Expires At</span>
+                  <span className="value mono">{new Date(record.expiresAt).toLocaleString()}</span>
+                </div>
+              </div>
+              <div className="invitation-management__card-footer">
+                <Space size="middle">
+                  <Button
+                    size="small"
+                    disabled={!isPending}
+                    onClick={() => handleCopyLink(record.inviteUrl)}
+                    icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>content_copy</span>}
+                  >
+                    Copy Link
+                  </Button>
+                  <Button
+                    size="small"
+                    disabled={record.status === InvitationStatus.Accepted || record.status === 1}
+                    onClick={() => handleResend(record.id)}
+                    loading={resendMutation.isPending && resendMutation.variables === record.id}
+                    icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>send</span>}
+                  >
+                    Resend
+                  </Button>
+                  <Button
+                    danger
+                    size="small"
+                    disabled={!isPending && !isExpired}
+                    onClick={() => handleRevoke(record.id)}
+                    loading={revokeMutation.isPending && revokeMutation.variables === record.id}
+                    icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>cancel</span>}
+                  >
+                    Revoke
+                  </Button>
+                </Space>
+              </div>
+            </div>
+          );
+        })}
+        {/* Mobile pagination controls */}
+        {data && data.totalCount > pageSize && (
+          <div className="invitation-management__mobile-pagination">
+            <Button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+              size="small"
+            >
+              Prev
+            </Button>
+            <span className="pagination-text">
+              Page {currentPage} of {Math.ceil(data.totalCount / pageSize)}
+            </span>
+            <Button
+              disabled={currentPage * pageSize >= data.totalCount}
+              onClick={() => setCurrentPage((p) => p + 1)}
+              size="small"
+            >
+              Next
+            </Button>
+          </div>
+        )}
+      </div>
 
       <Modal
         title="Invite New Member"

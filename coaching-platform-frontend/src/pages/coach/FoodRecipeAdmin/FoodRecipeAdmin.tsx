@@ -249,8 +249,95 @@ const FoodRecipeAdmin: React.FC = () => {
                       }
                     },
                   }}
-                  className="food-recipe-admin__table"
+                  className="food-recipe-admin__table food-recipe-admin__desktop-table"
                 />
+                <div className="food-recipe-admin__mobile-cards">
+                  {foodsData?.items.map((food) => (
+                    <div key={food.id} className="food-recipe-admin__card-item">
+                      <div className="food-recipe-admin__card-header">
+                        <strong className="food-name">{food.name}</strong>
+                        <span className="food-category-badge">{food.category}</span>
+                      </div>
+                      <div className="food-recipe-admin__card-body">
+                        <div className="food-recipe-admin__macro-row">
+                          <div className="macro-item">
+                            <span className="label">Calories</span>
+                            <span className="val mono">{Math.round(food.caloriesPer100g)} kcal</span>
+                          </div>
+                          <div className="macro-item">
+                            <span className="label">Protein</span>
+                            <span className="val mono">{food.proteinPer100g}g</span>
+                          </div>
+                          <div className="macro-item">
+                            <span className="label">Carbs</span>
+                            <span className="val mono">{food.carbsPer100g}g</span>
+                          </div>
+                          <div className="macro-item">
+                            <span className="label">Fat</span>
+                            <span className="val mono">{food.fatPer100g}g</span>
+                          </div>
+                          {food.fiberPer100g > 0 && (
+                            <div className="macro-item">
+                              <span className="label">Fiber</span>
+                              <span className="val mono">{food.fiberPer100g}g</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="food-recipe-admin__card-footer">
+                        <Space size="middle">
+                          <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => handleEditFoodClick(food)}
+                            icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>}
+                            className="edit-btn"
+                          >
+                            Edit
+                          </Button>
+                          <Popconfirm
+                            title="Delete food item?"
+                            description="Are you sure you want to delete this food?"
+                            onConfirm={() => handleDeleteFood(food.id)}
+                            okText="Yes"
+                            cancelText="No"
+                            okButtonProps={{ danger: true }}
+                          >
+                            <Button
+                              danger
+                              size="small"
+                              icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>}
+                            >
+                              Delete
+                            </Button>
+                          </Popconfirm>
+                        </Space>
+                      </div>
+                    </div>
+                  ))}
+                  {/* Inline Pagination for Mobile */}
+                  {foodsData && foodsData.totalCount > foodPageSize && (
+                    <div className="food-recipe-admin__mobile-pagination">
+                      <Button
+                        disabled={foodPage === 1}
+                        onClick={() => setFoodPage((p) => p - 1)}
+                        size="small"
+                      >
+                        Prev
+                      </Button>
+                      <span className="pagination-text">
+                        Page {foodPage} of {Math.ceil(foodsData.totalCount / foodPageSize)}
+                      </span>
+                      <Button
+                        disabled={foodPage * foodPageSize >= foodsData.totalCount}
+                        onClick={() => setFoodPage((p) => p + 1)}
+                        size="small"
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             ),
           },

@@ -1,10 +1,17 @@
 .coach-dashboard {
+  width: 100%;
   max-width: var(--content-max-width);
   margin: 0 auto;
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    padding: var(--space-sm);
+    gap: var(--space-sm);
+  }
 
   &--error {
     align-items: center;
@@ -58,6 +65,7 @@
   &__action-btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     padding: 10px 16px;
     background-color: var(--color-navy);
@@ -76,6 +84,10 @@
 
     &:hover {
       background-color: var(--color-navy-light);
+    }
+
+    @media (max-width: 600px) {
+      width: 100%;
     }
   }
 
@@ -227,6 +239,10 @@
       align-items: center;
       padding: 16px 20px;
       border-bottom: 1px solid var(--color-border-light);
+
+      @media (max-width: 480px) {
+        padding: 12px 14px;
+      }
     }
 
     &-title-wrapper {
@@ -250,6 +266,10 @@
       padding: 20px;
       flex-grow: 1;
       overflow-y: auto;
+
+      @media (max-width: 480px) {
+        padding: 12px;
+      }
     }
 
     &-footer {
@@ -328,6 +348,35 @@
   &__page-num {
     font-size: 13px;
     color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 480px) {
+    &__kpi-card {
+      padding: 14px 16px;
+      gap: 12px;
+    }
+
+    &__kpi-value {
+      font-size: 24px;
+    }
+
+    &__panel-footer {
+      padding: 12px 10px;
+      gap: 6px;
+
+      .coach-dashboard__page-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+        gap: 2px;
+        span {
+          font-size: 14px;
+        }
+      }
+
+      .coach-dashboard__page-num {
+        font-size: 11px;
+      }
+    }
   }
 }
 
