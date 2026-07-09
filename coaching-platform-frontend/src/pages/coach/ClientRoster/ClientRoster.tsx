@@ -208,17 +208,76 @@ const ClientRoster: React.FC = () => {
             <p>Failed to load client roster. Please refresh the page.</p>
           </div>
         ) : (
-          <Table
-            dataSource={filteredItems}
-            columns={columns}
-            rowKey="athleteId"
-            loading={isLoading}
-            pagination={false}
-            onRow={(record) => ({
-              onClick: () => handleRowClick(record.athleteId),
-            })}
-            className="roster-table"
-          />
+          <>
+            <Table
+              dataSource={filteredItems}
+              columns={columns}
+              rowKey="athleteId"
+              loading={isLoading}
+              pagination={false}
+              onRow={(record) => ({
+                onClick: () => handleRowClick(record.athleteId),
+              })}
+              className="roster-table client-roster__desktop-table"
+            />
+            <div className="client-roster__mobile-cards">
+              {filteredItems.map((item) => (
+                <div
+                  key={item.athleteId}
+                  className="client-roster__card-item"
+                  onClick={() => handleRowClick(item.athleteId)}
+                >
+                  <div className="client-roster__card-header">
+                    <div className="client-roster__card-athlete">
+                      {item.athleteAvatarUrl ? (
+                        <Avatar src={item.athleteAvatarUrl} size="large" />
+                      ) : (
+                        <Avatar size="large" style={{ backgroundColor: 'var(--surface-container-high)', color: 'var(--color-navy)', fontWeight: 600 }}>
+                          {getInitials(item.athleteName)}
+                        </Avatar>
+                      )}
+                      <span className="client-roster__card-name">{item.athleteName}</span>
+                    </div>
+                    {getStatusTag(item.status)}
+                  </div>
+                  <div className="client-roster__card-body">
+                    <div className="client-roster__card-row">
+                      <span className="label">Program</span>
+                      <span className="value">
+                        {item.activeProgramName || <span className="none">None Assigned</span>}
+                      </span>
+                    </div>
+                    <div className="client-roster__card-row">
+                      <span className="label">Last Check-in</span>
+                      <span className="value mono">
+                        {item.lastCheckInDate ? formatRelativeTime(item.lastCheckInDate) : 'Never'}
+                      </span>
+                    </div>
+                    <div className="client-roster__card-row client-roster__card-row--compliance">
+                      <span className="label">Compliance</span>
+                      <div className="compliance-wrapper">
+                        <div className="compliance-bar">
+                          <div
+                            className={`compliance-fill ${item.macroCompliancePercent > 105 || item.macroCompliancePercent < 40 ? 'compliance-fill--alert' : ''}`}
+                            style={{ width: `${Math.min(item.macroCompliancePercent, 100)}%` }}
+                          />
+                        </div>
+                        <span className={`compliance-text mono ${item.macroCompliancePercent > 105 || item.macroCompliancePercent < 40 ? 'compliance-text--alert' : ''}`}>
+                          {Math.round(item.macroCompliancePercent)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="client-roster__card-footer">
+                    <Button type="link" className="view-profile-link">
+                      View Profile
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chevron_right</span>
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

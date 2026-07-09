@@ -1,10 +1,16 @@
 .workout-template-builder {
+  width: 100%;
   max-width: var(--content-max-width);
   margin: 0 auto;
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    padding: var(--space-sm);
+  }
 
   &--loading {
     padding: 64px 24px;
@@ -21,7 +27,23 @@
 
     @media (max-width: 600px) {
       flex-direction: column;
-      align-items: flex-start;
+      align-items: stretch;
+      gap: 12px;
+      margin-bottom: var(--space-sm);
+
+      .ant-space {
+        width: 100%;
+        display: flex !important;
+        
+        .ant-space-item {
+          flex: 1;
+        }
+        
+        .workout-template-builder__action-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
     }
   }
 
@@ -68,7 +90,12 @@
     border-radius: var(--radius-card);
     border: 1px solid var(--color-border-light);
     box-shadow: var(--shadow-sm);
+
+    @media (max-width: 480px) {
+      padding: 16px;
+    }
   }
+
 
   &__meta-fields {
     display: flex;
@@ -120,8 +147,15 @@
     display: flex;
     flex-direction: column;
     height: 700px;
+    max-height: 700px;
     overflow: hidden;
+
+    @media (max-width: 768px) {
+      height: auto;
+      max-height: 400px;
+    }
   }
+
 
   &__sidebar-header {
     display: flex;
@@ -202,7 +236,12 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--space-sm);
     align-items: start;
+
+    @media (max-width: 480px) {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
   }
+
 
   &__add-day-card {
     min-height: 250px;
@@ -260,7 +299,12 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: var(--space-md);
+
+    @media (max-width: 480px) {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
   }
+
 
   &__template-card {
     background-color: var(--color-white);

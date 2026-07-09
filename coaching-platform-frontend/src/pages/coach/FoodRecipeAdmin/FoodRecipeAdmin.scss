@@ -1,16 +1,27 @@
 .food-recipe-admin {
-  max-width: var(--content-max-width);
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    padding: var(--space-sm);
+  }
 
   &__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
 
   &__title {
@@ -25,6 +36,10 @@
   }
 
   &__tabs {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
     .ant-tabs-nav-list {
       font-family: var(--font-heading);
       font-weight: 700;
@@ -57,6 +72,8 @@
     border-radius: var(--radius-card);
     border: 1px solid var(--color-border-light);
     box-shadow: var(--shadow-sm);
+    max-width: 100%;
+    overflow: hidden;
 
     @media (max-width: 768px) {
       flex-direction: column;
@@ -78,6 +95,7 @@
   &__btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     border-radius: var(--radius-btn);
     font-family: var(--font-heading);
@@ -86,6 +104,10 @@
 
     span {
       font-size: 18px;
+    }
+
+    @media (max-width: 768px) {
+      width: 100%;
     }
 
     &--navy {
@@ -111,8 +133,120 @@
     }
   }
 
+  &__desktop-table {
+    @media (max-width: 768px) {
+      display: none !important;
+    }
+  }
+
+  &__mobile-cards {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+
+    @media (max-width: 768px) {
+      display: flex;
+    }
+  }
+
+  &__card-item {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--surface-container-high);
+    padding-bottom: 8px;
+
+    .food-name {
+      font-size: 15px;
+      color: var(--color-navy);
+      font-weight: 700;
+      font-family: var(--font-heading);
+    }
+
+    .food-category-badge {
+      background-color: var(--surface-container);
+      color: var(--color-navy);
+      padding: 2px 8px;
+      border-radius: var(--radius-btn);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-family: var(--font-heading);
+    }
+  }
+
+  &__card-body {
+    padding: 4px 0;
+  }
+
+  &__macro-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) 16px;
+
+    .macro-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .label {
+        font-size: 10px;
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+
+      .val {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--color-navy);
+      }
+    }
+  }
+
+  &__card-footer {
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid var(--surface-container-high);
+    padding-top: 10px;
+    
+    .edit-btn {
+      background-color: var(--color-gold) !important;
+      border-color: var(--color-gold) !important;
+      color: var(--color-navy) !important;
+    }
+  }
+
+  &__mobile-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: 8px;
+
+    .pagination-text {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      font-weight: 600;
+    }
+  }
+
   &__recipe-tabs {
     flex-grow: 1;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
 
     .ant-tabs-nav {
       margin-bottom: 0 !important;
@@ -148,6 +282,13 @@
     opacity: 0;
     transition: opacity var(--transition-fast);
     z-index: 10;
+
+    @media (max-width: 768px) {
+      opacity: 1;
+      background: rgba(11, 19, 43, 0.6);
+      padding: 6px;
+      border-radius: var(--radius-card);
+    }
   }
 }
 
