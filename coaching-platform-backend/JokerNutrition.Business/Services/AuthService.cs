@@ -1,4 +1,4 @@
-﻿using System.Security.Principal;
+using System.Security.Principal;
 using JokerNutrition.Business.Configurations;
 using JokerNutrition.Business.DTOs.Auth;
 using JokerNutrition.Data.Enums;
@@ -206,7 +206,7 @@ public class AuthService : _BaseService, IAuthService
         var user = await _userManager.FindByEmailAsync(form.Email);
         if (user == null) return; // Don't reveal whether email exists
 
-        var resetToken = _jwtHelper.GenerateRefreshToken();
+        var resetToken = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
         var tokenEntity = new PasswordResetToken
         {
             UserId = user.Id,
