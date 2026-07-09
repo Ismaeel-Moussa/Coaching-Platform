@@ -1,13 +1,13 @@
 # 🃏 Joker Nutrition Coaching Platform
 
-[![Production URL](https://img.shields.io/badge/Live-www.jokernutrition.app-blueviolet?style=for-the-badge&logo=vercel)](https://www.jokernutrition.app)
+[![Production URL](https://img.shields.io/badge/Live-jokernutrition.app-blueviolet?style=for-the-badge&logo=vercel)](https://jokernutrition.app)
 [![Framework Backend](https://img.shields.io/badge/.NET-10.0-blue?style=for-the-badge&logo=dotnet)](https://dotnet.microsoft.com)
 [![Framework Frontend](https://img.shields.io/badge/React-19.0-blue?style=for-the-badge&logo=react)](https://react.dev)
 [![Database](https://img.shields.io/badge/PostgreSQL-16-blue?style=for-the-badge&logo=postgresql)](https://www.postgresql.org)
 
 **Joker Nutrition** is a state-of-the-art, high-performance coaching platform designed to connect fitness and nutrition coaches with athletes (clients). The platform delivers a premium, real-time, and mobile-friendly tracking experience that helps clients hit their goals and enables coaches to monitor compliance, adjust programs dynamically, and build workout/diet templates.
 
-🔗 **Live Platform URL:** [www.jokernutrition.app](https://www.jokernutrition.app)
+🔗 **Live Platform URL:** [jokernutrition.app](https://jokernutrition.app)
 
 ---
 
@@ -15,7 +15,7 @@
 
 Contact us so we can send you an invitation to the website:
 
-*   **Email:** [support@jokernutrion.app](mailto:support@jokernutrion.app)
+*   **Email:** [support@jokernutrition.app](mailto:support@jokernutrition.app)
 
 
 ---
@@ -70,4 +70,4 @@ Contact us so we can send you an invitation to the website:
 
 ## 📝 License
 
-This project is private and proprietary. All rights reserved. For any inquiries, please contact [support@jokernutrion.app](mailto:support@jokernutrion.app).
+This project is private and proprietary. All rights reserved. For any inquiries, please contact [support@jokernutrition.app](mailto:support@jokernutrition.app).
