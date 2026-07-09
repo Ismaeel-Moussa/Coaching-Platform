@@ -1,10 +1,16 @@
 .invitation-management {
+  width: 100%;
   max-width: var(--content-max-width);
   margin: 0 auto;
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    padding: var(--space-sm);
+  }
 
   &__header {
     display: flex;
@@ -50,7 +56,13 @@
     &:hover {
       background-color: var(--color-gold-dim) !important;
     }
+
+    @media (max-width: 600px) {
+      width: 100% !important;
+      justify-content: center !important;
+    }
   }
+
 
   &__table {
     background-color: var(--color-white);
@@ -58,6 +70,116 @@
     border: 1px solid var(--color-border-light);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
+  }
+
+  &__desktop-table {
+    @media (max-width: 768px) {
+      display: none !important;
+    }
+  }
+
+  &__mobile-cards {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+
+    @media (max-width: 768px) {
+      display: flex;
+    }
+  }
+
+  &__card-item {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--surface-container-high);
+    padding-bottom: 8px;
+
+    .invite-email {
+      font-size: 15px;
+      color: var(--color-navy);
+      font-weight: 700;
+      font-family: var(--font-heading);
+      word-break: break-all;
+    }
+
+    .invite-role-badge {
+      padding: 2px 8px;
+      border-radius: var(--radius-btn);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+
+      &--athlete {
+        background-color: rgba(253, 192, 3, 0.15);
+        color: var(--color-gold-text);
+      }
+
+      &--coach {
+        background-color: var(--surface-container);
+        color: var(--color-navy);
+      }
+
+      &--admin {
+        background-color: rgba(186, 26, 26, 0.1);
+        color: var(--color-red);
+      }
+    }
+  }
+
+  &__card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+
+    .label {
+      color: var(--color-text-tertiary);
+      font-weight: 500;
+    }
+
+    .value {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+  }
+
+  &__card-footer {
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid var(--surface-container-high);
+    padding-top: 10px;
+  }
+
+  &__mobile-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: 8px;
+
+    .pagination-text {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      font-weight: 600;
+    }
   }
 }
 

@@ -6,7 +6,7 @@
   background-color: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-btn);
-  cursor: grab;
+  cursor: default;
   user-select: none;
   transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
   margin-bottom: var(--space-xs);
@@ -17,7 +17,6 @@
   }
 
   &--dragging {
-    cursor: grabbing;
     box-shadow: 0 8px 24px rgba(11, 19, 43, 0.15);
   }
 
@@ -55,5 +54,36 @@
     padding: 2px 6px;
     border-radius: var(--radius-btn);
     text-transform: uppercase;
+  }
+
+  &__add-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-gold);
+    border: none;
+    border-radius: var(--radius-btn);
+    color: var(--color-navy);
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--transition-fast);
+
+    span {
+      font-size: 18px;
+    }
+
+    &:hover {
+      background-color: var(--color-gold-dim);
+    }
+
+    @media (max-width: 1024px) {
+      display: inline-flex;
+    }
+  }
+
+  &:hover &__add-btn {
+    display: inline-flex;
   }
 }

@@ -229,6 +229,40 @@ const WorkoutTemplateBuilder: React.FC = () => {
     });
   };
 
+  const handleAddExerciseToDay = (
+    exercise: { id: number; name: string; primaryMuscle: string },
+    dayNumber: number,
+  ) => {
+    setDays((prevDays) =>
+      prevDays.map((day) => {
+        if (day.dayNumber === dayNumber) {
+          if (day.isRestDay) {
+            Modal.warning({
+              title: 'Rest Day',
+              content: 'Cannot add exercises to a rest day. Please turn off Rest Day status first.',
+            });
+            return day;
+          }
+          const newExercise: WorkoutTemplateExerciseDto = {
+            exerciseId: exercise.id,
+            exerciseName: exercise.name,
+            section: 'Main',
+            orderIndex: day.exercises.length,
+            targetSets: 3,
+            targetReps: '10',
+            restSeconds: 90,
+            progressiveOverloadTargetKg: null,
+          };
+          return {
+            ...day,
+            exercises: [...day.exercises, newExercise],
+          };
+        }
+        return day;
+      })
+    );
+  };
+
   // Save template to DB
   const handleSave = async () => {
     if (!name.trim()) {
@@ -580,6 +614,8 @@ const WorkoutTemplateBuilder: React.FC = () => {
                               key={ex.id}
                               id={`exercise-library-${ex.id}`}
                               exercise={{ id: ex.id, name: ex.name, primaryMuscle: ex.primaryMuscle }}
+                              days={days.map((d) => ({ dayNumber: d.dayNumber, dayLabel: d.dayLabel }))}
+                              onAddToDay={handleAddExerciseToDay}
                             />
                           ))
                         )}
