@@ -71,9 +71,23 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     color: var(--color-text-inverse);
     text-transform: uppercase;
     white-space: nowrap;
-    opacity: 1;
+  }
+
+  &__logo-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
     overflow: hidden;
+    opacity: 1;
     transition: opacity 0.2s ease;
+  }
+
+  &__logo-sub {
+    font-size: 10px;
+    color: var(--color-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
   }
 
   &__nav {
@@ -281,10 +295,16 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
       margin-left: $sidebar-collapsed-width;
     }
 
+    .athlete-layout__logo-info {
+      opacity: 0;
+      width: 0;
+    }
+
     .athlete-layout__logo-text {
       opacity: 0;
       width: 0;
     }
+
 
     .athlete-layout__nav-label {
       opacity: 0;
@@ -461,6 +481,75 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
       letter-spacing: 0.02em;
     }
   }
+
+  &__badge {
+    background-color: var(--color-gold);
+    color: var(--color-navy);
+    font-size: 0.72rem;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    margin-left: auto;
+    line-height: 1;
+  }
+
+  &__mobile-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--space-sm) !important;
+
+    .athlete-layout__mobile-notification-btn,
+    .athlete-layout__mobile-avatar-btn {
+      position: relative !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin: 0 !important;
+    }
+  }
+
+  &__mobile-notification-btn {
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    position: relative;
+    border-radius: var(--radius-btn);
+    transition: all var(--transition-fast);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--color-gold);
+    }
+
+    .material-symbols-outlined {
+      font-size: 24px;
+    }
+  }
+
+  &__mobile-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: var(--color-gold);
+    color: var(--color-navy);
+    font-size: 0.62rem;
+    font-weight: 700;
+    min-width: 15px;
+    height: 15px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--color-navy);
+    line-height: 1;
+  }
 }
 
 // ── Mobile Drawer Custom Overrides ──────────────────────────────────────────
@@ -577,74 +666,5 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
       }
     }
   }
-
-  // ── Notifications UI Styling ──
-  &__badge {
-    background-color: var(--color-gold);
-    color: var(--color-navy);
-    font-size: 0.72rem;
-    font-weight: 700;
-    min-width: 18px;
-    height: 18px;
-    border-radius: var(--radius-full);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 4px;
-    margin-left: auto;
-    line-height: 1;
-  }
-
-  &__mobile-header-actions {
-    display: flex !important;
-    align-items: center !important;
-    gap: var(--space-sm) !important;
-
-    .athlete-layout__mobile-notification-btn,
-    .athlete-layout__mobile-avatar-btn {
-      position: relative !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      margin: 0 !important;
-    }
-  }
-
-  &__mobile-notification-btn {
-    color: rgba(255, 255, 255, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px;
-    position: relative;
-    border-radius: var(--radius-btn);
-    transition: all var(--transition-fast);
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--color-gold);
-    }
-
-    .material-symbols-outlined {
-      font-size: 24px;
-    }
-  }
-
-  &__mobile-badge {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    background-color: var(--color-gold);
-    color: var(--color-navy);
-    font-size: 0.62rem;
-    font-weight: 700;
-    min-width: 15px;
-    height: 15px;
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1.5px solid var(--color-navy);
-    line-height: 1;
-  }
 }
+
