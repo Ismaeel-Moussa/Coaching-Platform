@@ -203,40 +203,43 @@
     &--compliance {
       align-items: center;
 
-      .compliance-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        width: 140px;
-      }
-
-      .compliance-bar {
-        height: 6px;
-        flex-grow: 1;
-        background-color: var(--surface-container);
-        border-radius: var(--radius-full);
-        overflow: hidden;
-      }
-
-      .compliance-fill {
-        height: 100%;
-        background-color: var(--color-gold);
-        border-radius: var(--radius-full);
-
-        &--alert {
-          background-color: var(--color-red);
+      .roster-mobile-compliance {
+        &__wrapper {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 140px;
         }
-      }
 
-      .compliance-text {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--color-text-secondary);
-        min-width: 32px;
-        text-align: right;
+        &__track {
+          height: 6px;
+          flex-grow: 1;
+          background-color: var(--surface-container);
+          border-radius: var(--radius-full);
+          overflow: hidden;
+        }
 
-        &--alert {
-          color: var(--color-red);
+        &__fill {
+          height: 100%;
+          background-color: var(--color-gold);
+          border-radius: var(--radius-full);
+          transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+          &--alert {
+            background-color: var(--color-red);
+          }
+        }
+
+        &__text {
+          font-size: 11px;
+          font-weight: 700;
+          color: var(--color-text-secondary);
+          min-width: 32px;
+          text-align: right;
+
+          &--alert {
+            color: var(--color-red);
+          }
         }
       }
     }
@@ -349,6 +352,7 @@
     height: 100%;
     background-color: var(--color-gold);
     border-radius: var(--radius-full);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
     &--alert {
       background-color: var(--color-red);

@@ -92,18 +92,22 @@ const ClientRoster: React.FC = () => {
       title: 'Macro Compliance',
       dataIndex: 'macroCompliancePercent',
       key: 'macroCompliancePercent',
-      render: (percent: number) => {
-        const isAlert = percent > 105 || percent < 40;
+      render: (percent: number | null | undefined) => {
+        const hasNoData = percent == null;
+        const safePercent = percent ?? 0;
+        const isAlert = !hasNoData && (safePercent > 105 || safePercent < 40);
         return (
           <div className="roster-table__compliance">
             <div className="roster-table__compliance-bar-track">
-              <div 
-                className={`roster-table__compliance-bar-fill ${isAlert ? 'roster-table__compliance-bar-fill--alert' : ''}`}
-                style={{ width: `${Math.min(percent, 100)}%` }}
-              />
+              {!hasNoData && safePercent > 0 && (
+                <div 
+                  className={`roster-table__compliance-bar-fill ${isAlert ? 'roster-table__compliance-bar-fill--alert' : ''}`}
+                  style={{ width: `${Math.min(safePercent, 100)}%` }}
+                />
+              )}
             </div>
             <span className={`roster-table__compliance-text mono ${isAlert ? 'roster-table__compliance-text--alert' : ''}`}>
-              {Math.round(percent)}%
+              {hasNoData ? '—' : `${Math.round(safePercent)}%`}
             </span>
           </div>
         );
@@ -255,15 +259,17 @@ const ClientRoster: React.FC = () => {
                     </div>
                     <div className="client-roster__card-row client-roster__card-row--compliance">
                       <span className="label">Compliance</span>
-                      <div className="compliance-wrapper">
-                        <div className="compliance-bar">
-                          <div
-                            className={`compliance-fill ${item.macroCompliancePercent > 105 || item.macroCompliancePercent < 40 ? 'compliance-fill--alert' : ''}`}
-                            style={{ width: `${Math.min(item.macroCompliancePercent, 100)}%` }}
-                          />
+                      <div className="roster-mobile-compliance__wrapper">
+                        <div className="roster-mobile-compliance__track">
+                          {item.macroCompliancePercent != null && item.macroCompliancePercent > 0 && (
+                            <div
+                              className={`roster-mobile-compliance__fill ${item.macroCompliancePercent != null && (item.macroCompliancePercent > 105 || item.macroCompliancePercent < 40) ? 'roster-mobile-compliance__fill--alert' : ''}`}
+                              style={{ width: `${Math.min(item.macroCompliancePercent, 100)}%` }}
+                            />
+                          )}
                         </div>
-                        <span className={`compliance-text mono ${item.macroCompliancePercent > 105 || item.macroCompliancePercent < 40 ? 'compliance-text--alert' : ''}`}>
-                          {Math.round(item.macroCompliancePercent)}%
+                        <span className={`roster-mobile-compliance__text mono ${item.macroCompliancePercent != null && (item.macroCompliancePercent > 105 || item.macroCompliancePercent < 40) ? 'roster-mobile-compliance__text--alert' : ''}`}>
+                          {item.macroCompliancePercent == null ? '—' : `${Math.round(item.macroCompliancePercent)}%`}
                         </span>
                       </div>
                     </div>

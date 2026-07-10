@@ -16,6 +16,11 @@ const CATEGORIES: { label: string; value: string }[] = [
   { label: 'Core', value: 'Core' },
 ];
 
+const TAB_ITEMS = CATEGORIES.map((cat) => ({
+  key: cat.value,
+  label: cat.label,
+}));
+
 const ExerciseLibraryAdmin: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -68,11 +73,8 @@ const ExerciseLibraryAdmin: React.FC = () => {
         <div className="exercise-library-admin__tabs-wrapper">
           <Tabs
             activeKey={activeTab}
-            onChange={(key) => setActiveTab(key)}
-            items={CATEGORIES.map((cat) => ({
-              key: cat.value,
-              label: cat.label,
-            }))}
+            onChange={setActiveTab}
+            items={TAB_ITEMS}
             className="exercise-library-admin__tabs"
           />
         </div>

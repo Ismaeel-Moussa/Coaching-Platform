@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "genie": {
+      "source": "y0u-0/genie-react",
+      "sourceType": "github",
+      "skillPath": "skills/genie/SKILL.md",
+      "computedHash": "33a721c7f177c15b263d3c14481100c05af827bb563de17533d84bfa37073f52"
+    }
+  }
+}

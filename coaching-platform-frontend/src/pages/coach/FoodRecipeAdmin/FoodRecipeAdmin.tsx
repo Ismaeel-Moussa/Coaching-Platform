@@ -18,6 +18,16 @@ const RECIPE_CATEGORIES = [
   { label: 'Custom', value: RecipeCategory.Custom.toString() },
 ];
 
+const FOOD_CATEGORY_OPTIONS = FOOD_CATEGORIES.map((cat) => ({
+  label: cat,
+  value: cat,
+}));
+
+const RECIPE_TAB_ITEMS = RECIPE_CATEGORIES.map((cat) => ({
+  key: cat.value,
+  label: cat.label,
+}));
+
 const FoodRecipeAdmin: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('foods');
 
@@ -206,7 +216,7 @@ const FoodRecipeAdmin: React.FC = () => {
                       }}
                       allowClear
                       style={{ width: 160 }}
-                      options={FOOD_CATEGORIES.map((cat) => ({ label: cat, value: cat }))}
+                      options={FOOD_CATEGORY_OPTIONS}
                     />
 
                   </div>
@@ -349,11 +359,8 @@ const FoodRecipeAdmin: React.FC = () => {
                 <div className="food-recipe-admin__controls">
                   <Tabs
                     activeKey={recipeCategory}
-                    onChange={(key) => setRecipeCategory(key)}
-                    items={RECIPE_CATEGORIES.map((cat) => ({
-                      key: cat.value,
-                      label: cat.label,
-                    }))}
+                    onChange={setRecipeCategory}
+                    items={RECIPE_TAB_ITEMS}
                     className="food-recipe-admin__recipe-tabs"
                   />
                   <Button
