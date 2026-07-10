@@ -367,6 +367,55 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
   }
 
   // ── Responsive (Mobile / Tablet <= 768px) ──────────────────────────────────
+  @media (max-width: 1024px) and (min-width: 769px) {
+    &__sidebar {
+      width: $sidebar-collapsed-width !important;
+    }
+
+    &__main {
+      margin-left: $sidebar-collapsed-width !important;
+    }
+
+    .coach-layout__logo-info {
+      opacity: 0 !important;
+      width: 0 !important;
+      pointer-events: none;
+    }
+
+    .coach-layout__nav-label {
+      opacity: 0 !important;
+      width: 0 !important;
+      pointer-events: none;
+    }
+
+    .coach-layout__user-info {
+      opacity: 0 !important;
+      width: 0 !important;
+      pointer-events: none;
+    }
+
+    .coach-layout__logout {
+      display: none !important;
+    }
+
+    .coach-layout__nav-item {
+      justify-content: center !important;
+      gap: 0 !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    .coach-layout__sidebar-logo:hover {
+      .coach-layout__logo-brand {
+        opacity: 0 !important;
+      }
+      .coach-layout__toggle {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+    }
+  }
+
   @media (max-width: 768px) {
     --mobile-header-height: 56px;
 

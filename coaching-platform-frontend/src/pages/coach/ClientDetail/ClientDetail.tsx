@@ -21,7 +21,7 @@ import './ClientDetail.scss';
 
 const { TextArea } = Input;
 
-const CheckInCard: React.FC<{ checkIn: any; onPhotoClick: (url: string) => void }> = ({
+const CheckInCard: React.FC<{ checkIn: any; onPhotoClick: (url: string) => void }> = React.memo(({
   checkIn,
   onPhotoClick,
 }) => {
@@ -159,7 +159,7 @@ const CheckInCard: React.FC<{ checkIn: any; onPhotoClick: (url: string) => void 
       </div>
     </div>
   );
-};
+});
 
 const ClientDetail: React.FC = () => {
   const { athleteId } = useParams<{ athleteId: string }>();
@@ -176,6 +176,10 @@ const ClientDetail: React.FC = () => {
   const [historyPage, setHistoryPage] = useState<number>(1);
   const { data: checkInHistory, isLoading: isHistoryLoading } = useGetCheckInHistory(historyPage, 5, id);
   const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
+
+  const handlePhotoClick = React.useCallback((url: string) => {
+    setLightboxPhoto(url);
+  }, []);
 
   // Keep notes synchronized when profile loads
   useEffect(() => {
@@ -487,7 +491,7 @@ const ClientDetail: React.FC = () => {
                     <CheckInCard
                       key={checkIn.id}
                       checkIn={checkIn}
-                      onPhotoClick={(url) => setLightboxPhoto(url)}
+                      onPhotoClick={handlePhotoClick}
                     />
                   ))}
                   <div className="client-detail__history-pagination">

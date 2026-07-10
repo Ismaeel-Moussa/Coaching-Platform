@@ -388,6 +388,61 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
   }
 
   // ── Responsive (Mobile / Tablet <= 768px) ──────────────────────────────────
+  @media (max-width: 1024px) and (min-width: 769px) {
+    &__sidebar {
+      width: $sidebar-collapsed-width !important;
+    }
+
+    &__main {
+      margin-left: $sidebar-collapsed-width !important;
+    }
+
+    .athlete-layout__logo-info {
+      opacity: 0 !important;
+      width: 0 !important;
+      pointer-events: none;
+    }
+
+    .athlete-layout__logo-text {
+      opacity: 0 !important;
+      width: 0 !important;
+      pointer-events: none;
+    }
+
+    .athlete-layout__nav-label {
+      opacity: 0 !important;
+      width: 0 !important;
+      pointer-events: none;
+    }
+
+    .athlete-layout__user-info {
+      opacity: 0 !important;
+      width: 0 !important;
+      pointer-events: none;
+    }
+
+    .athlete-layout__logout {
+      display: none !important;
+    }
+
+    .athlete-layout__nav-item {
+      justify-content: center !important;
+      gap: 0 !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    .athlete-layout__sidebar-logo:hover {
+      .athlete-layout__logo-brand {
+        opacity: 0 !important;
+      }
+      .athlete-layout__toggle {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+    }
+  }
+
   @media (max-width: 768px) {
     --mobile-header-height: 56px;
     --mobile-nav-height: 60px;
