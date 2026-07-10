@@ -50,13 +50,35 @@ export const useQuickAddRecipe = (date: string) => {
 
 export const useDeleteRecipe = () => {
   const queryClient = useQueryClient();
-  return useMutation<void, Error, number>({
+  return useMutation<void, Error, number, { previousQueries: { queryKey: any; data: any }[] }>({
     mutationFn: deleteRecipe,
+    onMutate: async (deletedId) => {
+      await queryClient.cancelQueries({ queryKey: ['recipes'] });
+      const queries = queryClient.getQueriesData<any>({ queryKey: ['recipes'] });
+      const previousQueries = queries.map(([queryKey, data]) => ({ queryKey, data }));
+
+      queries.forEach(([queryKey, data]) => {
+        if (data && Array.isArray(data.items)) {
+          queryClient.setQueryData(queryKey, {
+            ...data,
+            items: data.items.filter((item: any) => item.id !== deletedId),
+            totalCount: Math.max(0, data.totalCount - 1),
+          });
+        }
+      });
+
+      return { previousQueries };
+    },
+    onError: (err, deletedId, context) => {
+      context?.previousQueries?.forEach(({ queryKey, data }) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+      antMessage.error('Failed to delete recipe.');
+    },
     onSuccess: () => {
       antMessage.success('Recipe deleted successfully!');
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
     },
-    onError: () => antMessage.error('Failed to delete recipe.'),
   });
 };
 

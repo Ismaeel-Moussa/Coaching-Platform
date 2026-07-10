@@ -232,7 +232,7 @@ public class CheckInService : _BaseService, ICheckInService
     public async Task<PagedResult<CheckInDto>> GetMyCheckInHistoryAsync(BasePaginationForm pagination)
     {
         var userId = LoggedInUser.Id;
-        var athlete = await _athleteRepo.Query()
+        var athlete = await _athleteRepo.QueryAll()
             .FirstOrDefaultAsync(a => a.UserId == userId)
             ?? throw new KeyNotFoundException("Athlete profile not found.");
 
@@ -243,7 +243,7 @@ public class CheckInService : _BaseService, ICheckInService
 
     public async Task<PagedResult<CheckInDto>> GetCheckInHistoryAsync(int athleteId, BasePaginationForm pagination)
     {
-        var query = _checkInRepo.Query()
+        var query = _checkInRepo.QueryAll()
             .Include(ci => ci.Athlete).ThenInclude(a => a.User)
             .Where(ci => ci.AthleteId == athleteId)
             .OrderByDescending(ci => ci.WeekOf);
@@ -275,20 +275,20 @@ public class CheckInService : _BaseService, ICheckInService
     public async Task<PagedResult<PendingCheckInDto>> GetPendingCheckInsAsync(BasePaginationForm pagination)
     {
         var userId = LoggedInUser.Id;
-        var coach = await _coachRepo.Query()
+        var coach = await _coachRepo.QueryAll()
             .FirstOrDefaultAsync(c => c.UserId == userId)
             ?? throw new KeyNotFoundException("Coach profile not found.");
 
         var weekOf = GetCurrentWeekMonday();
 
         // All athletes under this coach
-        var allAthletes = await _athleteRepo.Query()
+        var allAthletes = await _athleteRepo.QueryAll()
             .Include(a => a.User)
             .Where(a => a.AssignedCoachId == coach.Id)
             .ToListAsync();
 
         // Athletes who have submitted this week
-        var submittedAthleteIds = await _checkInRepo.Query()
+        var submittedAthleteIds = await _checkInRepo.QueryAll()
             .Where(ci => ci.WeekOf == weekOf && allAthletes.Select(a => a.Id).Contains(ci.AthleteId))
             .Select(ci => ci.AthleteId)
             .ToListAsync();
@@ -304,14 +304,21 @@ public class CheckInService : _BaseService, ICheckInService
             .Take(pagination.PageSize)
             .ToList();
 
+        var pagedAthleteIds = paged.Select(a => a.Id).ToList();
+        var lastCheckIns = await _checkInRepo.QueryAll()
+            .Where(ci => pagedAthleteIds.Contains(ci.AthleteId))
+            .GroupBy(ci => ci.AthleteId)
+            .Select(g => g.OrderByDescending(ci => ci.WeekOf).FirstOrDefault())
+            .ToListAsync();
+
+        var lastCheckInMap = lastCheckIns
+            .Where(ci => ci != null)
+            .ToDictionary(ci => ci!.AthleteId);
+
         var dtos = new List<PendingCheckInDto>();
         foreach (var athlete in paged)
         {
-            var lastCheckIn = await _checkInRepo.Query()
-                .Where(ci => ci.AthleteId == athlete.Id)
-                .OrderByDescending(ci => ci.WeekOf)
-                .FirstOrDefaultAsync();
-
+            lastCheckInMap.TryGetValue(athlete.Id, out var lastCheckIn);
             dtos.Add(CheckInMapper.MapPending(athlete, lastCheckIn));
         }
 
@@ -346,7 +353,7 @@ public class CheckInService : _BaseService, ICheckInService
 
     public async Task<List<CheckInPhotoDto>> GetCheckInPhotosAsync(int checkInId)
     {
-        var photos = await _photoRepo.Query()
+        var photos = await _photoRepo.QueryAll()
             .Where(p => p.ClientCheckInId == checkInId)
             .ToListAsync();
 
@@ -364,18 +371,18 @@ public class CheckInService : _BaseService, ICheckInService
 
     private async Task<ClientCheckIn> GetCheckInForAthleteAsync(int checkInId, int userId)
     {
-        var athlete = await _athleteRepo.Query()
+        var athlete = await _athleteRepo.QueryAll()
             .FirstOrDefaultAsync(a => a.UserId == userId)
             ?? throw new KeyNotFoundException("Athlete profile not found.");
 
-        return await _checkInRepo.Query()
+        return await _checkInRepo.QueryAll()
             .FirstOrDefaultAsync(ci => ci.Id == checkInId && ci.AthleteId == athlete.Id)
             ?? throw new UnauthorizedAccessException("Check-in not found or does not belong to the current athlete.");
     }
 
     private async Task<List<CheckInPhotoDto>> BuildPhotoDtosAsync(int checkInId)
     {
-        var photos = await _photoRepo.Query()
+        var photos = await _photoRepo.QueryAll()
             .Where(p => p.ClientCheckInId == checkInId)
             .ToListAsync();
 

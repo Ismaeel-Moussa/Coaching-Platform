@@ -25,48 +25,59 @@ public interface IFoodService
 public class FoodService : _BaseService, IFoodService
 {
     private readonly IFoodRepository _foodRepo;
+    private readonly ICacheService _cacheService;
 
     public FoodService(
         IPrincipal principal,
         ILogger<FoodService> logger,
-        IFoodRepository foodRepo)
+        IFoodRepository foodRepo,
+        ICacheService cacheService)
         : base(principal, logger)
     {
         _foodRepo = foodRepo;
+        _cacheService = cacheService;
     }
 
     public async Task<PagedResult<FoodDto>> SearchFoodsAsync(SearchFoodsForm form)
     {
-        var query = _foodRepo.Query();
-
-        if (!string.IsNullOrWhiteSpace(form.Search))
-            query = query.Where(f => f.Name.Contains(form.Search));
-
-        if (!string.IsNullOrWhiteSpace(form.Category))
-            query = query.Where(f => f.Category == form.Category);
-
-        var totalCount = await query.CountAsync();
-
-        var foods = await query
-            .OrderBy(f => f.Name)
-            .Skip((form.Page - 1) * form.PageSize)
-            .Take(form.PageSize)
-            .ToListAsync();
-
-        return new PagedResult<FoodDto>
+        string cacheKey = $"foods:search:{form.Search}:{form.Category}:{form.Page}:{form.PageSize}";
+        return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
         {
-            Items = foods.Select(FoodMapper.Map),
-            TotalCount = totalCount,
-            Page = form.Page,
-            PageSize = form.PageSize
-        };
+            var query = _foodRepo.QueryAll();
+
+            if (!string.IsNullOrWhiteSpace(form.Search))
+                query = query.Where(f => f.Name.Contains(form.Search));
+
+            if (!string.IsNullOrWhiteSpace(form.Category))
+                query = query.Where(f => f.Category == form.Category);
+
+            var totalCount = await query.CountAsync();
+
+            var foods = await query
+                .OrderBy(f => f.Name)
+                .Skip((form.Page - 1) * form.PageSize)
+                .Take(form.PageSize)
+                .ToListAsync();
+
+            return new PagedResult<FoodDto>
+            {
+                Items = foods.Select(FoodMapper.Map),
+                TotalCount = totalCount,
+                Page = form.Page,
+                PageSize = form.PageSize
+            };
+        }, TimeSpan.FromMinutes(5));
     }
 
     public async Task<FoodDto> GetFoodByIdAsync(int id)
     {
-        var food = await _foodRepo.GetByIdAsync(id)
-            ?? throw new KeyNotFoundException($"Food with id {id} not found.");
-        return FoodMapper.Map(food);
+        string cacheKey = $"food:{id}";
+        return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
+        {
+            var food = await _foodRepo.QueryAll().FirstOrDefaultAsync(f => f.Id == id)
+                ?? throw new KeyNotFoundException($"Food with id {id} not found.");
+            return FoodMapper.Map(food);
+        }, TimeSpan.FromMinutes(10));
     }
 
     // ─── Admin Mutations ──────────────────────────────────────────────
@@ -88,6 +99,8 @@ public class FoodService : _BaseService, IFoodService
         await _foodRepo.CreateAsync(food);
         await _foodRepo.SaveChangesAsync();
 
+        _cacheService.EvictByPrefix("foods:search:");
+
         return FoodMapper.Map(food);
     }
 
@@ -107,6 +120,9 @@ public class FoodService : _BaseService, IFoodService
         _foodRepo.Update(food);
         await _foodRepo.SaveChangesAsync();
 
+        _cacheService.EvictByPrefix("foods:search:");
+        _cacheService.Evict($"food:{id}");
+
         return FoodMapper.Map(food);
     }
 
@@ -117,6 +133,9 @@ public class FoodService : _BaseService, IFoodService
 
         _foodRepo.Delete(food);
         await _foodRepo.SaveChangesAsync();
+
+        _cacheService.EvictByPrefix("foods:search:");
+        _cacheService.Evict($"food:{id}");
     }
 
     public async Task<BulkImportResultDto> BulkImportFoodsAsync(BulkImportFoodsForm form)
@@ -193,6 +212,7 @@ public class FoodService : _BaseService, IFoodService
             await _foodRepo.CreateRangeAsync(validFoods);
             await _foodRepo.SaveChangesAsync();
             result.InsertedCount = validFoods.Count;
+            _cacheService.EvictByPrefix("foods:search:");
         }
 
         return result;

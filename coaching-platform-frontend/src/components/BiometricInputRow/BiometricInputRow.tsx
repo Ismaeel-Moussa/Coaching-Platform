@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputNumber } from 'antd';
+import { InputNumber, Space } from 'antd';
 import './BiometricInputRow.scss';
 
 interface BiometricInputRowProps {
@@ -27,18 +27,31 @@ const BiometricInputRow: React.FC<BiometricInputRowProps> = ({
     <div className="biometric-row">
       <label className="biometric-row__label">{label}</label>
       <div className="biometric-row__input-container">
-        <InputNumber
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          min={min}
-          max={max}
-          step={step}
-          className="biometric-row__input data-label mono"
-          addonAfter={unit}
-          stringMode={false}
-          style={{ width: '100%' }}
-        />
+        <Space.Compact style={{ width: '100%' }}>
+          <InputNumber
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            min={min}
+            max={max}
+            step={step}
+            className="biometric-row__input data-label mono"
+            stringMode={false}
+            style={{ width: '100%' }}
+          />
+          <span style={{
+            background: 'var(--ant-color-fill-alter, #fafafa)',
+            border: '1px solid var(--ant-color-border, #d9d9d9)',
+            borderLeft: 'none',
+            padding: '0 11px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            borderRadius: '0 6px 6px 0',
+            color: 'var(--ant-color-text-description, rgba(0, 0, 0, 0.45))'
+          }}>
+            {unit}
+          </span>
+        </Space.Compact>
       </div>
     </div>
   );

@@ -44,13 +44,13 @@ public class SupplementService : _BaseService, ISupplementService
         var athlete = await GetAthleteAsync();
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        var schedules = await _scheduleRepo.Query()
+        var schedules = await _scheduleRepo.QueryAll()
             .Where(s => s.AthleteId == athlete.Id && s.IsActive)
             .OrderBy(s => s.Type)
             .ThenBy(s => s.Name)
             .ToListAsync();
 
-        var todayLogs = await _logRepo.Query()
+        var todayLogs = await _logRepo.QueryAll()
             .Where(l => schedules.Select(s => s.Id).Contains(l.SupplementScheduleId)
                         && l.Date == today)
             .ToListAsync();
@@ -69,13 +69,13 @@ public class SupplementService : _BaseService, ISupplementService
     {
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        var schedules = await _scheduleRepo.Query()
+        var schedules = await _scheduleRepo.QueryAll()
             .Where(s => s.AthleteId == athleteId && s.IsActive)
             .OrderBy(s => s.Type)
             .ThenBy(s => s.Name)
             .ToListAsync();
 
-        var todayLogs = await _logRepo.Query()
+        var todayLogs = await _logRepo.QueryAll()
             .Where(l => schedules.Select(s => s.Id).Contains(l.SupplementScheduleId)
                         && l.Date == today)
             .ToListAsync();
@@ -176,7 +176,7 @@ public class SupplementService : _BaseService, ISupplementService
     private async Task<Athlete> GetAthleteAsync()
     {
         var userId = LoggedInUser.Id;
-        return await _athleteRepo.Query()
+        return await _athleteRepo.QueryAll()
             .FirstOrDefaultAsync(a => a.UserId == userId)
             ?? throw new UnauthorizedAccessException("Athlete profile not found.");
     }

@@ -21,6 +21,7 @@ public class FoodsController : ControllerBase
 
     /// <summary>Search foods by name and/or category with pagination.</summary>
     [HttpGet]
+    [ResponseCache(Duration = 120, Location = ResponseCacheLocation.Client)]
     public async Task<IActionResult> SearchFoods([FromQuery] SearchFoodsForm form)
     {
         var result = await _foodService.SearchFoodsAsync(form);
@@ -29,6 +30,7 @@ public class FoodsController : ControllerBase
 
     /// <summary>Get a single food item by ID with full macro-per-100g data.</summary>
     [HttpGet("{id:int}")]
+    [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Client)]
     public async Task<IActionResult> GetFoodById(int id)
     {
         var result = await _foodService.GetFoodByIdAsync(id);

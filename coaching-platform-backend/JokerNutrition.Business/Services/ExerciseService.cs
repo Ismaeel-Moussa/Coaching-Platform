@@ -23,53 +23,64 @@ public interface IExerciseService
 public class ExerciseService : _BaseService, IExerciseService
 {
     private readonly IExerciseRepository _exerciseRepo;
+    private readonly ICacheService _cacheService;
 
     public ExerciseService(
         IPrincipal principal,
         ILogger<ExerciseService> logger,
-        IExerciseRepository exerciseRepo)
+        IExerciseRepository exerciseRepo,
+        ICacheService cacheService)
         : base(principal, logger)
     {
         _exerciseRepo = exerciseRepo;
+        _cacheService = cacheService;
     }
 
     public async Task<PagedResult<ExerciseDto>> GetExercisesAsync(string? search, MuscleGroup? muscle, int page, int pageSize)
     {
-        var query = _exerciseRepo.Query()
-            .Where(e => e.IsActive);
-
-        if (!string.IsNullOrWhiteSpace(search))
-            query = query.Where(e => e.Name.Contains(search));
-
-        if (muscle.HasValue)
-            query = query.Where(e => e.PrimaryMuscle == muscle.Value);
-
-        var totalCount = await query.CountAsync();
-
-        var items = await query
-            .OrderBy(e => e.PrimaryMuscle)
-            .ThenBy(e => e.Name)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(e => ExerciseMapper.Map(e))
-            .ToListAsync();
-
-        return new PagedResult<ExerciseDto>
+        string cacheKey = $"exercises:search:{search}:{muscle}:{page}:{pageSize}";
+        return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
         {
-            Items = items,
-            TotalCount = totalCount,
-            Page = page,
-            PageSize = pageSize
-        };
+            var query = _exerciseRepo.QueryAll()
+                .Where(e => e.IsActive);
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(e => e.Name.Contains(search));
+
+            if (muscle.HasValue)
+                query = query.Where(e => e.PrimaryMuscle == muscle.Value);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderBy(e => e.PrimaryMuscle)
+                .ThenBy(e => e.Name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(e => ExerciseMapper.Map(e))
+                .ToListAsync();
+
+            return new PagedResult<ExerciseDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }, TimeSpan.FromMinutes(5));
     }
 
     public async Task<ExerciseDto> GetExerciseByIdAsync(int id)
     {
-        var exercise = await _exerciseRepo.Query()
-            .FirstOrDefaultAsync(e => e.Id == id && e.IsActive)
-            ?? throw new KeyNotFoundException($"Exercise {id} not found.");
+        string cacheKey = $"exercise:{id}";
+        return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
+        {
+            var exercise = await _exerciseRepo.QueryAll()
+                .FirstOrDefaultAsync(e => e.Id == id && e.IsActive)
+                ?? throw new KeyNotFoundException($"Exercise {id} not found.");
 
-        return ExerciseMapper.Map(exercise);
+            return ExerciseMapper.Map(exercise);
+        }, TimeSpan.FromMinutes(10));
     }
 
     // ─── Admin Mutations ──────────────────────────────────────────────
@@ -92,6 +103,8 @@ public class ExerciseService : _BaseService, IExerciseService
 
         await _exerciseRepo.CreateAsync(exercise);
         await _exerciseRepo.SaveChangesAsync();
+
+        _cacheService.EvictByPrefix("exercises:search:");
 
         return ExerciseMapper.Map(exercise);
     }
@@ -117,6 +130,9 @@ public class ExerciseService : _BaseService, IExerciseService
         _exerciseRepo.Update(exercise);
         await _exerciseRepo.SaveChangesAsync();
 
+        _cacheService.EvictByPrefix("exercises:search:");
+        _cacheService.Evict($"exercise:{id}");
+
         return ExerciseMapper.Map(exercise);
     }
 
@@ -129,5 +145,8 @@ public class ExerciseService : _BaseService, IExerciseService
         exercise.IsActive = false;
         _exerciseRepo.Update(exercise);
         await _exerciseRepo.SaveChangesAsync();
+
+        _cacheService.EvictByPrefix("exercises:search:");
+        _cacheService.Evict($"exercise:{id}");
     }
 }

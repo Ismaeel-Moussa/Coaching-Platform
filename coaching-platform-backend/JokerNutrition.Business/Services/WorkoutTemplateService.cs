@@ -50,7 +50,7 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
     // ─── List (summary, paged) ────────────────────────────────────────
     public async Task<PagedResult<WorkoutTemplateSummaryDto>> GetTemplatesAsync(int page, int pageSize)
     {
-        var query = _templateRepo.Query()
+        var query = _templateRepo.QueryAll()
             .Include(t => t.CreatedByCoach).ThenInclude(c => c.User)
             .Include(t => t.Days)
             .Where(t => t.IsActive);
@@ -75,7 +75,7 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
     // ─── Get by ID (full nested) ──────────────────────────────────────
     public async Task<WorkoutTemplateDto> GetTemplateByIdAsync(int id)
     {
-        var template = await _templateRepo.Query()
+        var template = await _templateRepo.QueryAll()
             .Include(t => t.CreatedByCoach).ThenInclude(c => c.User)
             .Include(t => t.Days)
                 .ThenInclude(d => d.Exercises)
@@ -255,7 +255,7 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
     private async Task<int> GetCoachIdAsync()
     {
         var userId = LoggedInUser.Id;
-        var coach = await _coachRepo.Query()
+        var coach = await _coachRepo.QueryAll()
             .FirstOrDefaultAsync(c => c.UserId == userId)
             ?? throw new KeyNotFoundException("Coach profile not found for the current user.");
         return coach.Id;

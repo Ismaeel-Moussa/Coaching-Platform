@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Input, Tabs, Dropdown, Menu, Skeleton, Empty, Popconfirm } from 'antd';
+import { Button, Input, Tabs, Dropdown, Skeleton, Empty, Popconfirm } from 'antd';
 import { useGetExercises, useDeleteExercise } from '../../../hooks/useExercises/useExercises';
 import AddExerciseModal from '../../../components/AddExerciseModal/AddExerciseModal';
 import type { ExerciseAdminDto, MuscleGroup } from '../../../types/Exercise';
@@ -124,31 +124,38 @@ const ExerciseLibraryAdmin: React.FC = () => {
                 <div className="exercise-library-admin__card-header">
                   <h3 className="exercise-library-admin__card-name">{item.name}</h3>
                   <Dropdown
-                    overlay={
-                      <Menu className="table-menu-dropdown">
-                        <Menu.Item key="edit" onClick={() => handleEdit(item)}>
-                          <div className="table-menu-item">
-                            <span className="material-symbols-outlined">edit</span>
-                            Edit
-                          </div>
-                        </Menu.Item>
-                        <Menu.Item key="delete">
-                          <Popconfirm
-                            title="Delete Exercise"
-                            description="Are you sure you want to delete this exercise?"
-                            onConfirm={() => handleDelete(item.id)}
-                            okText="Yes"
-                            cancelText="No"
-                            okButtonProps={{ danger: true }}
-                          >
-                            <div className="table-menu-item delete-item">
-                              <span className="material-symbols-outlined">delete</span>
-                              Delete
+                    menu={{
+                      items: [
+                        {
+                          key: 'edit',
+                          label: (
+                            <div className="table-menu-item" onClick={() => handleEdit(item)}>
+                              <span className="material-symbols-outlined">edit</span>
+                              Edit
                             </div>
-                          </Popconfirm>
-                        </Menu.Item>
-                      </Menu>
-                    }
+                          )
+                        },
+                        {
+                          key: 'delete',
+                          label: (
+                            <Popconfirm
+                              title="Delete Exercise"
+                              description="Are you sure you want to delete this exercise?"
+                              onConfirm={() => handleDelete(item.id)}
+                              okText="Yes"
+                              cancelText="No"
+                              okButtonProps={{ danger: true }}
+                            >
+                              <div className="table-menu-item delete-item">
+                                <span className="material-symbols-outlined">delete</span>
+                                Delete
+                              </div>
+                            </Popconfirm>
+                          )
+                        }
+                      ],
+                      className: "table-menu-dropdown"
+                    }}
                     trigger={['click']}
                     placement="bottomRight"
                   >

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Modal, Steps, Input, Select, InputNumber, Button, Spin, Empty, Form, message
+  Modal, Steps, Input, Select, InputNumber, Button, Spin, Empty, Form, message, Space
 } from 'antd';
 import { useSearchFoods } from '../../hooks/useFoods/useFoods';
 import { useCreateRecipe, useUpdateRecipe, useUploadRecipeImage } from '../../hooks/useRecipes/useRecipes';
@@ -264,14 +264,27 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                 <div className="create-recipe-modal__pending animate-fade-in">
                   <div className="create-recipe-modal__pending-name">{pendingFood.name}</div>
                   <div className="create-recipe-modal__pending-controls">
-                    <InputNumber
-                      value={pendingQty}
-                      onChange={(v) => setPendingQty(v ?? 100)}
-                      min={1}
-                      addonAfter="g"
-                      size="middle"
-                      style={{ width: 130 }}
-                    />
+                    <Space.Compact style={{ width: 130 }}>
+                      <InputNumber
+                        value={pendingQty}
+                        onChange={(v) => setPendingQty(v ?? 100)}
+                        min={1}
+                        size="middle"
+                        style={{ width: '100%' }}
+                      />
+                      <span style={{
+                        background: 'var(--ant-color-fill-alter, #fafafa)',
+                        border: '1px solid var(--ant-color-border, #d9d9d9)',
+                        borderLeft: 'none',
+                        padding: '0 8px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        borderRadius: '0 6px 6px 0',
+                        color: 'var(--ant-color-text-description, rgba(0, 0, 0, 0.45))'
+                      }}>
+                        g
+                      </span>
+                    </Space.Compact>
                     <Button type="primary" onClick={handleAddIngredient} size="middle">
                       Add
                     </Button>

@@ -35,6 +35,7 @@ public class CoachHubService : _BaseService, ICoachHubService
     private readonly IClientProgramRepository _clientProgramRepo;
     private readonly ICoachFeedbackNoteRepository _feedbackNoteRepo;
     private readonly INotificationService _notificationService;
+    private readonly ICacheService _cacheService;
 
     public CoachHubService(
         IPrincipal principal,
@@ -47,7 +48,8 @@ public class CoachHubService : _BaseService, ICoachHubService
         IClientCheckInRepository checkInRepo,
         IClientProgramRepository clientProgramRepo,
         ICoachFeedbackNoteRepository feedbackNoteRepo,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        ICacheService cacheService)
         : base(principal, logger)
     {
         _coachRepo = coachRepo;
@@ -59,6 +61,7 @@ public class CoachHubService : _BaseService, ICoachHubService
         _clientProgramRepo = clientProgramRepo;
         _feedbackNoteRepo = feedbackNoteRepo;
         _notificationService = notificationService;
+        _cacheService = cacheService;
     }
 
     // ─── Dashboard ────────────────────────────────────────────────────
@@ -66,56 +69,60 @@ public class CoachHubService : _BaseService, ICoachHubService
     public async Task<CoachDashboardDto> GetDashboardAsync()
     {
         var coach = await GetCoachAsync();
-        var athletes = LoggedInUser.Role == "Admin"
-            ? await _athleteRepo.Query().Include(a => a.User).ToListAsync()
-            : await GetCoachAthletesAsync(coach.Id);
-        var athleteIds = athletes.Select(a => a.Id).ToList();
-
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-        // Active athlete count
-        var activeCount = athletes.Count;
-
-        // Average workout completion % for the past 7 days
-        var weekAgo = today.AddDays(-7);
-        var recentLogs = await _workoutLogRepo.Query()
-            .Where(w => athleteIds.Contains(w.AthleteId) && w.Date >= weekAgo)
-            .ToListAsync();
-
-        double avgCompletion = 0;
-        if (recentLogs.Any())
+        string cacheKey = $"coach-dashboard:{coach.Id}";
+        return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
         {
-            avgCompletion = recentLogs.Count(w => w.Status == WorkoutStatus.Completed)
-                            / (double)recentLogs.Count * 100.0;
-        }
+            var athletes = LoggedInUser.Role == "Admin"
+                ? await _athleteRepo.QueryAll().Include(a => a.User).ToListAsync()
+                : await GetCoachAthletesAsync(coach.Id);
+            var athleteIds = athletes.Select(a => a.Id).ToList();
 
-        // Pending check-ins: athletes with no check-in in the past 7 days
-        var weekStart = DateTime.UtcNow.AddDays(-7);
-        var recentCheckInAthleteIds = await _checkInRepo.Query()
-            .Where(c => athleteIds.Contains(c.AthleteId) && c.SubmittedAt >= weekStart)
-            .Select(c => c.AthleteId)
-            .Distinct()
-            .ToListAsync();
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        var pendingCount = athleteIds.Count - recentCheckInAthleteIds.Count;
+            // Active athlete count
+            var activeCount = athletes.Count;
 
-        // Last 10 live feed items
-        var recentFeed = await _workoutLogRepo.Query()
-            .Include(w => w.Athlete).ThenInclude(a => a.User)
-            .Include(w => w.Day)
-            .Where(w => athleteIds.Contains(w.AthleteId))
-            .OrderByDescending(w => w.Date)
-            .ThenByDescending(w => w.CompletedAt)
-            .Take(10)
-            .ToListAsync();
+            // Average workout completion % for the past 7 days
+            var weekAgo = today.AddDays(-7);
+            var recentLogs = await _workoutLogRepo.QueryAll()
+                .Where(w => athleteIds.Contains(w.AthleteId) && w.Date >= weekAgo)
+                .ToListAsync();
 
-        return new CoachDashboardDto
-        {
-            ActiveAthleteCount = activeCount,
-            AvgWorkoutCompletionPercent = Math.Round(avgCompletion, 1),
-            PendingCheckInsCount = Math.Max(0, pendingCount),
-            RecentFeed = recentFeed.Select(CoachHubMapper.MapLiveFeedItem).ToList()
-        };
+            double avgCompletion = 0;
+            if (recentLogs.Any())
+            {
+                avgCompletion = recentLogs.Count(w => w.Status == WorkoutStatus.Completed)
+                                / (double)recentLogs.Count * 100.0;
+            }
+
+            // Pending check-ins: athletes with no check-in in the past 7 days
+            var weekStart = DateTime.UtcNow.AddDays(-7);
+            var recentCheckInAthleteIds = await _checkInRepo.QueryAll()
+                .Where(c => athleteIds.Contains(c.AthleteId) && c.SubmittedAt >= weekStart)
+                .Select(c => c.AthleteId)
+                .Distinct()
+                .ToListAsync();
+
+            var pendingCount = athleteIds.Count - recentCheckInAthleteIds.Count;
+
+            // Last 10 live feed items
+            var recentFeed = await _workoutLogRepo.QueryAll()
+                .Include(w => w.Athlete).ThenInclude(a => a.User)
+                .Include(w => w.Day)
+                .Where(w => athleteIds.Contains(w.AthleteId))
+                .OrderByDescending(w => w.Date)
+                .ThenByDescending(w => w.CompletedAt)
+                .Take(10)
+                .ToListAsync();
+
+            return new CoachDashboardDto
+            {
+                ActiveAthleteCount = activeCount,
+                AvgWorkoutCompletionPercent = Math.Round(avgCompletion, 1),
+                PendingCheckInsCount = Math.Max(0, pendingCount),
+                RecentFeed = recentFeed.Select(CoachHubMapper.MapLiveFeedItem).ToList()
+            };
+        }, TimeSpan.FromSeconds(60));
     }
 
     // ─── Live Feed ────────────────────────────────────────────────────
@@ -124,10 +131,10 @@ public class CoachHubService : _BaseService, ICoachHubService
     {
         var coach = await GetCoachAsync();
         var athleteIds = LoggedInUser.Role == "Admin"
-            ? await _athleteRepo.Query().Select(a => a.Id).ToListAsync()
+            ? await _athleteRepo.QueryAll().Select(a => a.Id).ToListAsync()
             : await GetCoachAthleteIdsAsync(coach.Id);
 
-        var query = _workoutLogRepo.Query()
+        var query = _workoutLogRepo.QueryAll()
             .Include(w => w.Athlete).ThenInclude(a => a.User)
             .Include(w => w.Day)
             .Where(w => athleteIds.Contains(w.AthleteId))
@@ -154,32 +161,36 @@ public class CoachHubService : _BaseService, ICoachHubService
     public async Task<List<ComplianceItemDto>> GetComplianceRosterAsync()
     {
         var coach = await GetCoachAsync();
-        var athletes = LoggedInUser.Role == "Admin"
-            ? await _athleteRepo.Query().Include(a => a.User).ToListAsync()
-            : await GetCoachAthletesAsync(coach.Id);
-        var athleteIds = athletes.Select(a => a.Id).ToList();
-
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-        // Load today's diaries with meal logs
-        var diaries = await _diaryRepo.Query()
-            .Include(d => d.MealLogs)
-            .Where(d => athleteIds.Contains(d.AthleteId) && d.Date == today)
-            .ToListAsync();
-
-        // Load active macro targets
-        var targets = await _macroTargetRepo.Query()
-            .Where(t => athleteIds.Contains(t.AthleteId) && t.IsActive)
-            .ToListAsync();
-
-        var result = athletes.Select(athlete =>
+        string cacheKey = $"coach-compliance:{coach.Id}";
+        return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
         {
-            var diary = diaries.FirstOrDefault(d => d.AthleteId == athlete.Id);
-            var target = targets.FirstOrDefault(t => t.AthleteId == athlete.Id);
-            return CoachHubMapper.MapComplianceItem(athlete, diary, target);
-        }).ToList();
+            var athletes = LoggedInUser.Role == "Admin"
+                ? await _athleteRepo.QueryAll().Include(a => a.User).ToListAsync()
+                : await GetCoachAthletesAsync(coach.Id);
+            var athleteIds = athletes.Select(a => a.Id).ToList();
 
-        return result;
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            // Load today's diaries with meal logs
+            var diaries = await _diaryRepo.QueryAll()
+                .Include(d => d.MealLogs)
+                .Where(d => athleteIds.Contains(d.AthleteId) && d.Date == today)
+                .ToListAsync();
+
+            // Load active macro targets
+            var targets = await _macroTargetRepo.QueryAll()
+                .Where(t => athleteIds.Contains(t.AthleteId) && t.IsActive)
+                .ToListAsync();
+
+            var result = athletes.Select(athlete =>
+            {
+                var diary = diaries.FirstOrDefault(d => d.AthleteId == athlete.Id);
+                var target = targets.FirstOrDefault(t => t.AthleteId == athlete.Id);
+                return CoachHubMapper.MapComplianceItem(athlete, diary, target);
+            }).ToList();
+
+            return result;
+        }, TimeSpan.FromSeconds(60));
     }
 
     // ─── Roster ───────────────────────────────────────────────────────
@@ -188,26 +199,32 @@ public class CoachHubService : _BaseService, ICoachHubService
     {
         var coach = await GetCoachAsync();
         var athletes = LoggedInUser.Role == "Admin"
-            ? await _athleteRepo.Query().Include(a => a.User).ToListAsync()
+            ? await _athleteRepo.QueryAll().Include(a => a.User).ToListAsync()
             : await GetCoachAthletesAsync(coach.Id);
         var athleteIds = athletes.Select(a => a.Id).ToList();
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        // Load active programs
-        var programs = await _clientProgramRepo.Query()
+        // Load active programs (AsNoTracking)
+        var programs = await _clientProgramRepo.QueryAll()
             .Include(p => p.WorkoutTemplate)
             .Where(p => athleteIds.Contains(p.AthleteId) && p.IsActive)
             .ToListAsync();
 
-        // Load last check-ins per athlete
-        var allCheckIns = await _checkInRepo.Query()
+        // Load last check-ins per athlete (AsNoTracking)
+        var allCheckIns = await _checkInRepo.QueryAll()
             .Where(c => athleteIds.Contains(c.AthleteId))
             .ToListAsync();
 
-        // Load today's compliance data
-        var complianceItems = await GetComplianceRosterAsync();
-        var complianceMap = complianceItems.ToDictionary(c => c.AthleteId, c => c.CompliancePercent);
+        // Load compliance data directly to avoid duplicate coach/athlete queries
+        var diaries = await _diaryRepo.QueryAll()
+            .Include(d => d.MealLogs)
+            .Where(d => athleteIds.Contains(d.AthleteId) && d.Date == today)
+            .ToListAsync();
+
+        var targets = await _macroTargetRepo.QueryAll()
+            .Where(t => athleteIds.Contains(t.AthleteId) && t.IsActive)
+            .ToListAsync();
 
         // Build roster items
         var rosterItems = athletes.Select(athlete =>
@@ -217,7 +234,17 @@ public class CoachHubService : _BaseService, ICoachHubService
                 .Where(c => c.AthleteId == athlete.Id)
                 .OrderByDescending(c => c.SubmittedAt)
                 .FirstOrDefault();
-            var compliance = complianceMap.GetValueOrDefault(athlete.Id, 0);
+
+            var diary = diaries.FirstOrDefault(d => d.AthleteId == athlete.Id);
+            var target = targets.FirstOrDefault(t => t.AthleteId == athlete.Id);
+            var targetCalories = target?.TargetCalories ?? 0m;
+            var consumed = diary != null ? diary.MealLogs.Sum(m => m.Calories) : 0m;
+            double compliance = 0;
+            if (targetCalories > 0)
+            {
+                compliance = Math.Min(100.0, (double)(consumed / targetCalories) * 100.0);
+            }
+
             return CoachHubMapper.MapRosterItem(athlete, program, lastCheckIn, compliance);
         }).ToList();
 
@@ -251,12 +278,12 @@ public class CoachHubService : _BaseService, ICoachHubService
         var coach = await GetCoachAsync();
         await EnsureAthleteInRosterAsync(coach.Id, athleteId);
 
-        var athlete = await _athleteRepo.Query()
+        var athlete = await _athleteRepo.QueryAll()
             .Include(a => a.User)
             .FirstAsync(a => a.Id == athleteId);
 
         // Current macro targets
-        var target = await _macroTargetRepo.Query()
+        var target = await _macroTargetRepo.QueryAll()
             .Include(t => t.SetByCoach).ThenInclude(c => c.User)
             .Where(t => t.AthleteId == athleteId && t.IsActive)
             .OrderByDescending(t => t.SetAt)
@@ -270,13 +297,13 @@ public class CoachHubService : _BaseService, ICoachHubService
         }
 
         // Weight history from check-ins
-        var checkIns = await _checkInRepo.Query()
+        var checkIns = await _checkInRepo.QueryAll()
             .Where(c => c.AthleteId == athleteId)
             .OrderBy(c => c.WeekOf)
             .ToListAsync();
 
         // Feedback notes
-        var notes = await _feedbackNoteRepo.Query()
+        var notes = await _feedbackNoteRepo.QueryAll()
             .Include(n => n.Coach).ThenInclude(c => c.User)
             .Where(n => n.AthleteId == athleteId)
             .OrderByDescending(n => n.CreatedAt)
@@ -316,7 +343,7 @@ public class CoachHubService : _BaseService, ICoachHubService
         await _feedbackNoteRepo.CreateAsync(note);
         await _feedbackNoteRepo.SaveChangesAsync();
 
-        var athleteUserId = await _athleteRepo.Query()
+        var athleteUserId = await _athleteRepo.QueryAll()
             .Where(a => a.Id == athleteId)
             .Select(a => a.UserId)
             .FirstAsync();
@@ -342,7 +369,7 @@ public class CoachHubService : _BaseService, ICoachHubService
         var coach = await GetCoachAsync();
         await EnsureAthleteInRosterAsync(coach.Id, athleteId);
 
-        var checkIns = await _checkInRepo.Query()
+        var checkIns = await _checkInRepo.QueryAll()
             .Where(c => c.AthleteId == athleteId)
             .OrderBy(c => c.WeekOf)
             .ToListAsync();
@@ -416,8 +443,12 @@ public class CoachHubService : _BaseService, ICoachHubService
 
         await _macroTargetRepo.SaveChangesAsync();
 
+        // Evict cached dashboard and compliance for this coach
+        _cacheService.Evict($"coach-dashboard:{coach.Id}");
+        _cacheService.Evict($"coach-compliance:{coach.Id}");
+
         // Notify Athlete
-        var athleteUserId = await _athleteRepo.Query()
+        var athleteUserId = await _athleteRepo.QueryAll()
             .Where(a => a.Id == athleteId)
             .Select(a => a.UserId)
             .FirstAsync();
@@ -452,20 +483,20 @@ public class CoachHubService : _BaseService, ICoachHubService
     private async Task<Coach> GetCoachAsync()
     {
         var userId = LoggedInUser.Id;
-        return await _coachRepo.Query()
+        return await _coachRepo.QueryAll()
             .Include(c => c.User)
             .FirstOrDefaultAsync(c => c.UserId == userId)
             ?? throw new UnauthorizedAccessException("Coach profile not found.");
     }
 
     private async Task<List<Athlete>> GetCoachAthletesAsync(int coachId) =>
-        await _athleteRepo.Query()
+        await _athleteRepo.QueryAll()
             .Include(a => a.User)
             .Where(a => a.AssignedCoachId == coachId)
             .ToListAsync();
 
     private async Task<List<int>> GetCoachAthleteIdsAsync(int coachId) =>
-        await _athleteRepo.Query()
+        await _athleteRepo.QueryAll()
             .Where(a => a.AssignedCoachId == coachId)
             .Select(a => a.Id)
             .ToListAsync();
@@ -475,7 +506,7 @@ public class CoachHubService : _BaseService, ICoachHubService
         if (LoggedInUser.Role == "Admin")
             return;
 
-        var belongs = await _athleteRepo.Query()
+        var belongs = await _athleteRepo.QueryAll()
             .AnyAsync(a => a.Id == athleteId && a.AssignedCoachId == coachId);
 
         if (!belongs)
