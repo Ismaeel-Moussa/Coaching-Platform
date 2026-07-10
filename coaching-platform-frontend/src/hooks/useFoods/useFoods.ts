@@ -60,17 +60,37 @@ export const useUpdateFood = () => {
 
 export const useDeleteFood = () => {
   const queryClient = useQueryClient();
-  return useMutation<void, AxiosError, number>({
+  return useMutation<void, AxiosError, number, { previousQueries: { queryKey: any; data: any }[] }>({
     mutationFn: deleteFood,
-    onSuccess: () => {
-      antMessage.success('Food deleted successfully!');
-      queryClient.invalidateQueries({ queryKey: ['foods'] });
+    onMutate: async (deletedId) => {
+      await queryClient.cancelQueries({ queryKey: ['foods'] });
+      const queries = queryClient.getQueriesData<any>({ queryKey: ['foods'] });
+      const previousQueries = queries.map(([queryKey, data]) => ({ queryKey, data }));
+
+      queries.forEach(([queryKey, data]) => {
+        if (data && Array.isArray(data.items)) {
+          queryClient.setQueryData(queryKey, {
+            ...data,
+            items: data.items.filter((item: any) => item.id !== deletedId),
+            totalCount: Math.max(0, data.totalCount - 1),
+          });
+        }
+      });
+
+      return { previousQueries };
     },
-    onError: (error) => {
+    onError: (error, deletedId, context) => {
+      context?.previousQueries?.forEach(({ queryKey, data }) => {
+        queryClient.setQueryData(queryKey, data);
+      });
       const msg =
         (error.response?.data as { message?: string })?.message ??
         'Failed to delete food.';
       antMessage.error(msg);
+    },
+    onSuccess: () => {
+      antMessage.success('Food deleted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['foods'] });
     },
   });
 };

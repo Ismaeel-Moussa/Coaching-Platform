@@ -29,6 +29,7 @@ export const useGetExerciseById = (id: number, enabled = true) =>
     queryKey: ['exercise', id],
     queryFn: () => getExerciseById(id),
     enabled,
+    staleTime: 60_000,
   });
 
 export const useCreateExercise = () => {
@@ -68,17 +69,37 @@ export const useUpdateExercise = () => {
 
 export const useDeleteExercise = () => {
   const queryClient = useQueryClient();
-  return useMutation<void, AxiosError, number>({
+  return useMutation<void, AxiosError, number, { previousQueries: { queryKey: any; data: any }[] }>({
     mutationFn: deleteExercise,
-    onSuccess: () => {
-      antMessage.success('Exercise deleted successfully!');
-      queryClient.invalidateQueries({ queryKey: ['exercises'] });
+    onMutate: async (deletedId) => {
+      await queryClient.cancelQueries({ queryKey: ['exercises'] });
+      const queries = queryClient.getQueriesData<any>({ queryKey: ['exercises'] });
+      const previousQueries = queries.map(([queryKey, data]) => ({ queryKey, data }));
+
+      queries.forEach(([queryKey, data]) => {
+        if (data && Array.isArray(data.items)) {
+          queryClient.setQueryData(queryKey, {
+            ...data,
+            items: data.items.filter((item: any) => item.id !== deletedId),
+            totalCount: Math.max(0, data.totalCount - 1),
+          });
+        }
+      });
+
+      return { previousQueries };
     },
-    onError: (error) => {
+    onError: (error, deletedId, context) => {
+      context?.previousQueries?.forEach(({ queryKey, data }) => {
+        queryClient.setQueryData(queryKey, data);
+      });
       const msg =
         (error.response?.data as { message?: string })?.message ??
         'Failed to delete exercise.';
       antMessage.error(msg);
+    },
+    onSuccess: () => {
+      antMessage.success('Exercise deleted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['exercises'] });
     },
   });
 };

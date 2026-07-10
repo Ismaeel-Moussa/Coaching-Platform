@@ -69,13 +69,29 @@ export const useDeleteAthleteSupplement = (athleteId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => deleteAthleteSupplement(id),
+    onMutate: async (deletedId) => {
+      await queryClient.cancelQueries({ queryKey: ['athlete-supplements', athleteId] });
+      const previousSupplements = queryClient.getQueryData<any[]>(['athlete-supplements', athleteId]);
+
+      if (previousSupplements) {
+        queryClient.setQueryData(
+          ['athlete-supplements', athleteId],
+          previousSupplements.filter((s) => s.id !== deletedId),
+        );
+      }
+
+      return { previousSupplements };
+    },
+    onError: (error: any, deletedId, context) => {
+      if (context?.previousSupplements) {
+        queryClient.setQueryData(['athlete-supplements', athleteId], context.previousSupplements);
+      }
+      const msg = error.response?.data?.message || 'Failed to delete supplement schedule.';
+      antMessage.error(msg);
+    },
     onSuccess: () => {
       antMessage.success('Supplement schedule deleted successfully!');
       queryClient.invalidateQueries({ queryKey: ['athlete-supplements', athleteId] });
-    },
-    onError: (error: any) => {
-      const msg = error.response?.data?.message || 'Failed to delete supplement schedule.';
-      antMessage.error(msg);
     },
   });
 };

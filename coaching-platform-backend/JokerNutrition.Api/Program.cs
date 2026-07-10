@@ -206,6 +206,7 @@ try
         });
     builder.Services.AddHttpClient();
     builder.Services.AddHttpContextAccessor();
+    builder.Services.AddResponseCaching();
 
     // 12. Rate Limiting
     builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
@@ -257,6 +258,7 @@ try
 
     // 14. Middleware pipeline
     app.UseCors("AllowFrontend");
+    app.UseResponseCaching();
     app.UseStaticFiles();
     app.UseHttpsRedirection();
     app.UseIpRateLimiting();
@@ -294,7 +296,14 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<JokerNutritionContext>();
-        await dbContext.Database.MigrateAsync();
+        if (dbContext.Database.IsRelational())
+        {
+            await dbContext.Database.MigrateAsync();
+        }
+        else
+        {
+            await dbContext.Database.EnsureCreatedAsync();
+        }
     }
 
     if (app.Environment.IsDevelopment())

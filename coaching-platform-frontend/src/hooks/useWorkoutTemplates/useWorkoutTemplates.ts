@@ -87,17 +87,37 @@ export const useAssignTemplate = () => {
 
 export const useDeleteTemplate = () => {
   const queryClient = useQueryClient();
-  return useMutation<void, AxiosError, number>({
+  return useMutation<void, AxiosError, number, { previousQueries: { queryKey: any; data: any }[] }>({
     mutationFn: (id) => deleteWorkoutTemplate(id),
-    onSuccess: () => {
-      antMessage.success('Template deleted successfully!');
-      queryClient.invalidateQueries({ queryKey: ['workout-templates'] });
+    onMutate: async (deletedId) => {
+      await queryClient.cancelQueries({ queryKey: ['workout-templates'] });
+      const queries = queryClient.getQueriesData<any>({ queryKey: ['workout-templates'] });
+      const previousQueries = queries.map(([queryKey, data]) => ({ queryKey, data }));
+
+      queries.forEach(([queryKey, data]) => {
+        if (data && Array.isArray(data.items)) {
+          queryClient.setQueryData(queryKey, {
+            ...data,
+            items: data.items.filter((item: any) => item.id !== deletedId),
+            totalCount: Math.max(0, data.totalCount - 1),
+          });
+        }
+      });
+
+      return { previousQueries };
     },
-    onError: (error) => {
+    onError: (error, deletedId, context) => {
+      context?.previousQueries?.forEach(({ queryKey, data }) => {
+        queryClient.setQueryData(queryKey, data);
+      });
       const msg =
         (error.response?.data as { message?: string })?.message ??
         'Failed to delete template.';
       antMessage.error(msg);
+    },
+    onSuccess: () => {
+      antMessage.success('Template deleted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['workout-templates'] });
     },
   });
 };

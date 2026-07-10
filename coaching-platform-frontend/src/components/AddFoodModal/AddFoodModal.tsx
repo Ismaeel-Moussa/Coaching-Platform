@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Input, Select, InputNumber, Button, Spin, Empty, Segmented } from 'antd';
+import { Modal, Input, Select, InputNumber, Button, Spin, Empty, Segmented, Space } from 'antd';
 import { useSearchFoods } from '../../hooks/useFoods/useFoods';
 import { useLogFood } from '../../hooks/useDiary/useDiary';
 import { useGetRecipes } from '../../hooks/useRecipes/useRecipes';
@@ -293,16 +293,30 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
             <div className="add-food-modal__row">
               <div className="add-food-modal__field" style={{ width: '100%' }}>
                 <label className="add-food-modal__label">Quantity (grams)</label>
-                <InputNumber
-                  id="add-food-quantity-input"
-                  value={quantity}
-                  onChange={(v) => setQuantity(v ?? 0)}
-                  min={1}
-                  max={9999}
-                  size="large"
-                  style={{ width: '100%' }}
-                  addonAfter="g"
-                />
+                <Space.Compact style={{ width: '100%' }}>
+                  <InputNumber
+                    id="add-food-quantity-input"
+                    value={quantity}
+                    onChange={(v) => setQuantity(v ?? 0)}
+                    min={1}
+                    max={9999}
+                    size="large"
+                    style={{ width: '100%' }}
+                  />
+                  <span style={{
+                    background: 'var(--ant-color-fill-alter, #fafafa)',
+                    border: '1px solid var(--ant-color-border, #d9d9d9)',
+                    borderLeft: 'none',
+                    padding: '0 15px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    borderRadius: '0 8px 8px 0', // size="large" input has 8px border-radius
+                    color: 'var(--ant-color-text-description, rgba(0, 0, 0, 0.45))',
+                    fontSize: '16px'
+                  }}>
+                    g
+                  </span>
+                </Space.Compact>
               </div>
             </div>
 

@@ -23,6 +23,7 @@ public class ExercisesController : ControllerBase
 
     /// <summary>List all exercises, optionally filtered by name search or muscle group.</summary>
     [HttpGet]
+    [ResponseCache(Duration = 120, Location = ResponseCacheLocation.Client)]
     public async Task<IActionResult> GetExercises(
         [FromQuery] string? search,
         [FromQuery] MuscleGroup? muscleGroup,
@@ -35,6 +36,7 @@ public class ExercisesController : ControllerBase
 
     /// <summary>Get a single exercise by ID.</summary>
     [HttpGet("{id:int}")]
+    [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Client)]
     public async Task<IActionResult> GetExercise(int id)
     {
         var result = await _exerciseService.GetExerciseByIdAsync(id);
