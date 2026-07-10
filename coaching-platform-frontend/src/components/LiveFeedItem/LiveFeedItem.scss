@@ -132,3 +132,40 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+@media (max-width: 470px) {
+  .live-feed-item {
+    gap: 8px;
+    padding: 10px 12px;
+
+    &__avatar,
+    &__avatar-placeholder {
+      width: 32px;
+      height: 32px;
+      font-size: 12px;
+    }
+
+    &__name {
+      font-size: 12px;
+      max-width: 90px;
+    }
+
+    &__time {
+      font-size: 10px;
+    }
+
+    &__action {
+      font-size: 11px;
+    }
+
+    &__status {
+      padding: 3px 6px;
+      font-size: 9px;
+      gap: 2px;
+
+      .live-feed-item__status-icon {
+        font-size: 12px;
+      }
+    }
+  }
+}
