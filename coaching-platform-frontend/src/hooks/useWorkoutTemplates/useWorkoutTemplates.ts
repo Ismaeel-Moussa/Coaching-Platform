@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
 import type { AxiosError } from 'axios';
+import i18n from '../../i18n/i18n';
 import {
   getWorkoutTemplates,
   getWorkoutTemplateById,
@@ -37,13 +38,13 @@ export const useSaveTemplate = () => {
   return useMutation<WorkoutTemplateDto, AxiosError, CreateWorkoutTemplateForm>({
     mutationFn: createWorkoutTemplate,
     onSuccess: (data) => {
-      antMessage.success(`Template "${data.name}" created successfully!`);
+      antMessage.success(i18n.t('common:alerts.templateCreated', { name: data.name }));
       queryClient.invalidateQueries({ queryKey: ['workout-templates'] });
     },
     onError: (error) => {
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to create workout template.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
   });
@@ -54,14 +55,14 @@ export const useUpdateTemplate = () => {
   return useMutation<WorkoutTemplateDto, AxiosError, { id: number; form: CreateWorkoutTemplateForm }>({
     mutationFn: ({ id, form }) => updateWorkoutTemplate(id, form),
     onSuccess: (data) => {
-      antMessage.success(`Template "${data.name}" updated successfully!`);
+      antMessage.success(i18n.t('common:alerts.templateUpdated', { name: data.name }));
       queryClient.invalidateQueries({ queryKey: ['workout-templates'] });
       queryClient.invalidateQueries({ queryKey: ['workout-template', data.id] });
     },
     onError: (error) => {
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to update workout template.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
   });
@@ -72,14 +73,14 @@ export const useAssignTemplate = () => {
   return useMutation<{ assignedCount: number; message: string }, AxiosError, { id: number; form: AssignTemplateForm }>({
     mutationFn: ({ id, form }) => assignWorkoutTemplate(id, form),
     onSuccess: (data) => {
-      antMessage.success(data.message || 'Template assigned successfully!');
+      antMessage.success(i18n.t('common:alerts.templateAssigned'));
       queryClient.invalidateQueries({ queryKey: ['workout-templates'] });
       queryClient.invalidateQueries({ queryKey: ['coach-roster'] });
     },
     onError: (error) => {
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to assign template.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
   });
@@ -112,11 +113,11 @@ export const useDeleteTemplate = () => {
       });
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to delete template.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
     onSuccess: () => {
-      antMessage.success('Template deleted successfully!');
+      antMessage.success(i18n.t('common:alerts.templateDeleted'));
       queryClient.invalidateQueries({ queryKey: ['workout-templates'] });
     },
   });

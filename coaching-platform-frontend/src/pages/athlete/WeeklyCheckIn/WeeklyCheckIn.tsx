@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Steps, Button, Card, Divider, Alert, Space, Result, Progress } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import BiometricInputRow from '../../../components/BiometricInputRow/BiometricInputRow';
 import SubjectiveSlider from '../../../components/SubjectiveSlider/SubjectiveSlider';
 import PhotoUploadZone from '../../../components/PhotoUploadZone/PhotoUploadZone';
@@ -10,6 +11,7 @@ import { formatDateDisplay } from '../../../utils/date';
 import './WeeklyCheckIn.scss';
 
 const PhotoPreview: React.FC<{ file: File | null; existingUrl?: string | null; label: string }> = ({ file, existingUrl, label }) => {
+  const { t } = useTranslation();
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,13 +31,14 @@ const PhotoPreview: React.FC<{ file: File | null; existingUrl?: string | null; l
       {displayUrl ? (
         <img src={displayUrl} alt={`${label} Preview`} className="weekly-check-in__review-photo-img" />
       ) : (
-        <div className="weekly-check-in__review-photo-empty">No photo selected</div>
+        <div className="weekly-check-in__review-photo-empty">{t('athlete:checkIn.noPhotoSelected')}</div>
       )}
     </div>
   );
 };
 
 const WeeklyCheckIn: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [checkInId, setCheckInId] = useState<number | null>(null);
@@ -256,9 +259,9 @@ const WeeklyCheckIn: React.FC = () => {
   return (
     <div id="weekly-check-in-page" className="weekly-check-in animate-fade-in">
       <div className="weekly-check-in__header">
-        <h1 className="weekly-check-in__title">Weekly Check-In</h1>
+        <h1 className="weekly-check-in__title">{t('athlete:checkIn.title')}</h1>
         <p className="weekly-check-in__subtitle">
-          Submit your weekly stats and progress photos so your coach can adjust your targets.
+          {t('athlete:checkIn.subtitle')}
         </p>
       </div>
 
@@ -266,9 +269,9 @@ const WeeklyCheckIn: React.FC = () => {
         <Steps
           current={currentStep}
           items={[
-            { title: 'Biometrics & Subjective' },
-            { title: 'Progress Photos' },
-            { title: isAlreadySubmittedThisWeek || isSubmissionSuccessful ? 'Confirmation' : 'Review & Submit' },
+            { title: t('athlete:checkIn.step1') },
+            { title: t('athlete:checkIn.step2') },
+            { title: isAlreadySubmittedThisWeek || isSubmissionSuccessful ? t('athlete:checkIn.step3Confirm') : t('athlete:checkIn.step3Review') },
           ]}
           className="weekly-check-in__steps"
         />
@@ -277,28 +280,29 @@ const WeeklyCheckIn: React.FC = () => {
       <div className="weekly-check-in__content">
         <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
           <Card className="weekly-check-in__card" loading={historyLoading}>
-            <h2 className="weekly-check-in__section-title">Step 1: Measurements & Well-being</h2>
+            <h2 className="weekly-check-in__section-title">{t('athlete:checkIn.step1Title')}</h2>
             <p className="weekly-check-in__section-desc">
-              Please enter your current body measurements. Weight is required.
+              {t('athlete:checkIn.step1Desc')}
             </p>
 
             <div className="weekly-check-in__form-grid">
               <div className="weekly-check-in__form-column">
                 <h3 className="weekly-check-in__subsection-title">
-                  <span className="material-symbols-outlined text-gold">scale</span> Biometrics
+                  <span className="material-symbols-outlined text-gold">scale</span> {t('athlete:checkIn.biometricsTitle')}
                 </h3>
                 <div className="weekly-check-in__biometrics-list">
                   <BiometricInputRow
-                    label="Current Weight *"
+                    label={t('athlete:checkIn.weightLabel')}
                     value={weightKg}
                     onChange={setWeightKg}
                     unit="kg"
                     placeholder="e.g. 78.5"
                     min={30}
                     max={250}
+                    required
                   />
                   <BiometricInputRow
-                    label="Waist Circumference"
+                    label={t('athlete:checkIn.waistLabel')}
                     value={waistCm}
                     onChange={setWaistCm}
                     unit="cm"
@@ -307,7 +311,7 @@ const WeeklyCheckIn: React.FC = () => {
                     max={200}
                   />
                   <BiometricInputRow
-                    label="Chest Circumference"
+                    label={t('athlete:checkIn.chestLabel')}
                     value={chestCm}
                     onChange={setChestCm}
                     unit="cm"
@@ -316,7 +320,7 @@ const WeeklyCheckIn: React.FC = () => {
                     max={200}
                   />
                   <BiometricInputRow
-                    label="Thigh Circumference"
+                    label={t('athlete:checkIn.thighLabel')}
                     value={thighCm}
                     onChange={setThighCm}
                     unit="cm"
@@ -329,26 +333,26 @@ const WeeklyCheckIn: React.FC = () => {
 
               <div className="weekly-check-in__form-column">
                 <h3 className="weekly-check-in__subsection-title">
-                  <span className="material-symbols-outlined text-gold">favorite</span> Subjective Markers
+                  <span className="material-symbols-outlined text-gold">favorite</span> {t('athlete:checkIn.subjectiveTitle')}
                 </h3>
                 <div className="weekly-check-in__sliders-list">
                   <SubjectiveSlider
-                    label="Sleep Quality"
+                    label={t('athlete:checkIn.sleepLabel')}
                     value={sleepQuality}
                     onChange={setSleepQuality}
                   />
                   <SubjectiveSlider
-                    label="Energy Level"
+                    label={t('athlete:checkIn.energyLabel')}
                     value={energyLevel}
                     onChange={setEnergyLevel}
                   />
                   <SubjectiveSlider
-                    label="Gut Health"
+                    label={t('athlete:checkIn.gutLabel')}
                     value={gutHealth}
                     onChange={setGutHealth}
                   />
                   <SubjectiveSlider
-                    label="Training Stress"
+                    label={t('athlete:checkIn.stressLabel')}
                     value={trainingStress}
                     onChange={setTrainingStress}
                   />
@@ -366,7 +370,7 @@ const WeeklyCheckIn: React.FC = () => {
                 className="weekly-check-in__next-btn"
                 size="large"
               >
-                Next: Add Photos <span className="material-symbols-outlined">arrow_forward</span>
+                {t('athlete:checkIn.nextPhotosBtn')} <span className="material-symbols-outlined">arrow_forward</span>
               </Button>
             </div>
           </Card>
@@ -374,9 +378,9 @@ const WeeklyCheckIn: React.FC = () => {
 
         <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
           <Card className="weekly-check-in__card">
-            <h2 className="weekly-check-in__section-title">Step 2: Progress Photos (Optional)</h2>
+            <h2 className="weekly-check-in__section-title">{t('athlete:checkIn.step2Title')}</h2>
             <p className="weekly-check-in__section-desc">
-              Select Front, Side, and Back photos in consistent lighting to track visual composition changes.
+              {t('athlete:checkIn.step2Desc')}
             </p>
 
             <div className="weekly-check-in__photos-grid">
@@ -414,7 +418,7 @@ const WeeklyCheckIn: React.FC = () => {
                 className="weekly-check-in__back-btn"
                 size="large"
               >
-                <span className="material-symbols-outlined">arrow_back</span> Back
+                <span className="material-symbols-outlined">arrow_back</span> {t('athlete:checkIn.backBtn')}
               </Button>
               <Button
                 type="primary"
@@ -422,7 +426,7 @@ const WeeklyCheckIn: React.FC = () => {
                 className="weekly-check-in__next-btn"
                 size="large"
               >
-                Next: Review & Submit <span className="material-symbols-outlined">arrow_forward</span>
+                {t('athlete:checkIn.nextReviewBtn')} <span className="material-symbols-outlined">arrow_forward</span>
               </Button>
             </div>
           </Card>
@@ -433,8 +437,8 @@ const WeeklyCheckIn: React.FC = () => {
             <Card className="weekly-check-in__card weekly-check-in__card--confirm">
               <Result
                 status="success"
-                title="Check-In Received!"
-                subTitle="Your coach has been notified and will review your stats and photos shortly. Check back for custom feedback and adjustments."
+                title={t('athlete:checkIn.successTitle')}
+                subTitle={t('athlete:checkIn.successDesc')}
                 extra={
                   <div className="weekly-check-in__confirm-actions">
                     <Button
@@ -443,7 +447,7 @@ const WeeklyCheckIn: React.FC = () => {
                       size="large"
                       className="weekly-check-in__done-btn"
                     >
-                      Return to Dashboard
+                      {t('athlete:checkIn.returnDashboard')}
                     </Button>
                     <Button
                       onClick={() => {
@@ -459,7 +463,7 @@ const WeeklyCheckIn: React.FC = () => {
                       size="large"
                       className="weekly-check-in__resubmit-btn"
                     >
-                      Resubmit Check-in
+                      {t('athlete:checkIn.resubmitBtn')}
                     </Button>
                   </div>
                 }
@@ -467,28 +471,28 @@ const WeeklyCheckIn: React.FC = () => {
             </Card>
           ) : (
             <Card className="weekly-check-in__card">
-              <h2 className="weekly-check-in__section-title">Step 3: Review & Submit</h2>
+              <h2 className="weekly-check-in__section-title">{t('athlete:checkIn.step3Title')}</h2>
               <p className="weekly-check-in__section-desc">
-                Please review your inputs before submitting. Once submitted, your coach will be notified.
+                {t('athlete:checkIn.step3Desc')}
               </p>
 
               <div className="weekly-check-in__review-sections">
                 <div className="weekly-check-in__review-section">
                   <h3 className="weekly-check-in__subsection-title">
-                    <span className="material-symbols-outlined text-gold">scale</span> Biometrics Summary
+                    <span className="material-symbols-outlined text-gold">scale</span> {t('athlete:checkIn.biometricsSummary')}
                   </h3>
                   <div className="weekly-check-in__review-grid">
                     <div className="weekly-check-in__review-item">
-                      <strong>Weight:</strong> <span>{weightKg} kg</span>
+                      <strong>{t('athlete:checkIn.weight')}:</strong> <span>{weightKg} kg</span>
                     </div>
                     <div className="weekly-check-in__review-item">
-                      <strong>Waist:</strong> <span>{waistCm ? `${waistCm} cm` : 'Not provided'}</span>
+                      <strong>{t('athlete:checkIn.waist')}:</strong> <span>{waistCm ? `${waistCm} cm` : t('athlete:checkIn.notProvided')}</span>
                     </div>
                     <div className="weekly-check-in__review-item">
-                      <strong>Chest:</strong> <span>{chestCm ? `${chestCm} cm` : 'Not provided'}</span>
+                      <strong>{t('athlete:checkIn.chest')}:</strong> <span>{chestCm ? `${chestCm} cm` : t('athlete:checkIn.notProvided')}</span>
                     </div>
                     <div className="weekly-check-in__review-item">
-                      <strong>Thigh:</strong> <span>{thighCm ? `${thighCm} cm` : 'Not provided'}</span>
+                      <strong>{t('athlete:checkIn.thigh')}:</strong> <span>{thighCm ? `${thighCm} cm` : t('athlete:checkIn.notProvided')}</span>
                     </div>
                   </div>
                 </div>
@@ -497,20 +501,20 @@ const WeeklyCheckIn: React.FC = () => {
 
                 <div className="weekly-check-in__review-section">
                   <h3 className="weekly-check-in__subsection-title">
-                    <span className="material-symbols-outlined text-gold">favorite</span> Subjective Markers Summary (1-10)
+                    <span className="material-symbols-outlined text-gold">favorite</span> {t('athlete:checkIn.subjectiveSummary')}
                   </h3>
                   <div className="weekly-check-in__review-grid">
                     <div className="weekly-check-in__review-item">
-                      <strong>Sleep Quality:</strong> <span>{sleepQuality}/10</span>
+                      <strong>{t('athlete:checkIn.sleepLabel')}:</strong> <span>{sleepQuality}/10</span>
                     </div>
                     <div className="weekly-check-in__review-item">
-                      <strong>Energy Level:</strong> <span>{energyLevel}/10</span>
+                      <strong>{t('athlete:checkIn.energyLabel')}:</strong> <span>{energyLevel}/10</span>
                     </div>
                     <div className="weekly-check-in__review-item">
-                      <strong>Gut Health:</strong> <span>{gutHealth}/10</span>
+                      <strong>{t('athlete:checkIn.gutLabel')}:</strong> <span>{gutHealth}/10</span>
                     </div>
                     <div className="weekly-check-in__review-item">
-                      <strong>Training Stress:</strong> <span>{trainingStress}/10</span>
+                      <strong>{t('athlete:checkIn.stressLabel')}:</strong> <span>{trainingStress}/10</span>
                     </div>
                   </div>
                 </div>
@@ -519,23 +523,23 @@ const WeeklyCheckIn: React.FC = () => {
 
                 <div className="weekly-check-in__review-section">
                   <h3 className="weekly-check-in__subsection-title">
-                    <span className="material-symbols-outlined text-gold">photo_camera</span> Selected Progress Photos
+                    <span className="material-symbols-outlined text-gold">photo_camera</span> {t('athlete:checkIn.photosSummary')}
                   </h3>
                   <div className="weekly-check-in__review-photos">
                     <PhotoPreview 
                       file={frontFile} 
                       existingUrl={!deletedAngles.includes('Front') ? existingFrontPhoto?.signedDownloadUrl : null} 
-                      label="Front View" 
+                      label={t('athlete:checkIn.frontView')} 
                     />
                     <PhotoPreview 
                       file={sideFile} 
                       existingUrl={!deletedAngles.includes('Side') ? existingSidePhoto?.signedDownloadUrl : null} 
-                      label="Side View" 
+                      label={t('athlete:checkIn.sideView')} 
                     />
                     <PhotoPreview 
                       file={backFile} 
                       existingUrl={!deletedAngles.includes('Back') ? existingBackPhoto?.signedDownloadUrl : null} 
-                      label="Back View" 
+                      label={t('athlete:checkIn.backView')} 
                     />
                   </div>
                 </div>
@@ -545,7 +549,7 @@ const WeeklyCheckIn: React.FC = () => {
                 <div style={{ marginTop: 24, padding: '0 16px' }}>
                   <Progress percent={uploadProgress} status="active" strokeColor="var(--color-gold)" />
                   <div style={{ textAlign: 'center', marginTop: 8, color: 'var(--color-text-secondary)', fontSize: 14 }}>
-                    Uploading progress photos ({uploadProgress}%)...
+                    {t('athlete:checkIn.uploadingProgress', { progress: uploadProgress })}
                   </div>
                 </div>
               )}
@@ -559,7 +563,7 @@ const WeeklyCheckIn: React.FC = () => {
                   className="weekly-check-in__back-btn"
                   size="large"
                 >
-                  <span className="material-symbols-outlined">arrow_back</span> Back
+                  <span className="material-symbols-outlined">arrow_back</span> {t('athlete:checkIn.backBtn')}
                 </Button>
                 <Button
                   type="primary"
@@ -568,7 +572,7 @@ const WeeklyCheckIn: React.FC = () => {
                   className="weekly-check-in__next-btn"
                   size="large"
                 >
-                  Submit Check-In <span className="material-symbols-outlined">done</span>
+                  {t('athlete:checkIn.submitBtn')} <span className="material-symbols-outlined">done</span>
                 </Button>
               </div>
             </Card>

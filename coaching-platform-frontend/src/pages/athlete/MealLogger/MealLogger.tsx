@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Tabs, Skeleton, Empty, Tooltip, Popconfirm } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useGetDiary, useGetMacroSummary, useRemoveLogEntry } from '../../../hooks/useDiary/useDiary';
 import MacroProgressBar from '../../../components/MacroProgressBar/MacroProgressBar';
 import AddFoodModal from '../../../components/AddFoodModal/AddFoodModal';
@@ -34,6 +35,7 @@ interface MealSectionProps {
 }
 
 const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType, date, onAddFood }) => {
+  const { t } = useTranslation(['common', 'athlete']);
   const removeMutation = useRemoveLogEntry(date);
 
   const subtotals = entries.reduce(
@@ -48,18 +50,18 @@ const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType,
       ) : entries.length === 0 ? (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description="Nothing logged yet"
+          description={t('athlete:mealLogger.empty')}
           className="meal-section__empty"
         />
       ) : (
         <div className="meal-section__list">
           {/* Column headers */}
           <div className="meal-section__list-header">
-            <span>Food</span>
+            <span>{t('athlete:mealLogger.foodHeader')}</span>
             <span className="mono">P</span>
             <span className="mono">C</span>
             <span className="mono">F</span>
-            <span className="mono">kcal</span>
+            <span className="mono">{t('athlete:mealLogger.kcalHeader')}</span>
             <span />
           </div>
 
@@ -67,7 +69,7 @@ const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType,
             <div key={entry.id} className="meal-section__row">
               <div className="meal-section__food-info">
                 <span className="meal-section__food-name">
-                  {entry.food?.name ?? entry.recipe?.name ?? 'Unknown'}
+                  {entry.food?.name ?? entry.recipe?.name ?? t('common:status.unknown')}
                 </span>
                 <span className="meal-section__food-qty mono">
                   {entry.quantityGrams}g
@@ -88,13 +90,13 @@ const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType,
                 </span>
                 <span className="mono meal-section__macro meal-section__macro--kcal">
                   {Math.round(entry.calories)}
-                  <span className="meal-section__kcal-suffix"> kcal</span>
+                  <span className="meal-section__kcal-suffix"> {t('athlete:mealLogger.kcalHeader')}</span>
                 </span>
               </div>
               <Popconfirm
-                title="Remove this entry?"
+                title={t('athlete:mealLogger.removeConfirm')}
                 onConfirm={() => removeMutation.mutate(entry.id)}
-                okText="Remove"
+                okText={t('athlete:mealLogger.remove')}
                 okButtonProps={{ danger: true }}
               >
                 <button className="meal-section__delete-btn" aria-label="Remove entry">
@@ -106,7 +108,7 @@ const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType,
 
           {/* Subtotals */}
           <div className="meal-section__subtotal">
-            <span className="meal-section__subtotal-label">Subtotal</span>
+            <span className="meal-section__subtotal-label">{t('athlete:mealLogger.subtotal')}</span>
             <div className="meal-section__subtotal-macros">
               <span className="mono">
                 <span className="meal-section__macro-label">P:</span>
@@ -121,7 +123,7 @@ const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType,
                 {subtotals.f.toFixed(1)}g
               </span>
               <span className="mono meal-section__subtotal-kcal">
-                {Math.round(subtotals.cal)} kcal
+                {Math.round(subtotals.cal)} {t('athlete:mealLogger.kcalHeader')}
               </span>
             </div>
             <span className="meal-section__subtotal-spacer" />
@@ -135,13 +137,28 @@ const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType,
         id={`add-food-btn-${mealType}`}
       >
         <span className="material-symbols-outlined">add</span>
-        Add Food
+        {t('athlete:mealLogger.addFood')}
       </button>
     </div>
   );
 };
 
+const getMealTypeLabel = (type: MealType, t: any) => {
+  switch (type) {
+    case MealType.Breakfast: return t('common:meals.breakfast');
+    case MealType.Lunch: return t('common:meals.lunch');
+    case MealType.Dinner: return t('common:meals.dinner');
+    case MealType.Snack: return t('common:meals.snack');
+    case MealType.Suhoor: return t('common:meals.suhoor');
+    case MealType.Iftar: return t('common:meals.iftar');
+    case MealType.PreWorkout: return t('common:meals.preWorkout');
+    case MealType.PostWorkout: return t('common:meals.postWorkout');
+    default: return MEAL_TYPE_LABELS[type];
+  }
+};
+
 const MealLogger: React.FC = () => {
+  const { t } = useTranslation(['common', 'athlete']);
   const today = getTodayIso();
   const [addFoodModal, setAddFoodModal] = useState<{ open: boolean; mealType: MealType }>({
     open: false,
@@ -160,7 +177,7 @@ const MealLogger: React.FC = () => {
     label: (
       <span className="meal-logger__tab-label">
         <span className="material-symbols-outlined">{icon}</span>
-        {MEAL_TYPE_LABELS[type]}
+        {getMealTypeLabel(type, t)}
       </span>
     ),
     children: (
@@ -179,8 +196,8 @@ const MealLogger: React.FC = () => {
       {/* ── Page Header ── */}
       <div className="meal-logger__header">
         <div>
-          <h1 className="meal-logger__title">Meal Logger</h1>
-          <p className="meal-logger__sub">Track your daily nutrition</p>
+          <h1 className="meal-logger__title">{t('athlete:mealLogger.title')}</h1>
+          <p className="meal-logger__sub">{t('athlete:mealLogger.sub')}</p>
         </div>
       </div>
 
@@ -188,10 +205,10 @@ const MealLogger: React.FC = () => {
       <div className="meal-logger__summary-card">
         <div className="meal-logger__summary-header">
           <span className="material-symbols-outlined">pie_chart</span>
-          <h2 className="meal-logger__summary-title">Today's Progress</h2>
+          <h2 className="meal-logger__summary-title">{t('athlete:mealLogger.todayProgress')}</h2>
           {summary && (
             <span className="meal-logger__summary-remaining mono">
-              {Math.round(summary.caloriesRemaining >= 0 ? summary.caloriesRemaining : 0)} kcal left
+              {t('athlete:mealLogger.kcalLeft', { count: Math.round(summary.caloriesRemaining >= 0 ? summary.caloriesRemaining : 0) })}
             </span>
           )}
         </div>
@@ -204,25 +221,25 @@ const MealLogger: React.FC = () => {
         ) : summary ? (
           <div className="meal-logger__summary-bars">
             <MacroProgressBar
-              label="Calories"
+              label={t('athlete:dashboard.dailyMacros.calories')}
               consumed={summary.caloriesConsumed}
               target={summary.targetCalories}
-              unit=" kcal"
+              unit={` ${t('athlete:mealLogger.kcalHeader')}`}
             />
             <MacroProgressBar
-              label="Protein"
+              label={t('athlete:dashboard.dailyMacros.protein')}
               consumed={summary.proteinConsumed}
               target={summary.targetProtein}
               unit="g"
             />
             <MacroProgressBar
-              label="Carbs"
+              label={t('athlete:dashboard.dailyMacros.carbs')}
               consumed={summary.carbsConsumed}
               target={summary.targetCarbs}
               unit="g"
             />
             <MacroProgressBar
-              label="Fat"
+              label={t('athlete:dashboard.dailyMacros.fat')}
               consumed={summary.fatConsumed}
               target={summary.targetFat}
               unit="g"

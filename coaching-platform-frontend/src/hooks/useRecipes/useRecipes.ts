@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
+import i18n from '../../i18n/i18n';
 import { getRecipes, createRecipe, updateRecipe, quickAddRecipeToDiary, deleteRecipe, uploadRecipeImage } from '../../api/recipe';
 import type { RecipeDto, RecipesPagedResult, CreateRecipeForm, UpdateRecipeForm, GetRecipesParams } from '../../types/Recipe';
 
@@ -18,7 +19,7 @@ export const useCreateRecipe = () => {
       // Message handled after full creation step including photo upload
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
     },
-    onError: () => antMessage.error('Failed to create recipe.'),
+    onError: () => antMessage.error(i18n.t('common:alerts.recipeCreateFailed')),
   });
 };
 
@@ -29,7 +30,7 @@ export const useUpdateRecipe = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
     },
-    onError: () => antMessage.error('Failed to update recipe.'),
+    onError: () => antMessage.error(i18n.t('common:alerts.recipeUpdateFailed')),
   });
 };
 
@@ -39,12 +40,12 @@ export const useQuickAddRecipe = (date: string) => {
     mutationFn: ({ id, mealType }: { id: number; mealType: number }) =>
       quickAddRecipeToDiary(id, mealType),
     onSuccess: () => {
-      antMessage.success('Recipe added to diary!');
+      antMessage.success(i18n.t('common:alerts.recipeAddedToDiary'));
       queryClient.invalidateQueries({ queryKey: ['diary', date] });
       queryClient.invalidateQueries({ queryKey: ['diary-summary', date] });
       queryClient.invalidateQueries({ queryKey: ['athlete-dashboard'] });
     },
-    onError: () => antMessage.error('Failed to add recipe to diary.'),
+    onError: () => antMessage.error(i18n.t('common:alerts.recipeAddFailed')),
   });
 };
 
@@ -73,10 +74,10 @@ export const useDeleteRecipe = () => {
       context?.previousQueries?.forEach(({ queryKey, data }) => {
         queryClient.setQueryData(queryKey, data);
       });
-      antMessage.error('Failed to delete recipe.');
+      antMessage.error(i18n.t('common:alerts.recipeDeleteFailed'));
     },
     onSuccess: () => {
-      antMessage.success('Recipe deleted successfully!');
+      antMessage.success(i18n.t('common:alerts.recipeDeleted'));
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
     },
   });
@@ -89,7 +90,7 @@ export const useUploadRecipeImage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
     },
-    onError: () => antMessage.error('Failed to upload recipe image.'),
+    onError: () => antMessage.error(i18n.t('common:alerts.recipeImageUploadFailed')),
   });
 };
 

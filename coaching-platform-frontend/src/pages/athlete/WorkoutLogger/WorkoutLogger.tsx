@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Skeleton, Empty, Popconfirm, Button, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useGetTodaysWorkout, useCompleteWorkout } from '../../../hooks/useWorkout/useWorkout';
 import ExerciseCard from '../../../components/ExerciseCard/ExerciseCard';
 import VideoDemoModal from '../../../components/VideoDemoModal/VideoDemoModal';
@@ -28,6 +29,7 @@ const SectionGroup: React.FC<SectionGroupProps> = ({
   onVideoPlay,
   accentClass,
 }) => {
+  const { t } = useTranslation(['athlete']);
   if (exercises.length === 0) return null;
 
   return (
@@ -35,7 +37,7 @@ const SectionGroup: React.FC<SectionGroupProps> = ({
       <div className={`workout-section__header ${accentClass}`}>
         <span className="material-symbols-outlined">{icon}</span>
         <h2 className="workout-section__title">{title}</h2>
-        <span className="workout-section__count mono">{exercises.length} exercise{exercises.length !== 1 ? 's' : ''}</span>
+        <span className="workout-section__count mono">{t('athlete:workoutLogger.exercisesCount', { count: exercises.length })}</span>
       </div>
       <div className="workout-section__cards">
         {exercises.map((ex) => (
@@ -54,11 +56,12 @@ const SectionGroup: React.FC<SectionGroupProps> = ({
 
 // ── Status badge helper ───────────────────────────────────────────────────────
 const StatusBadge: React.FC<{ status: WorkoutStatus }> = ({ status }) => {
+  const { t } = useTranslation(['athlete']);
   const config: Record<WorkoutStatus, { color: string; label: string; icon: string }> = {
-    [WorkoutStatus.InProgress]: { color: '#fabd00', label: 'In Progress', icon: 'fitness_center' },
-    [WorkoutStatus.Completed]: { color: '#12b76a', label: 'Completed', icon: 'check_circle' },
-    [WorkoutStatus.Missed]: { color: '#ba1a1a', label: 'Missed', icon: 'cancel' },
-    [WorkoutStatus.NoProgram]: { color: '#76767e', label: 'No Program', icon: 'calendar_today' },
+    [WorkoutStatus.InProgress]: { color: '#fabd00', label: t('athlete:workoutLogger.status.inProgress'), icon: 'fitness_center' },
+    [WorkoutStatus.Completed]: { color: '#12b76a', label: t('athlete:workoutLogger.status.completed'), icon: 'check_circle' },
+    [WorkoutStatus.Missed]: { color: '#ba1a1a', label: t('athlete:workoutLogger.status.missed'), icon: 'cancel' },
+    [WorkoutStatus.NoProgram]: { color: '#76767e', label: t('athlete:workoutLogger.status.noProgram'), icon: 'calendar_today' },
   };
   const c = config[status];
   return (
@@ -84,6 +87,7 @@ const StatusBadge: React.FC<{ status: WorkoutStatus }> = ({ status }) => {
 // ── Main Page ────────────────────────────────────────────────────────────────
 const WorkoutLogger: React.FC = () => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation(['common', 'athlete']);
   const { data: workout, isLoading, isError } = useGetTodaysWorkout();
   const { mutate: completeWorkout, isPending: isCompleting } = useCompleteWorkout();
 
@@ -132,11 +136,11 @@ const WorkoutLogger: React.FC = () => {
       <div id="workout-logger-page" className="workout-logger animate-fade-in">
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description="Failed to load today's workout. Please try again."
+          description={t('athlete:workoutLogger.failedLoad')}
           style={{ marginTop: 80 }}
         >
           <Button onClick={() => window.location.reload()} type="primary">
-            Retry
+            {t('athlete:workoutLogger.retry')}
           </Button>
         </Empty>
       </div>
@@ -149,16 +153,16 @@ const WorkoutLogger: React.FC = () => {
       <div id="workout-logger-page" className="workout-logger animate-fade-in">
         <div className="workout-logger__header">
           <div>
-            <h1 className="workout-logger__title">Workout Logger</h1>
-            <p className="workout-logger__sub">Your daily training session</p>
+            <h1 className="workout-logger__title">{t('athlete:workoutLogger.title')}</h1>
+            <p className="workout-logger__sub">{t('athlete:workoutLogger.sub')}</p>
           </div>
         </div>
         <div className="workout-logger__no-program">
           <span className="material-symbols-outlined workout-logger__no-program-icon">
             sports_gymnastics
           </span>
-          <h2>No Program Assigned</h2>
-          <p>Your coach hasn't assigned a workout program yet. Reach out to your coach to get started!</p>
+          <h2>{t('athlete:workoutLogger.noProgram')}</h2>
+          <p>{t('athlete:workoutLogger.noProgramDesc')}</p>
         </div>
       </div>
     );
@@ -173,14 +177,14 @@ const WorkoutLogger: React.FC = () => {
       <div id="workout-logger-page" className="workout-logger animate-fade-in">
         <div className="workout-logger__header">
           <div>
-            <h1 className="workout-logger__title">Workout Logger</h1>
-            <p className="workout-logger__sub">Your daily training session</p>
+            <h1 className="workout-logger__title">{t('athlete:workoutLogger.title')}</h1>
+            <p className="workout-logger__sub">{t('athlete:workoutLogger.sub')}</p>
           </div>
         </div>
         <div className="workout-logger__rest-day">
           <span className="material-symbols-outlined workout-logger__rest-icon">self_improvement</span>
-          <h2>Rest Day 🛌</h2>
-          <p>Recovery is where gains are made. Rest up and come back stronger tomorrow!</p>
+          <h2>{t('athlete:workoutLogger.restDayTitle')}</h2>
+          <p>{t('athlete:workoutLogger.restDayDesc')}</p>
         </div>
       </div>
     );
@@ -195,24 +199,24 @@ const WorkoutLogger: React.FC = () => {
       {/* ── Header ── */}
       <div className="workout-logger__header">
         <div>
-          <h1 className="workout-logger__title">{day?.dayLabel ?? 'Today\'s Workout'}</h1>
+          <h1 className="workout-logger__title">{day?.dayLabel ?? t('athlete:workoutLogger.title')}</h1>
           <p className="workout-logger__sub">
-            {totalExercises} exercises · {loggedCount}/{totalExercises} exercises started
+            {t('athlete:workoutLogger.exercisesCount', { count: totalExercises })} · {t('athlete:workoutLogger.exercisesCountStarted', { started: loggedCount, total: totalExercises })}
           </p>
         </div>
-        <StatusBadge status={status} />
+        {status !== WorkoutStatus.Completed && <StatusBadge status={status} />}
       </div>
 
       {/* ── Session Info Card ── */}
       <div className="workout-logger__info-card">
         <div className="workout-logger__info-row">
           <span className="material-symbols-outlined">calendar_today</span>
-          <span className="mono">{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+          <span className="mono">{new Date().toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' })}</span>
         </div>
         {isCompleted && (
           <div className="workout-logger__completed-banner">
             <span className="material-symbols-outlined">check_circle</span>
-            Workout completed! Great work today. 🔥
+            {t('athlete:workoutLogger.completedBanner')}
           </div>
         )}
       </div>
@@ -220,7 +224,7 @@ const WorkoutLogger: React.FC = () => {
       {/* ── Exercise Sections ── */}
       <div className="workout-logger__content">
         <SectionGroup
-          title="Warm-Up"
+          title={t('athlete:workoutLogger.sections.warmup')}
           icon="directions_run"
           exercises={day?.warmUp ?? []}
           loggedSets={loggedSets}
@@ -229,7 +233,7 @@ const WorkoutLogger: React.FC = () => {
           accentClass="workout-section__header--warmup"
         />
         <SectionGroup
-          title="Main"
+          title={t('athlete:workoutLogger.sections.main')}
           icon="fitness_center"
           exercises={day?.main ?? []}
           loggedSets={loggedSets}
@@ -238,7 +242,7 @@ const WorkoutLogger: React.FC = () => {
           accentClass="workout-section__header--main"
         />
         <SectionGroup
-          title="Cool-Down"
+          title={t('athlete:workoutLogger.sections.cooldown')}
           icon="self_improvement"
           exercises={day?.coolDown ?? []}
           loggedSets={loggedSets}
@@ -252,11 +256,11 @@ const WorkoutLogger: React.FC = () => {
       {!isCompleted && (
         <div className="workout-logger__complete-zone">
           <Popconfirm
-            title="Complete Workout"
-            description="Are you sure you want to mark today's workout as complete?"
+            title={t('athlete:workoutLogger.confirmComplete')}
+            description={t('athlete:workoutLogger.confirmCompleteDesc')}
             onConfirm={handleComplete}
-            okText="Complete"
-            cancelText="Not Yet"
+            okText={t('athlete:workoutLogger.completeBtn')}
+            cancelText={t('athlete:workoutLogger.cancelBtn')}
             okButtonProps={{ style: { background: 'var(--color-navy)', borderColor: 'var(--color-navy)' } }}
           >
             <button
@@ -265,7 +269,7 @@ const WorkoutLogger: React.FC = () => {
               id="complete-workout-btn"
             >
               <span className="material-symbols-outlined">emoji_events</span>
-              {isCompleting ? 'Saving...' : 'Complete Workout'}
+              {isCompleting ? t('athlete:workoutLogger.saving') : t('athlete:workoutLogger.completeWorkout')}
             </button>
           </Popconfirm>
         </div>

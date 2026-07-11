@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, Result } from 'antd';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useForgotPassword } from '../../../hooks/useAuth/useAuth';
 import type { ForgotPasswordForm } from '../../../types/auth';
 import './ForgotPassword.scss';
 
 const ForgotPassword: React.FC = () => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<ForgotPasswordForm>();
   const [submitted, setSubmitted] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');
@@ -27,17 +29,16 @@ const ForgotPassword: React.FC = () => {
               <span className="material-symbols-outlined">mark_email_read</span>
             </div>
           }
-          title={<span className="forgot-password__success-title">Check Your Inbox</span>}
+          title={<span className="forgot-password__success-title">{t('auth:forgotPassword.successTitle')}</span>}
           subTitle={
             <span className="forgot-password__success-sub">
-              If an account exists for <strong>{submittedEmail}</strong>, you'll receive a reset
-              link shortly.
+              {t('auth:forgotPassword.successSub', { email: submittedEmail })}
             </span>
           }
           extra={
             <Link to="/sign-in" className="forgot-password__back-btn">
               <span className="material-symbols-outlined">arrow_back</span>
-              Back to Sign In
+              {t('auth:forgotPassword.backToSignIn')}
             </Link>
           }
         />
@@ -51,9 +52,9 @@ const ForgotPassword: React.FC = () => {
         <div className="forgot-password__icon-wrap">
           <span className="material-symbols-outlined">lock_reset</span>
         </div>
-        <h2 className="forgot-password__title">Reset Password</h2>
+        <h2 className="forgot-password__title">{t('auth:forgotPassword.title')}</h2>
         <p className="forgot-password__subtitle">
-          Enter your email and we'll send you a reset link
+          {t('auth:forgotPassword.subtitle')}
         </p>
       </div>
 
@@ -66,10 +67,10 @@ const ForgotPassword: React.FC = () => {
       >
         <Form.Item
           name="email"
-          label="Email Address"
+          label={t('auth:forgotPassword.emailLabel')}
           rules={[
-            { required: true, message: 'Email is required' },
-            { type: 'email', message: 'Please enter a valid email address' },
+            { required: true, message: t('auth:forgotPassword.emailReq') },
+            { type: 'email', message: t('auth:forgotPassword.emailInvalid') },
           ]}
         >
           <Input
@@ -92,7 +93,7 @@ const ForgotPassword: React.FC = () => {
             block
             className="forgot-password__submit-btn"
           >
-            {isPending ? 'Sending...' : 'Send Reset Link'}
+            {isPending ? t('auth:forgotPassword.submitBtnPending') : t('auth:forgotPassword.submitBtn')}
           </Button>
         </Form.Item>
       </Form>
@@ -100,7 +101,7 @@ const ForgotPassword: React.FC = () => {
       <p className="forgot-password__back-hint">
         <Link to="/sign-in" className="forgot-password__back-link">
           <span className="material-symbols-outlined">arrow_back</span>
-          Back to Sign In
+          {t('auth:forgotPassword.backToSignIn')}
         </Link>
       </p>
     </div>

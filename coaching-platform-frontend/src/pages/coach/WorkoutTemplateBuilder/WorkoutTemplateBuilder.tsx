@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DndContext } from '@dnd-kit/core';
 import { Button, Input, Tabs, List, Modal, Checkbox, Space, Skeleton, Card, Tag, Empty, Popconfirm } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useGetExercises } from '../../../hooks/useExercises/useExercises';
 import {
   useGetWorkoutTemplates,
@@ -18,22 +19,26 @@ import type { WorkoutTemplateExerciseDto, WorkoutTemplateDayDto } from '../../..
 import type { MuscleGroup } from '../../../types/Exercise';
 import './WorkoutTemplateBuilder.scss';
 
-const EXERCISE_CATEGORIES: { label: string; value: string }[] = [
-  { label: 'All', value: 'All' },
-  { label: 'Chest', value: 'Chest' },
-  { label: 'Back', value: 'Back' },
-  { label: 'Shoulders', value: 'Shoulders' },
-  { label: 'Arms', value: 'Arms' },
-  { label: 'Legs', value: 'Legs' },
-  { label: 'Cardio', value: 'Cardio' },
-  { label: 'Core', value: 'Core' },
-];
-
 const INITIAL_DAYS: WorkoutTemplateDayDto[] = [
   { dayNumber: 1, dayLabel: 'Day 1', isRestDay: false, exercises: [] },
 ];
 
+const getMuscleCategoryLabel = (category: string, t: any) => {
+  switch (category) {
+    case 'All': return t('common:status.all', { defaultValue: 'All' });
+    case 'Chest': return t('common:muscleGroups.chest', { defaultValue: 'Chest' });
+    case 'Back': return t('common:muscleGroups.back', { defaultValue: 'Back' });
+    case 'Shoulders': return t('common:muscleGroups.shoulders', { defaultValue: 'Shoulders' });
+    case 'Arms': return t('common:muscleGroups.arms', { defaultValue: 'Arms' });
+    case 'Legs': return t('common:muscleGroups.legs', { defaultValue: 'Legs' });
+    case 'Cardio': return t('common:muscleGroups.cardio', { defaultValue: 'Cardio' });
+    case 'Core': return t('common:muscleGroups.core', { defaultValue: 'Core' });
+    default: return category;
+  }
+};
+
 const WorkoutTemplateBuilder: React.FC = () => {
+  const { t } = useTranslation(['common', 'athlete', 'coach']);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const templateId = id ? parseInt(id, 10) : null;
@@ -49,6 +54,17 @@ const WorkoutTemplateBuilder: React.FC = () => {
   const [selectedAthleteIds, setSelectedAthleteIds] = useState<number[]>([]);
   const [listPage, setListPage] = useState<number>(1);
   const [assigningTemplateId, setAssigningTemplateId] = useState<number | null>(null);
+
+  const EXERCISE_CATEGORIES = [
+    { label: t('common:status.all', { defaultValue: 'All' }), value: 'All' },
+    { label: t('common:muscleGroups.chest', { defaultValue: 'Chest' }), value: 'Chest' },
+    { label: t('common:muscleGroups.back', { defaultValue: 'Back' }), value: 'Back' },
+    { label: t('common:muscleGroups.shoulders', { defaultValue: 'Shoulders' }), value: 'Shoulders' },
+    { label: t('common:muscleGroups.arms', { defaultValue: 'Arms' }), value: 'Arms' },
+    { label: t('common:muscleGroups.legs', { defaultValue: 'Legs' }), value: 'Legs' },
+    { label: t('common:muscleGroups.cardio', { defaultValue: 'Cardio' }), value: 'Cardio' },
+    { label: t('common:muscleGroups.core', { defaultValue: 'Core' }), value: 'Core' },
+  ];
 
   // TanStack Queries
   const { data: exercisesData, isLoading: isExercisesLoading } = useGetExercises({
@@ -238,8 +254,8 @@ const WorkoutTemplateBuilder: React.FC = () => {
         if (day.dayNumber === dayNumber) {
           if (day.isRestDay) {
             Modal.warning({
-              title: 'Rest Day',
-              content: 'Cannot add exercises to a rest day. Please turn off Rest Day status first.',
+              title: t('athlete:workoutLogger.restDayTitle'),
+              content: t('coach:templateBuilder.restDayWarn', { defaultValue: 'Cannot add exercises to a rest day. Please turn off Rest Day status first.' }),
             });
             return day;
           }
@@ -266,12 +282,12 @@ const WorkoutTemplateBuilder: React.FC = () => {
   // Save template to DB
   const handleSave = async () => {
     if (!name.trim()) {
-      Modal.error({ title: 'Validation Error', content: 'Please enter a name for the template.' });
+      Modal.error({ title: t('common:actions.confirm'), content: t('coach:templateBuilder.nameRequired', { defaultValue: 'Please enter a name for the template.' }) });
       return;
     }
 
     if (days.length === 0) {
-      Modal.error({ title: 'Validation Error', content: 'Please include at least one workout day.' });
+      Modal.error({ title: t('common:actions.confirm'), content: t('coach:templateBuilder.dayRequired', { defaultValue: 'Please include at least one workout day.' }) });
       return;
     }
 
@@ -320,7 +336,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
   // Assign template flow
   const handleAssign = async () => {
     if (selectedAthleteIds.length === 0) {
-      Modal.error({ title: 'Validation Error', content: 'Please select at least one athlete.' });
+      Modal.error({ title: t('common:actions.confirm'), content: t('coach:templateBuilder.athleteRequired', { defaultValue: 'Please select at least one athlete.' }) });
       return;
     }
 
@@ -375,11 +391,11 @@ const WorkoutTemplateBuilder: React.FC = () => {
         <div className="workout-template-builder__list-empty">
           <Empty
             description={
-              <span>No workout program templates created yet. Get started by building one!</span>
+              <span>{t('coach:templateBuilder.emptyTemplates')}</span>
             }
           >
             <Button type="primary" onClick={() => handleTabChange('builder')}>
-              Create First Template
+              {t('coach:templateBuilder.createFirst')}
             </Button>
           </Empty>
         </div>
@@ -397,7 +413,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
                 <div className="workout-template-builder__card-title">
                   <span>{tmpl.name}</span>
                   <Tag color={tmpl.isActive ? 'success' : 'default'}>
-                    {tmpl.isActive ? 'Active' : 'Archived'}
+                    {tmpl.isActive ? t('common:status.active') : t('common:status.archived')}
                   </Tag>
                 </div>
               }
@@ -410,7 +426,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
                     navigate(`/coach/template-builder/${tmpl.id}`);
                   }}
                 >
-                  View / Edit
+                  {t('coach:templateBuilder.viewEdit')}
                 </Button>,
                 <Button
                   type="link"
@@ -420,19 +436,19 @@ const WorkoutTemplateBuilder: React.FC = () => {
                     openAssignModal(tmpl.id);
                   }}
                 >
-                  Assign
+                  {t('coach:templateBuilder.assign')}
                 </Button>,
                 <Popconfirm
-                  title="Delete Template"
-                  description="Are you sure you want to delete this template?"
+                  title={t('coach:templateBuilder.delete')}
+                  description={t('coach:templateBuilder.deleteConfirm')}
                   onConfirm={() => {
                     if (document.activeElement instanceof HTMLElement) {
                       document.activeElement.blur();
                     }
                     deleteTemplateMutation.mutate(tmpl.id);
                   }}
-                  okText="Yes, Delete"
-                  cancelText="No"
+                  okText={t('common:actions.delete')}
+                  cancelText={t('common:actions.cancel')}
                   okButtonProps={{ danger: true, loading: deleteTemplateMutation.isPending }}
                   key="delete"
                 >
@@ -441,23 +457,23 @@ const WorkoutTemplateBuilder: React.FC = () => {
                     danger
                     onClick={(e) => e.currentTarget.blur()}
                   >
-                    Delete
+                    {t('coach:templateBuilder.delete')}
                   </Button>
                 </Popconfirm>,
               ]}
             >
               <div className="workout-template-builder__card-content">
                 <p className="workout-template-builder__card-desc">
-                  {tmpl.description || 'No description provided.'}
+                  {tmpl.description || '—'}
                 </p>
                 <div className="workout-template-builder__card-stats">
                   <span className="stat-item">
                     <span className="material-symbols-outlined">calendar_today</span>
-                    <strong>{tmpl.dayCount} Days</strong>
+                    <strong>{t('coach:templateBuilder.daysCount', { count: tmpl.dayCount })}</strong>
                   </span>
                   <span className="stat-item">
                     <span className="material-symbols-outlined">person</span>
-                    <span>By Coach {tmpl.coachName}</span>
+                    <span>{t('coach:templateBuilder.byCoach', { name: tmpl.coachName })}</span>
                   </span>
                 </div>
               </div>
@@ -470,16 +486,16 @@ const WorkoutTemplateBuilder: React.FC = () => {
               disabled={listPage === 1}
               onClick={() => setListPage((p) => p - 1)}
             >
-              Previous
+              {t('common:pagination.prev')}
             </Button>
             <span className="pagination-text">
-              Page {listPage} of {Math.ceil(templatesData.totalCount / 8)}
+              {t('common:pagination.pageOf', { page: listPage, total: Math.ceil(templatesData.totalCount / 8) })}
             </span>
             <Button
               disabled={listPage * 8 >= templatesData.totalCount}
               onClick={() => setListPage((p) => p + 1)}
             >
-              Next
+              {t('common:pagination.next')}
             </Button>
           </div>
         )}
@@ -499,7 +515,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
             label: (
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>view_list</span>
-                My Templates
+                {t('coach:templateBuilder.myTemplates')}
               </span>
             ),
             children: renderTemplatesList(),
@@ -509,7 +525,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
             label: (
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>design_services</span>
-                {templateId ? 'Edit Program Template' : 'Create New Template'}
+                {templateId ? t('coach:templateBuilder.editNew') : t('coach:templateBuilder.createNew')}
               </span>
             ),
             children: (
@@ -520,10 +536,10 @@ const WorkoutTemplateBuilder: React.FC = () => {
                   <div className="workout-template-builder__header">
                     <div>
                       <h1 className="workout-template-builder__title">
-                        {templateId ? 'Edit Workout Program Template' : 'Workout Program Template Builder'}
+                        {templateId ? t('coach:templateBuilder.titleEdit') : t('coach:templateBuilder.title')}
                       </h1>
                       <p className="workout-template-builder__subtitle">
-                        Drag-and-drop movements to curate personalized hypertrophic workout programs
+                        {t('coach:templateBuilder.subtitle')}
                       </p>
                     </div>
                     <Space>
@@ -534,7 +550,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
                           icon={<span className="material-symbols-outlined">person_add</span>}
                           className="workout-template-builder__action-btn"
                         >
-                          Assign to Athletes
+                          {t('coach:templateBuilder.assignToAthletes')}
                         </Button>
                       )}
                       <Button
@@ -544,7 +560,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
                         icon={<span className="material-symbols-outlined">save</span>}
                         className="workout-template-builder__action-btn workout-template-builder__action-btn--navy"
                       >
-                        Save Template
+                        {t('coach:templateBuilder.saveTemplate')}
                       </Button>
                     </Space>
                   </div>
@@ -553,18 +569,18 @@ const WorkoutTemplateBuilder: React.FC = () => {
                   <div className="workout-template-builder__meta-card">
                     <div className="workout-template-builder__meta-fields">
                       <div className="workout-template-builder__meta-field">
-                        <span className="workout-template-builder__meta-label">Template Name</span>
+                        <span className="workout-template-builder__meta-label">{t('coach:templateBuilder.templateName')}</span>
                         <Input
-                          placeholder="e.g. 6-Day PPL Phase 1 (Hypertrophy Focus)"
+                          placeholder={t('coach:templateBuilder.templateNamePlaceholder')}
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                         />
                       </div>
                       <div className="workout-template-builder__meta-field">
-                        <span className="workout-template-builder__meta-label">Description / Coach Notes</span>
+                        <span className="workout-template-builder__meta-label">{t('coach:templateBuilder.descLabel')}</span>
                         <Input.TextArea
                           rows={1}
-                          placeholder="Brief summary or details about progressive overload instructions..."
+                          placeholder={t('coach:templateBuilder.descPlaceholder')}
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
                           autoSize={{ minRows: 1, maxRows: 3 }}
@@ -580,13 +596,13 @@ const WorkoutTemplateBuilder: React.FC = () => {
                     <div className="workout-template-builder__sidebar">
                       <div className="workout-template-builder__sidebar-header">
                         <span className="material-symbols-outlined">fitness_center</span>
-                        <h3>Exercise Catalog</h3>
+                        <h3>{t('coach:templateBuilder.exerciseCatalog')}</h3>
                       </div>
                       
                       <div className="workout-template-builder__sidebar-search">
                         <Input
                           size="small"
-                          placeholder="Search exercises..."
+                          placeholder={t('coach:templateBuilder.searchExercises')}
                           value={exerciseSearch}
                           onChange={(e) => setExerciseSearch(e.target.value)}
                           allowClear
@@ -597,7 +613,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
                           onChange={(key) => setSelectedMuscle(key)}
                           items={EXERCISE_CATEGORIES.map((cat) => ({
                             key: cat.value,
-                            label: cat.label,
+                            label: getMuscleCategoryLabel(cat.value, t),
                           }))}
                           className="workout-template-builder__sidebar-tabs"
                         />
@@ -607,7 +623,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
                         {isExercisesLoading ? (
                           <div style={{ padding: 16 }}><Skeleton active /></div>
                         ) : exercisesData?.items.length === 0 ? (
-                          <div className="workout-template-builder__sidebar-empty">No matching exercises.</div>
+                          <div className="workout-template-builder__sidebar-empty">{t('coach:exerciseLibrary.empty')}</div>
                         ) : (
                           exercisesData?.items.map((ex) => (
                             <DraggableExercise
@@ -642,10 +658,10 @@ const WorkoutTemplateBuilder: React.FC = () => {
                         <div 
                           className="workout-template-builder__add-day-card"
                           onClick={handleAddDay}
-                          title="Add new workout day"
+                          title={t('coach:templateBuilder.addDay')}
                         >
                           <span className="material-symbols-outlined">add_circle</span>
-                          <span className="add-day-text">Add Day</span>
+                          <span className="add-day-text">{t('coach:templateBuilder.addDay')}</span>
                         </div>
                       </div>
                     </div>
@@ -661,20 +677,20 @@ const WorkoutTemplateBuilder: React.FC = () => {
 
       {/* Assign to Athletes Modal */}
       <Modal
-        title="Assign Workout Template"
+        title={t('coach:templateBuilder.assignTitle')}
         open={isAssignModalVisible}
         onCancel={() => {
           setIsAssignModalVisible(false);
           setAssigningTemplateId(null);
         }}
         onOk={handleAssign}
-        okText="Assign"
+        okText={t('coach:templateBuilder.assign')}
         okButtonProps={{ loading: assignTemplateMutation.isPending }}
         width={500}
       >
         <div className="assign-athletes-modal">
           <p className="assign-athletes-modal__hint">
-            Select one or more athletes to assign this workout routine. This deactivates their current routine.
+            {t('coach:templateBuilder.assignDesc')}
           </p>
           <div className="assign-athletes-modal__list-container">
             {rosterData && rosterData.items && rosterData.items.length > 0 ? (
@@ -692,7 +708,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
                         <div className="assign-athletes-modal__athlete-info">
                           <strong className="assign-athletes-modal__athlete-name">{item.athleteName}</strong>
                           <span className="assign-athletes-modal__athlete-program">
-                            Current Program: {item.activeProgramName || 'None'}
+                            {t('coach:templateBuilder.currentProgram', { program: item.activeProgramName || t('common:status.noneAssigned') })}
                           </span>
                         </div>
                       </Checkbox>
@@ -701,7 +717,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
                 />
               </Checkbox.Group>
             ) : (
-              <div className="assign-athletes-modal__empty">No active athletes on your roster.</div>
+              <div className="assign-athletes-modal__empty">{t('coach:templateBuilder.noAthletes')}</div>
             )}
           </div>
         </div>

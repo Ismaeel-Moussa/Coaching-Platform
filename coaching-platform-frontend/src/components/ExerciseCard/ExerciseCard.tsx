@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Tooltip, Popover } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useLogSet } from '../../hooks/useWorkout/useWorkout';
 import type { TemplateExerciseDto, SetLogDto, LogSetForm } from '../../types/Workout';
 import { ExerciseSection } from '../../types/Workout';
@@ -12,14 +13,23 @@ interface ExerciseCardProps {
   onVideoPlay: (videoId: string, exerciseName: string) => void;
 }
 
-const SECTION_LABELS: Record<ExerciseSection, { label: string; className: string }> = {
-  [ExerciseSection.WarmUp]: { label: 'Warm-Up', className: 'exercise-card__badge--warmup' },
-  [ExerciseSection.Main]: { label: 'Main', className: 'exercise-card__badge--main' },
-  [ExerciseSection.CoolDown]: { label: 'Cool-Down', className: 'exercise-card__badge--cooldown' },
+const SECTION_CLASSES: Record<ExerciseSection, string> = {
+  [ExerciseSection.WarmUp]: 'exercise-card__badge--warmup',
+  [ExerciseSection.Main]: 'exercise-card__badge--main',
+  [ExerciseSection.CoolDown]: 'exercise-card__badge--cooldown',
 };
 
 // Sections that don't use weight/reps — show a simple "Mark as Done" toggle
 const SIMPLE_SECTIONS: ExerciseSection[] = [ExerciseSection.WarmUp, ExerciseSection.CoolDown];
+
+const getSectionLabel = (sec: ExerciseSection, t: any) => {
+  switch (sec) {
+    case ExerciseSection.WarmUp: return t('athlete:workoutLogger.sections.warmup');
+    case ExerciseSection.Main: return t('athlete:workoutLogger.sections.main');
+    case ExerciseSection.CoolDown: return t('athlete:workoutLogger.sections.cooldown');
+    default: return String(sec);
+  }
+};
 
 const ExerciseCard: React.FC<ExerciseCardProps> = ({
   exercise,
@@ -27,6 +37,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   workoutLogId,
   onVideoPlay,
 }) => {
+  const { t } = useTranslation(['common', 'athlete']);
   const { mutate: logSet, isPending } = useLogSet();
 
   const [setInputs, setSetInputs] = useState<Array<{ weight: string; reps: string }>>(() =>
@@ -88,15 +99,13 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
     });
   };
 
-  const sectionMeta = SECTION_LABELS[exercise.section];
-
   return (
     <div className={`exercise-card ${allSetsLogged ? 'exercise-card--done' : ''}`}>
       {/* ── Header ── */}
       <div className="exercise-card__header">
         <div className="exercise-card__title-row">
-          <span className={`exercise-card__badge ${sectionMeta.className}`}>
-            {sectionMeta.label}
+          <span className={`exercise-card__badge ${SECTION_CLASSES[exercise.section]}`}>
+            {getSectionLabel(exercise.section, t)}
           </span>
           <h3 className="exercise-card__name">{exercise.exercise.name}</h3>
           {/* Done button inline for WarmUp/CoolDown */}
@@ -110,7 +119,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
               <span className="material-symbols-outlined">
                 {allSetsLogged ? 'check_circle' : 'radio_button_unchecked'}
               </span>
-              {allSetsLogged ? 'Done' : 'Mark as Done'}
+              {allSetsLogged ? t('common:status.done') : t('athlete:components.exerciseCard.markDone')}
             </button>
           )}
           {!isSimple && allSetsLogged && (
@@ -127,13 +136,13 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
           {exercise.restSeconds != null && (
             <span className="exercise-card__rest mono">
               <span className="material-symbols-outlined">timer</span>
-              {exercise.restSeconds}s rest
+              {t('athlete:components.exerciseCard.restTime', { seconds: exercise.restSeconds })}
             </span>
           )}
           {!isSimple && exercise.progressiveOverloadTargetKg != null && (
             <span className="exercise-card__overload mono">
               <span className="material-symbols-outlined">trending_up</span>
-              Target: {exercise.progressiveOverloadTargetKg}kg
+              {t('athlete:components.exerciseCard.targetWeight', { defaultValue: 'Target: {{weight}}kg', weight: exercise.progressiveOverloadTargetKg })}
             </span>
           )}
           {exercise.exercise.equipmentRequired &&
@@ -151,9 +160,9 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
         /* Main — full set logging table */
         <div className="exercise-card__sets">
           <div className="exercise-card__sets-header">
-            <span>Set</span>
-            <span>Weight (kg)</span>
-            <span>Reps</span>
+            <span>{t('athlete:components.exerciseCard.setHeader', { defaultValue: 'Set' })}</span>
+            <span>{t('athlete:components.exerciseCard.weightHeader', { defaultValue: 'Weight (kg)' })}</span>
+            <span>{t('athlete:components.exerciseCard.repsHeader', { defaultValue: 'Reps' })}</span>
             <span></span>
           </div>
 
@@ -198,7 +207,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
                     disabled={isPending || !setInputs[i]?.weight || !setInputs[i]?.reps}
                     id={`log-set-btn-exercise-${exercise.exercise.id}-set-${i + 1}`}
                   >
-                    Log
+                    {t('athlete:components.exerciseCard.logSet', { defaultValue: 'Log' })}
                   </button>
                 )}
               </div>
@@ -214,7 +223,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
             content={
               <p style={{ maxWidth: 280, fontSize: 13 }}>{exercise.exercise.instructions}</p>
             }
-            title="Instructions"
+            title={t('athlete:components.exerciseCard.notes', { defaultValue: 'Instructions' })}
             trigger="click"
           >
             <button
@@ -222,12 +231,12 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
               id={`instructions-btn-${exercise.exercise.id}`}
             >
               <span className="material-symbols-outlined">info</span>
-              Instructions
+              {t('athlete:components.exerciseCard.notes', { defaultValue: 'Instructions' })}
             </button>
           </Popover>
         )}
         {exercise.exercise.youTubeVideoId && (
-          <Tooltip title="Watch demo video">
+          <Tooltip title={t('athlete:components.exerciseCard.videoDemo', { defaultValue: 'Watch demo video' })}>
             <button
               className="exercise-card__action-btn exercise-card__action-btn--video"
               onClick={() =>
@@ -236,7 +245,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
               id={`video-btn-${exercise.exercise.id}`}
             >
               <span className="material-symbols-outlined">play_circle</span>
-              Demo Video
+              {t('athlete:components.exerciseCard.videoDemo', { defaultValue: 'Demo Video' })}
             </button>
           </Tooltip>
         )}

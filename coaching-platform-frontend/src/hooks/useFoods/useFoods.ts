@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
 import type { AxiosError } from 'axios';
+import i18n from '../../i18n/i18n';
 import {
   searchFoods,
   createFood,
@@ -29,13 +30,13 @@ export const useCreateFood = () => {
   return useMutation<FoodDto, AxiosError, CreateFoodForm>({
     mutationFn: createFood,
     onSuccess: (data) => {
-      antMessage.success(`Food "${data.name}" created successfully!`);
+      antMessage.success(i18n.t('common:alerts.foodCreated', { name: data.name }));
       queryClient.invalidateQueries({ queryKey: ['foods'] });
     },
     onError: (error) => {
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to create food.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
   });
@@ -46,13 +47,13 @@ export const useUpdateFood = () => {
   return useMutation<FoodDto, AxiosError, { id: number; form: CreateFoodForm }>({
     mutationFn: ({ id, form }) => updateFood(id, form),
     onSuccess: (data) => {
-      antMessage.success(`Food "${data.name}" updated successfully!`);
+      antMessage.success(i18n.t('common:alerts.foodUpdated', { name: data.name }));
       queryClient.invalidateQueries({ queryKey: ['foods'] });
     },
     onError: (error) => {
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to update food.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
   });
@@ -85,11 +86,11 @@ export const useDeleteFood = () => {
       });
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to delete food.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
     onSuccess: () => {
-      antMessage.success('Food deleted successfully!');
+      antMessage.success(i18n.t('common:alerts.foodDeleted'));
       queryClient.invalidateQueries({ queryKey: ['foods'] });
     },
   });
@@ -102,17 +103,17 @@ export const useBulkImportFoods = () => {
     onSuccess: (data) => {
       if (data.skippedCount > 0) {
         antMessage.warning(
-          `Import complete. Imported: ${data.insertedCount}, Skipped: ${data.skippedCount}. Check errors.`,
+          i18n.t('common:alerts.bulkImportPartial', { inserted: data.insertedCount, skipped: data.skippedCount }),
         );
       } else {
-        antMessage.success(`Successfully imported ${data.insertedCount} foods!`);
+        antMessage.success(i18n.t('common:alerts.bulkImportSuccess', { count: data.insertedCount }));
       }
       queryClient.invalidateQueries({ queryKey: ['foods'] });
     },
     onError: (error) => {
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to bulk import foods.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
   });

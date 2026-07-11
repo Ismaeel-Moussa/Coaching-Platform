@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Skeleton, Input, Button, Avatar, Card, Breadcrumb, Empty, Pagination, Modal, Tag, Progress, Divider } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
   ResponsiveContainer,
   LineChart,
@@ -21,10 +22,21 @@ import './ClientDetail.scss';
 
 const { TextArea } = Input;
 
+const getSubjectiveLabel = (label: string, t: any) => {
+  switch (label) {
+    case 'Sleep Quality': return t('athlete:checkIn.sleepLabel');
+    case 'Energy Level': return t('athlete:checkIn.energyLabel');
+    case 'Gut Health': return t('athlete:checkIn.gutLabel');
+    case 'Training Stress': return t('athlete:checkIn.stressLabel');
+    default: return label;
+  }
+};
+
 const CheckInCard: React.FC<{ checkIn: any; onPhotoClick: (url: string) => void }> = React.memo(({
   checkIn,
   onPhotoClick,
 }) => {
+  const { t, i18n } = useTranslation(['common', 'athlete', 'coach']);
   const [notes, setNotes] = useState<string>(checkIn.coachNotes || '');
   const addCoachNotesMutation = useAddCoachNotes(checkIn.id);
 
@@ -43,40 +55,40 @@ const CheckInCard: React.FC<{ checkIn: any; onPhotoClick: (url: string) => void 
     <div className="checkin-card-item">
       <div className="checkin-card-item__header">
         <div className="checkin-card-item__week-title">
-          Week of {formatDateDisplay(checkIn.weekOf)}
+          {t('coach:clientDetail.weekOf', { date: formatDateDisplay(checkIn.weekOf) })}
         </div>
         <div className="checkin-card-item__submit-time mono">
-          Submitted: {new Date(checkIn.submittedAt).toLocaleString()}
+          {t('coach:clientDetail.submittedAt', { date: new Date(checkIn.submittedAt).toLocaleString(i18n.language) })}
         </div>
       </div>
 
       <div className="checkin-card-item__body">
-        {/* Biometrics */}
+        {/* Measurements */}
         <div className="checkin-card-item__section">
-          <h4 className="checkin-card-item__section-title">Measurements</h4>
+          <h4 className="checkin-card-item__section-title">{t('coach:clientDetail.measurements')}</h4>
           <div className="checkin-card-item__biometrics-grid mono">
             <div className="checkin-card-item__metric">
-              <span className="label">Weight</span>
-              <span className="value">{checkIn.weightKg} kg</span>
+              <span className="label">{t('common:labels.weight')}</span>
+              <span className="value">{checkIn.weightKg} {t('common:units.kg')}</span>
             </div>
             <div className="checkin-card-item__metric">
-              <span className="label">Waist</span>
-              <span className="value">{checkIn.waistCm ? `${checkIn.waistCm} cm` : 'N/A'}</span>
+              <span className="label">{t('common:labels.waist')}</span>
+              <span className="value">{checkIn.waistCm ? `${checkIn.waistCm} ${t('common:units.cm')}` : '—'}</span>
             </div>
             <div className="checkin-card-item__metric">
-              <span className="label">Chest</span>
-              <span className="value">{checkIn.chestCm ? `${checkIn.chestCm} cm` : 'N/A'}</span>
+              <span className="label">{t('common:labels.chest')}</span>
+              <span className="value">{checkIn.chestCm ? `${checkIn.chestCm} ${t('common:units.cm')}` : '—'}</span>
             </div>
             <div className="checkin-card-item__metric">
-              <span className="label">Thigh</span>
-              <span className="value">{checkIn.thighCm ? `${checkIn.thighCm} cm` : 'N/A'}</span>
+              <span className="label">{t('common:labels.thigh')}</span>
+              <span className="value">{checkIn.thighCm ? `${checkIn.thighCm} ${t('common:units.cm')}` : '—'}</span>
             </div>
           </div>
         </div>
 
         {/* Well-being sliders */}
         <div className="checkin-card-item__section">
-          <h4 className="checkin-card-item__section-title">Subjective Well-being</h4>
+          <h4 className="checkin-card-item__section-title">{t('coach:clientDetail.subjective')}</h4>
           <div className="checkin-card-item__subjective-list">
             {[
               { label: 'Sleep Quality', val: checkIn.sleepQuality },
@@ -85,7 +97,7 @@ const CheckInCard: React.FC<{ checkIn: any; onPhotoClick: (url: string) => void 
               { label: 'Training Stress', val: checkIn.trainingStress },
             ].map((marker) => (
               <div className="checkin-card-item__subjective-row" key={marker.label}>
-                <span className="label">{marker.label}</span>
+                <span className="label">{getSubjectiveLabel(marker.label, t)}</span>
                 <div className="progress-container">
                   <Progress
                     percent={marker.val * 10}
@@ -101,7 +113,7 @@ const CheckInCard: React.FC<{ checkIn: any; onPhotoClick: (url: string) => void 
 
         {/* Photos */}
         <div className="checkin-card-item__section checkin-card-item__section--photos">
-          <h4 className="checkin-card-item__section-title">Progress Photos</h4>
+          <h4 className="checkin-card-item__section-title">{t('coach:clientDetail.photos')}</h4>
           <div className="checkin-card-item__photos-row">
             {checkIn.photos && checkIn.photos.length > 0 ? (
               checkIn.photos.map((photo: any) => (
@@ -117,7 +129,7 @@ const CheckInCard: React.FC<{ checkIn: any; onPhotoClick: (url: string) => void 
             ) : (
               <div className="checkin-card-item__no-photos">
                 <span className="material-symbols-outlined">hide_image</span>
-                <span>No photos</span>
+                <span>{t('coach:clientDetail.noPhotos')}</span>
               </div>
             )}
           </div>
@@ -128,20 +140,20 @@ const CheckInCard: React.FC<{ checkIn: any; onPhotoClick: (url: string) => void 
 
       {/* Coach Notes */}
       <div className="checkin-card-item__feedback-section">
-        <h4 className="checkin-card-item__section-title">Check-In Review & Adjustment Notes</h4>
+        <h4 className="checkin-card-item__section-title">{t('coach:clientDetail.reviewTitle')}</h4>
         <div className="checkin-card-item__notes-form">
           <TextArea
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Provide feedback, nutrition tweaks, or program adjustments for this check-in..."
+            placeholder={t('coach:clientDetail.reviewPlaceholder')}
             maxLength={2000}
             disabled={addCoachNotesMutation.isPending}
           />
           <div className="checkin-card-item__notes-actions">
             {checkIn.coachReviewedAt && (
               <span className="reviewed-at-text mono">
-                Reviewed: {new Date(checkIn.coachReviewedAt).toLocaleDateString()}
+                {t('coach:clientDetail.reviewedAt', { date: new Date(checkIn.coachReviewedAt).toLocaleDateString(i18n.language) })}
               </span>
             )}
             <Button
@@ -152,7 +164,7 @@ const CheckInCard: React.FC<{ checkIn: any; onPhotoClick: (url: string) => void 
               disabled={notes.trim() === (checkIn.coachNotes || '').trim() || !notes.trim()}
               className="save-checkin-notes-btn"
             >
-              Save Review
+              {t('coach:clientDetail.saveReview')}
             </Button>
           </div>
         </div>
@@ -162,6 +174,7 @@ const CheckInCard: React.FC<{ checkIn: any; onPhotoClick: (url: string) => void 
 });
 
 const ClientDetail: React.FC = () => {
+  const { t, i18n } = useTranslation(['common', 'athlete', 'coach']);
   const { athleteId } = useParams<{ athleteId: string }>();
   const navigate = useNavigate();
   const id = athleteId ? parseInt(athleteId, 10) : 0;
@@ -226,10 +239,10 @@ const ClientDetail: React.FC = () => {
     return (
       <div className="client-detail client-detail--error">
         <span className="material-symbols-outlined">error_outline</span>
-        <h2>Client Profile Not Found</h2>
-        <p>Could not load profile or you are unauthorized to view this client.</p>
+        <h2>{t('coach:clientDetail.errorTitle')}</h2>
+        <p>{t('coach:clientDetail.errorDesc')}</p>
         <Button type="primary" onClick={() => navigate('/coach/roster')}>
-          Back to Roster
+          {t('coach:clientDetail.backRoster')}
         </Button>
       </div>
     );
@@ -241,8 +254,8 @@ const ClientDetail: React.FC = () => {
       <div className="client-detail__breadcrumbs">
         <Breadcrumb
           items={[
-            { title: <a onClick={() => navigate('/coach/roster')}>Client Roster</a> },
-            { title: isLoading ? 'Loading...' : profile?.fullName },
+            { title: <a onClick={() => navigate('/coach/roster')}>{t('coach:roster.title')}</a> },
+            { title: isLoading ? t('common:status.loading') : profile?.fullName },
           ]}
         />
       </div>
@@ -269,15 +282,15 @@ const ClientDetail: React.FC = () => {
                 <div className="client-detail__badges">
                   <span className="client-detail__badge-item">
                     <span className="material-symbols-outlined">track_changes</span>
-                    Goal: {profile.targetGoal}
+                    {t('coach:clientDetail.goal', { goal: profile.targetGoal })}
                   </span>
                   <span className="client-detail__badge-item">
                     <span className="material-symbols-outlined">scale</span>
-                    Weight: {profile.weightKg} kg
+                    {t('coach:clientDetail.weight', { weight: profile.weightKg })}
                   </span>
                   <span className="client-detail__badge-item">
                     <span className="material-symbols-outlined">height</span>
-                    Height: {profile.heightCm} cm
+                    {t('coach:clientDetail.height', { height: profile.heightCm })}
                   </span>
                 </div>
               </div>
@@ -289,7 +302,7 @@ const ClientDetail: React.FC = () => {
                 <span className="client-detail__streak-icon">🔥</span>
                 <div>
                   <span className="client-detail__streak-value mono">{profile.currentStreak}</span>
-                  <span className="client-detail__streak-label">Current Streak</span>
+                  <span className="client-detail__streak-label">{t('coach:clientDetail.currentStreak')}</span>
                 </div>
               </div>
               <div className="client-detail__streak-divider" />
@@ -297,7 +310,7 @@ const ClientDetail: React.FC = () => {
                 <span className="client-detail__streak-icon">🏆</span>
                 <div>
                   <span className="client-detail__streak-value mono">{profile.longestStreak}</span>
-                  <span className="client-detail__streak-label">Longest Streak</span>
+                  <span className="client-detail__streak-label">{t('coach:clientDetail.longestStreak')}</span>
                 </div>
               </div>
             </div>
@@ -313,49 +326,49 @@ const ClientDetail: React.FC = () => {
               <div className="client-detail__card">
                 <div className="client-detail__card-header">
                   <span className="material-symbols-outlined text-gold">adjust</span>
-                  <h3>Assigned Daily Targets</h3>
+                  <h3>{t('coach:clientDetail.assignedTargets')}</h3>
                 </div>
                 {profile.currentTargets ? (
                   <div className="client-detail__targets-grid">
                     <div className="client-detail__target-item">
-                      <span className="client-detail__target-label">Calories</span>
+                      <span className="client-detail__target-label">{t('common:labels.calories')}</span>
                       <span className="client-detail__target-val mono">
-                        {Math.round(profile.currentTargets.targetCalories)} <span className="unit">kcal</span>
+                        {Math.round(profile.currentTargets.targetCalories)} <span className="unit">{t('common:units.kcal')}</span>
                       </span>
                     </div>
                     <div className="client-detail__target-item">
-                      <span className="client-detail__target-label">Protein</span>
+                      <span className="client-detail__target-label">{t('common:labels.protein')}</span>
                       <span className="client-detail__target-val mono">
-                        {Math.round(profile.currentTargets.targetProtein)} <span className="unit">g</span>
+                        {Math.round(profile.currentTargets.targetProtein)} <span className="unit">{t('common:units.grams')}</span>
                       </span>
                     </div>
                     <div className="client-detail__target-item">
-                      <span className="client-detail__target-label">Carbohydrates</span>
+                      <span className="client-detail__target-label">{t('common:labels.carbs')}</span>
                       <span className="client-detail__target-val mono">
-                        {Math.round(profile.currentTargets.targetCarbs)} <span className="unit">g</span>
+                        {Math.round(profile.currentTargets.targetCarbs)} <span className="unit">{t('common:units.grams')}</span>
                       </span>
                     </div>
                     <div className="client-detail__target-item">
-                      <span className="client-detail__target-label">Fat</span>
+                      <span className="client-detail__target-label">{t('common:labels.fat')}</span>
                       <span className="client-detail__target-val mono">
-                        {Math.round(profile.currentTargets.targetFat)} <span className="unit">g</span>
+                        {Math.round(profile.currentTargets.targetFat)} <span className="unit">{t('common:units.grams')}</span>
                       </span>
                     </div>
                     <div className="client-detail__target-item">
-                      <span className="client-detail__target-label">Water Intake</span>
+                      <span className="client-detail__target-label">{t('athlete:dashboard.targets.hydration')}</span>
                       <span className="client-detail__target-val mono">
-                        {profile.currentTargets.waterLitersTarget} <span className="unit">L</span>
+                        {profile.currentTargets.waterLitersTarget} <span className="unit">{t('common:units.liters')}</span>
                       </span>
                     </div>
                     <div className="client-detail__target-item">
-                      <span className="client-detail__target-label">Daily Steps</span>
+                      <span className="client-detail__target-label">{t('athlete:dashboard.targets.steps')}</span>
                       <span className="client-detail__target-val mono">
-                        {profile.currentTargets.stepsTarget.toLocaleString()} <span className="unit">steps</span>
+                        {profile.currentTargets.stepsTarget.toLocaleString()} <span className="unit">{t('common:units.steps')}</span>
                       </span>
                     </div>
                   </div>
                 ) : (
-                  <Empty description="No targets configured yet." style={{ padding: '20px 0' }} />
+                  <Empty description={t('coach:clientDetail.noTargets')} style={{ padding: '20px 0' }} />
                 )}
               </div>
 
@@ -363,7 +376,7 @@ const ClientDetail: React.FC = () => {
               <div className="client-detail__card">
                 <div className="client-detail__card-header">
                   <span className="material-symbols-outlined text-gold">show_chart</span>
-                  <h3>Weight Progress Chart</h3>
+                  <h3>{t('coach:clientDetail.weightChart')}</h3>
                 </div>
                 <div className="client-detail__chart-container">
                   {profile.weightHistory && profile.weightHistory.length > 0 ? (
@@ -382,12 +395,12 @@ const ClientDetail: React.FC = () => {
                         <YAxis
                           stroke="var(--color-text-secondary)"
                           style={{ fontFamily: 'var(--font-data)', fontSize: 11 }}
-                          unit=" kg"
+                          unit={` ${t('common:units.kg')}`}
                           domain={['auto', 'auto']}
                         />
                         <Tooltip
-                          labelFormatter={(label) => `Week: ${formatDateDisplay(label)}`}
-                          formatter={(value) => [`${value} kg`, 'Weight']}
+                          labelFormatter={(label) => `${t('coach:clientDetail.weekOf', { date: formatDateDisplay(label) })}`}
+                          formatter={(value) => [`${value} ${t('common:units.kg')}`, t('common:labels.weight')]}
                           contentStyle={{
                             backgroundColor: 'var(--color-white)',
                             borderRadius: 'var(--radius-card)',
@@ -408,7 +421,7 @@ const ClientDetail: React.FC = () => {
                       </LineChart>
                     </ResponsiveContainer>
                   ) : (
-                    <Empty description="No weight measurements logged yet." style={{ padding: '40px 0' }} />
+                    <Empty description={t('coach:clientDetail.noWeightData')} style={{ padding: '40px 0' }} />
                   )}
                 </div>
               </div>
@@ -419,13 +432,13 @@ const ClientDetail: React.FC = () => {
               <div className="client-detail__card client-detail__card--notes">
                 <div className="client-detail__card-header">
                   <span className="material-symbols-outlined text-gold">feedback</span>
-                  <h3>Coach Feedback & Notes</h3>
+                  <h3>{t('coach:clientDetail.feedbackTitle')}</h3>
                 </div>
 
                 {/* Add Note Input */}
                 <div className="client-detail__add-note">
                   <TextArea
-                    placeholder="Provide weekly feedback, target updates, or workout recommendations..."
+                    placeholder={t('coach:clientDetail.notePlaceholder')}
                     rows={4}
                     value={noteText}
                     onChange={(e) => setNoteText(e.target.value)}
@@ -434,7 +447,7 @@ const ClientDetail: React.FC = () => {
                   />
                   <div className="client-detail__note-actions">
                     <span className="client-detail__note-count">
-                      {noteText.length}/2000 characters
+                      {t('coach:clientDetail.charCount', { count: noteText.length })}
                     </span>
                     <Button
                       type="primary"
@@ -443,7 +456,7 @@ const ClientDetail: React.FC = () => {
                       disabled={!noteText.trim()}
                       className="client-detail__submit-note-btn"
                     >
-                      Save Note
+                      {t('coach:clientDetail.saveNote')}
                     </Button>
                   </div>
                 </div>
@@ -454,7 +467,7 @@ const ClientDetail: React.FC = () => {
                     notesList.map((note) => (
                       <div className="client-detail__note-item" key={note.id}>
                         <div className="client-detail__note-header">
-                          <span className="client-detail__note-author">Coach {note.coachName}</span>
+                          <span className="client-detail__note-author">{t('coach:templateBuilder.byCoach', { name: note.coachName })}</span>
                           <span className="client-detail__note-date mono">
                             {formatDateDisplay(note.createdAt.substring(0, 10))}
                           </span>
@@ -465,7 +478,7 @@ const ClientDetail: React.FC = () => {
                   ) : (
                     <div className="client-detail__no-notes">
                       <span className="material-symbols-outlined">forum</span>
-                      <p>No feedback notes logged yet. Be the first to leave a comment!</p>
+                      <p>{t('coach:clientDetail.noNotes')}</p>
                     </div>
                   )}
                 </div>
@@ -479,7 +492,7 @@ const ClientDetail: React.FC = () => {
             <div className="client-detail__card">
               <div className="client-detail__card-header">
                 <span className="material-symbols-outlined text-gold">assignment_turned_in</span>
-                <h3>Weekly Check-In History</h3>
+                <h3>{t('coach:clientDetail.checkinHistory')}</h3>
               </div>
               {isHistoryLoading ? (
                 <div style={{ padding: '20px' }}>
@@ -505,7 +518,7 @@ const ClientDetail: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <Empty description="No weekly check-ins submitted yet." style={{ padding: '40px 0' }} />
+                <Empty description={t('coach:clientDetail.noCheckins')} style={{ padding: '40px 0' }} />
               )}
             </div>
           </div>

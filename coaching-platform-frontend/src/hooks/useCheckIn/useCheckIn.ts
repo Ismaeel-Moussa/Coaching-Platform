@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
+import i18n from '../../i18n/i18n';
 import {
   submitCheckIn,
   uploadPhotos,
@@ -16,13 +17,13 @@ export const useSubmitCheckIn = () => {
   return useMutation({
     mutationFn: (form: SubmitCheckInForm) => submitCheckIn(form),
     onSuccess: () => {
-      antMessage.success('Check-in submitted successfully!');
+      antMessage.success(i18n.t('common:alerts.checkInSubmitted'));
       queryClient.invalidateQueries({ queryKey: ['checkin-history'] });
       queryClient.invalidateQueries({ queryKey: ['coach-dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['coach-pending-checkins'] });
     },
     onError: (err: any) => {
-      antMessage.error(err.response?.data?.message || 'Failed to submit check-in.');
+      antMessage.error(err.response?.data?.message || i18n.t('common:alerts.checkInFailed'));
     },
   });
 };
@@ -36,13 +37,13 @@ export const useUploadPhotos = () => {
       onProgress?: (progress: number) => void;
     }) => uploadPhotos(variables.checkInId, variables.files, variables.onProgress),
     onSuccess: (data, variables) => {
-      antMessage.success('Progress photos uploaded successfully!');
+      antMessage.success(i18n.t('common:alerts.photosUploaded'));
       queryClient.invalidateQueries({ queryKey: ['checkin-history'] });
       queryClient.invalidateQueries({ queryKey: ['checkin-photos', variables.checkInId] });
       queryClient.invalidateQueries({ queryKey: ['coach-athlete-profile'] });
     },
     onError: (err: any) => {
-      antMessage.error(err.response?.data?.message || 'Failed to upload photos.');
+      antMessage.error(err.response?.data?.message || i18n.t('common:alerts.photosUploadFailed'));
     },
   });
 };
@@ -53,13 +54,13 @@ export const useDeletePhoto = () => {
     mutationFn: (variables: { id: number; angle: PhotoAngle }) =>
       deletePhoto(variables.id, variables.angle),
     onSuccess: (_, variables) => {
-      antMessage.success('Photo deleted.');
+      antMessage.success(i18n.t('common:alerts.photoDeleted'));
       queryClient.invalidateQueries({ queryKey: ['checkin-history'] });
       queryClient.invalidateQueries({ queryKey: ['checkin-photos', variables.id] });
       queryClient.invalidateQueries({ queryKey: ['coach-athlete-profile'] });
     },
     onError: (err: any) => {
-      antMessage.error(err.response?.data?.message || 'Failed to delete photo.');
+      antMessage.error(err.response?.data?.message || i18n.t('common:alerts.photoDeleteFailed'));
     },
   });
 };
@@ -81,12 +82,12 @@ export const useAddCoachNotes = (checkInId: number) => {
   return useMutation({
     mutationFn: (form: AddCoachNotesForm) => addCoachNotes(checkInId, form),
     onSuccess: () => {
-      antMessage.success('Feedback note saved successfully!');
+      antMessage.success(i18n.t('common:alerts.feedbackSaved'));
       queryClient.invalidateQueries({ queryKey: ['checkin-history'] });
       queryClient.invalidateQueries({ queryKey: ['coach-athlete-profile'] });
     },
     onError: (err: any) => {
-      antMessage.error(err.response?.data?.message || 'Failed to save coach notes.');
+      antMessage.error(err.response?.data?.message || i18n.t('common:alerts.feedbackSaveFailed'));
     },
   });
 };

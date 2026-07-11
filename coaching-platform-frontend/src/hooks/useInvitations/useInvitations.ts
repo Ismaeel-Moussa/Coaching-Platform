@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
 import type { AxiosError } from 'axios';
+import i18n from '../../i18n/i18n';
 import {
   getInvitations,
   createInvitation,
@@ -23,13 +24,13 @@ export const useCreateInvitation = () => {
   return useMutation<InvitationDto, AxiosError, CreateInvitationForm>({
     mutationFn: createInvitation,
     onSuccess: (data) => {
-      antMessage.success(`Invitation sent to ${data.email}`);
+      antMessage.success(i18n.t('common:alerts.invitationSent', { email: data.email }));
       queryClient.invalidateQueries({ queryKey: ['invitations'] });
     },
     onError: (error) => {
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to send invitation.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
   });
@@ -42,13 +43,13 @@ export const useResendInvitation = () => {
   return useMutation<InvitationDto, AxiosError, number>({
     mutationFn: resendInvitation,
     onSuccess: (data) => {
-      antMessage.success(`Invitation resent to ${data.email}`);
+      antMessage.success(i18n.t('common:alerts.invitationResent', { email: data.email }));
       queryClient.invalidateQueries({ queryKey: ['invitations'] });
     },
     onError: (error) => {
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to resend invitation.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
   });
@@ -83,11 +84,11 @@ export const useRevokeInvitation = () => {
       });
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to revoke invitation.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
     onSuccess: () => {
-      antMessage.success('Invitation revoked.');
+      antMessage.success(i18n.t('common:alerts.invitationRevoked'));
       queryClient.invalidateQueries({ queryKey: ['invitations'] });
     },
   });

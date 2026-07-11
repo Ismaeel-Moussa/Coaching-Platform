@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Spin, Alert } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import { useGetProfile, useUpdateProfile, useChangePassword, useUploadAvatar } from '../../../hooks/useProfile/useProfile';
 import './Profile.scss';
 
 const Profile: React.FC = () => {
+  const { t } = useTranslation();
+  const { language, setLanguage } = useLanguage();
   const { data: profile, isLoading, error } = useGetProfile();
   const updateProfileMutation = useUpdateProfile();
   const changePasswordMutation = useChangePassword();
@@ -70,17 +74,17 @@ const Profile: React.FC = () => {
     setPasswordError('');
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      setPasswordError('All password fields are required.');
+      setPasswordError(t('profile:password.errorFields'));
       return;
     }
 
     if (newPassword.length < 8) {
-      setPasswordError('New password must be at least 8 characters long.');
+      setPasswordError(t('profile:password.errorLength'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setPasswordError('New password and confirmation do not match.');
+      setPasswordError(t('profile:password.errorMismatch'));
       return;
     }
 
@@ -104,7 +108,7 @@ const Profile: React.FC = () => {
     return (
       <div className="profile-page-loader">
         <Spin size="large" />
-        <div className="profile-page-loader__text">Loading Profile Details...</div>
+        <div className="profile-page-loader__text">{t('profile:avatar.loading')}</div>
       </div>
     );
   }
@@ -113,8 +117,8 @@ const Profile: React.FC = () => {
     return (
       <div className="profile-page-error">
         <Alert
-          message="Error loading profile"
-          description="Could not load your profile details. Please try reloading the page."
+          message={t('profile:avatar.errorTitle')}
+          description={t('profile:avatar.errorDesc')}
           type="error"
           showIcon
         />
@@ -145,7 +149,7 @@ const Profile: React.FC = () => {
           </div>
           
           {/* File input overlay trigger */}
-          <label htmlFor="avatar-file-input" className="profile-page__avatar-trigger" title="Upload Photo">
+          <label htmlFor="avatar-file-input" className="profile-page__avatar-trigger" title={t('profile:avatar.upload')}>
             <span className="material-symbols-outlined">photo_camera</span>
             <input
               id="avatar-file-input"
@@ -174,21 +178,21 @@ const Profile: React.FC = () => {
           onClick={() => setActiveTab('info')}
         >
           <span className="material-symbols-outlined">manage_accounts</span>
-          Edit Info
+          {t('profile:tabs.info')}
         </button>
         <button
           className={`profile-page__tab-btn ${activeTab === 'stats' ? 'profile-page__tab-btn--active' : ''}`}
           onClick={() => setActiveTab('stats')}
         >
           <span className="material-symbols-outlined">query_stats</span>
-          Insights
+          {t('profile:tabs.insights')}
         </button>
         <button
           className={`profile-page__tab-btn ${activeTab === 'password' ? 'profile-page__tab-btn--active' : ''}`}
           onClick={() => setActiveTab('password')}
         >
           <span className="material-symbols-outlined">lock_reset</span>
-          Change Password
+          {t('profile:tabs.password')}
         </button>
       </nav>
 
@@ -196,99 +200,127 @@ const Profile: React.FC = () => {
       <div className="profile-page__content">
         {/* Tab 1: Edit Profile */}
         {activeTab === 'info' && (
-          <form className="profile-page__form fade-in" onSubmit={handleUpdateProfile}>
-            <h2 className="profile-page__section-title">Personal Details</h2>
-            
-            <div className="profile-page__form-row">
-              <div className="profile-page__form-group">
-                <label htmlFor="firstName">First Name</label>
-                <input
-                  id="firstName"
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="profile-page__form-group">
-                <label htmlFor="lastName">Last Name</label>
-                <input
-                  id="lastName"
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            {profile.role !== 'Athlete' ? (
-              <div className="profile-page__form-group">
-                <label htmlFor="bio">Coach Bio</label>
-                <textarea
-                  id="bio"
-                  rows={4}
-                  placeholder="Share a short bio with your clients..."
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                />
-              </div>
-            ) : (
-              <>
-                <h2 className="profile-page__section-title profile-page__section-title--spacing">
-                  Fitness & Body Metrics
-                </h2>
-                <div className="profile-page__form-row">
-                  <div className="profile-page__form-group">
-                    <label htmlFor="weightKg">Weight (kg)</label>
-                    <input
-                      id="weightKg"
-                      type="number"
-                      step="0.1"
-                      placeholder="e.g. 75.5"
-                      value={weightKg}
-                      onChange={(e) => setWeightKg(e.target.value === '' ? '' : Number(e.target.value))}
-                    />
-                  </div>
-                  <div className="profile-page__form-group">
-                    <label htmlFor="heightCm">Height (cm)</label>
-                    <input
-                      id="heightCm"
-                      type="number"
-                      step="0.1"
-                      placeholder="e.g. 180"
-                      value={heightCm}
-                      onChange={(e) => setHeightCm(e.target.value === '' ? '' : Number(e.target.value))}
-                    />
-                  </div>
-                </div>
+          <div className="profile-page__info-tab-wrapper">
+            <form className="profile-page__form fade-in" onSubmit={handleUpdateProfile}>
+              <h2 className="profile-page__section-title">{t('profile:personal.title')}</h2>
+              
+              <div className="profile-page__form-row">
                 <div className="profile-page__form-group">
-                  <label htmlFor="targetGoal">Fitness Target / Goal</label>
+                  <label htmlFor="firstName">{t('profile:personal.firstName')}</label>
                   <input
-                    id="targetGoal"
+                    id="firstName"
                     type="text"
-                    placeholder="e.g. Fat Loss / Muscle Gain / Marathon Prep"
-                    value={targetGoal}
-                    onChange={(e) => setTargetGoal(e.target.value)}
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
                   />
                 </div>
-              </>
-            )}
+                <div className="profile-page__form-group">
+                  <label htmlFor="lastName">{t('profile:personal.lastName')}</label>
+                  <input
+                    id="lastName"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
 
-            <button
-              type="submit"
-              className="profile-page__submit-btn"
-              disabled={updateProfileMutation.isPending}
-            >
-              {updateProfileMutation.isPending ? 'Saving Changes...' : 'Save Profile Details'}
-            </button>
-          </form>
+              {profile.role !== 'Athlete' ? (
+                <div className="profile-page__form-group">
+                  <label htmlFor="bio">{t('profile:personal.bio')}</label>
+                  <textarea
+                    id="bio"
+                    rows={4}
+                    placeholder={t('profile:personal.bioPlaceholder')}
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                  />
+                </div>
+              ) : (
+                <>
+                  <h2 className="profile-page__section-title profile-page__section-title--spacing">
+                    {t('profile:fitness.title')}
+                  </h2>
+                  <div className="profile-page__form-row">
+                    <div className="profile-page__form-group">
+                      <label htmlFor="weightKg">{t('profile:fitness.weight')}</label>
+                      <input
+                        id="weightKg"
+                        type="number"
+                        step="0.1"
+                        placeholder={t('profile:fitness.weightPlaceholder')}
+                        value={weightKg}
+                        onChange={(e) => setWeightKg(e.target.value === '' ? '' : Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="profile-page__form-group">
+                      <label htmlFor="heightCm">{t('profile:fitness.height')}</label>
+                      <input
+                        id="heightCm"
+                        type="number"
+                        step="0.1"
+                        placeholder={t('profile:fitness.heightPlaceholder')}
+                        value={heightCm}
+                        onChange={(e) => setHeightCm(e.target.value === '' ? '' : Number(e.target.value))}
+                      />
+                    </div>
+                  </div>
+                  <div className="profile-page__form-group">
+                    <label htmlFor="targetGoal">{t('profile:fitness.target')}</label>
+                    <input
+                      id="targetGoal"
+                      type="text"
+                      placeholder={t('profile:fitness.targetPlaceholder')}
+                      value={targetGoal}
+                      onChange={(e) => setTargetGoal(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
+
+              <button
+                type="submit"
+                className="profile-page__submit-btn"
+                disabled={updateProfileMutation.isPending}
+              >
+                {updateProfileMutation.isPending ? t('profile:personal.saveBtnPending') : t('profile:personal.saveBtn')}
+              </button>
+            </form>
+
+            {/* Dedicated Language preference Section */}
+            <div className="profile-page__language-section fade-in">
+              <h2 className="profile-page__section-title profile-page__section-title--spacing">
+                {t('profile:languageSettings.title')}
+              </h2>
+              <p className="profile-page__language-desc">
+                {t('profile:languageSettings.desc')}
+              </p>
+              <div className="profile-page__language-control">
+                <button
+                  type="button"
+                  className={`profile-page__lang-btn ${language === 'en' ? 'profile-page__lang-btn--active' : ''}`}
+                  onClick={() => setLanguage('en')}
+                >
+                  English
+                </button>
+                <button
+                  type="button"
+                  className={`profile-page__lang-btn ${language === 'ar' ? 'profile-page__lang-btn--active' : ''}`}
+                  onClick={() => setLanguage('ar')}
+                >
+                  العربية
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Tab 2: Change Password */}
         {activeTab === 'password' && (
           <form className="profile-page__form fade-in" onSubmit={handleChangePassword}>
-            <h2 className="profile-page__section-title">Change Password</h2>
+            <h2 className="profile-page__section-title">{t('profile:password.title')}</h2>
 
             {passwordError && (
               <div className="profile-page__alert profile-page__alert--error">
@@ -298,7 +330,7 @@ const Profile: React.FC = () => {
             )}
 
             <div className="profile-page__form-group">
-              <label htmlFor="currentPassword">Current Password</label>
+              <label htmlFor="currentPassword">{t('profile:password.current')}</label>
               <input
                 id="currentPassword"
                 type="password"
@@ -309,11 +341,11 @@ const Profile: React.FC = () => {
             </div>
 
             <div className="profile-page__form-group">
-              <label htmlFor="newPassword">New Password</label>
+              <label htmlFor="newPassword">{t('profile:password.new')}</label>
               <input
                 id="newPassword"
                 type="password"
-                placeholder="At least 8 characters"
+                placeholder={t('profile:password.newPlaceholder')}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
@@ -321,7 +353,7 @@ const Profile: React.FC = () => {
             </div>
 
             <div className="profile-page__form-group">
-              <label htmlFor="confirmPassword">Confirm New Password</label>
+              <label htmlFor="confirmPassword">{t('profile:password.confirm')}</label>
               <input
                 id="confirmPassword"
                 type="password"
@@ -336,7 +368,7 @@ const Profile: React.FC = () => {
               className="profile-page__submit-btn"
               disabled={changePasswordMutation.isPending}
             >
-              {changePasswordMutation.isPending ? 'Updating Password...' : 'Update Password'}
+              {changePasswordMutation.isPending ? t('profile:password.submitBtnPending') : t('profile:password.submitBtn')}
             </button>
           </form>
         )}
@@ -344,50 +376,50 @@ const Profile: React.FC = () => {
         {/* Tab 3: Insights & Statistics */}
         {activeTab === 'stats' && (
           <div className="profile-page__stats fade-in">
-            <h2 className="profile-page__section-title">Account Insights</h2>
+            <h2 className="profile-page__section-title">{t('profile:insights.title')}</h2>
             
             {profile.role === 'Athlete' ? (
               <div className="profile-page__stats-grid">
                 <div className="profile-page__stat-card">
                   <span className="material-symbols-outlined profile-page__stat-icon">local_fire_department</span>
-                  <div className="profile-page__stat-value">{profile.currentStreak ?? 0} days</div>
-                  <div className="profile-page__stat-label">Current Check-in Streak</div>
+                  <div className="profile-page__stat-value">{profile.currentStreak ?? 0} {t('athlete:dashboard.streakLabel')}</div>
+                  <div className="profile-page__stat-label">{t('profile:insights.currentStreak')}</div>
                 </div>
 
                 <div className="profile-page__stat-card">
                   <span className="material-symbols-outlined profile-page__stat-icon">emoji_events</span>
-                  <div className="profile-page__stat-value">{profile.longestStreak ?? 0} days</div>
-                  <div className="profile-page__stat-label">Longest All-Time Streak</div>
+                  <div className="profile-page__stat-value">{profile.longestStreak ?? 0} {t('athlete:dashboard.streakLabel')}</div>
+                  <div className="profile-page__stat-label">{t('profile:insights.longestStreak')}</div>
                 </div>
 
                 <div className="profile-page__stat-card">
                   <span className="material-symbols-outlined profile-page__stat-icon">sports</span>
                   <div className="profile-page__stat-value">
-                    {profile.assignedCoachName || 'No Coach Assigned'}
+                    {profile.assignedCoachName || t('profile:insights.noCoach')}
                   </div>
-                  <div className="profile-page__stat-label">Assigned Coach</div>
+                  <div className="profile-page__stat-label">{t('profile:insights.assignedCoach')}</div>
                 </div>
 
                 <div className="profile-page__stat-card">
                   <span className="material-symbols-outlined profile-page__stat-icon">monitoring</span>
                   <div className="profile-page__stat-value">
-                    {profile.weightKg ? `${profile.weightKg} kg` : 'Not Set'}
+                    {profile.weightKg ? `${profile.weightKg} kg` : t('profile:insights.notSet')}
                   </div>
-                  <div className="profile-page__stat-label">Current Weight</div>
+                  <div className="profile-page__stat-label">{t('profile:insights.currentWeight')}</div>
                 </div>
               </div>
             ) : (
               <div className="profile-page__stats-grid">
                 <div className="profile-page__stat-card">
                   <span className="material-symbols-outlined profile-page__stat-icon">verified_user</span>
-                  <div className="profile-page__stat-value">Active Portal</div>
-                  <div className="profile-page__stat-label">Role: {profile.role}</div>
+                  <div className="profile-page__stat-value">{t('profile:insights.activePortal')}</div>
+                  <div className="profile-page__stat-label">{t('profile:insights.roleTag', { role: profile.role })}</div>
                 </div>
 
                 <div className="profile-page__stat-card">
                   <span className="material-symbols-outlined profile-page__stat-icon">school</span>
-                  <div className="profile-page__stat-value">JN Staff</div>
-                  <div className="profile-page__stat-label">Coaching & Nutrition Hub</div>
+                  <div className="profile-page__stat-value">{t('profile:insights.jnStaff')}</div>
+                  <div className="profile-page__stat-label">{t('profile:insights.coachingHub')}</div>
                 </div>
               </div>
             )}

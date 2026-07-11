@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { message as antMessage } from 'antd';
 import type { AxiosError } from 'axios';
+import i18n from '../../i18n/i18n';
 import {
   loginUser,
   registerWithInvite,
@@ -45,14 +46,14 @@ export const useLogin = () => {
     mutationFn: loginUser,
     onSuccess: (data) => {
       persistAuth(data);
-      antMessage.success(`Welcome back, ${data.user.firstName}!`);
+      antMessage.success(i18n.t('common:alerts.welcomeBack', { name: data.user.firstName }));
       navigate(getRoleRoute(data.user.role), { replace: true });
     },
     onError: (error) => {
       if (error.response?.status === 429 || (error.response?.status && error.response.status >= 500)) return;
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Invalid email or password. Please try again.';
+        i18n.t('common:alerts.loginFailed');
       antMessage.error(msg);
     },
   });
@@ -66,14 +67,14 @@ export const useRegister = () => {
     mutationFn: registerWithInvite,
     onSuccess: (data) => {
       persistAuth(data);
-      antMessage.success(`Welcome to Joker Nutrition, ${data.user.firstName}!`);
+      antMessage.success(i18n.t('common:alerts.welcomeNew', { name: data.user.firstName }));
       navigate(getRoleRoute(data.user.role), { replace: true });
     },
     onError: (error) => {
       if (error.response?.status === 429 || (error.response?.status && error.response.status >= 500)) return;
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Registration failed. Please check your details and try again.';
+        i18n.t('common:alerts.registerFailed');
       antMessage.error(msg);
     },
   });
@@ -97,7 +98,7 @@ export const useForgotPassword = () => {
       if (error.response?.status === 429 || (error.response?.status && error.response.status >= 500)) return;
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Something went wrong. Please try again.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
   });
@@ -110,14 +111,14 @@ export const useResetPassword = () => {
   return useMutation<{ message: string }, AxiosError, ResetPasswordForm>({
     mutationFn: resetPassword,
     onSuccess: () => {
-      antMessage.success('Password reset successfully! Please sign in.');
+      antMessage.success(i18n.t('common:alerts.passwordResetSuccess'));
       navigate('/sign-in', { replace: true });
     },
     onError: (error) => {
       if (error.response?.status === 429 || (error.response?.status && error.response.status >= 500)) return;
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Reset failed. Your link may have expired.';
+        i18n.t('common:alerts.passwordResetFailed');
       antMessage.error(msg);
     },
   });

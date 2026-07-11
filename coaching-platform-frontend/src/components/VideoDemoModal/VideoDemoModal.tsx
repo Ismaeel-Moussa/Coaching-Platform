@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal } from 'antd';
+import { useTranslation } from 'react-i18next';
 import './VideoDemoModal.scss';
 
 interface VideoDemoModalProps {
@@ -15,6 +16,7 @@ const VideoDemoModal: React.FC<VideoDemoModalProps> = ({
   open,
   onClose,
 }) => {
+  const { t } = useTranslation(['common', 'athlete']);
   return (
     <Modal
       open={open}
@@ -43,7 +45,7 @@ const VideoDemoModal: React.FC<VideoDemoModalProps> = ({
       ) : (
         <div className="video-demo-modal__no-video">
           <span className="material-symbols-outlined">videocam_off</span>
-          <p>No demo video available for this exercise.</p>
+          <p>{t('athlete:components.exerciseCard.noVideo', { defaultValue: 'No demo video available for this exercise.' })}</p>
         </div>
       )}
     </Modal>

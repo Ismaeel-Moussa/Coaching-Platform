@@ -1,29 +1,20 @@
 import React, { useState } from 'react';
 import { Table, Button, Modal, Form, Input, Select, InputNumber, Space, Badge, Tooltip } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
   useGetInvitations,
   useCreateInvitation,
   useResendInvitation,
   useRevokeInvitation,
 } from '../../../hooks/useInvitations/useInvitations';
-import { InvitationStatus, InvitationStatusLabel } from '../../../types/Invitation';
+import { InvitationStatus } from '../../../types/Invitation';
 import type { InvitationDto, InvitationRole, InvitationStatusValue } from '../../../types/Invitation';
 import './InvitationManagement.scss';
 
 const ROLE_OPTIONS: InvitationRole[] = ['Athlete', 'Coach', 'Admin'];
 
-const STATUS_BADGES: Record<InvitationStatusValue, { status: 'default' | 'success' | 'processing' | 'error' | 'warning'; text: string }> = {
-  [InvitationStatus.Pending]: { status: 'warning', text: 'Pending' },
-  [InvitationStatus.Accepted]: { status: 'success', text: 'Accepted' },
-  [InvitationStatus.Expired]: { status: 'default', text: 'Expired' },
-  [InvitationStatus.Revoked]: { status: 'error', text: 'Revoked' },
-  0: { status: 'warning', text: 'Pending' },
-  1: { status: 'success', text: 'Accepted' },
-  2: { status: 'default', text: 'Expired' },
-  3: { status: 'error', text: 'Revoked' },
-};
-
 const InvitationManagement: React.FC = () => {
+  const { t, i18n } = useTranslation(['common', 'coach']);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [isInviteModalVisible, setIsInviteModalVisible] = useState<boolean>(false);
@@ -69,20 +60,39 @@ const InvitationManagement: React.FC = () => {
   const handleCopyLink = (url: string) => {
     navigator.clipboard.writeText(url);
     Modal.success({
-      title: 'Link Copied',
-      content: 'Invitation link has been copied to your clipboard.',
+      title: t('coach:invitations.linkCopied'),
+      content: t('coach:invitations.linkCopiedDesc'),
     });
+  };
+
+  const getStatusBadge = (status: InvitationStatusValue) => {
+    switch (status) {
+      case InvitationStatus.Pending:
+      case 0:
+        return <Badge status="warning" text={t('common:status.pending')} className="mono" />;
+      case InvitationStatus.Accepted:
+      case 1:
+        return <Badge status="success" text={t('common:status.accepted')} className="mono" />;
+      case InvitationStatus.Expired:
+      case 2:
+        return <Badge status="default" text={t('common:status.expired')} className="mono" />;
+      case InvitationStatus.Revoked:
+      case 3:
+        return <Badge status="error" text={t('common:status.revoked')} className="mono" />;
+      default:
+        return <Badge status="default" text={t('common:status.unknown')} className="mono" />;
+    }
   };
 
   const columns = [
     {
-      title: 'Invitee Email',
+      title: t('coach:invitations.inviteEmail'),
       dataIndex: 'email',
       key: 'email',
       render: (text: string) => <strong className="invite-table__email">{text}</strong>,
     },
     {
-      title: 'Assigned Role',
+      title: t('coach:invitations.assignedRole'),
       dataIndex: 'role',
       key: 'role',
       render: (role: string) => (
@@ -92,22 +102,19 @@ const InvitationManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Status',
+      title: t('coach:invitations.status'),
       dataIndex: 'status',
       key: 'status',
-      render: (status: InvitationStatusValue) => {
-        const badgeInfo = STATUS_BADGES[status] || { status: 'default', text: 'Unknown' };
-        return <Badge status={badgeInfo.status} text={badgeInfo.text} className="mono" />;
-      },
+      render: (status: InvitationStatusValue) => getStatusBadge(status),
     },
     {
-      title: 'Expires At',
+      title: t('coach:invitations.expiresAt'),
       dataIndex: 'expiresAt',
       key: 'expiresAt',
-      render: (dateStr: string) => <span className="mono">{new Date(dateStr).toLocaleString()}</span>,
+      render: (dateStr: string) => <span className="mono">{new Date(dateStr).toLocaleString(i18n.language)}</span>,
     },
     {
-      title: 'Actions',
+      title: t('coach:invitations.actions'),
       key: 'actions',
       render: (_: any, record: InvitationDto) => {
         const isPending = record.status === InvitationStatus.Pending || record.status === 0;
@@ -116,7 +123,7 @@ const InvitationManagement: React.FC = () => {
 
         return (
           <Space size="middle">
-            <Tooltip title="Copy Invite Link">
+            <Tooltip title={t('coach:invitations.copyLink')}>
               <Button
                 type="text"
                 disabled={!isPending}
@@ -125,7 +132,7 @@ const InvitationManagement: React.FC = () => {
               />
             </Tooltip>
 
-            <Tooltip title="Resend Email Invitation">
+            <Tooltip title={t('coach:invitations.resend')}>
               <Button
                 type="text"
                 disabled={record.status === InvitationStatus.Accepted || record.status === 1}
@@ -135,7 +142,7 @@ const InvitationManagement: React.FC = () => {
               />
             </Tooltip>
 
-            <Tooltip title="Revoke Invitation">
+            <Tooltip title={t('coach:invitations.revoke')}>
               <Button
                 type="text"
                 danger
@@ -155,8 +162,8 @@ const InvitationManagement: React.FC = () => {
     <div id="invitation-management-page" className="invitation-management animate-fade-in">
       <div className="invitation-management__header">
         <div>
-          <h1 className="invitation-management__title">Invitation Management</h1>
-          <p className="invitation-management__subtitle">Issue, resend, and revoke client/staff onboarding invitations</p>
+          <h1 className="invitation-management__title">{t('coach:invitations.title')}</h1>
+          <p className="invitation-management__subtitle">{t('coach:invitations.subtitle')}</p>
         </div>
         <Button
           type="primary"
@@ -164,7 +171,7 @@ const InvitationManagement: React.FC = () => {
           icon={<span className="material-symbols-outlined">person_add</span>}
           className="invitation-management__add-btn"
         >
-          Invite Member
+          {t('coach:invitations.inviteMember')}
         </Button>
       </div>
 
@@ -186,7 +193,6 @@ const InvitationManagement: React.FC = () => {
       />
       <div className="invitation-management__mobile-cards">
         {data?.items.map((record) => {
-          const badgeInfo = STATUS_BADGES[record.status] || { status: 'default', text: 'Unknown' };
           const isPending = record.status === InvitationStatus.Pending || record.status === 0;
           const isExpired = record.status === InvitationStatus.Expired || record.status === 2;
           const isRevoked = record.status === InvitationStatus.Revoked || record.status === 3;
@@ -201,14 +207,14 @@ const InvitationManagement: React.FC = () => {
               </div>
               <div className="invitation-management__card-body">
                 <div className="invitation-management__card-row">
-                  <span className="label">Status</span>
+                  <span className="label">{t('coach:invitations.status')}</span>
                   <span className="value">
-                    <Badge status={badgeInfo.status} text={badgeInfo.text} className="mono" />
+                    {getStatusBadge(record.status)}
                   </span>
                 </div>
                 <div className="invitation-management__card-row">
-                  <span className="label">Expires At</span>
-                  <span className="value mono">{new Date(record.expiresAt).toLocaleString()}</span>
+                  <span className="label">{t('coach:invitations.expiresAt')}</span>
+                  <span className="value mono">{new Date(record.expiresAt).toLocaleString(i18n.language)}</span>
                 </div>
               </div>
               <div className="invitation-management__card-footer">
@@ -219,7 +225,7 @@ const InvitationManagement: React.FC = () => {
                     onClick={() => handleCopyLink(record.inviteUrl)}
                     icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>content_copy</span>}
                   >
-                    Copy Link
+                    {t('coach:invitations.copyLink')}
                   </Button>
                   <Button
                     size="small"
@@ -228,7 +234,7 @@ const InvitationManagement: React.FC = () => {
                     loading={resendMutation.isPending && resendMutation.variables === record.id}
                     icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>send</span>}
                   >
-                    Resend
+                    {t('coach:invitations.resend')}
                   </Button>
                   <Button
                     danger
@@ -238,7 +244,7 @@ const InvitationManagement: React.FC = () => {
                     loading={revokeMutation.isPending && revokeMutation.variables === record.id}
                     icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>cancel</span>}
                   >
-                    Revoke
+                    {t('coach:invitations.revoke')}
                   </Button>
                 </Space>
               </div>
@@ -253,49 +259,49 @@ const InvitationManagement: React.FC = () => {
               onClick={() => setCurrentPage((p) => p - 1)}
               size="small"
             >
-              Prev
+              {t('common:pagination.prev')}
             </Button>
             <span className="pagination-text">
-              Page {currentPage} of {Math.ceil(data.totalCount / pageSize)}
+              {t('common:pagination.pageOf', { page: currentPage, total: Math.ceil(data.totalCount / pageSize) })}
             </span>
             <Button
               disabled={currentPage * pageSize >= data.totalCount}
               onClick={() => setCurrentPage((p) => p + 1)}
               size="small"
             >
-              Next
+              {t('common:pagination.next')}
             </Button>
           </div>
         )}
       </div>
 
       <Modal
-        title="Invite New Member"
+        title={t('coach:invitations.inviteTitle')}
         open={isInviteModalVisible}
         onCancel={() => setIsInviteModalVisible(false)}
         onOk={handleSendInvite}
-        okText="Send Invitation"
+        okText={t('coach:invitations.sendInvite')}
         okButtonProps={{ loading: createMutation.isPending }}
         width={450}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item
             name="email"
-            label="Email Address"
+            label={t('coach:invitations.emailLabel')}
             rules={[
-              { required: true, message: 'Please enter email address' },
-              { type: 'email', message: 'Please enter a valid email address' },
+              { required: true, message: t('coach:invitations.enterEmail', { defaultValue: 'Please enter email address' }) },
+              { type: 'email', message: t('coach:invitations.validEmail', { defaultValue: 'Please enter a valid email address' }) },
             ]}
           >
-            <Input placeholder="e.g. recruit@jokernutrition.com" />
+            <Input placeholder={t('coach:invitations.emailPlaceholder')} />
           </Form.Item>
 
           <Form.Item
             name="role"
-            label="Onboarding Role"
-            rules={[{ required: true, message: 'Please select role' }]}
+            label={t('coach:invitations.roleLabel')}
+            rules={[{ required: true, message: t('coach:invitations.selectRole', { defaultValue: 'Please select role' }) }]}
           >
-            <Select placeholder="Select role">
+            <Select placeholder={t('coach:invitations.roleSelect')}>
               {ROLE_OPTIONS.map((r) => (
                 <Select.Option key={r} value={r}>
                   {r}
@@ -306,8 +312,8 @@ const InvitationManagement: React.FC = () => {
 
           <Form.Item
             name="expiryHours"
-            label="Link Expiry (Hours)"
-            help="The link will automatically expire after this period."
+            label={t('coach:invitations.expiryLabel')}
+            help={t('coach:invitations.expiryHelp')}
           >
             <InputNumber min={1} max={720} style={{ width: '100%' }} />
           </Form.Item>

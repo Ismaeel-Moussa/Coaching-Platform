@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Table, Input, Tag, Avatar, Button, Pagination } from 'antd';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useGetRoster } from '../../../hooks/useCoachHub/useCoachHub';
 import { formatRelativeTime } from '../../../utils/date';
 import './ClientRoster.scss';
@@ -8,6 +9,7 @@ import './ClientRoster.scss';
 type ActiveTab = 'All' | 'ComplianceAlert' | 'NoRecentCheckIn';
 
 const ClientRoster: React.FC = () => {
+  const { t } = useTranslation(['common', 'coach']);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -44,13 +46,13 @@ const ClientRoster: React.FC = () => {
   const getStatusTag = (status: string) => {
     switch (status) {
       case 'Active':
-        return <Tag color="success" className="roster-tag">Active</Tag>;
+        return <Tag color="success" className="roster-tag">{t('common:status.active')}</Tag>;
       case 'ComplianceAlert':
-        return <Tag color="error" className="roster-tag">Compliance Alert</Tag>;
+        return <Tag color="error" className="roster-tag">{t('coach:roster.compliant')}</Tag>;
       case 'NoRecentCheckIn':
-        return <Tag color="warning" className="roster-tag">No Recent Check-In</Tag>;
+        return <Tag color="warning" className="roster-tag">{t('coach:roster.nonCompliant')}</Tag>;
       default:
-        return <Tag color="default" className="roster-tag">{status}</Tag>;
+        return <Tag color="default" className="roster-tag">{t(`common:status.${status.toLowerCase()}`, { defaultValue: status })}</Tag>;
     }
   };
 
@@ -62,7 +64,7 @@ const ClientRoster: React.FC = () => {
 
   const columns = [
     {
-      title: 'Athlete',
+      title: t('coach:roster.table.name'),
       dataIndex: 'athleteName',
       key: 'athleteName',
       render: (_text: string, record: any) => (
@@ -79,17 +81,17 @@ const ClientRoster: React.FC = () => {
       ),
     },
     {
-      title: 'Active Program',
+      title: t('coach:roster.table.status'),
       dataIndex: 'activeProgramName',
       key: 'activeProgramName',
       render: (programName: string | null) => (
         <span className="roster-table__program-text">
-          {programName || <span className="roster-table__program-text--none">None Assigned</span>}
+          {programName || <span className="roster-table__program-text--none">{t('common:status.noneAssigned')}</span>}
         </span>
       ),
     },
     {
-      title: 'Macro Compliance',
+      title: t('coach:roster.table.compliance'),
       dataIndex: 'macroCompliancePercent',
       key: 'macroCompliancePercent',
       render: (percent: number | null | undefined) => {
@@ -114,23 +116,23 @@ const ClientRoster: React.FC = () => {
       },
     },
     {
-      title: 'Last Check-In',
+      title: t('coach:roster.table.lastCheckin'),
       dataIndex: 'lastCheckInDate',
       key: 'lastCheckInDate',
       render: (dateStr: string | null) => (
         <span className="roster-table__date-text mono">
-          {dateStr ? formatRelativeTime(dateStr) : 'Never'}
+          {dateStr ? formatRelativeTime(dateStr) : t('common:status.never')}
         </span>
       ),
     },
     {
-      title: 'Status',
+      title: t('coach:invitations.status'),
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => getStatusTag(status),
     },
     {
-      title: 'Action',
+      title: t('coach:roster.table.actions'),
       key: 'action',
       render: (_: any, record: any) => (
         <Button 
@@ -141,7 +143,7 @@ const ClientRoster: React.FC = () => {
           }}
           className="roster-table__action-btn"
         >
-          View Profile
+          {t('coach:roster.viewProfile')}
         </Button>
       ),
     },
@@ -152,21 +154,21 @@ const ClientRoster: React.FC = () => {
       {/* Page Header */}
       <div className="client-roster__header">
         <div>
-          <h1 className="client-roster__title">Client Roster</h1>
-          <p className="client-roster__subtitle">Manage and track your assigned athletes</p>
+          <h1 className="client-roster__title">{t('coach:roster.title')}</h1>
+          <p className="client-roster__subtitle">{t('coach:roster.subtitle')}</p>
         </div>
       </div>
 
       {/* Roster Controls: Search & Tabs */}
       <div className="client-roster__controls">
         <div className="client-roster__search-wrapper">
-          <span className="material-symbols-outlined client-roster__search-icon">search</span>
           <Input
-            placeholder="Search by athlete name..."
+            placeholder={t('coach:roster.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="client-roster__search-input"
             allowClear
+            prefix={<span className="material-symbols-outlined" style={{ color: 'var(--color-text-tertiary)', fontSize: '18px', marginRight: '4px' }}>search</span>}
           />
         </div>
 
@@ -179,7 +181,7 @@ const ClientRoster: React.FC = () => {
               setSearchParams({});
             }}
           >
-            All Clients
+            {t('coach:roster.all')}
           </button>
           <button
             className={`client-roster__tab ${activeTab === 'ComplianceAlert' ? 'client-roster__tab--active' : ''}`}
@@ -189,7 +191,7 @@ const ClientRoster: React.FC = () => {
               setSearchParams({ filter: 'ComplianceAlert' });
             }}
           >
-            Compliance Alerts
+            {t('coach:roster.compliant')}
           </button>
           <button
             className={`client-roster__tab ${activeTab === 'NoRecentCheckIn' ? 'client-roster__tab--active' : ''}`}
@@ -199,7 +201,7 @@ const ClientRoster: React.FC = () => {
               setSearchParams({ filter: 'NoRecentCheckIn' });
             }}
           >
-            No Recent Check-in
+            {t('coach:roster.nonCompliant')}
           </button>
         </div>
       </div>
@@ -209,7 +211,7 @@ const ClientRoster: React.FC = () => {
         {error ? (
           <div className="client-roster__error">
             <span className="material-symbols-outlined">error_outline</span>
-            <p>Failed to load client roster. Please refresh the page.</p>
+            <p>{t('coach:roster.empty')}</p>
           </div>
         ) : (
           <>
@@ -246,19 +248,19 @@ const ClientRoster: React.FC = () => {
                   </div>
                   <div className="client-roster__card-body">
                     <div className="client-roster__card-row">
-                      <span className="label">Program</span>
+                      <span className="label">{t('coach:roster.table.programLabel')}</span>
                       <span className="value">
-                        {item.activeProgramName || <span className="none">None Assigned</span>}
+                        {item.activeProgramName || <span className="none">{t('common:status.noneAssigned')}</span>}
                       </span>
                     </div>
                     <div className="client-roster__card-row">
-                      <span className="label">Last Check-in</span>
+                      <span className="label">{t('coach:roster.table.lastCheckinLabel')}</span>
                       <span className="value mono">
-                        {item.lastCheckInDate ? formatRelativeTime(item.lastCheckInDate) : 'Never'}
+                        {item.lastCheckInDate ? formatRelativeTime(item.lastCheckInDate) : t('common:status.never')}
                       </span>
                     </div>
                     <div className="client-roster__card-row client-roster__card-row--compliance">
-                      <span className="label">Compliance</span>
+                      <span className="label">{t('coach:roster.table.complianceLabel')}</span>
                       <div className="roster-mobile-compliance__wrapper">
                         <div className="roster-mobile-compliance__track">
                           {item.macroCompliancePercent != null && item.macroCompliancePercent > 0 && (
@@ -276,7 +278,7 @@ const ClientRoster: React.FC = () => {
                   </div>
                   <div className="client-roster__card-footer">
                     <Button type="link" className="view-profile-link">
-                      View Profile
+                      {t('coach:roster.viewProfile')}
                       <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chevron_right</span>
                     </Button>
                   </div>

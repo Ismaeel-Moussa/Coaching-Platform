@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Button, Tag, Segmented, Skeleton, Empty, Tooltip } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useNotifications } from '../../../contexts/NotificationContext';
 import { getRoster } from '../../../api/coachHub';
 import './Notifications.scss';
 
 const Notifications: React.FC = () => {
+  const { t } = useTranslation(['common', 'athlete', 'coach']);
   const navigate = useNavigate();
   const {
     notifications,
@@ -45,21 +47,21 @@ const Notifications: React.FC = () => {
 
   const getNotifTag = (type: string, message: string) => {
     if (type === 'CoachNote' && message.toLowerCase().includes('workout program template assigned')) {
-      return <Tag color="success">Workout</Tag>;
+      return <Tag color="success">{t('common:notifications.tags.workout')}</Tag>;
     }
     switch (type) {
       case 'MacroAlert':
-        return <Tag color="blue">Nutrition</Tag>;
+        return <Tag color="blue">{t('common:notifications.tags.nutrition')}</Tag>;
       case 'CoachNote':
-        return <Tag color="gold">Coach Feedback</Tag>;
+        return <Tag color="gold">{t('common:notifications.tags.feedback')}</Tag>;
       case 'WorkoutCompleted':
-        return <Tag color="success">Workout</Tag>;
+        return <Tag color="success">{t('common:notifications.tags.workout')}</Tag>;
       case 'CheckInSubmitted':
-        return <Tag color="cyan">Check-In</Tag>;
+        return <Tag color="cyan">{t('common:notifications.tags.checkIn')}</Tag>;
       case 'InvitationAccepted':
-        return <Tag color="purple">Roster</Tag>;
+        return <Tag color="purple">{t('common:notifications.tags.roster')}</Tag>;
       default:
-        return <Tag color="default">General</Tag>;
+        return <Tag color="default">{t('common:notifications.tags.general')}</Tag>;
     }
   };
 
@@ -82,11 +84,10 @@ const Notifications: React.FC = () => {
     <div id="notifications-page" className="notifications-page animate-fade-in">
       <div className="notifications-page__header">
         <div>
-          <h1 className="notifications-page__title">Notification Center</h1>
-          <p className="notifications-page__subtitle">
-            Stay updated with your daily programs, feedback, and logs. You have{' '}
-            <span className="notifications-page__count">{unreadCount}</span> unread messages.
-          </p>
+          <h1 className="notifications-page__title">{t('common:notifications.title')}</h1>
+          <p className="notifications-page__subtitle"
+             dangerouslySetInnerHTML={{ __html: t('common:notifications.subtitle', { count: unreadCount }) }}
+          />
         </div>
         {unreadCount > 0 && (
           <Button
@@ -95,7 +96,7 @@ const Notifications: React.FC = () => {
             icon={<span className="material-symbols-outlined btn-icon">done_all</span>}
             className="notifications-page__read-all-btn"
           >
-            Mark all as read
+            {t('common:notifications.markAllRead')}
           </Button>
         )}
       </div>
@@ -103,9 +104,9 @@ const Notifications: React.FC = () => {
       <div className="notifications-page__filters">
         <Segmented
           options={[
-            { label: 'All', value: 'all' },
-            { label: `Unread (${unreadCount})`, value: 'unread' },
-            { label: 'Read', value: 'read' },
+            { label: t('common:notifications.filterAll'), value: 'all' },
+            { label: t('common:notifications.filterUnread', { count: unreadCount }), value: 'unread' },
+            { label: t('common:notifications.filterRead'), value: 'read' },
           ]}
           value={filter}
           onChange={(value) => setFilter(value as 'all' | 'unread' | 'read')}
@@ -125,10 +126,10 @@ const Notifications: React.FC = () => {
             description={
               <span className="notifications-page__empty-text">
                 {filter === 'unread'
-                  ? 'No unread notifications! All caught up.'
+                  ? t('common:notifications.emptyUnread')
                   : filter === 'read'
-                  ? 'No read notifications.'
-                  : 'You have no notifications.'}
+                  ? t('common:notifications.emptyRead')
+                  : t('common:notifications.emptyAll')}
               </span>
             }
           />
@@ -199,7 +200,7 @@ const Notifications: React.FC = () => {
               </div>
 
               {!notif.isRead && (
-                <Tooltip title="Mark as read">
+                <Tooltip title={t('common:notifications.markReadTooltip')}>
                   <button
                     className="notifications-page__item-action"
                     onClick={(e) => {

@@ -2,26 +2,31 @@ import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Tooltip, Drawer } from 'antd';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useNotifications } from '../contexts/NotificationContext';
 import HealthBanner from '../components/HealthBanner/HealthBanner';
 import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary';
+import LanguageSwitcher from '../components/LanguageSwitcher/LanguageSwitcher';
 import './CoachLayout.scss';
 
 const coachNavItems = [
-  { path: '/coach/dashboard', icon: 'analytics', label: 'Dashboard' },
-  { path: '/coach/roster', icon: 'group', label: 'Client Roster' },
-  { path: '/coach/athlete-hub', icon: 'assignment_ind', label: 'Athlete Hub' },
-  { path: '/coach/exercise-library', icon: 'fitness_center', label: 'Exercise Library' },
-  { path: '/coach/food-admin', icon: 'restaurant_menu', label: 'Food & Recipes' },
-  { path: '/coach/template-builder', icon: 'view_week', label: 'Template Builder' },
-  { path: '/coach/invitations', icon: 'mail', label: 'Invitations' },
-  { path: '/coach/notifications', icon: 'notifications', label: 'Notifications' },
-  { path: '/coach/profile', icon: 'person', label: 'Profile' },
+  { path: '/coach/dashboard', icon: 'analytics', labelKey: 'nav.dashboard' },
+  { path: '/coach/roster', icon: 'group', labelKey: 'nav.clientRoster' },
+  { path: '/coach/athlete-hub', icon: 'assignment_ind', labelKey: 'nav.athleteHub' },
+  { path: '/coach/exercise-library', icon: 'fitness_center', labelKey: 'nav.exerciseLibrary' },
+  { path: '/coach/food-admin', icon: 'restaurant_menu', labelKey: 'nav.foodRecipes' },
+  { path: '/coach/template-builder', icon: 'view_week', labelKey: 'nav.templateBuilder' },
+  { path: '/coach/invitations', icon: 'mail', labelKey: 'nav.invitations' },
+  { path: '/coach/notifications', icon: 'notifications', labelKey: 'nav.notifications' },
+  { path: '/coach/profile', icon: 'person', labelKey: 'nav.profile' },
 ];
 
 const STORAGE_KEY = 'coach-sidebar-collapsed';
 
 const CoachLayout: React.FC = () => {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { unreadCount } = useNotifications();
@@ -47,6 +52,10 @@ const CoachLayout: React.FC = () => {
     navigate('/sign-in', { replace: true });
   };
 
+  const chevronIcon = collapsed
+    ? (isRTL ? 'chevron_left' : 'chevron_right')
+    : (isRTL ? 'chevron_right' : 'chevron_left');
+
   return (
     <div className={`coach-layout ${collapsed ? 'coach-layout--collapsed' : ''}`}>
       {/* ── Desktop Sidebar (hidden on mobile <= 768px) ── */}
@@ -56,8 +65,8 @@ const CoachLayout: React.FC = () => {
           <div className="coach-layout__logo-brand">
             <div className="coach-layout__logo-icon">JN</div>
             <div className="coach-layout__logo-info">
-              <span className="coach-layout__logo-text">JOKER NUTRITION</span>
-              <span className="coach-layout__logo-sub">Coach Hub</span>
+              <span className="coach-layout__logo-text">{t('brand.title')}</span>
+              <span className="coach-layout__logo-sub">{t('brand.coachHub')}</span>
             </div>
           </div>
           <button
@@ -67,40 +76,46 @@ const CoachLayout: React.FC = () => {
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <span className="material-symbols-outlined">
-              {collapsed ? 'chevron_right' : 'chevron_left'}
+              {chevronIcon}
             </span>
           </button>
         </div>
 
         {/* Nav */}
         <nav className="coach-layout__nav">
-          {coachNavItems.map((item) => (
-            <Tooltip
-              key={item.path}
-              title={collapsed ? item.label : ''}
-              placement="right"
-              mouseEnterDelay={0.1}
-            >
-              <NavLink
-                to={item.path}
-                className={({ isActive }) =>
-                  `coach-layout__nav-item ${isActive ? 'coach-layout__nav-item--active' : ''}`
-                }
+          {coachNavItems.map((item) => {
+            const labelText = t(item.labelKey);
+            return (
+              <Tooltip
+                key={item.path}
+                title={collapsed ? labelText : ''}
+                placement={isRTL ? 'left' : 'right'}
+                mouseEnterDelay={0.1}
               >
-                <span className="material-symbols-outlined">{item.icon}</span>
-                <span className="coach-layout__nav-label">{item.label}</span>
-                {item.path === '/coach/notifications' && unreadCount > 0 && (
-                  <span className="coach-layout__badge">{unreadCount}</span>
-                )}
-              </NavLink>
-            </Tooltip>
-          ))}
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `coach-layout__nav-item ${isActive ? 'coach-layout__nav-item--active' : ''}`
+                  }
+                >
+                  <span className="material-symbols-outlined">{item.icon}</span>
+                  <span className="coach-layout__nav-label">{labelText}</span>
+                  {item.path === '/coach/notifications' && unreadCount > 0 && (
+                    <span className="coach-layout__badge">{unreadCount}</span>
+                  )}
+                </NavLink>
+              </Tooltip>
+            );
+          })}
         </nav>
 
         {/* Footer */}
         <div className="coach-layout__sidebar-footer">
           {user && (
-            <Tooltip title={collapsed ? `${user.firstName} ${user.lastName}` : ''} placement="right">
+            <Tooltip
+              title={collapsed ? `${user.firstName} ${user.lastName}` : ''}
+              placement={isRTL ? 'left' : 'right'}
+            >
               <NavLink to="/coach/profile" className="coach-layout__user">
                 <div className="coach-layout__avatar">
                   {user.profilePictureUrl ? (
@@ -109,18 +124,23 @@ const CoachLayout: React.FC = () => {
                     `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
                   )}
                 </div>
-                <div className="coach-layout__user-info">
-                  <span className="coach-layout__user-name">{user.firstName} {user.lastName}</span>
-                  <span className="coach-layout__user-role">{user.role}</span>
-                </div>
+                {!collapsed && (
+                  <div className="coach-layout__user-info">
+                    <span className="coach-layout__user-name">{user.firstName} {user.lastName}</span>
+                    <span className="coach-layout__user-role">{t('profile:insights.jnStaff')}</span>
+                  </div>
+                )}
               </NavLink>
             </Tooltip>
           )}
-          <Tooltip title={collapsed ? 'Sign out' : ''} placement="right">
-            <button className="coach-layout__logout" onClick={handleLogout} aria-label="Sign out">
-              <span className="material-symbols-outlined">logout</span>
-            </button>
-          </Tooltip>
+          <div className="coach-layout__footer-actions" style={{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-evenly', gap: '8px', width: '100%', marginTop: '4px' }}>
+            {!collapsed && <LanguageSwitcher className="coach-layout__lang-switch" />}
+            <Tooltip title={collapsed ? t('nav.signOut') : ''} placement={isRTL ? 'left' : 'right'}>
+              <button className="coach-layout__logout" onClick={handleLogout} aria-label="Sign out">
+                <span className="material-symbols-outlined">logout</span>
+              </button>
+            </Tooltip>
+          </div>
         </div>
       </aside>
 
@@ -136,11 +156,12 @@ const CoachLayout: React.FC = () => {
         <div className="coach-layout__logo-brand">
           <div className="coach-layout__logo-icon">JN</div>
           <div className="coach-layout__logo-info">
-            <span className="coach-layout__logo-text">JOKER NUTRITION</span>
-            <span className="coach-layout__logo-sub">Coach Hub</span>
+            <span className="coach-layout__logo-text">{t('brand.title')}</span>
+            <span className="coach-layout__logo-sub">{t('brand.coachHub')}</span>
           </div>
         </div>
         <div className="coach-layout__mobile-header-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
+          <LanguageSwitcher className="coach-layout__lang-switch" />
           <NavLink
             to="/coach/notifications"
             className="coach-layout__mobile-notification-btn"
@@ -167,8 +188,8 @@ const CoachLayout: React.FC = () => {
 
       {/* Slide-out Navigation Drawer for Mobile */}
       <Drawer
-        title="Coach Portal"
-        placement="left"
+        title={t('brand.title')}
+        placement={isRTL ? 'right' : 'left'}
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
         className="coach-layout__mobile-drawer"
@@ -191,7 +212,7 @@ const CoachLayout: React.FC = () => {
               </div>
               <div className="coach-layout__drawer-user-info">
                 <h4>{user.firstName} {user.lastName}</h4>
-                <p>{user.role}</p>
+                <p>{t('profile:insights.jnStaff')}</p>
               </div>
             </>
           )}
@@ -206,7 +227,7 @@ const CoachLayout: React.FC = () => {
               onClick={() => setDrawerOpen(false)}
             >
               <span className="material-symbols-outlined">{item.icon}</span>
-              <span>{item.label}</span>
+              <span>{t(item.labelKey)}</span>
             </NavLink>
           ))}
           <button 
@@ -217,7 +238,7 @@ const CoachLayout: React.FC = () => {
             }}
           >
             <span className="material-symbols-outlined">logout</span>
-            <span>Sign Out</span>
+            <span>{t('nav.signOut')}</span>
           </button>
         </nav>
       </Drawer>

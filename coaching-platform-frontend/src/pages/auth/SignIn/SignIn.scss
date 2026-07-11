@@ -22,11 +22,22 @@
 
   &__form {
     // Label styles
-    .ant-form-item-label > label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--color-text-primary);
-      height: auto;
+    .ant-form-item-label {
+      width: 100%;
+      > label {
+        width: 100%;
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        height: auto;
+        
+        &::after {
+          display: none !important;
+        }
+      }
     }
 
     // Input override

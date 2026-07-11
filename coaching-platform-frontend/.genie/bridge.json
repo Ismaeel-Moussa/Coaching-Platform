@@ -1,5 +1,5 @@
 {
-  "url": "ws://localhost:5174/__genie/ws",
-  "port": 5174,
-  "pid": 13940
+  "url": "ws://localhost:5173/__genie/ws",
+  "port": 5173,
+  "pid": 3888
 }

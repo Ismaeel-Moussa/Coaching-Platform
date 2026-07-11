@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputNumber, Space } from 'antd';
+import { InputNumber } from 'antd';
 import './BiometricInputRow.scss';
 
 interface BiometricInputRowProps {
@@ -11,6 +11,7 @@ interface BiometricInputRowProps {
   min?: number;
   max?: number;
   step?: number;
+  required?: boolean;
 }
 
 const BiometricInputRow: React.FC<BiometricInputRowProps> = ({
@@ -22,36 +23,29 @@ const BiometricInputRow: React.FC<BiometricInputRowProps> = ({
   min = 0,
   max = 500,
   step = 0.1,
+  required = false,
 }) => {
   return (
     <div className="biometric-row">
-      <label className="biometric-row__label">{label}</label>
-      <div className="biometric-row__input-container">
-        <Space.Compact style={{ width: '100%' }}>
-          <InputNumber
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            min={min}
-            max={max}
-            step={step}
-            className="biometric-row__input data-label mono"
-            stringMode={false}
-            style={{ width: '100%' }}
-          />
-          <span style={{
-            background: 'var(--ant-color-fill-alter, #fafafa)',
-            border: '1px solid var(--ant-color-border, #d9d9d9)',
-            borderLeft: 'none',
-            padding: '0 11px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            borderRadius: '0 6px 6px 0',
-            color: 'var(--ant-color-text-description, rgba(0, 0, 0, 0.45))'
-          }}>
-            {unit}
-          </span>
-        </Space.Compact>
+      <label className="biometric-row__label">
+        {label}
+        {required && <span className="biometric-row__required"> *</span>}
+      </label>
+      <div className="biometric-row__input-wrapper">
+        <InputNumber
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          min={min}
+          max={max}
+          step={step}
+          controls={false}
+          className="biometric-row__input"
+          stringMode={false}
+          // Numbers are always LTR regardless of UI language direction
+          style={{ width: '100%', direction: 'ltr' }}
+        />
+        <span className="biometric-row__unit">{unit}</span>
       </div>
     </div>
   );

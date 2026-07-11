@@ -49,6 +49,9 @@
   --font-data:               'JetBrains Mono', monospace;
   --font-family:             var(--font-body);
 
+  --slide-translate-x:       -16px;
+
+
   // Radius
   --radius-xs:               2px;
   --radius-btn:              4px;
@@ -84,6 +87,14 @@
   --header-height:           64px;
   --content-max-width:       1280px;
 }
+
+[dir="rtl"] {
+  --font-heading:            'Cairo', 'Archivo Narrow', sans-serif;
+  --font-body:               'Noto Sans Arabic', 'Inter', sans-serif;
+  --font-family:             var(--font-body);
+  --slide-translate-x:       16px;
+}
+
 
 // ── Global Reset ──────────────────────────────────────────────────────────────
 *,
@@ -285,7 +296,7 @@ a {
 }
 
 @keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-16px); }
+  from { opacity: 0; transform: translateX(var(--slide-translate-x)); }
   to   { opacity: 1; transform: translateX(0); }
 }
 

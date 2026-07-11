@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Select, Button } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useCreateExercise, useUpdateExercise } from '../../hooks/useExercises/useExercises';
 import type { ExerciseAdminDto, MuscleGroup } from '../../types/Exercise';
 import './AddExerciseModal.scss';
@@ -12,7 +13,21 @@ interface AddExerciseModalProps {
 
 const MUSCLE_GROUPS: MuscleGroup[] = ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Cardio', 'Core'];
 
+const getMuscleCategoryLabel = (category: string, t: any) => {
+  switch (category) {
+    case 'Chest': return t('common:muscleGroups.chest', { defaultValue: 'Chest' });
+    case 'Back': return t('common:muscleGroups.back', { defaultValue: 'Back' });
+    case 'Shoulders': return t('common:muscleGroups.shoulders', { defaultValue: 'Shoulders' });
+    case 'Arms': return t('common:muscleGroups.arms', { defaultValue: 'Arms' });
+    case 'Legs': return t('common:muscleGroups.legs', { defaultValue: 'Legs' });
+    case 'Cardio': return t('common:muscleGroups.cardio', { defaultValue: 'Cardio' });
+    case 'Core': return t('common:muscleGroups.core', { defaultValue: 'Core' });
+    default: return category;
+  }
+};
+
 const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ visible, onCancel, exercise }) => {
+  const { t } = useTranslation(['common', 'athlete', 'coach']);
   const [form] = Form.useForm();
   const createExerciseMutation = useCreateExercise();
   const updateExerciseMutation = useUpdateExercise();
@@ -61,12 +76,12 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ visible, onCancel, 
 
   return (
     <Modal
-      title={isEdit ? 'Edit Exercise' : 'Add New Exercise'}
+      title={isEdit ? t('athlete:components.addExerciseModal.titleEdit') : t('athlete:components.addExerciseModal.titleAdd')}
       open={visible}
       onCancel={onCancel}
       footer={[
         <Button key="cancel" onClick={onCancel}>
-          Cancel
+          {t('common:actions.cancel')}
         </Button>,
         <Button
           key="submit"
@@ -75,7 +90,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ visible, onCancel, 
           loading={createExerciseMutation.isPending || updateExerciseMutation.isPending}
           style={{ backgroundColor: 'var(--color-gold)', color: 'var(--color-navy)', border: 'none', fontWeight: 600 }}
         >
-          {isEdit ? 'Save Changes' : 'Add Exercise'}
+          {isEdit ? t('common:actions.save') : t('coach:exerciseLibrary.addExercise')}
         </Button>,
       ]}
       className="add-exercise-modal"
@@ -84,45 +99,45 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ visible, onCancel, 
       <Form form={form} layout="vertical" className="add-exercise-modal__form">
         <Form.Item
           name="name"
-          label="Exercise Name"
-          rules={[{ required: true, message: 'Please enter exercise name' }]}
+          label={t('athlete:components.addExerciseModal.name')}
+          rules={[{ required: true, message: t('coach:exerciseLibrary.enterName', { defaultValue: 'Please enter exercise name' }) }]}
         >
-          <Input placeholder="e.g. Incline Bench Press" />
+          <Input placeholder={t('coach:exerciseLibrary.namePlaceholder', { defaultValue: 'e.g. Incline Bench Press' })} />
         </Form.Item>
 
         <Form.Item
           name="primaryMuscle"
-          label="Primary Muscle Group"
-          rules={[{ required: true, message: 'Please select primary muscle group' }]}
+          label={t('athlete:components.addExerciseModal.muscle')}
+          rules={[{ required: true, message: t('coach:exerciseLibrary.selectMuscle', { defaultValue: 'Please select primary muscle group' }) }]}
         >
-          <Select placeholder="Select primary muscle group">
+          <Select placeholder={t('coach:exerciseLibrary.selectMuscle', { defaultValue: 'Select primary muscle group' })}>
             {MUSCLE_GROUPS.map((m) => (
               <Select.Option key={m} value={m}>
-                {m}
+                {getMuscleCategoryLabel(m, t)}
               </Select.Option>
             ))}
           </Select>
         </Form.Item>
 
-        <Form.Item name="equipmentRequired" label="Equipment Needed">
-          <Input placeholder="e.g. Barbell, Incline Bench" />
+        <Form.Item name="equipmentRequired" label={t('athlete:components.addExerciseModal.equipment')}>
+          <Input placeholder={t('coach:exerciseLibrary.equipmentPlaceholder', { defaultValue: 'e.g. Barbell, Incline Bench' })} />
         </Form.Item>
 
-        <Form.Item name="instructions" label="Instructions">
-          <Input.TextArea rows={4} placeholder="Enter step-by-step instructions..." />
+        <Form.Item name="instructions" label={t('athlete:components.addExerciseModal.instructions')}>
+          <Input.TextArea rows={4} placeholder={t('coach:exerciseLibrary.instructionsPlaceholder', { defaultValue: 'Enter step-by-step instructions...' })} />
         </Form.Item>
 
         <Form.Item
           name="youTubeVideoId"
-          label="YouTube Video ID"
-          help="Provide ONLY the 11-character video ID (e.g. rT7DgCr-3pg), not the full URL."
+          label={t('athlete:components.addExerciseModal.video')}
+          help={t('coach:exerciseLibrary.videoHelp', { defaultValue: 'Provide ONLY the 11-character video ID (e.g. rT7DgCr-3pg), not the full URL.' })}
         >
-          <Input placeholder="e.g. rT7DgCr-3pg" />
+          <Input placeholder={t('coach:exerciseLibrary.videoPlaceholder', { defaultValue: 'e.g. rT7DgCr-3pg' })} />
         </Form.Item>
 
         {watchYouTubeVideoId && watchYouTubeVideoId.trim().length === 11 && (
           <div className="add-exercise-modal__video-preview">
-            <span className="add-exercise-modal__video-label">Video Preview:</span>
+            <span className="add-exercise-modal__video-label">{t('coach:exerciseLibrary.videoPreviewLabel', { defaultValue: 'Video Preview:' })}</span>
             <iframe
               src={`https://www.youtube.com/embed/${watchYouTubeVideoId.trim()}`}
               title="YouTube video player"
