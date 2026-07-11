@@ -224,5 +224,16 @@
     "suppScheduleDeleteFailed": "Failed to delete supplement schedule.",
     "bulkImportSuccess": "Successfully imported {{count}} foods!",
     "bulkImportPartial": "Imported {{inserted}} foods, but {{skipped}} were skipped (duplicates)."
+  },
+  "photoUpload": {
+    "uploadingAngle": "Uploading {{angle}}...",
+    "angleView": "{{angle}}",
+    "dragDropOrClick": "Drag & drop or click to upload",
+    "limits": "JPG/PNG, max 10MB",
+    "angles": {
+      "front": "Front View",
+      "side": "Side View",
+      "back": "Back View"
+    }
   }
 }

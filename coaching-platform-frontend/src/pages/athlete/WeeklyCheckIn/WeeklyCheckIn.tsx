@@ -299,6 +299,7 @@ const WeeklyCheckIn: React.FC = () => {
                     placeholder="e.g. 78.5"
                     min={30}
                     max={250}
+                    required
                   />
                   <BiometricInputRow
                     label={t('athlete:checkIn.waistLabel')}

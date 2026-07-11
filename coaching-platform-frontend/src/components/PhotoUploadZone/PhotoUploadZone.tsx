@@ -113,13 +113,17 @@ const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
             strokeColor="var(--color-gold)"
             size={80}
           />
-          <span className="upload-zone__upload-label">Uploading {angle} View...</span>
+          <span className="upload-zone__upload-label">
+            {t('common:photoUpload.uploadingAngle', { angle: t(`common:photoUpload.angles.${angle.toLowerCase()}`) })}
+          </span>
         </div>
       ) : displayUrl ? (
         <div className="upload-zone__preview">
           <img src={displayUrl} alt={`${angle} progress preview`} className="upload-zone__preview-img" />
           <div className="upload-zone__overlay">
-            <span className="upload-zone__angle-badge">{angle} View</span>
+            <span className="upload-zone__angle-badge">
+              {t('common:photoUpload.angleView', { angle: t(`common:photoUpload.angles.${angle.toLowerCase()}`) })}
+            </span>
             <div className="upload-zone__actions">
               <Button
                 type="primary"
@@ -138,9 +142,11 @@ const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
       ) : (
         <div className="upload-zone__empty" onClick={triggerBrowse}>
           <span className="material-symbols-outlined upload-zone__empty-icon">photo_camera</span>
-          <span className="upload-zone__empty-label">{angle} View</span>
-          <p className="upload-zone__empty-hint">Drag & drop or click to upload</p>
-          <span className="upload-zone__empty-limit">JPG/PNG, max 10MB</span>
+          <span className="upload-zone__empty-label">
+            {t('common:photoUpload.angleView', { angle: t(`common:photoUpload.angles.${angle.toLowerCase()}`) })}
+          </span>
+          <p className="upload-zone__empty-hint">{t('common:photoUpload.dragDropOrClick')}</p>
+          <span className="upload-zone__empty-limit">{t('common:photoUpload.limits')}</span>
         </div>
       )}
     </div>

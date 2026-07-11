@@ -224,5 +224,16 @@
     "suppScheduleDeleteFailed": "فشل حذف جدول المكمل.",
     "bulkImportSuccess": "تم استيراد {{count}} من الأطعمة بنجاح!",
     "bulkImportPartial": "تم استيراد {{inserted}} من الأطعمة، وتم تخطي {{skipped}} (أطعمة مكررة)."
+  },
+  "photoUpload": {
+    "uploadingAngle": "جاري رفع {{angle}}...",
+    "angleView": "{{angle}}",
+    "dragDropOrClick": "اسحب وأفلت أو انقر للرفع",
+    "limits": "JPG/PNG، بحد أقصى 10 ميجابايت",
+    "angles": {
+      "front": "المظهر الأمامي",
+      "side": "المظهر الجانبي",
+      "back": "المظهر الخلفي"
+    }
   }
 }
