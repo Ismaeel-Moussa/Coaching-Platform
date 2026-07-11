@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Tooltip, Drawer } from 'antd';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -21,20 +21,12 @@ const athleteNavItems = [
   { path: '/athlete/profile', icon: 'person', labelKey: 'nav.profile' },
 ];
 
-const mobileBottomNavItems = [
-  { path: '/athlete/dashboard', icon: 'dashboard', labelKey: 'nav.dashboard' },
-  { path: '/athlete/meal-logger', icon: 'restaurant', labelKey: 'nav.nutrition' },
-  { path: '/athlete/workouts', icon: 'fitness_center', labelKey: 'nav.workouts' },
-  { path: '/athlete/supplements', icon: 'medication', labelKey: 'nav.supplements' },
-];
-
 const STORAGE_KEY = 'athlete-sidebar-collapsed';
 
 const AthleteLayout: React.FC = () => {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
   const navigate = useNavigate();
-  const location = useLocation();
   const queryClient = useQueryClient();
   const { unreadCount } = useNotifications();
   const userStr = localStorage.getItem('user');
@@ -57,11 +49,6 @@ const AthleteLayout: React.FC = () => {
     queryClient.clear();
     localStorage.clear();
     navigate('/sign-in', { replace: true });
-  };
-
-  // Determine if a bottom nav path matches the current location
-  const isBottomTabActive = (path: string) => {
-    return location.pathname.startsWith(path);
   };
 
   const chevronIcon = collapsed
@@ -156,15 +143,8 @@ const AthleteLayout: React.FC = () => {
         </div>
       </aside>
 
-      {/* ── Mobile Layout Elements (visible on mobile <= 768px) ── */}
+      {/* ── Mobile Header (visible on mobile <= 768px) ── */}
       <header className="athlete-layout__mobile-header">
-        <button
-          className="athlete-layout__mobile-hamburger"
-          onClick={() => setMoreDrawerOpen(true)}
-          aria-label="Open navigation menu"
-        >
-          <span className="material-symbols-outlined">menu</span>
-        </button>
         <div className="athlete-layout__logo-brand">
           <div className="athlete-layout__logo-icon">JN</div>
           <div className="athlete-layout__logo-info">
@@ -186,9 +166,9 @@ const AthleteLayout: React.FC = () => {
             )}
           </NavLink>
           {user && (
-            <NavLink 
+            <NavLink
               to="/athlete/profile"
-              className="athlete-layout__mobile-avatar-btn" 
+              className="athlete-layout__mobile-avatar-btn"
               aria-label="Open profile"
             >
               <div className="athlete-layout__avatar">
@@ -203,34 +183,18 @@ const AthleteLayout: React.FC = () => {
         </div>
       </header>
 
-      <nav className="athlete-layout__mobile-nav">
-        {mobileBottomNavItems.map((item) => {
-          const active = isBottomTabActive(item.path);
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={`athlete-layout__mobile-nav-item ${active ? 'athlete-layout__mobile-nav-item--active' : ''}`}
-            >
-              <span className="material-symbols-outlined">{item.icon}</span>
-              <span className="athlete-layout__mobile-nav-label">{t(item.labelKey)}</span>
-            </NavLink>
-          );
-        })}
-      </nav>
-
       {/* More Drawer for Mobile */}
       <Drawer
         title={t('brand.title')}
-        placement="bottom"
+        placement={isRTL ? 'right' : 'left'}
         onClose={() => setMoreDrawerOpen(false)}
         open={moreDrawerOpen}
-        height="auto"
         className="athlete-layout__mobile-drawer"
+        width={260}
         styles={{
-          content: { backgroundColor: 'var(--color-navy)', borderRadius: '16px 16px 0 0' },
+          content: { backgroundColor: 'var(--color-navy)' },
           header: { backgroundColor: 'var(--color-navy)', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' },
-          body: { padding: '16px 24px 24px', backgroundColor: 'var(--color-navy)' }
+          body: { padding: '16px 0 24px', backgroundColor: 'var(--color-navy)' }
         }}
       >
         <div className="athlete-layout__drawer-user">
@@ -245,38 +209,28 @@ const AthleteLayout: React.FC = () => {
               </div>
               <div className="athlete-layout__drawer-user-info">
                 <h4>{user.firstName} {user.lastName}</h4>
-                <p>{t('profile:insights.jnStaff')}</p>
+                <p>{t('profile:insights.roleTag', { role: 'Athlete' })}</p>
               </div>
             </>
           )}
         </div>
         <hr className="athlete-layout__drawer-divider" />
-        <div className="athlete-layout__drawer-menu">
-          <NavLink
-            to="/athlete/recipes"
-            className={({ isActive }) => `athlete-layout__drawer-item ${isActive ? 'athlete-layout__drawer-item--active' : ''}`}
-            onClick={() => setMoreDrawerOpen(false)}
-          >
-            <span className="material-symbols-outlined">menu_book</span>
-            <span>{t('nav.recipes')}</span>
-          </NavLink>
-          <NavLink
-            to="/athlete/check-in"
-            className={({ isActive }) => `athlete-layout__drawer-item ${isActive ? 'athlete-layout__drawer-item--active' : ''}`}
-            onClick={() => setMoreDrawerOpen(false)}
-          >
-            <span className="material-symbols-outlined">assignment</span>
-            <span>{t('nav.checkIn')}</span>
-          </NavLink>
-          <NavLink
-            to="/athlete/profile"
-            className={({ isActive }) => `athlete-layout__drawer-item ${isActive ? 'athlete-layout__drawer-item--active' : ''}`}
-            onClick={() => setMoreDrawerOpen(false)}
-          >
-            <span className="material-symbols-outlined">person</span>
-            <span>{t('nav.profile')}</span>
-          </NavLink>
-          <button 
+        <nav className="athlete-layout__drawer-nav">
+          {athleteNavItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) => `athlete-layout__drawer-item ${isActive ? 'athlete-layout__drawer-item--active' : ''}`}
+              onClick={() => setMoreDrawerOpen(false)}
+            >
+              <span className="material-symbols-outlined">{item.icon}</span>
+              <span>{t(item.labelKey)}</span>
+              {item.path === '/athlete/notifications' && unreadCount > 0 && (
+                <span className="athlete-layout__badge">{unreadCount}</span>
+              )}
+            </NavLink>
+          ))}
+          <button
             className="athlete-layout__drawer-item athlete-layout__drawer-item--logout"
             onClick={() => {
               setMoreDrawerOpen(false);
@@ -286,7 +240,7 @@ const AthleteLayout: React.FC = () => {
             <span className="material-symbols-outlined">logout</span>
             <span>{t('nav.signOut')}</span>
           </button>
-        </div>
+        </nav>
       </Drawer>
 
       {/* Main content */}
@@ -296,6 +250,58 @@ const AthleteLayout: React.FC = () => {
           <Outlet />
         </ErrorBoundary>
       </main>
+
+      {/* ── Mobile Bottom Tab Bar (visible on mobile <= 768px) ── */}
+      <nav className="athlete-layout__bottom-tabs">
+        <NavLink
+          to="/athlete/dashboard"
+          className={({ isActive }) =>
+            `athlete-layout__tab ${isActive ? 'athlete-layout__tab--active' : ''}`
+          }
+        >
+          <span className="material-symbols-outlined">dashboard</span>
+          <span className="athlete-layout__tab-label">{t('nav.dashboard')}</span>
+        </NavLink>
+
+        <NavLink
+          to="/athlete/meal-logger"
+          className={({ isActive }) =>
+            `athlete-layout__tab ${isActive ? 'athlete-layout__tab--active' : ''}`
+          }
+        >
+          <span className="material-symbols-outlined">restaurant</span>
+          <span className="athlete-layout__tab-label">{t('nav.nutrition')}</span>
+        </NavLink>
+
+        <NavLink
+          to="/athlete/workouts"
+          className={({ isActive }) =>
+            `athlete-layout__tab ${isActive ? 'athlete-layout__tab--active' : ''}`
+          }
+        >
+          <span className="material-symbols-outlined">fitness_center</span>
+          <span className="athlete-layout__tab-label">{t('nav.workouts')}</span>
+        </NavLink>
+
+        <NavLink
+          to="/athlete/supplements"
+          className={({ isActive }) =>
+            `athlete-layout__tab ${isActive ? 'athlete-layout__tab--active' : ''}`
+          }
+        >
+          <span className="material-symbols-outlined">medication</span>
+          <span className="athlete-layout__tab-label">{t('nav.supplements')}</span>
+        </NavLink>
+
+        <button
+          className="athlete-layout__tab athlete-layout__tab--more"
+          onClick={() => setMoreDrawerOpen(true)}
+          aria-label="More navigation"
+        >
+          <span className="material-symbols-outlined">menu</span>
+          <span className="athlete-layout__tab-label">{t('nav.more', 'More')}</span>
+        </button>
+      </nav>
     </div>
   );
 };

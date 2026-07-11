@@ -146,13 +146,6 @@ const CoachLayout: React.FC = () => {
 
       {/* ── Mobile Layout Elements (visible on mobile <= 768px) ── */}
       <header className="coach-layout__mobile-header">
-        <button
-          className="coach-layout__mobile-hamburger"
-          onClick={() => setDrawerOpen(true)}
-          aria-label="Open navigation menu"
-        >
-          <span className="material-symbols-outlined">menu</span>
-        </button>
         <div className="coach-layout__logo-brand">
           <div className="coach-layout__logo-icon">JN</div>
           <div className="coach-layout__logo-info">
