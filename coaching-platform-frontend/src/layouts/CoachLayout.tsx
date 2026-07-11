@@ -250,6 +250,48 @@ const CoachLayout: React.FC = () => {
           <Outlet />
         </ErrorBoundary>
       </main>
+
+      {/* ── Mobile Bottom Tab Bar (visible on mobile <= 768px) ── */}
+      <nav className="coach-layout__bottom-tabs">
+        <NavLink
+          to="/coach/dashboard"
+          className={({ isActive }) =>
+            `coach-layout__tab ${isActive ? 'coach-layout__tab--active' : ''}`
+          }
+        >
+          <span className="material-symbols-outlined">analytics</span>
+          <span className="coach-layout__tab-label">{t('nav.dashboard')}</span>
+        </NavLink>
+
+        <NavLink
+          to="/coach/roster"
+          className={({ isActive }) =>
+            `coach-layout__tab ${isActive ? 'coach-layout__tab--active' : ''}`
+          }
+        >
+          <span className="material-symbols-outlined">group</span>
+          <span className="coach-layout__tab-label">{t('nav.clientRoster')}</span>
+        </NavLink>
+
+        <NavLink
+          to="/coach/athlete-hub"
+          className={({ isActive }) =>
+            `coach-layout__tab ${isActive ? 'coach-layout__tab--active' : ''}`
+          }
+        >
+          <span className="material-symbols-outlined">assignment_ind</span>
+          <span className="coach-layout__tab-label">{t('nav.athleteHub')}</span>
+        </NavLink>
+
+        <button
+          className="coach-layout__tab coach-layout__tab--more"
+          onClick={() => setDrawerOpen(true)}
+          aria-label="More navigation"
+        >
+          <span className="material-symbols-outlined">menu</span>
+          <span className="coach-layout__tab-label">{t('nav.more', 'More')}</span>
+        </button>
+      </nav>
     </div>
   );
 };

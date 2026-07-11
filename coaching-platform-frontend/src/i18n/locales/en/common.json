@@ -19,7 +19,8 @@
     "supplements": "Supplements",
     "recipes": "Recipes",
     "checkIn": "Check-In",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "more": "More"
   },
   "actions": {
     "back": "Back",
