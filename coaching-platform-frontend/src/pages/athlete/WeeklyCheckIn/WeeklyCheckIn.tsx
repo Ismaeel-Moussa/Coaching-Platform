@@ -5,10 +5,11 @@ import BiometricInputRow from '../../../components/BiometricInputRow/BiometricIn
 import SubjectiveSlider from '../../../components/SubjectiveSlider/SubjectiveSlider';
 import PhotoUploadZone from '../../../components/PhotoUploadZone/PhotoUploadZone';
 import { useSubmitCheckIn, useUploadPhotos, useGetCheckInHistory } from '../../../hooks/useCheckIn/useCheckIn';
+import { deletePhoto } from '../../../api/checkIn';
 import { formatDateDisplay } from '../../../utils/date';
 import './WeeklyCheckIn.scss';
 
-const PhotoPreview: React.FC<{ file: File | null; label: string }> = ({ file, label }) => {
+const PhotoPreview: React.FC<{ file: File | null; existingUrl?: string | null; label: string }> = ({ file, existingUrl, label }) => {
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -20,11 +21,13 @@ const PhotoPreview: React.FC<{ file: File | null; label: string }> = ({ file, la
     setUrl(null);
   }, [file]);
 
+  const displayUrl = url || existingUrl;
+
   return (
     <div className="weekly-check-in__review-photo-item">
       <h4>{label}</h4>
-      {url ? (
-        <img src={url} alt={`${label} Preview`} className="weekly-check-in__review-photo-img" />
+      {displayUrl ? (
+        <img src={displayUrl} alt={`${label} Preview`} className="weekly-check-in__review-photo-img" />
       ) : (
         <div className="weekly-check-in__review-photo-empty">No photo selected</div>
       )}
@@ -57,6 +60,45 @@ const WeeklyCheckIn: React.FC = () => {
   const [sideFile, setSideFile] = useState<File | null>(null);
   const [backFile, setBackFile] = useState<File | null>(null);
 
+  // Photo deletion tracking for resubmission
+  const [deletedAngles, setDeletedAngles] = useState<string[]>([]);
+
+  const handleSelectFront = (file: File) => {
+    setFrontFile(file);
+    setDeletedAngles(prev => prev.filter(a => a !== 'Front'));
+  };
+  const handleDeleteFront = () => {
+    if (frontFile) {
+      setFrontFile(null);
+    } else {
+      setDeletedAngles(prev => [...prev, 'Front']);
+    }
+  };
+
+  const handleSelectSide = (file: File) => {
+    setSideFile(file);
+    setDeletedAngles(prev => prev.filter(a => a !== 'Side'));
+  };
+  const handleDeleteSide = () => {
+    if (sideFile) {
+      setSideFile(null);
+    } else {
+      setDeletedAngles(prev => [...prev, 'Side']);
+    }
+  };
+
+  const handleSelectBack = (file: File) => {
+    setBackFile(file);
+    setDeletedAngles(prev => prev.filter(a => a !== 'Back'));
+  };
+  const handleDeleteBack = () => {
+    if (backFile) {
+      setBackFile(null);
+    } else {
+      setDeletedAngles(prev => [...prev, 'Back']);
+    }
+  };
+
   // Upload Progress per angle (mock UI progress while Axios uploads, or Axios progress)
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [uploading, setUploading] = useState<boolean>(false);
@@ -64,6 +106,10 @@ const WeeklyCheckIn: React.FC = () => {
   // Fetch Check-In History to see if they already submitted this week
   const { data: historyData, isLoading: historyLoading } = useGetCheckInHistory(1, 1);
   const latestCheckIn = historyData?.items?.[0];
+
+  const existingFrontPhoto = latestCheckIn?.photos?.find((p: any) => p.angle === 'Front');
+  const existingSidePhoto = latestCheckIn?.photos?.find((p: any) => p.angle === 'Side');
+  const existingBackPhoto = latestCheckIn?.photos?.find((p: any) => p.angle === 'Back');
 
   // Prefill check-in if there is a recent one to make life easier
   useEffect(() => {
@@ -138,47 +184,66 @@ const WeeklyCheckIn: React.FC = () => {
         trainingStress,
       },
       {
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
           const newCheckInId = data.id;
           setCheckInId(newCheckInId);
 
-          const hasPhotos = frontFile || sideFile || backFile;
-          if (hasPhotos) {
-            setUploading(true);
-            setUploadProgress(10);
-
-            uploadPhotosMutation.mutate(
-              {
-                checkInId: newCheckInId,
-                files: {
-                  Front: frontFile || undefined,
-                  Side: sideFile || undefined,
-                  Back: backFile || undefined,
-                },
-                onProgress: (progress) => {
-                  setUploadProgress(progress);
-                },
-              },
-              {
-                onSuccess: () => {
-                  setUploading(false);
-                  setIsSubmitting(false);
-                  setIsSubmissionSuccessful(true);
-                  setHasExplicitlyChosenToResubmit(false);
-                },
-                onError: () => {
-                  setUploading(false);
-                  setIsSubmitting(false);
-                  // Succeed check-in even if photos failed
-                  setIsSubmissionSuccessful(true);
-                  setHasExplicitlyChosenToResubmit(false);
-                },
+          try {
+            // Process photo deletions on the server first
+            for (const angle of deletedAngles) {
+              const hasPhotoInLatest = latestCheckIn?.photos?.some(p => p.angle === angle);
+              if (hasPhotoInLatest) {
+                await deletePhoto(newCheckInId, angle as any);
               }
-            );
-          } else {
+            }
+
+            // Upload any newly selected photos
+            const hasPhotos = frontFile || sideFile || backFile;
+            if (hasPhotos) {
+              setUploading(true);
+              setUploadProgress(10);
+
+              uploadPhotosMutation.mutate(
+                {
+                  checkInId: newCheckInId,
+                  files: {
+                    Front: frontFile || undefined,
+                    Side: sideFile || undefined,
+                    Back: backFile || undefined,
+                  },
+                  onProgress: (progress) => {
+                    setUploadProgress(progress);
+                  },
+                },
+                {
+                  onSuccess: () => {
+                    setUploading(false);
+                    setIsSubmitting(false);
+                    setIsSubmissionSuccessful(true);
+                    setHasExplicitlyChosenToResubmit(false);
+                    setDeletedAngles([]);
+                  },
+                  onError: () => {
+                    setUploading(false);
+                    setIsSubmitting(false);
+                    setIsSubmissionSuccessful(true);
+                    setHasExplicitlyChosenToResubmit(false);
+                    setDeletedAngles([]);
+                  },
+                }
+              );
+            } else {
+              setIsSubmitting(false);
+              setIsSubmissionSuccessful(true);
+              setHasExplicitlyChosenToResubmit(false);
+              setDeletedAngles([]);
+            }
+          } catch (err) {
+            console.error('Error updating photos:', err);
             setIsSubmitting(false);
             setIsSubmissionSuccessful(true);
             setHasExplicitlyChosenToResubmit(false);
+            setDeletedAngles([]);
           }
         },
         onError: () => {
@@ -318,22 +383,25 @@ const WeeklyCheckIn: React.FC = () => {
               <PhotoUploadZone
                 angle="Front"
                 file={frontFile}
-                onFileSelect={setFrontFile}
-                onDelete={() => setFrontFile(null)}
+                onFileSelect={handleSelectFront}
+                onDelete={handleDeleteFront}
+                existingUrl={!deletedAngles.includes('Front') ? existingFrontPhoto?.signedDownloadUrl : null}
                 uploading={false}
               />
               <PhotoUploadZone
                 angle="Side"
                 file={sideFile}
-                onFileSelect={setSideFile}
-                onDelete={() => setSideFile(null)}
+                onFileSelect={handleSelectSide}
+                onDelete={handleDeleteSide}
+                existingUrl={!deletedAngles.includes('Side') ? existingSidePhoto?.signedDownloadUrl : null}
                 uploading={false}
               />
               <PhotoUploadZone
                 angle="Back"
                 file={backFile}
-                onFileSelect={setBackFile}
-                onDelete={() => setBackFile(null)}
+                onFileSelect={handleSelectBack}
+                onDelete={handleDeleteBack}
+                existingUrl={!deletedAngles.includes('Back') ? existingBackPhoto?.signedDownloadUrl : null}
                 uploading={false}
               />
             </div>
@@ -383,6 +451,7 @@ const WeeklyCheckIn: React.FC = () => {
                       setFrontFile(null);
                       setSideFile(null);
                       setBackFile(null);
+                      setDeletedAngles([]);
                       setIsSubmissionSuccessful(false);
                       setIsAlreadySubmittedThisWeek(false);
                     }}
@@ -452,9 +521,21 @@ const WeeklyCheckIn: React.FC = () => {
                   <span className="material-symbols-outlined text-gold">photo_camera</span> Selected Progress Photos
                 </h3>
                 <div className="weekly-check-in__review-photos">
-                  <PhotoPreview file={frontFile} label="Front View" />
-                  <PhotoPreview file={sideFile} label="Side View" />
-                  <PhotoPreview file={backFile} label="Back View" />
+                  <PhotoPreview 
+                    file={frontFile} 
+                    existingUrl={!deletedAngles.includes('Front') ? existingFrontPhoto?.signedDownloadUrl : null} 
+                    label="Front View" 
+                  />
+                  <PhotoPreview 
+                    file={sideFile} 
+                    existingUrl={!deletedAngles.includes('Side') ? existingSidePhoto?.signedDownloadUrl : null} 
+                    label="Side View" 
+                  />
+                  <PhotoPreview 
+                    file={backFile} 
+                    existingUrl={!deletedAngles.includes('Back') ? existingBackPhoto?.signedDownloadUrl : null} 
+                    label="Back View" 
+                  />
                 </div>
               </div>
             </div>
