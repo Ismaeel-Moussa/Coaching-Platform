@@ -1,3 +1,24 @@
+// Clear the chunk reload flag once the application loads successfully
+try {
+  sessionStorage.removeItem('chunk-load-error-reload');
+} catch (e) {
+  // Ignore errors if sessionStorage is not supported/accessible
+}
+
+// Handle Vite preload errors (dynamic import failures due to outdated chunk hashes)
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
+  try {
+    const hasReloaded = sessionStorage.getItem('chunk-load-error-reload');
+    if (!hasReloaded) {
+      sessionStorage.setItem('chunk-load-error-reload', 'true');
+      window.location.reload();
+    }
+  } catch (e) {
+    window.location.reload();
+  }
+});
+
 import '@ant-design/v5-patch-for-react-19';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
