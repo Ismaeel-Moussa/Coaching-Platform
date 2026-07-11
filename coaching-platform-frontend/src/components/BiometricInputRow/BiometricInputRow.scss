@@ -71,6 +71,8 @@
       font-size: 15px !important;
       font-weight: 600;
       color: var(--color-text-primary);
+      // Numbers are always LTR — force this even in RTL page direction
+      direction: ltr !important;
       text-align: start;
       padding-inline: 12px !important;
       height: 40px;

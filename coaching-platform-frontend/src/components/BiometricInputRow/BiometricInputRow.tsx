@@ -42,7 +42,8 @@ const BiometricInputRow: React.FC<BiometricInputRowProps> = ({
           controls={false}
           className="biometric-row__input"
           stringMode={false}
-          style={{ width: '100%' }}
+          // Numbers are always LTR regardless of UI language direction
+          style={{ width: '100%', direction: 'ltr' }}
         />
         <span className="biometric-row__unit">{unit}</span>
       </div>
