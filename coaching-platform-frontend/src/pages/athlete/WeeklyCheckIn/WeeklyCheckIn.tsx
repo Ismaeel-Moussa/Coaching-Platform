@@ -275,7 +275,7 @@ const WeeklyCheckIn: React.FC = () => {
       </div>
 
       <div className="weekly-check-in__content">
-        {currentStep === 0 && (
+        <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
           <Card className="weekly-check-in__card" loading={historyLoading}>
             <h2 className="weekly-check-in__section-title">Step 1: Measurements & Well-being</h2>
             <p className="weekly-check-in__section-desc">
@@ -370,9 +370,9 @@ const WeeklyCheckIn: React.FC = () => {
               </Button>
             </div>
           </Card>
-        )}
+        </div>
 
-        {currentStep === 1 && (
+        <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
           <Card className="weekly-check-in__card">
             <h2 className="weekly-check-in__section-title">Step 2: Progress Photos (Optional)</h2>
             <p className="weekly-check-in__section-desc">
@@ -426,152 +426,154 @@ const WeeklyCheckIn: React.FC = () => {
               </Button>
             </div>
           </Card>
-        )}
+        </div>
 
-        {currentStep === 2 && (isAlreadySubmittedThisWeek || isSubmissionSuccessful ? (
-          <Card className="weekly-check-in__card weekly-check-in__card--confirm">
-            <Result
-              status="success"
-              title="Check-In Received!"
-              subTitle="Your coach has been notified and will review your stats and photos shortly. Check back for custom feedback and adjustments."
-              extra={
-                <div className="weekly-check-in__confirm-actions">
-                  <Button
-                    type="primary"
-                    onClick={() => navigate('/athlete/dashboard')}
-                    size="large"
-                    className="weekly-check-in__done-btn"
-                  >
-                    Return to Dashboard
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setHasExplicitlyChosenToResubmit(true);
-                      setCurrentStep(0);
-                      setFrontFile(null);
-                      setSideFile(null);
-                      setBackFile(null);
-                      setDeletedAngles([]);
-                      setIsSubmissionSuccessful(false);
-                      setIsAlreadySubmittedThisWeek(false);
-                    }}
-                    size="large"
-                    className="weekly-check-in__resubmit-btn"
-                  >
-                    Resubmit Check-in
-                  </Button>
+        <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
+          {isAlreadySubmittedThisWeek || isSubmissionSuccessful ? (
+            <Card className="weekly-check-in__card weekly-check-in__card--confirm">
+              <Result
+                status="success"
+                title="Check-In Received!"
+                subTitle="Your coach has been notified and will review your stats and photos shortly. Check back for custom feedback and adjustments."
+                extra={
+                  <div className="weekly-check-in__confirm-actions">
+                    <Button
+                      type="primary"
+                      onClick={() => navigate('/athlete/dashboard')}
+                      size="large"
+                      className="weekly-check-in__done-btn"
+                    >
+                      Return to Dashboard
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setHasExplicitlyChosenToResubmit(true);
+                        setCurrentStep(0);
+                        setFrontFile(null);
+                        setSideFile(null);
+                        setBackFile(null);
+                        setDeletedAngles([]);
+                        setIsSubmissionSuccessful(false);
+                        setIsAlreadySubmittedThisWeek(false);
+                      }}
+                      size="large"
+                      className="weekly-check-in__resubmit-btn"
+                    >
+                      Resubmit Check-in
+                    </Button>
+                  </div>
+                }
+              />
+            </Card>
+          ) : (
+            <Card className="weekly-check-in__card">
+              <h2 className="weekly-check-in__section-title">Step 3: Review & Submit</h2>
+              <p className="weekly-check-in__section-desc">
+                Please review your inputs before submitting. Once submitted, your coach will be notified.
+              </p>
+
+              <div className="weekly-check-in__review-sections">
+                <div className="weekly-check-in__review-section">
+                  <h3 className="weekly-check-in__subsection-title">
+                    <span className="material-symbols-outlined text-gold">scale</span> Biometrics Summary
+                  </h3>
+                  <div className="weekly-check-in__review-grid">
+                    <div className="weekly-check-in__review-item">
+                      <strong>Weight:</strong> <span>{weightKg} kg</span>
+                    </div>
+                    <div className="weekly-check-in__review-item">
+                      <strong>Waist:</strong> <span>{waistCm ? `${waistCm} cm` : 'Not provided'}</span>
+                    </div>
+                    <div className="weekly-check-in__review-item">
+                      <strong>Chest:</strong> <span>{chestCm ? `${chestCm} cm` : 'Not provided'}</span>
+                    </div>
+                    <div className="weekly-check-in__review-item">
+                      <strong>Thigh:</strong> <span>{thighCm ? `${thighCm} cm` : 'Not provided'}</span>
+                    </div>
+                  </div>
                 </div>
-              }
-            />
-          </Card>
-        ) : (
-          <Card className="weekly-check-in__card">
-            <h2 className="weekly-check-in__section-title">Step 3: Review & Submit</h2>
-            <p className="weekly-check-in__section-desc">
-              Please review your inputs before submitting. Once submitted, your coach will be notified.
-            </p>
 
-            <div className="weekly-check-in__review-sections">
-              <div className="weekly-check-in__review-section">
-                <h3 className="weekly-check-in__subsection-title">
-                  <span className="material-symbols-outlined text-gold">scale</span> Biometrics Summary
-                </h3>
-                <div className="weekly-check-in__review-grid">
-                  <div className="weekly-check-in__review-item">
-                    <strong>Weight:</strong> <span>{weightKg} kg</span>
+                <Divider />
+
+                <div className="weekly-check-in__review-section">
+                  <h3 className="weekly-check-in__subsection-title">
+                    <span className="material-symbols-outlined text-gold">favorite</span> Subjective Markers Summary (1-10)
+                  </h3>
+                  <div className="weekly-check-in__review-grid">
+                    <div className="weekly-check-in__review-item">
+                      <strong>Sleep Quality:</strong> <span>{sleepQuality}/10</span>
+                    </div>
+                    <div className="weekly-check-in__review-item">
+                      <strong>Energy Level:</strong> <span>{energyLevel}/10</span>
+                    </div>
+                    <div className="weekly-check-in__review-item">
+                      <strong>Gut Health:</strong> <span>{gutHealth}/10</span>
+                    </div>
+                    <div className="weekly-check-in__review-item">
+                      <strong>Training Stress:</strong> <span>{trainingStress}/10</span>
+                    </div>
                   </div>
-                  <div className="weekly-check-in__review-item">
-                    <strong>Waist:</strong> <span>{waistCm ? `${waistCm} cm` : 'Not provided'}</span>
-                  </div>
-                  <div className="weekly-check-in__review-item">
-                    <strong>Chest:</strong> <span>{chestCm ? `${chestCm} cm` : 'Not provided'}</span>
-                  </div>
-                  <div className="weekly-check-in__review-item">
-                    <strong>Thigh:</strong> <span>{thighCm ? `${thighCm} cm` : 'Not provided'}</span>
+                </div>
+
+                <Divider />
+
+                <div className="weekly-check-in__review-section">
+                  <h3 className="weekly-check-in__subsection-title">
+                    <span className="material-symbols-outlined text-gold">photo_camera</span> Selected Progress Photos
+                  </h3>
+                  <div className="weekly-check-in__review-photos">
+                    <PhotoPreview 
+                      file={frontFile} 
+                      existingUrl={!deletedAngles.includes('Front') ? existingFrontPhoto?.signedDownloadUrl : null} 
+                      label="Front View" 
+                    />
+                    <PhotoPreview 
+                      file={sideFile} 
+                      existingUrl={!deletedAngles.includes('Side') ? existingSidePhoto?.signedDownloadUrl : null} 
+                      label="Side View" 
+                    />
+                    <PhotoPreview 
+                      file={backFile} 
+                      existingUrl={!deletedAngles.includes('Back') ? existingBackPhoto?.signedDownloadUrl : null} 
+                      label="Back View" 
+                    />
                   </div>
                 </div>
               </div>
+
+              {uploading && (
+                <div style={{ marginTop: 24, padding: '0 16px' }}>
+                  <Progress percent={uploadProgress} status="active" strokeColor="var(--color-gold)" />
+                  <div style={{ textAlign: 'center', marginTop: 8, color: 'var(--color-text-secondary)', fontSize: 14 }}>
+                    Uploading progress photos ({uploadProgress}%)...
+                  </div>
+                </div>
+              )}
 
               <Divider />
 
-              <div className="weekly-check-in__review-section">
-                <h3 className="weekly-check-in__subsection-title">
-                  <span className="material-symbols-outlined text-gold">favorite</span> Subjective Markers Summary (1-10)
-                </h3>
-                <div className="weekly-check-in__review-grid">
-                  <div className="weekly-check-in__review-item">
-                    <strong>Sleep Quality:</strong> <span>{sleepQuality}/10</span>
-                  </div>
-                  <div className="weekly-check-in__review-item">
-                    <strong>Energy Level:</strong> <span>{energyLevel}/10</span>
-                  </div>
-                  <div className="weekly-check-in__review-item">
-                    <strong>Gut Health:</strong> <span>{gutHealth}/10</span>
-                  </div>
-                  <div className="weekly-check-in__review-item">
-                    <strong>Training Stress:</strong> <span>{trainingStress}/10</span>
-                  </div>
-                </div>
+              <div className="weekly-check-in__actions weekly-check-in__actions--split">
+                <Button
+                  onClick={() => setCurrentStep(1)}
+                  disabled={isSubmitting}
+                  className="weekly-check-in__back-btn"
+                  size="large"
+                >
+                  <span className="material-symbols-outlined">arrow_back</span> Back
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={handleFinalSubmit}
+                  loading={isSubmitting}
+                  className="weekly-check-in__next-btn"
+                  size="large"
+                >
+                  Submit Check-In <span className="material-symbols-outlined">done</span>
+                </Button>
               </div>
-
-              <Divider />
-
-              <div className="weekly-check-in__review-section">
-                <h3 className="weekly-check-in__subsection-title">
-                  <span className="material-symbols-outlined text-gold">photo_camera</span> Selected Progress Photos
-                </h3>
-                <div className="weekly-check-in__review-photos">
-                  <PhotoPreview 
-                    file={frontFile} 
-                    existingUrl={!deletedAngles.includes('Front') ? existingFrontPhoto?.signedDownloadUrl : null} 
-                    label="Front View" 
-                  />
-                  <PhotoPreview 
-                    file={sideFile} 
-                    existingUrl={!deletedAngles.includes('Side') ? existingSidePhoto?.signedDownloadUrl : null} 
-                    label="Side View" 
-                  />
-                  <PhotoPreview 
-                    file={backFile} 
-                    existingUrl={!deletedAngles.includes('Back') ? existingBackPhoto?.signedDownloadUrl : null} 
-                    label="Back View" 
-                  />
-                </div>
-              </div>
-            </div>
-
-            {uploading && (
-              <div style={{ marginTop: 24, padding: '0 16px' }}>
-                <Progress percent={uploadProgress} status="active" strokeColor="var(--color-gold)" />
-                <div style={{ textAlign: 'center', marginTop: 8, color: 'var(--color-text-secondary)', fontSize: 14 }}>
-                  Uploading progress photos ({uploadProgress}%)...
-                </div>
-              </div>
-            )}
-
-            <Divider />
-
-            <div className="weekly-check-in__actions weekly-check-in__actions--split">
-              <Button
-                onClick={() => setCurrentStep(1)}
-                disabled={isSubmitting}
-                className="weekly-check-in__back-btn"
-                size="large"
-              >
-                <span className="material-symbols-outlined">arrow_back</span> Back
-              </Button>
-              <Button
-                type="primary"
-                onClick={handleFinalSubmit}
-                loading={isSubmitting}
-                className="weekly-check-in__next-btn"
-                size="large"
-              >
-                Submit Check-In <span className="material-symbols-outlined">done</span>
-              </Button>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
