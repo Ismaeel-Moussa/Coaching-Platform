@@ -1,6 +1,7 @@
 import React from 'react';
 import { Skeleton, Checkbox } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
+import { useTranslation } from 'react-i18next';
 import { useGetSupplements, useToggleSupplement } from '../../../hooks/useSupplements/useSupplements';
 import { SupplementType, type SupplementDto } from '../../../types/Supplement';
 import { getTodayIso, parseUtcDate } from '../../../utils/date';
@@ -14,12 +15,13 @@ interface SupplementRowProps {
 }
 
 const SupplementRow: React.FC<SupplementRowProps> = ({ supplement, onToggle, isLoading }) => {
+  const { t, i18n } = useTranslation(['athlete']);
   const handleChange = (e: CheckboxChangeEvent) => {
     if (!isLoading) onToggle(supplement.id);
   };
 
   const takenAtFormatted = supplement.takenAt
-    ? parseUtcDate(supplement.takenAt).toLocaleTimeString('en-GB', {
+    ? parseUtcDate(supplement.takenAt).toLocaleTimeString(i18n.language, {
         hour: '2-digit',
         minute: '2-digit',
       })
@@ -57,7 +59,7 @@ const SupplementRow: React.FC<SupplementRowProps> = ({ supplement, onToggle, isL
         ) : (
           <span className="supplement-row__pending-badge">
             <span className="material-symbols-outlined">radio_button_unchecked</span>
-            Pending
+            {t('athlete:supplementsTracker.pending')}
           </span>
         )}
       </div>
@@ -67,6 +69,7 @@ const SupplementRow: React.FC<SupplementRowProps> = ({ supplement, onToggle, isL
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 const SupplementsTracker: React.FC = () => {
+  const { t } = useTranslation(['athlete']);
   const today = getTodayIso();
   const { data: supplements, isLoading } = useGetSupplements();
   const { mutate: toggleSupplement, isPending } = useToggleSupplement();
@@ -86,21 +89,21 @@ const SupplementsTracker: React.FC = () => {
       {/* ── Header ── */}
       <div className="supplements-tracker__header">
         <div>
-          <h1 className="supplements-tracker__title">Supplements Tracker</h1>
-          <p className="supplements-tracker__sub">Daily supplement checklist — resets at midnight</p>
+          <h1 className="supplements-tracker__title">{t('athlete:supplementsTracker.title')}</h1>
+          <p className="supplements-tracker__sub">{t('athlete:supplementsTracker.sub')}</p>
         </div>
         {!isLoading && total > 0 && (
           <div className={`supplements-tracker__progress-badge ${allDone ? 'supplements-tracker__progress-badge--done' : ''}`}>
             {allDone ? (
               <>
                 <span className="material-symbols-outlined">celebration</span>
-                All Done!
+                {t('athlete:supplementsTracker.allDone')}
               </>
             ) : (
               <>
                 <span className="material-symbols-outlined">pill</span>
                 <span className="mono">{totalTaken} / {total}</span>
-                taken
+                {' '}{t('athlete:supplementsTracker.taken')}
               </>
             )}
           </div>
@@ -117,7 +120,7 @@ const SupplementsTracker: React.FC = () => {
             />
           </div>
           <span className="mono supplements-tracker__progress-label">
-            {Math.round((totalTaken / total) * 100)}% complete
+            {Math.round((totalTaken / total) * 100)}% {t('athlete:supplementsTracker.complete')}
           </span>
         </div>
       )}
@@ -139,7 +142,7 @@ const SupplementsTracker: React.FC = () => {
         <div className="supplements-tracker__section">
           <div className="supplements-tracker__section-header supplements-tracker__section-header--essential">
             <span className="material-symbols-outlined">verified</span>
-            <h2>Essential Supplements</h2>
+            <h2>{t('athlete:supplementsTracker.essential')}</h2>
             <span className="mono supplements-tracker__section-count">
               {essential.filter((s) => s.isTakenToday).length} / {essential.length}
             </span>
@@ -162,7 +165,7 @@ const SupplementsTracker: React.FC = () => {
         <div className="supplements-tracker__section">
           <div className="supplements-tracker__section-header supplements-tracker__section-header--optional">
             <span className="material-symbols-outlined">help</span>
-            <h2>Optional Supplements</h2>
+            <h2>{t('athlete:supplementsTracker.optional')}</h2>
             <span className="mono supplements-tracker__section-count">
               {optional.filter((s) => s.isTakenToday).length} / {optional.length}
             </span>
@@ -184,8 +187,8 @@ const SupplementsTracker: React.FC = () => {
       {!isLoading && total === 0 && (
         <div className="supplements-tracker__empty">
           <span className="material-symbols-outlined">medication</span>
-          <h2>No Supplements Assigned</h2>
-          <p>Your coach hasn't assigned any supplements yet. Check back later!</p>
+          <h2>{t('athlete:supplementsTracker.noSupps')}</h2>
+          <p>{t('athlete:supplementsTracker.noSuppsDesc')}</p>
         </div>
       )}
     </div>

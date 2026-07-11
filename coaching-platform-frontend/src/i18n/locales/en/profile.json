@@ -1,0 +1,61 @@
+{
+  "tabs": {
+    "info": "Edit Info",
+    "insights": "Insights",
+    "password": "Change Password"
+  },
+  "personal": {
+    "title": "Personal Details",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "bio": "Coach Bio",
+    "bioPlaceholder": "Share a short bio with your clients...",
+    "saveBtn": "Save Profile Details",
+    "saveBtnPending": "Saving Changes..."
+  },
+  "fitness": {
+    "title": "Fitness & Body Metrics",
+    "weight": "Weight (kg)",
+    "weightPlaceholder": "e.g. 75.5",
+    "height": "Height (cm)",
+    "heightPlaceholder": "e.g. 180",
+    "target": "Fitness Target / Goal",
+    "targetPlaceholder": "e.g. Fat Loss / Muscle Gain / Marathon Prep"
+  },
+  "password": {
+    "title": "Change Password",
+    "current": "Current Password",
+    "new": "New Password",
+    "newPlaceholder": "At least 8 characters",
+    "confirm": "Confirm New Password",
+    "submitBtn": "Update Password",
+    "submitBtnPending": "Updating Password...",
+    "errorFields": "All password fields are required.",
+    "errorLength": "New password must be at least 8 characters long.",
+    "errorMismatch": "New password and confirmation do not match."
+  },
+  "insights": {
+    "title": "Account Insights",
+    "currentStreak": "Current Check-in Streak",
+    "longestStreak": "Longest All-Time Streak",
+    "assignedCoach": "Assigned Coach",
+    "noCoach": "No Coach Assigned",
+    "currentWeight": "Current Weight",
+    "notSet": "Not Set",
+    "activePortal": "Active Portal",
+    "roleTag": "Role: {{role}}",
+    "jnStaff": "JN Staff",
+    "coachingHub": "Coaching & Nutrition Hub"
+  },
+  "avatar": {
+    "upload": "Upload Photo",
+    "loading": "Loading Profile Details...",
+    "errorTitle": "Error loading profile",
+    "errorDesc": "Could not load your profile details. Please try reloading the page."
+  },
+  "languageSettings": {
+    "title": "Language Preference",
+    "desc": "Choose your preferred language for the application interface.",
+    "label": "Language"
+  }
+}

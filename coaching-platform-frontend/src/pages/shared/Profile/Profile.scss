@@ -434,3 +434,54 @@
     transform: translateY(0);
   }
 }
+
+// ── Language Settings Section ──
+.profile-page {
+  &__language-section {
+    margin-top: 32px;
+    border-top: 1px solid var(--color-border-light);
+    padding-top: 24px;
+  }
+
+  &__language-desc {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-xs);
+  }
+
+  &__language-control {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+  }
+
+  &__lang-btn {
+    background: var(--surface-container-low);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    padding: 10px 24px;
+    border-radius: var(--radius-card);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+
+    &:hover {
+      background: var(--surface-container-high);
+      border-color: var(--color-gold);
+    }
+
+    &--active {
+      background: var(--color-gold-bg);
+      border-color: var(--color-gold);
+      color: var(--color-gold-text);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+
+  // Update avatar trigger with logical positioning
+  &__avatar-trigger {
+    right: auto;
+    inset-inline-end: -2px;
+  }
+}
+

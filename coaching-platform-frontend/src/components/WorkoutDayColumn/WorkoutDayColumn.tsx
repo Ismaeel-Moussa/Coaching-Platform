@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { Card, Switch, Select, Input, Button, InputNumber } from 'antd';
+import { useTranslation } from 'react-i18next';
 import type { WorkoutTemplateExerciseDto } from '../../types/Workout';
 import './WorkoutDayColumn.scss';
 
@@ -16,12 +17,6 @@ interface WorkoutDayColumnProps {
   onRemoveDay: (dayNumber: number) => void;
 }
 
-const SECTIONS = [
-  { label: 'Warm Up', value: 'WarmUp' },
-  { label: 'Main Lift', value: 'Main' },
-  { label: 'Cool Down', value: 'CoolDown' },
-];
-
 const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
   dayNumber,
   dayLabel,
@@ -33,6 +28,7 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
   onUpdateDayLabel,
   onRemoveDay,
 }) => {
+  const { t } = useTranslation(['common', 'athlete', 'coach']);
   const { setNodeRef, isOver } = useDroppable({
     id: `day-${dayNumber}`,
     data: {
@@ -65,6 +61,12 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
     }
   };
 
+  const SECTIONS = [
+    { label: t('athlete:workoutLogger.sections.warmup'), value: 'WarmUp' },
+    { label: t('athlete:workoutLogger.sections.main'), value: 'Main' },
+    { label: t('athlete:workoutLogger.sections.cooldown'), value: 'CoolDown' },
+  ];
+
   return (
     <div
       ref={setNodeRef}
@@ -76,7 +78,7 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
         title={
           <div className="workout-day-column__header">
             <div className="workout-day-column__title-section">
-              <span className="workout-day-column__day-num mono">Day {dayNumber}</span>
+              <span className="workout-day-column__day-num mono">{t('coach:templateBuilder.dayNum', { defaultValue: 'Day {{num}}', num: dayNumber })}</span>
               {isEditing ? (
                 <Input
                   size="small"
@@ -91,7 +93,7 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
                 <h3
                   className="workout-day-column__day-label editable"
                   onClick={() => setIsEditing(true)}
-                  title="Click to edit day label"
+                  title={t('coach:templateBuilder.clickToEditLabel', { defaultValue: 'Click to edit day label' })}
                 >
                   {dayLabel}
                   <span className="material-symbols-outlined edit-icon" style={{ fontSize: 14, marginLeft: 4 }}>edit</span>
@@ -100,7 +102,7 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
             </div>
             <div className="workout-day-column__header-actions">
               <div className="workout-day-column__rest-toggle">
-                <span className="workout-day-column__toggle-text">Rest</span>
+                <span className="workout-day-column__toggle-text">{t('coach:templateBuilder.rest', { defaultValue: 'Rest' })}</span>
                 <Switch
                   size="small"
                   checked={isRestDay}
@@ -116,7 +118,7 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
                 onClick={() => onRemoveDay(dayNumber)}
                 className="workout-day-column__delete-day-btn"
                 icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>}
-                title="Remove this day"
+                title={t('coach:templateBuilder.delete', { defaultValue: 'Remove this day' })}
               />
             </div>
           </div>
@@ -127,14 +129,14 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
         {isRestDay ? (
           <div className="workout-day-column__rest-body">
             <span className="material-symbols-outlined">hotel</span>
-            <p>Rest & Recovery Day</p>
+            <p>{t('coach:templateBuilder.restRecovery', { defaultValue: 'Rest & Recovery Day' })}</p>
           </div>
         ) : (
           <div className="workout-day-column__body">
             {exercises.length === 0 ? (
               <div className="workout-day-column__empty-zone">
                 <span className="material-symbols-outlined">add_task</span>
-                <p>Drag exercises here</p>
+                <p>{t('coach:templateBuilder.dragHelp', { defaultValue: 'Drag exercises here' })}</p>
               </div>
             ) : (
               <div className="workout-day-column__exercise-list">
@@ -154,7 +156,7 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
 
                     <div className="workout-day-column__exercise-fields">
                       <div className="workout-day-column__field-group">
-                        <span className="workout-day-column__field-label">Section</span>
+                        <span className="workout-day-column__field-label">{t('coach:templateBuilder.sectionLabel', { defaultValue: 'Section' })}</span>
                         <Select
                           size="small"
                           value={item.section}
@@ -167,7 +169,7 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
 
                       <div className="workout-day-column__fields-grid">
                         <div className="workout-day-column__field-group">
-                          <span className="workout-day-column__field-label">Sets</span>
+                          <span className="workout-day-column__field-label">{t('coach:templateBuilder.setsLabel', { defaultValue: 'Sets' })}</span>
                           <InputNumber
                             size="small"
                             min={1}
@@ -179,7 +181,7 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
                         </div>
 
                         <div className="workout-day-column__field-group">
-                          <span className="workout-day-column__field-label">Reps</span>
+                          <span className="workout-day-column__field-label">{t('athlete:components.exerciseCard.repsHeader', { defaultValue: 'Reps' })}</span>
                           <Input
                             size="small"
                             value={item.targetReps}
@@ -190,7 +192,7 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
                         </div>
 
                         <div className="workout-day-column__field-group">
-                          <span className="workout-day-column__field-label">Rest (s)</span>
+                          <span className="workout-day-column__field-label">{t('athlete:components.exerciseCard.restTimeLabel', { defaultValue: 'Rest (s)' })}</span>
                           <InputNumber
                             size="small"
                             min={0}
@@ -202,7 +204,7 @@ const WorkoutDayColumn: React.FC<WorkoutDayColumnProps> = ({
                         </div>
 
                         <div className="workout-day-column__field-group">
-                          <span className="workout-day-column__field-label">Target (kg)</span>
+                          <span className="workout-day-column__field-label">{t('athlete:components.exerciseCard.targetWeightLabel', { defaultValue: 'Target (kg)' })}</span>
                           <InputNumber
                             size="small"
                             min={0}

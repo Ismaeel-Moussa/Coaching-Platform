@@ -1,31 +1,47 @@
 import React, { useState } from 'react';
 import { Button, Input, Tabs, Dropdown, Skeleton, Empty, Popconfirm } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useGetExercises, useDeleteExercise } from '../../../hooks/useExercises/useExercises';
 import AddExerciseModal from '../../../components/AddExerciseModal/AddExerciseModal';
 import type { ExerciseAdminDto, MuscleGroup } from '../../../types/Exercise';
 import './ExerciseLibraryAdmin.scss';
 
-const CATEGORIES: { label: string; value: string }[] = [
-  { label: 'All', value: 'All' },
-  { label: 'Chest', value: 'Chest' },
-  { label: 'Back', value: 'Back' },
-  { label: 'Shoulders', value: 'Shoulders' },
-  { label: 'Arms', value: 'Arms' },
-  { label: 'Legs', value: 'Legs' },
-  { label: 'Cardio', value: 'Cardio' },
-  { label: 'Core', value: 'Core' },
-];
-
-const TAB_ITEMS = CATEGORIES.map((cat) => ({
-  key: cat.value,
-  label: cat.label,
-}));
+const getMuscleCategoryLabel = (category: string, t: any) => {
+  switch (category) {
+    case 'All': return t('common:status.all', { defaultValue: 'All' });
+    case 'Chest': return t('common:muscleGroups.chest', { defaultValue: 'Chest' });
+    case 'Back': return t('common:muscleGroups.back', { defaultValue: 'Back' });
+    case 'Shoulders': return t('common:muscleGroups.shoulders', { defaultValue: 'Shoulders' });
+    case 'Arms': return t('common:muscleGroups.arms', { defaultValue: 'Arms' });
+    case 'Legs': return t('common:muscleGroups.legs', { defaultValue: 'Legs' });
+    case 'Cardio': return t('common:muscleGroups.cardio', { defaultValue: 'Cardio' });
+    case 'Core': return t('common:muscleGroups.core', { defaultValue: 'Core' });
+    default: return category;
+  }
+};
 
 const ExerciseLibraryAdmin: React.FC = () => {
+  const { t } = useTranslation(['common', 'athlete', 'coach']);
   const [activeTab, setActiveTab] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [selectedExercise, setSelectedExercise] = useState<ExerciseAdminDto | null>(null);
+
+  const CATEGORIES = [
+    { label: t('common:status.all', { defaultValue: 'All' }), value: 'All' },
+    { label: t('common:muscleGroups.chest', { defaultValue: 'Chest' }), value: 'Chest' },
+    { label: t('common:muscleGroups.back', { defaultValue: 'Back' }), value: 'Back' },
+    { label: t('common:muscleGroups.shoulders', { defaultValue: 'Shoulders' }), value: 'Shoulders' },
+    { label: t('common:muscleGroups.arms', { defaultValue: 'Arms' }), value: 'Arms' },
+    { label: t('common:muscleGroups.legs', { defaultValue: 'Legs' }), value: 'Legs' },
+    { label: t('common:muscleGroups.cardio', { defaultValue: 'Cardio' }), value: 'Cardio' },
+    { label: t('common:muscleGroups.core', { defaultValue: 'Core' }), value: 'Core' },
+  ];
+
+  const TAB_ITEMS = CATEGORIES.map((cat) => ({
+    key: cat.value,
+    label: cat.label,
+  }));
 
   // Debounced search parameter handling can be simplified or direct since it's local
   // Pass to TanStack query params
@@ -56,8 +72,8 @@ const ExerciseLibraryAdmin: React.FC = () => {
     <div id="exercise-library-page" className="exercise-library-admin animate-fade-in">
       <div className="exercise-library-admin__header">
         <div>
-          <h1 className="exercise-library-admin__title">Exercise Library</h1>
-          <p className="exercise-library-admin__subtitle">Manage the master exercise database for workout templates</p>
+          <h1 className="exercise-library-admin__title">{t('coach:exerciseLibrary.title')}</h1>
+          <p className="exercise-library-admin__subtitle">{t('coach:exerciseLibrary.subtitle')}</p>
         </div>
         <Button
           type="primary"
@@ -65,7 +81,7 @@ const ExerciseLibraryAdmin: React.FC = () => {
           className="exercise-library-admin__add-btn"
           icon={<span className="material-symbols-outlined">add</span>}
         >
-          Add Exercise
+          {t('coach:exerciseLibrary.addExercise')}
         </Button>
       </div>
 
@@ -79,7 +95,7 @@ const ExerciseLibraryAdmin: React.FC = () => {
           />
         </div>
         <Input
-          placeholder="Search by exercise name..."
+          placeholder={t('coach:exerciseLibrary.searchPlaceholder')}
           prefix={<span className="material-symbols-outlined" style={{ fontSize: 18, color: 'var(--color-border-strong)' }}>search</span>}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -97,11 +113,11 @@ const ExerciseLibraryAdmin: React.FC = () => {
       ) : error ? (
         <div className="exercise-library-admin__error">
           <span className="material-symbols-outlined">error</span>
-          <h3>Error Loading Exercises</h3>
-          <p>Please check your connection and try again.</p>
+          <h3>{t('coach:exerciseLibrary.errorTitle')}</h3>
+          <p>{t('coach:exerciseLibrary.errorDesc')}</p>
         </div>
       ) : data?.items.length === 0 ? (
-        <Empty description="No exercises found matching filters." style={{ padding: '60px 0' }} />
+        <Empty description={t('coach:exerciseLibrary.empty')} style={{ padding: '60px 0' }} />
       ) : (
         <div className="exercise-library-admin__grid">
           {data?.items.map((item) => (
@@ -120,7 +136,7 @@ const ExerciseLibraryAdmin: React.FC = () => {
                     <span className="material-symbols-outlined">fitness_center</span>
                   </div>
                 )}
-                <span className="exercise-library-admin__card-badge font-data">{item.primaryMuscle}</span>
+                <span className="exercise-library-admin__card-badge font-data">{getMuscleCategoryLabel(item.primaryMuscle, t)}</span>
               </div>
               <div className="exercise-library-admin__card-content">
                 <div className="exercise-library-admin__card-header">
@@ -133,7 +149,7 @@ const ExerciseLibraryAdmin: React.FC = () => {
                           label: (
                             <div className="table-menu-item" onClick={() => handleEdit(item)}>
                               <span className="material-symbols-outlined">edit</span>
-                              Edit
+                              {t('coach:exerciseLibrary.edit')}
                             </div>
                           )
                         },
@@ -141,16 +157,16 @@ const ExerciseLibraryAdmin: React.FC = () => {
                           key: 'delete',
                           label: (
                             <Popconfirm
-                              title="Delete Exercise"
-                              description="Are you sure you want to delete this exercise?"
+                              title={t('coach:exerciseLibrary.delete')}
+                              description={t('coach:assignmentHub.deleteConfirm')}
                               onConfirm={() => handleDelete(item.id)}
-                              okText="Yes"
-                              cancelText="No"
+                              okText={t('common:confirm.yes')}
+                              cancelText={t('common:confirm.no')}
                               okButtonProps={{ danger: true }}
                             >
                               <div className="table-menu-item delete-item">
                                 <span className="material-symbols-outlined">delete</span>
-                                Delete
+                                {t('coach:exerciseLibrary.delete')}
                               </div>
                             </Popconfirm>
                           )
@@ -167,7 +183,7 @@ const ExerciseLibraryAdmin: React.FC = () => {
                   </Dropdown>
                 </div>
                 <p className="exercise-library-admin__card-equip">
-                  <strong>Equipment:</strong> {item.equipmentRequired || 'None'}
+                  <strong>{t('coach:exerciseLibrary.equipment')}</strong> {item.equipmentRequired || 'None'}
                 </p>
                 {item.instructions && (
                   <p className="exercise-library-admin__card-desc">

@@ -1,0 +1,44 @@
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+
+  &__icon {
+    font-size: 16px;
+    transition: transform var(--transition-base);
+  }
+
+  &:hover {
+    color: var(--color-gold);
+    background: rgba(253, 192, 3, 0.12);
+    border-color: var(--color-gold);
+
+    .language-switcher__icon {
+      transform: rotate(30deg);
+    }
+  }
+
+  // Dark background sibling variant (for layouts)
+  &--light-bg {
+    background: var(--surface-container-low);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+
+    &:hover {
+      background: var(--surface-container-high);
+      border-color: var(--color-gold-text);
+      color: var(--color-gold-text);
+    }
+  }
+}

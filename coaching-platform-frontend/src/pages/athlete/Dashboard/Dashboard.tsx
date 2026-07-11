@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from 'antd';
+import { useTranslation, Trans } from 'react-i18next';
 import { useGetDashboard } from '../../../hooks/useAthlete/useAthlete';
 import { useUpdateWater, useUpdateSteps } from '../../../hooks/useDiary/useDiary';
 import MacroProgressBar from '../../../components/MacroProgressBar/MacroProgressBar';
@@ -9,13 +10,14 @@ import { getTodayIso, formatDateDisplay, getDayOfWeek } from '../../../utils/dat
 import './Dashboard.scss';
 
 const WORKOUT_STATUS_CONFIG = {
-  NoProgram: { label: 'No Program', icon: 'info', className: 'status--none' },
-  InProgress: { label: 'In Progress', icon: 'play_circle', className: 'status--active' },
-  Completed: { label: 'Completed', icon: 'check_circle', className: 'status--completed' },
-  Missed: { label: 'Missed', icon: 'cancel', className: 'status--missed' },
+  NoProgram: { labelKey: 'noProgram', icon: 'info', className: 'status--none' },
+  InProgress: { labelKey: 'inProgress', icon: 'play_circle', className: 'status--active' },
+  Completed: { labelKey: 'completed', icon: 'check_circle', className: 'status--completed' },
+  Missed: { labelKey: 'missed', icon: 'cancel', className: 'status--missed' },
 } as const;
 
 const AthleteDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const today = getTodayIso();
 
@@ -57,7 +59,7 @@ const AthleteDashboard: React.FC = () => {
     return (
       <div className="dashboard dashboard--error">
         <span className="material-symbols-outlined">error_outline</span>
-        <p>Failed to load dashboard. Please refresh the page.</p>
+        <p>{t('athlete:dashboard.errorMsg')}</p>
       </div>
     );
   }
@@ -76,7 +78,11 @@ const AthleteDashboard: React.FC = () => {
             {isLoading ? (
               <Skeleton.Input active style={{ width: 200 }} />
             ) : (
-              <>Good morning, <span className="dashboard__name">{athlete?.firstName}</span> 👋</>
+              <Trans
+                i18nKey="athlete:dashboard.greeting"
+                values={{ name: athlete?.firstName }}
+                components={{ span: <span className="dashboard__name" /> }}
+              />
             )}
           </h1>
           <p className="dashboard__date">
@@ -90,7 +96,7 @@ const AthleteDashboard: React.FC = () => {
             <span className="dashboard__streak-flame">🔥</span>
             <div className="dashboard__streak-info">
               <span className="dashboard__streak-count mono">{athlete.currentStreak}</span>
-              <span className="dashboard__streak-label">Day Streak</span>
+              <span className="dashboard__streak-label">{t('athlete:dashboard.streakLabel')}</span>
             </div>
           </div>
         )}
@@ -103,10 +109,10 @@ const AthleteDashboard: React.FC = () => {
         <div className="dashboard__card dashboard__card--macros">
           <div className="dashboard__card-header">
             <span className="material-symbols-outlined">nutrition</span>
-            <h2 className="dashboard__card-title">Daily Macros</h2>
+            <h2 className="dashboard__card-title">{t('athlete:dashboard.dailyMacros.title')}</h2>
             {todayMacros && (
               <span className="dashboard__card-sub mono">
-                {Math.round(todayMacros.caloriesRemaining)} kcal remaining
+                {t('athlete:dashboard.dailyMacros.kcalRemaining', { count: Math.round(todayMacros.caloriesRemaining) })}
               </span>
             )}
           </div>
@@ -120,25 +126,25 @@ const AthleteDashboard: React.FC = () => {
           ) : todayMacros ? (
             <div className="dashboard__macro-bars">
               <MacroProgressBar
-                label="Calories"
+                label={t('athlete:dashboard.dailyMacros.calories')}
                 consumed={todayMacros.caloriesConsumed}
                 target={todayMacros.targetCalories}
                 unit=" kcal"
               />
               <MacroProgressBar
-                label="Protein"
+                label={t('athlete:dashboard.dailyMacros.protein')}
                 consumed={todayMacros.proteinConsumed}
                 target={todayMacros.targetProtein}
                 unit="g"
               />
               <MacroProgressBar
-                label="Carbs"
+                label={t('athlete:dashboard.dailyMacros.carbs')}
                 consumed={todayMacros.carbsConsumed}
                 target={todayMacros.targetCarbs}
                 unit="g"
               />
               <MacroProgressBar
-                label="Fat"
+                label={t('athlete:dashboard.dailyMacros.fat')}
                 consumed={todayMacros.fatConsumed}
                 target={todayMacros.targetFat}
                 unit="g"
@@ -151,7 +157,7 @@ const AthleteDashboard: React.FC = () => {
             onClick={() => navigate('/athlete/meal-logger')}
           >
             <span className="material-symbols-outlined">add_circle</span>
-            Log a Meal
+            {t('athlete:dashboard.dailyMacros.logMealBtn')}
           </button>
         </div>
 
@@ -162,7 +168,7 @@ const AthleteDashboard: React.FC = () => {
           </div>
           <div className="dashboard__session-body">
             <h2 className="dashboard__card-title dashboard__card-title--inverse">
-              Today's Workout
+              {t('athlete:dashboard.workout.title')}
             </h2>
             {isLoading ? (
               <Skeleton active paragraph={{ rows: 2 }} title={false} />
@@ -170,17 +176,17 @@ const AthleteDashboard: React.FC = () => {
               <>
                 <div className={`dashboard__session-status ${statusConfig.className}`}>
                   <span className="material-symbols-outlined">{statusConfig.icon}</span>
-                  {statusConfig.label}
+                  {t('athlete:dashboard.workout.' + statusConfig.labelKey)}
                 </div>
                 {workoutStatus === 'NoProgram' ? (
-                  <p className="dashboard__session-hint">No workout program assigned yet. Contact your coach.</p>
+                  <p className="dashboard__session-hint">{t('athlete:dashboard.workout.noProgramDesc')}</p>
                 ) : (
                   <p className="dashboard__session-hint">
                     {workoutStatus === 'Completed'
-                      ? 'Great work! You crushed today\'s session.'
+                      ? t('athlete:dashboard.workout.completedDesc')
                       : workoutStatus === 'Missed'
-                      ? 'Missed today. Get back on track tomorrow!'
-                      : 'Your session is ready. Let\'s go!'}
+                      ? t('athlete:dashboard.workout.missedDesc')
+                      : t('athlete:dashboard.workout.readyDesc')}
                   </p>
                 )}
               </>
@@ -194,7 +200,9 @@ const AthleteDashboard: React.FC = () => {
             <span className="material-symbols-outlined">
               {workoutStatus === 'Completed' ? 'task_alt' : 'play_arrow'}
             </span>
-            {workoutStatus === 'Completed' ? 'Completed' : 'Start Workout'}
+            {workoutStatus === 'Completed'
+              ? t('athlete:dashboard.workout.completedBtn')
+              : t('athlete:dashboard.workout.startBtn')}
           </button>
         </div>
 
@@ -202,7 +210,7 @@ const AthleteDashboard: React.FC = () => {
         <div className="dashboard__card dashboard__card--targets">
           <div className="dashboard__card-header">
             <span className="material-symbols-outlined">track_changes</span>
-            <h2 className="dashboard__card-title">Daily Targets</h2>
+            <h2 className="dashboard__card-title">{t('athlete:dashboard.targets.title')}</h2>
           </div>
           {isLoading ? (
             <Skeleton active avatar={{ shape: 'circle', size: 100 }} paragraph={false} />
@@ -212,7 +220,7 @@ const AthleteDashboard: React.FC = () => {
                 value={parseFloat(todayMacros.waterLitersConsumed.toFixed(2))}
                 max={todayMacros.waterLitersTarget}
                 unit="L"
-                label="Hydration"
+                label={t('athlete:dashboard.targets.hydration')}
                 size={120}
                 onIncrement={handleAddWater}
                 incrementLabel="+0.25L"
@@ -220,8 +228,8 @@ const AthleteDashboard: React.FC = () => {
               <RingProgress
                 value={todayMacros.stepsWalked}
                 max={todayMacros.stepsTarget}
-                unit="steps"
-                label="Steps"
+                unit={t('athlete:dashboard.targets.steps').toLowerCase()}
+                label={t('athlete:dashboard.targets.steps')}
                 size={120}
                 onIncrement={handleAddSteps}
                 incrementLabel="+1000"
@@ -235,20 +243,20 @@ const AthleteDashboard: React.FC = () => {
           <div className="dashboard__card dashboard__card--stats">
             <div className="dashboard__card-header">
               <span className="material-symbols-outlined">emoji_events</span>
-              <h2 className="dashboard__card-title">Your Goal</h2>
+              <h2 className="dashboard__card-title">{t('athlete:dashboard.goal')}</h2>
             </div>
             <div className="dashboard__goal">
-              <span className="dashboard__goal-label">{athlete.targetGoal || 'General Fitness'}</span>
+              <span className="dashboard__goal-label">{athlete.targetGoal || t('athlete:dashboard.generalFitness')}</span>
             </div>
             <div className="dashboard__streak-stats">
               <div className="dashboard__streak-stat">
                 <span className="dashboard__streak-stat-val mono">{athlete.currentStreak}</span>
-                <span className="dashboard__streak-stat-label">Current Streak</span>
+                <span className="dashboard__streak-stat-label">{t('profile:insights.currentStreak')}</span>
               </div>
               <div className="dashboard__streak-divider" />
               <div className="dashboard__streak-stat">
                 <span className="dashboard__streak-stat-val mono">{athlete.longestStreak}</span>
-                <span className="dashboard__streak-stat-label">Longest Streak</span>
+                <span className="dashboard__streak-stat-label">{t('profile:insights.longestStreak')}</span>
               </div>
             </div>
           </div>
@@ -258,7 +266,7 @@ const AthleteDashboard: React.FC = () => {
         <div id="coach-feedback-card" className="dashboard__card dashboard__card--feedback">
           <div className="dashboard__card-header">
             <span className="material-symbols-outlined">chat</span>
-            <h2 className="dashboard__card-title">Coach Feedback</h2>
+            <h2 className="dashboard__card-title">{t('athlete:dashboard.feedback.title')}</h2>
           </div>
           {isLoading ? (
             <Skeleton active paragraph={{ rows: 3 }} title={false} />
@@ -282,7 +290,7 @@ const AthleteDashboard: React.FC = () => {
           ) : (
             <div className="dashboard__feedback-empty">
               <span className="material-symbols-outlined">forum</span>
-              <p>No feedback notes from your coach yet.</p>
+              <p>{t('athlete:dashboard.feedback.empty')}</p>
             </div>
           )}
         </div>

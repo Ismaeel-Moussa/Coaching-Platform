@@ -1,11 +1,13 @@
 import React from 'react';
 import { Form, Input, Button, Divider } from 'antd';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useLogin } from '../../../hooks/useAuth/useAuth';
 import type { LoginForm } from '../../../types/auth';
 import './SignIn.scss';
 
 const SignIn: React.FC = () => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<LoginForm>();
   const { mutate: login, isPending } = useLogin();
 
@@ -17,8 +19,8 @@ const SignIn: React.FC = () => {
     <div className="sign-in" id="sign-in-page">
       {/* Page header */}
       <div className="sign-in__header">
-        <h2 className="sign-in__title">Welcome Back</h2>
-        <p className="sign-in__subtitle">Sign in to your Joker Nutrition account</p>
+        <h2 className="sign-in__title">{t('auth:signIn.title')}</h2>
+        <p className="sign-in__subtitle">{t('auth:signIn.subtitle')}</p>
       </div>
 
       <Form
@@ -31,10 +33,10 @@ const SignIn: React.FC = () => {
         {/* Email */}
         <Form.Item
           name="email"
-          label="Email Address"
+          label={t('auth:signIn.emailLabel')}
           rules={[
-            { required: true, message: 'Email is required' },
-            { type: 'email', message: 'Please enter a valid email address' },
+            { required: true, message: t('auth:signIn.emailReq') },
+            { type: 'email', message: t('auth:signIn.emailInvalid') },
           ]}
         >
           <Input
@@ -52,15 +54,15 @@ const SignIn: React.FC = () => {
           name="password"
           label={
             <div className="sign-in__password-label">
-              <span>Password</span>
+              <span>{t('auth:signIn.passwordLabel')}</span>
               <Link to="/forgot-password" className="sign-in__forgot-link" tabIndex={-1}>
-                Forgot password?
+                {t('auth:signIn.forgotPassword')}
               </Link>
             </div>
           }
           rules={[
-            { required: true, message: 'Password is required' },
-            { min: 6, message: 'Password must be at least 6 characters' },
+            { required: true, message: t('auth:signIn.passwordReq') },
+            { min: 6, message: t('auth:signIn.passwordMin') },
           ]}
         >
           <Input.Password
@@ -83,7 +85,7 @@ const SignIn: React.FC = () => {
             block
             className="sign-in__submit-btn"
           >
-            {isPending ? 'Signing in...' : 'Sign In'}
+            {isPending ? t('auth:signIn.submitBtnPending') : t('auth:signIn.submitBtn')}
           </Button>
         </Form.Item>
       </Form>
@@ -91,8 +93,8 @@ const SignIn: React.FC = () => {
       <Divider className="sign-in__divider" />
 
       <p className="sign-in__register-hint">
-        New to Joker Nutrition?{' '}
-        <span className="sign-in__register-note">You need an invitation from your coach.</span>
+        {t('auth:signIn.newHint')}{' '}
+        <span className="sign-in__register-note">{t('auth:signIn.newHintNote')}</span>
       </p>
     </div>
   );

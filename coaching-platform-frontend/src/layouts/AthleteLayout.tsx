@@ -2,32 +2,37 @@ import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Tooltip, Drawer } from 'antd';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useNotifications } from '../contexts/NotificationContext';
 import HealthBanner from '../components/HealthBanner/HealthBanner';
 import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary';
+import LanguageSwitcher from '../components/LanguageSwitcher/LanguageSwitcher';
 import './AthleteLayout.scss';
 
 const athleteNavItems = [
-  { path: '/athlete/dashboard', icon: 'dashboard', label: 'Dashboard' },
-  { path: '/athlete/meal-logger', icon: 'restaurant', label: 'Nutrition' },
-  { path: '/athlete/workouts', icon: 'fitness_center', label: 'Workouts' },
-  { path: '/athlete/supplements', icon: 'medication', label: 'Supplements' },
-  { path: '/athlete/recipes', icon: 'menu_book', label: 'Recipes' },
-  { path: '/athlete/check-in', icon: 'assignment', label: 'Check-In' },
-  { path: '/athlete/notifications', icon: 'notifications', label: 'Notifications' },
-  { path: '/athlete/profile', icon: 'person', label: 'Profile' },
+  { path: '/athlete/dashboard', icon: 'dashboard', labelKey: 'nav.dashboard' },
+  { path: '/athlete/meal-logger', icon: 'restaurant', labelKey: 'nav.nutrition' },
+  { path: '/athlete/workouts', icon: 'fitness_center', labelKey: 'nav.workouts' },
+  { path: '/athlete/supplements', icon: 'medication', labelKey: 'nav.supplements' },
+  { path: '/athlete/recipes', icon: 'menu_book', labelKey: 'nav.recipes' },
+  { path: '/athlete/check-in', icon: 'assignment', labelKey: 'nav.checkIn' },
+  { path: '/athlete/notifications', icon: 'notifications', labelKey: 'nav.notifications' },
+  { path: '/athlete/profile', icon: 'person', labelKey: 'nav.profile' },
 ];
 
 const mobileBottomNavItems = [
-  { path: '/athlete/dashboard', icon: 'dashboard', label: 'Dashboard' },
-  { path: '/athlete/meal-logger', icon: 'restaurant', label: 'Nutrition' },
-  { path: '/athlete/workouts', icon: 'fitness_center', label: 'Workouts' },
-  { path: '/athlete/supplements', icon: 'medication', label: 'Supplements' },
+  { path: '/athlete/dashboard', icon: 'dashboard', labelKey: 'nav.dashboard' },
+  { path: '/athlete/meal-logger', icon: 'restaurant', labelKey: 'nav.nutrition' },
+  { path: '/athlete/workouts', icon: 'fitness_center', labelKey: 'nav.workouts' },
+  { path: '/athlete/supplements', icon: 'medication', labelKey: 'nav.supplements' },
 ];
 
 const STORAGE_KEY = 'athlete-sidebar-collapsed';
 
 const AthleteLayout: React.FC = () => {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -59,6 +64,10 @@ const AthleteLayout: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
+  const chevronIcon = collapsed
+    ? (isRTL ? 'chevron_left' : 'chevron_right')
+    : (isRTL ? 'chevron_right' : 'chevron_left');
+
   return (
     <div className={`athlete-layout ${collapsed ? 'athlete-layout--collapsed' : ''}`}>
       {/* ── Desktop Sidebar (hidden on mobile <= 768px) ── */}
@@ -68,8 +77,8 @@ const AthleteLayout: React.FC = () => {
           <div className="athlete-layout__logo-brand">
             <div className="athlete-layout__logo-icon">JN</div>
             <div className="athlete-layout__logo-info">
-              <span className="athlete-layout__logo-text">JOKER NUTRITION</span>
-              <span className="athlete-layout__logo-sub">Client Portal</span>
+              <span className="athlete-layout__logo-text">{t('brand.title')}</span>
+              <span className="athlete-layout__logo-sub">{t('brand.clientPortal')}</span>
             </div>
           </div>
           <button
@@ -79,40 +88,46 @@ const AthleteLayout: React.FC = () => {
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <span className="material-symbols-outlined">
-              {collapsed ? 'chevron_right' : 'chevron_left'}
+              {chevronIcon}
             </span>
           </button>
         </div>
 
         {/* Nav */}
         <nav className="athlete-layout__nav">
-          {athleteNavItems.map((item) => (
-            <Tooltip
-              key={item.path}
-              title={collapsed ? item.label : ''}
-              placement="right"
-              mouseEnterDelay={0.1}
-            >
-              <NavLink
-                to={item.path}
-                className={({ isActive }) =>
-                  `athlete-layout__nav-item ${isActive ? 'athlete-layout__nav-item--active' : ''}`
-                }
+          {athleteNavItems.map((item) => {
+            const labelText = t(item.labelKey);
+            return (
+              <Tooltip
+                key={item.path}
+                title={collapsed ? labelText : ''}
+                placement={isRTL ? 'left' : 'right'}
+                mouseEnterDelay={0.1}
               >
-                <span className="material-symbols-outlined">{item.icon}</span>
-                <span className="athlete-layout__nav-label">{item.label}</span>
-                {item.path === '/athlete/notifications' && unreadCount > 0 && (
-                  <span className="athlete-layout__badge">{unreadCount}</span>
-                )}
-              </NavLink>
-            </Tooltip>
-          ))}
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `athlete-layout__nav-item ${isActive ? 'athlete-layout__nav-item--active' : ''}`
+                  }
+                >
+                  <span className="material-symbols-outlined">{item.icon}</span>
+                  <span className="athlete-layout__nav-label">{labelText}</span>
+                  {item.path === '/athlete/notifications' && unreadCount > 0 && (
+                    <span className="athlete-layout__badge">{unreadCount}</span>
+                  )}
+                </NavLink>
+              </Tooltip>
+            );
+          })}
         </nav>
 
         {/* Footer */}
         <div className="athlete-layout__sidebar-footer">
           {user && (
-            <Tooltip title={collapsed ? `${user.firstName} ${user.lastName}` : ''} placement="right">
+            <Tooltip
+              title={collapsed ? `${user.firstName} ${user.lastName}` : ''}
+              placement={isRTL ? 'left' : 'right'}
+            >
               <NavLink to="/athlete/profile" className="athlete-layout__user">
                 <div className="athlete-layout__avatar">
                   {user.profilePictureUrl ? (
@@ -121,18 +136,23 @@ const AthleteLayout: React.FC = () => {
                     `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
                   )}
                 </div>
-                <div className="athlete-layout__user-info">
-                  <span className="athlete-layout__user-name">{user.firstName} {user.lastName}</span>
-                  <span className="athlete-layout__user-role">Athlete</span>
-                </div>
+                {!collapsed && (
+                  <div className="athlete-layout__user-info">
+                    <span className="athlete-layout__user-name">{user.firstName} {user.lastName}</span>
+                    <span className="athlete-layout__user-role">{t('profile:insights.roleTag', { role: 'Athlete' })}</span>
+                  </div>
+                )}
               </NavLink>
             </Tooltip>
           )}
-          <Tooltip title={collapsed ? 'Sign out' : ''} placement="right">
-            <button className="athlete-layout__logout" onClick={handleLogout} aria-label="Sign out">
-              <span className="material-symbols-outlined">logout</span>
-            </button>
-          </Tooltip>
+          <div className="athlete-layout__footer-actions" style={{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-evenly', gap: '8px', width: '100%', marginTop: '4px' }}>
+            {!collapsed && <LanguageSwitcher className="athlete-layout__lang-switch" />}
+            <Tooltip title={collapsed ? t('nav.signOut') : ''} placement={isRTL ? 'left' : 'right'}>
+              <button className="athlete-layout__logout" onClick={handleLogout} aria-label="Sign out">
+                <span className="material-symbols-outlined">logout</span>
+              </button>
+            </Tooltip>
+          </div>
         </div>
       </aside>
 
@@ -148,12 +168,13 @@ const AthleteLayout: React.FC = () => {
         <div className="athlete-layout__logo-brand">
           <div className="athlete-layout__logo-icon">JN</div>
           <div className="athlete-layout__logo-info">
-            <span className="athlete-layout__logo-text">JOKER NUTRITION</span>
-            <span className="athlete-layout__logo-sub">Client Portal</span>
+            <span className="athlete-layout__logo-text">{t('brand.title')}</span>
+            <span className="athlete-layout__logo-sub">{t('brand.clientPortal')}</span>
           </div>
         </div>
 
         <div className="athlete-layout__mobile-header-actions" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
+          <LanguageSwitcher className="athlete-layout__lang-switch" />
           <NavLink
             to="/athlete/notifications"
             className="athlete-layout__mobile-notification-btn"
@@ -192,7 +213,7 @@ const AthleteLayout: React.FC = () => {
               className={`athlete-layout__mobile-nav-item ${active ? 'athlete-layout__mobile-nav-item--active' : ''}`}
             >
               <span className="material-symbols-outlined">{item.icon}</span>
-              <span className="athlete-layout__mobile-nav-label">{item.label}</span>
+              <span className="athlete-layout__mobile-nav-label">{t(item.labelKey)}</span>
             </NavLink>
           );
         })}
@@ -200,7 +221,7 @@ const AthleteLayout: React.FC = () => {
 
       {/* More Drawer for Mobile */}
       <Drawer
-        title="Joker Nutrition"
+        title={t('brand.title')}
         placement="bottom"
         onClose={() => setMoreDrawerOpen(false)}
         open={moreDrawerOpen}
@@ -224,7 +245,7 @@ const AthleteLayout: React.FC = () => {
               </div>
               <div className="athlete-layout__drawer-user-info">
                 <h4>{user.firstName} {user.lastName}</h4>
-                <p>Athlete Profile</p>
+                <p>{t('profile:insights.jnStaff')}</p>
               </div>
             </>
           )}
@@ -237,7 +258,7 @@ const AthleteLayout: React.FC = () => {
             onClick={() => setMoreDrawerOpen(false)}
           >
             <span className="material-symbols-outlined">menu_book</span>
-            <span>Recipe Library</span>
+            <span>{t('nav.recipes')}</span>
           </NavLink>
           <NavLink
             to="/athlete/check-in"
@@ -245,7 +266,7 @@ const AthleteLayout: React.FC = () => {
             onClick={() => setMoreDrawerOpen(false)}
           >
             <span className="material-symbols-outlined">assignment</span>
-            <span>Weekly Check-In</span>
+            <span>{t('nav.checkIn')}</span>
           </NavLink>
           <NavLink
             to="/athlete/profile"
@@ -253,7 +274,7 @@ const AthleteLayout: React.FC = () => {
             onClick={() => setMoreDrawerOpen(false)}
           >
             <span className="material-symbols-outlined">person</span>
-            <span>Profile</span>
+            <span>{t('nav.profile')}</span>
           </NavLink>
           <button 
             className="athlete-layout__drawer-item athlete-layout__drawer-item--logout"
@@ -263,7 +284,7 @@ const AthleteLayout: React.FC = () => {
             }}
           >
             <span className="material-symbols-outlined">logout</span>
-            <span>Sign Out</span>
+            <span>{t('nav.signOut')}</span>
           </button>
         </div>
       </Drawer>

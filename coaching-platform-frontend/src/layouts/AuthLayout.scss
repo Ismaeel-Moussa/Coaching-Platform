@@ -42,8 +42,10 @@
   &__brand-content {
     position: relative;
     z-index: 1;
-    padding: var(--space-xl);
-    max-width: 380px;
+    padding: var(--space-lg);
+    max-width: 360px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   &__logo {
@@ -102,29 +104,37 @@
   &__stats {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    justify-content: space-between;
+    gap: var(--space-xs);
     padding-top: var(--space-md);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
   }
 
   &__stat {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    flex: 1;
+    min-width: 0;
+    text-align: center;
   }
 
   &__stat-value {
     font-family: var(--font-heading);
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--color-gold);
+    white-space: nowrap;
   }
 
   &__stat-label {
-    font-size: 11px;
+    font-size: 10px;
     color: rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.04em;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &__stat-divider {
@@ -133,10 +143,10 @@
     background: rgba(255, 255, 255, 0.15);
   }
 
-  // Gold accent strip on right edge of brand panel
+  // Gold accent strip on edge of brand panel
   &__brand-accent {
     position: absolute;
-    right: 0;
+    inset-inline-end: 0;
     top: 0;
     bottom: 0;
     width: 3px;
@@ -153,6 +163,14 @@
     padding: var(--space-xl) var(--space-lg);
     overflow-y: auto;
     background-color: var(--color-canvas);
+    position: relative;
+  }
+
+  &__lang-container {
+    position: absolute;
+    top: var(--space-sm);
+    inset-inline-end: var(--space-sm);
+    z-index: 10;
   }
 
   &__form-container {
@@ -160,6 +178,7 @@
     max-width: 420px;
     animation: fadeIn 0.4s ease both;
   }
+
 
   // ── Responsive ─────────────────────────────────────────────────────────────
   @media (max-width: 768px) {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Modal, Steps, Input, Select, InputNumber, Button, Spin, Empty, Form, message, Space
 } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useSearchFoods } from '../../hooks/useFoods/useFoods';
 import { useCreateRecipe, useUpdateRecipe, useUploadRecipeImage } from '../../hooks/useRecipes/useRecipes';
 import { calcMacroPreview } from '../../utils/macroCalc';
@@ -23,7 +24,17 @@ interface CreateRecipeModalProps {
   recipeToEdit?: RecipeDto | null;
 }
 
+const getRecipeCategoryLabel = (category: RecipeCategory, t: any) => {
+  switch (category) {
+    case RecipeCategory.MuscleBuilding: return t('athlete:recipeLibrary.categories.muscleBuilding');
+    case RecipeCategory.FatLoss: return t('athlete:recipeLibrary.categories.fatLoss');
+    case RecipeCategory.Custom: return t('athlete:recipeLibrary.categories.custom');
+    default: return RECIPE_CATEGORY_LABELS[category] || String(category);
+  }
+};
+
 const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, recipeToEdit }) => {
+  const { t } = useTranslation(['common', 'athlete']);
   const [currentStep, setCurrentStep] = useState(0);
   const [ingredients, setIngredients] = useState<IngredientEntry[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,6 +56,12 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
   const createMutation = useCreateRecipe();
   const updateMutation = useUpdateRecipe();
   const uploadImageMutation = useUploadRecipeImage();
+
+  const steps = [
+    t('athlete:components.createRecipeModal.stepIngredients'),
+    t('athlete:components.createRecipeModal.stepBasic'),
+    t('athlete:components.createRecipeModal.stepPreview', { defaultValue: 'Preview & Save' })
+  ];
 
   // Prefill in Edit Mode
   useEffect(() => {
@@ -81,8 +98,8 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
 
   // Debounce
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(searchTerm), 400);
-    return () => clearTimeout(t);
+    const timeOut = setTimeout(() => setDebouncedSearch(searchTerm), 400);
+    return () => clearTimeout(timeOut);
   }, [searchTerm]);
 
   const { data: foodsData, isLoading: isSearching } = useSearchFoods(
@@ -104,13 +121,11 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
     { calories: 0, protein: 0, carbs: 0, fat: 0 },
   );
 
-  // ── Step 1: Add ingredient ───────────────────────────────────────────────────
   const handleAddIngredient = () => {
-    if (!pendingFood) return;
+    if (!pendingFood || !pendingQty) return;
     setIngredients((prev) => [...prev, { food: pendingFood, quantityGrams: pendingQty }]);
     setPendingFood(null);
     setSearchTerm('');
-    setDebouncedSearch('');
     setPendingQty(100);
   };
 
@@ -118,62 +133,43 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
     setIngredients((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // ── Step 3: Submit ───────────────────────────────────────────────────────────
-  const handleSave = () => {
-    if (!recipeName.trim() || ingredients.length === 0) return;
-    if (!recipeToEdit && !recipeImageFile) return;
-
-    const formIngredients: CreateRecipeIngredient[] = ingredients.map((ing) => ({
-      foodId: ing.food.id,
-      quantityGrams: ing.quantityGrams,
-    }));
+  const handleSave = async () => {
+    if (ingredients.length === 0) {
+      message.error(t('athlete:components.createRecipeModal.noIngredients'));
+      return;
+    }
 
     const payload = {
-      name: recipeName.trim(),
-      description: recipeDesc.trim() || undefined,
+      name: recipeName,
+      description: recipeDesc,
       category: recipeCategory,
       prepTimeMinutes: prepTime,
       cookTimeMinutes: cookTime,
-      servings,
-      videoUrl: recipeVideoUrl.trim() || undefined,
-      ingredients: formIngredients,
+      servings: servings,
+      videoUrl: recipeVideoUrl || undefined,
+      ingredients: ingredients.map((ing) => ({
+        foodId: ing.food.id,
+        quantityGrams: ing.quantityGrams,
+      })),
     };
 
-    const handlePhotoUploadAfterSave = (recipeId: number, successMsg: string) => {
-      if (recipeImageFile) {
-        uploadImageMutation.mutate(
-          { recipeId, imageFile: recipeImageFile },
-          {
-            onSuccess: () => {
-              message.success(successMsg);
-              handleClose();
-            },
-          },
-        );
+    try {
+      let savedRecipe: RecipeDto;
+      if (recipeToEdit) {
+        savedRecipe = await updateMutation.mutateAsync({ id: recipeToEdit.id, form: payload });
       } else {
-        message.success(successMsg);
-        handleClose();
+        savedRecipe = await createMutation.mutateAsync(payload);
       }
-    };
 
-    if (recipeToEdit) {
-      updateMutation.mutate(
-        { id: recipeToEdit.id, form: payload },
-        {
-          onSuccess: (updatedRecipe: RecipeDto) => {
-            handlePhotoUploadAfterSave(updatedRecipe.id, 'Recipe updated successfully!');
-          },
-        },
-      );
-    } else {
-      createMutation.mutate(
-        payload,
-        {
-          onSuccess: (newRecipe: RecipeDto) => {
-            handlePhotoUploadAfterSave(newRecipe.id, 'Recipe created successfully with photo!');
-          },
-        },
-      );
+      // Upload image if selected
+      if (recipeImageFile) {
+        await uploadImageMutation.mutateAsync({ recipeId: savedRecipe.id, imageFile: recipeImageFile });
+      }
+
+      message.success(t('common:actions.done'));
+      handleClose();
+    } catch (err) {
+      // hook handles errors
     }
   };
 
@@ -181,9 +177,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
     setCurrentStep(0);
     setIngredients([]);
     setSearchTerm('');
-    setDebouncedSearch('');
     setPendingFood(null);
-    setPendingQty(100);
     setRecipeName('');
     setRecipeDesc('');
     setRecipeCategory(RecipeCategory.Custom);
@@ -196,8 +190,6 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
     onClose();
   };
 
-  const steps = ['Ingredients', 'Details', 'Preview & Save'];
-
   return (
     <Modal
       open={open}
@@ -205,7 +197,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
       title={
         <div className="create-recipe-modal__title">
           <span className="material-symbols-outlined">menu_book</span>
-          {recipeToEdit ? 'Edit Custom Recipe' : 'Create Custom Recipe'}
+          {recipeToEdit ? t('athlete:components.createRecipeModal.titleEdit') : t('athlete:components.createRecipeModal.titleCreate')}
         </div>
       }
       footer={null}
@@ -227,7 +219,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
             <div className="create-recipe-modal__search-area">
               <Search
                 id="create-recipe-food-search"
-                placeholder="Search ingredients..."
+                placeholder={t('athlete:components.createRecipeModal.searchIngredients')}
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setPendingFood(null); }}
                 allowClear
@@ -237,7 +229,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
               {debouncedSearch.length >= 1 && !pendingFood && (
                 <div className="create-recipe-modal__results">
                   {isSearching ? (
-                    <div className="create-recipe-modal__loading"><Spin size="small" /><span>Searching...</span></div>
+                    <div className="create-recipe-modal__loading"><Spin size="small" /><span>{t('common:actions.loading')}</span></div>
                   ) : foodsData && foodsData.items.length > 0 ? (
                     <ul className="create-recipe-modal__food-list">
                       {foodsData.items.map((food) => (
@@ -250,12 +242,12 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                           onKeyDown={(e) => e.key === 'Enter' && setPendingFood(food)}
                         >
                           <span className="create-recipe-modal__food-name">{food.name}</span>
-                          <span className="mono create-recipe-modal__food-kcal">{Math.round(food.caloriesPer100g)} kcal/100g</span>
+                          <span className="mono create-recipe-modal__food-kcal">{Math.round(food.caloriesPer100g)} {t('common:units.kcal')}/100g</span>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <Empty description="No foods found." image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                    <Empty description={t('athlete:components.addFoodModal.emptyFood')} image={Empty.PRESENTED_IMAGE_SIMPLE} />
                   )}
                 </div>
               )}
@@ -286,10 +278,10 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                       </span>
                     </Space.Compact>
                     <Button type="primary" onClick={handleAddIngredient} size="middle">
-                      Add
+                      {t('common:actions.confirm')}
                     </Button>
                     <Button onClick={() => { setPendingFood(null); setSearchTerm(''); }} size="middle">
-                      Cancel
+                      {t('common:actions.cancel')}
                     </Button>
                   </div>
                 </div>
@@ -300,9 +292,9 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
             {ingredients.length > 0 && (
               <div className="create-recipe-modal__ingredient-list">
                 <div className="create-recipe-modal__ingredient-header">
-                  <span>Ingredient</span>
-                  <span className="mono">Quantity</span>
-                  <span className="mono">kcal</span>
+                  <span>{t('athlete:components.createRecipeModal.stepIngredients')}</span>
+                  <span className="mono">{t('athlete:components.addFoodModal.quantity')}</span>
+                  <span className="mono">{t('athlete:mealLogger.kcalHeader')}</span>
                   <span />
                 </div>
                 {ingredients.map((ing, i) => {
@@ -327,9 +319,9 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
 
                 {/* Running total */}
                 <div className="create-recipe-modal__running-total">
-                  <span>Total ({ingredients.length} ingredients)</span>
+                  <span>{t('athlete:components.createRecipeModal.selectedIngredients')} ({ingredients.length})</span>
                   <div className="create-recipe-modal__total-macros">
-                    <span className="mono">{Math.round(totals.calories)} kcal</span>
+                    <span className="mono">{Math.round(totals.calories)} {t('common:units.kcal')}</span>
                     <span className="mono">P {totals.protein.toFixed(1)}g</span>
                     <span className="mono">C {totals.carbs.toFixed(1)}g</span>
                     <span className="mono">F {totals.fat.toFixed(1)}g</span>
@@ -345,7 +337,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                 disabled={ingredients.length === 0}
                 size="large"
               >
-                Next: Recipe Details →
+                {t('common:actions.next')} →
               </Button>
             </div>
           </div>
@@ -355,7 +347,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
         {currentStep === 1 && (
           <div className="create-recipe-modal__step animate-fade-in">
             <Form layout="vertical" className="create-recipe-modal__form">
-              <Form.Item label="Recipe Name" required>
+              <Form.Item label={t('athlete:components.createRecipeModal.nameLabel')} required>
                 <Input
                   id="create-recipe-name-input"
                   value={recipeName}
@@ -364,7 +356,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                   size="large"
                 />
               </Form.Item>
-              <Form.Item label="Description">
+              <Form.Item label={t('athlete:components.createRecipeModal.descLabel')}>
                 <Input.TextArea
                   id="create-recipe-desc-input"
                   value={recipeDesc}
@@ -373,7 +365,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                   rows={2}
                 />
               </Form.Item>
-              <Form.Item label="Category">
+              <Form.Item label={t('athlete:components.createRecipeModal.categoryLabel')}>
                 <Select
                   id="create-recipe-category-select"
                   value={recipeCategory}
@@ -382,23 +374,23 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                   style={{ width: '100%' }}
                 >
                   {([RecipeCategory.MuscleBuilding, RecipeCategory.FatLoss, RecipeCategory.Custom] as RecipeCategory[]).map((rc) => (
-                    <Option key={rc} value={rc}>{RECIPE_CATEGORY_LABELS[rc]}</Option>
+                    <Option key={rc} value={rc}>{getRecipeCategoryLabel(rc, t)}</Option>
                   ))}
                 </Select>
               </Form.Item>
               <div className="create-recipe-modal__row">
-                <Form.Item label="Prep Time (min)" style={{ flex: 1 }}>
+                <Form.Item label={t('athlete:components.createRecipeModal.prepTime')} style={{ flex: 1 }}>
                   <InputNumber value={prepTime} onChange={(v) => setPrepTime(v ?? 0)} min={0} size="large" style={{ width: '100%' }} />
                 </Form.Item>
-                <Form.Item label="Cook Time (min)" style={{ flex: 1 }}>
+                <Form.Item label={t('athlete:components.createRecipeModal.cookTime')} style={{ flex: 1 }}>
                   <InputNumber value={cookTime} onChange={(v) => setCookTime(v ?? 0)} min={0} size="large" style={{ width: '100%' }} />
                 </Form.Item>
-                <Form.Item label="Servings" style={{ flex: 1 }}>
+                <Form.Item label={t('athlete:components.createRecipeModal.servingsLabel')} style={{ flex: 1 }}>
                   <InputNumber value={servings} onChange={(v) => setServings(v ?? 1)} min={1} size="large" style={{ width: '100%' }} />
                 </Form.Item>
               </div>
 
-              <Form.Item label={recipeToEdit ? "Recipe Photo (Optional)" : "Recipe Photo (Required)"} required={!recipeToEdit}>
+              <Form.Item label={recipeToEdit ? t('coach:foodAdmin.recipePhotoOptional', { defaultValue: 'Recipe Photo (Optional)' }) : t('coach:foodAdmin.recipePhotoRequired', { defaultValue: 'Recipe Photo (Required)' })} required={!recipeToEdit}>
                 <div className="create-recipe-modal__photo-upload">
                   {recipeImagePreview ? (
                     <div className="create-recipe-modal__photo-preview-container">
@@ -412,13 +404,13 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                         }}
                         className="create-recipe-modal__photo-remove"
                       >
-                        <span className="material-symbols-outlined">delete</span> Remove Photo
+                        <span className="material-symbols-outlined">delete</span> {t('coach:foodAdmin.removePhoto', { defaultValue: 'Remove Photo' })}
                       </Button>
                     </div>
                   ) : (
                     <label className="create-recipe-modal__photo-label">
                       <span className="material-symbols-outlined text-gold">add_a_photo</span>
-                      <span>Click to upload recipe photo</span>
+                      <span>{t('coach:foodAdmin.uploadPhotoLabel', { defaultValue: 'Click to upload recipe photo' })}</span>
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/jpg"
@@ -436,7 +428,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                 </div>
               </Form.Item>
 
-              <Form.Item label="Video Link (Optional)">
+              <Form.Item label={t('coach:foodAdmin.videoLinkOptional', { defaultValue: 'Video Link (Optional)' })}>
                 <Input
                   id="create-recipe-video-input"
                   value={recipeVideoUrl}
@@ -448,14 +440,14 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
               </Form.Item>
             </Form>
             <div className="create-recipe-modal__nav">
-              <Button onClick={() => setCurrentStep(0)} size="large">← Back</Button>
+              <Button onClick={() => setCurrentStep(0)} size="large">← {t('common:actions.back')}</Button>
               <Button
                 type="primary"
                 onClick={() => setCurrentStep(2)}
                 disabled={!recipeName.trim() || (!recipeImageFile && !recipeImagePreview)}
                 size="large"
               >
-                Preview & Save →
+                {t('coach:foodAdmin.previewSave', { defaultValue: 'Preview & Save' })} →
               </Button>
             </div>
           </div>
@@ -474,18 +466,18 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
               <div className="create-recipe-modal__preview-header">
                 <h3 className="create-recipe-modal__preview-name">{recipeName}</h3>
                 <span className="create-recipe-modal__preview-category">
-                  {RECIPE_CATEGORY_LABELS[recipeCategory]}
+                  {getRecipeCategoryLabel(recipeCategory, t)}
                 </span>
               </div>
               {recipeDesc && <p className="create-recipe-modal__preview-desc">{recipeDesc}</p>}
 
               <div className="create-recipe-modal__preview-meta">
-                <span><span className="material-symbols-outlined">schedule</span> {prepTime + cookTime} min</span>
-                <span><span className="material-symbols-outlined">dining</span> {servings} serving{servings > 1 ? 's' : ''}</span>
+                <span><span className="material-symbols-outlined">schedule</span> {prepTime + cookTime} {t('common:units.minutes')}</span>
+                <span><span className="material-symbols-outlined">dining</span> {servings} {servings > 1 ? t('common:units.servings') : t('common:units.serving')}</span>
                 {recipeVideoUrl && (
                   <span className="create-recipe-modal__preview-video-link">
                     <span className="material-symbols-outlined text-gold">smart_display</span>
-                    <a href={recipeVideoUrl} target="_blank" rel="noopener noreferrer">Video Link</a>
+                    <a href={recipeVideoUrl} target="_blank" rel="noopener noreferrer">{t('coach:foodAdmin.videoLink', { defaultValue: 'Video Link' })}</a>
                   </span>
                 )}
               </div>
@@ -494,19 +486,19 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
               <div className="create-recipe-modal__macro-summary">
                 <div className="create-recipe-modal__macro-item create-recipe-modal__macro-item--kcal">
                   <span className="create-recipe-modal__macro-val">{Math.round(totals.calories)}</span>
-                  <span className="create-recipe-modal__macro-lbl">kcal</span>
+                  <span className="create-recipe-modal__macro-lbl">{t('common:units.kcal')}</span>
                 </div>
                 <div className="create-recipe-modal__macro-item">
                   <span className="create-recipe-modal__macro-val">{totals.protein.toFixed(1)}g</span>
-                  <span className="create-recipe-modal__macro-lbl">Protein</span>
+                  <span className="create-recipe-modal__macro-lbl">{t('common:labels.protein')}</span>
                 </div>
                 <div className="create-recipe-modal__macro-item">
                   <span className="create-recipe-modal__macro-val">{totals.carbs.toFixed(1)}g</span>
-                  <span className="create-recipe-modal__macro-lbl">Carbs</span>
+                  <span className="create-recipe-modal__macro-lbl">{t('common:labels.carbs')}</span>
                 </div>
                 <div className="create-recipe-modal__macro-item">
                   <span className="create-recipe-modal__macro-val">{totals.fat.toFixed(1)}g</span>
-                  <span className="create-recipe-modal__macro-lbl">Fat</span>
+                  <span className="create-recipe-modal__macro-lbl">{t('common:labels.fat')}</span>
                 </div>
               </div>
 
@@ -522,7 +514,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
             </div>
 
             <div className="create-recipe-modal__nav">
-              <Button onClick={() => setCurrentStep(1)} size="large" disabled={createMutation.isPending || updateMutation.isPending || uploadImageMutation.isPending}>← Back</Button>
+              <Button onClick={() => setCurrentStep(1)} size="large" disabled={createMutation.isPending || updateMutation.isPending || uploadImageMutation.isPending}>← {t('common:actions.back')}</Button>
               <Button
                 id="create-recipe-save-btn"
                 type="primary"
@@ -530,7 +522,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                 onClick={handleSave}
                 loading={createMutation.isPending || updateMutation.isPending || uploadImageMutation.isPending}
               >
-                Save Recipe
+                {t('athlete:components.createRecipeModal.createBtn')}
               </Button>
             </div>
           </div>

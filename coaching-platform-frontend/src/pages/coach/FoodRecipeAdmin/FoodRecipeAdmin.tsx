@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Tabs, Table, Button, Input, Select, Space, Popconfirm, Modal, Form, InputNumber, Empty, Radio, Tag } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useSearchFoods, useCreateFood, useUpdateFood, useDeleteFood } from '../../../hooks/useFoods/useFoods';
 import { useGetRecipes, useDeleteRecipe } from '../../../hooks/useRecipes/useRecipes';
 import BulkImportModal from '../../../components/BulkImportModal/BulkImportModal';
@@ -11,24 +12,24 @@ import { RecipeCategory } from '../../../types/Recipe';
 import './FoodRecipeAdmin.scss';
 
 const FOOD_CATEGORIES: FoodCategory[] = ['Protein', 'Carbs', 'Fat', 'Vegetable', 'Dairy', 'Fruit', 'Meat', 'Bakery', 'Cheese', 'Poultry', 'Nuts', 'Oils', 'Condiments', 'Juice', 'Snacks'];
-const RECIPE_CATEGORIES = [
-  { label: 'All Recipes', value: 'All' },
-  { label: 'Muscle Building', value: RecipeCategory.MuscleBuilding.toString() },
-  { label: 'Fat Loss', value: RecipeCategory.FatLoss.toString() },
-  { label: 'Custom', value: RecipeCategory.Custom.toString() },
-];
 
-const FOOD_CATEGORY_OPTIONS = FOOD_CATEGORIES.map((cat) => ({
-  label: cat,
-  value: cat,
-}));
+const getRecipeCategoryLabel = (category: string, t: any) => {
+  switch (category) {
+    case 'All': return t('coach:foodAdmin.recipeCategoryAll', { defaultValue: 'All Recipes' });
+    case RecipeCategory.MuscleBuilding.toString(): return t('athlete:recipeLibrary.categories.muscleBuilding');
+    case RecipeCategory.FatLoss.toString(): return t('athlete:recipeLibrary.categories.fatLoss');
+    case RecipeCategory.Custom.toString(): return t('athlete:recipeLibrary.categories.custom');
+    default: return category;
+  }
+};
 
-const RECIPE_TAB_ITEMS = RECIPE_CATEGORIES.map((cat) => ({
-  key: cat.value,
-  label: cat.label,
-}));
+const getFoodCategoryLabel = (category: string, t: any) => {
+  const key = `common:foodCategories.${category.toLowerCase()}`;
+  return t(key, { defaultValue: category });
+};
 
 const FoodRecipeAdmin: React.FC = () => {
+  const { t } = useTranslation(['common', 'athlete', 'coach']);
   const [activeTab, setActiveTab] = useState<string>('foods');
 
   // Foods state
@@ -63,6 +64,23 @@ const FoodRecipeAdmin: React.FC = () => {
   const updateFoodMutation = useUpdateFood();
   const deleteFoodMutation = useDeleteFood();
   const deleteRecipeMutation = useDeleteRecipe();
+
+  const FOOD_CATEGORY_OPTIONS = FOOD_CATEGORIES.map((cat) => ({
+    label: getFoodCategoryLabel(cat, t),
+    value: cat,
+  }));
+
+  const RECIPE_CATEGORIES = [
+    { label: t('coach:foodAdmin.recipeCategoryAll', { defaultValue: 'All Recipes' }), value: 'All' },
+    { label: t('athlete:recipeLibrary.categories.muscleBuilding'), value: RecipeCategory.MuscleBuilding.toString() },
+    { label: t('athlete:recipeLibrary.categories.fatLoss'), value: RecipeCategory.FatLoss.toString() },
+    { label: t('athlete:recipeLibrary.categories.custom'), value: RecipeCategory.Custom.toString() },
+  ];
+
+  const RECIPE_TAB_ITEMS = RECIPE_CATEGORIES.map((cat) => ({
+    key: cat.value,
+    label: cat.label,
+  }));
 
   // Food CRUD handlers
   const handleAddFoodClick = () => {
@@ -102,50 +120,50 @@ const FoodRecipeAdmin: React.FC = () => {
 
   const foodColumns = [
     {
-      title: 'Name',
+      title: t('coach:foodAdmin.table.name'),
       dataIndex: 'name',
       key: 'name',
       render: (text: string) => <strong className="food-table__name">{text}</strong>,
     },
     {
-      title: 'Category',
+      title: t('coach:foodAdmin.table.category'),
       dataIndex: 'category',
       key: 'category',
-      render: (cat: string) => <span className="food-table__category font-data">{cat}</span>,
+      render: (cat: string) => <span className="food-table__category font-data">{getFoodCategoryLabel(cat, t)}</span>,
     },
 
     {
-      title: 'Calories / 100g',
+      title: t('coach:foodAdmin.table.calories'),
       dataIndex: 'caloriesPer100g',
       key: 'caloriesPer100g',
-      render: (val: number) => <span className="mono">{Math.round(val)} kcal</span>,
+      render: (val: number) => <span className="mono">{Math.round(val)} {t('common:units.kcal')}</span>,
     },
     {
-      title: 'Protein',
+      title: t('coach:foodAdmin.table.protein'),
       dataIndex: 'proteinPer100g',
       key: 'proteinPer100g',
       render: (val: number) => <span className="mono">{val}g</span>,
     },
     {
-      title: 'Carbs',
+      title: t('coach:foodAdmin.table.carbs'),
       dataIndex: 'carbsPer100g',
       key: 'carbsPer100g',
       render: (val: number) => <span className="mono">{val}g</span>,
     },
     {
-      title: 'Fat',
+      title: t('coach:foodAdmin.table.fat'),
       dataIndex: 'fatPer100g',
       key: 'fatPer100g',
       render: (val: number) => <span className="mono">{val}g</span>,
     },
     {
-      title: 'Fiber',
+      title: t('coach:foodAdmin.table.fiber'),
       dataIndex: 'fiberPer100g',
       key: 'fiberPer100g',
       render: (val: number) => <span className="mono">{val}g</span>,
     },
     {
-      title: 'Actions',
+      title: t('coach:foodAdmin.table.actions'),
       key: 'actions',
       render: (_: any, record: FoodDto) => (
         <Space size="middle">
@@ -156,11 +174,11 @@ const FoodRecipeAdmin: React.FC = () => {
             icon={<span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit</span>}
           />
           <Popconfirm
-            title="Delete food item?"
-            description="Are you sure you want to delete this food?"
+            title={t('coach:foodAdmin.deleteFoodConfirm')}
+            description={t('coach:foodAdmin.deleteFoodDesc')}
             onConfirm={() => handleDeleteFood(record.id)}
-            okText="Yes"
-            cancelText="No"
+            okText={t('common:confirm.yes')}
+            cancelText={t('common:confirm.no')}
             okButtonProps={{ danger: true }}
           >
             <Button
@@ -179,8 +197,8 @@ const FoodRecipeAdmin: React.FC = () => {
     <div id="food-recipe-admin-page" className="food-recipe-admin animate-fade-in">
       <div className="food-recipe-admin__header">
         <div>
-          <h1 className="food-recipe-admin__title">Nutrition &amp; Content Admin</h1>
-          <p className="food-recipe-admin__subtitle">Manage master food databases and premium recipes</p>
+          <h1 className="food-recipe-admin__title">{t('coach:foodAdmin.title')}</h1>
+          <p className="food-recipe-admin__subtitle">{t('coach:foodAdmin.subtitle')}</p>
         </div>
       </div>
 
@@ -191,13 +209,13 @@ const FoodRecipeAdmin: React.FC = () => {
         items={[
           {
             key: 'foods',
-            label: 'Food Database',
+            label: t('coach:foodAdmin.tabFoods'),
             children: (
               <div className="food-recipe-admin__tab-content">
                 <div className="food-recipe-admin__controls">
                   <div className="food-recipe-admin__filters">
                     <Input
-                      placeholder="Search foods..."
+                      placeholder={t('coach:foodAdmin.searchPlaceholder')}
                       prefix={<span className="material-symbols-outlined" style={{ fontSize: 18, color: 'var(--color-border-strong)' }}>search</span>}
                       value={foodSearch}
                       onChange={(e) => {
@@ -208,7 +226,7 @@ const FoodRecipeAdmin: React.FC = () => {
                       style={{ width: 240 }}
                     />
                     <Select
-                      placeholder="Category"
+                      placeholder={t('coach:foodAdmin.categoryPlaceholder')}
                       value={foodCategory}
                       onChange={(val) => {
                         setFoodCategory(val);
@@ -227,7 +245,7 @@ const FoodRecipeAdmin: React.FC = () => {
                       icon={<span className="material-symbols-outlined">upload_file</span>}
                       className="food-recipe-admin__btn"
                     >
-                      Bulk Import
+                      {t('coach:foodAdmin.bulkImport')}
                     </Button>
                     <Button
                       type="primary"
@@ -235,7 +253,7 @@ const FoodRecipeAdmin: React.FC = () => {
                       icon={<span className="material-symbols-outlined">add</span>}
                       className="food-recipe-admin__btn food-recipe-admin__btn--navy"
                     >
-                      Add Food
+                      {t('coach:foodAdmin.addFood')}
                     </Button>
                   </Space>
                 </div>
@@ -266,29 +284,29 @@ const FoodRecipeAdmin: React.FC = () => {
                     <div key={food.id} className="food-recipe-admin__card-item">
                       <div className="food-recipe-admin__card-header">
                         <strong className="food-name">{food.name}</strong>
-                        <span className="food-category-badge">{food.category}</span>
+                        <span className="food-category-badge">{getFoodCategoryLabel(food.category, t)}</span>
                       </div>
                       <div className="food-recipe-admin__card-body">
                         <div className="food-recipe-admin__macro-row">
                           <div className="macro-item">
-                            <span className="label">Calories</span>
-                            <span className="val mono">{Math.round(food.caloriesPer100g)} kcal</span>
+                            <span className="label">{t('common:labels.calories')}</span>
+                            <span className="val mono">{Math.round(food.caloriesPer100g)} {t('common:units.kcal')}</span>
                           </div>
                           <div className="macro-item">
-                            <span className="label">Protein</span>
+                            <span className="label">{t('common:labels.protein')}</span>
                             <span className="val mono">{food.proteinPer100g}g</span>
                           </div>
                           <div className="macro-item">
-                            <span className="label">Carbs</span>
+                            <span className="label">{t('common:labels.carbs')}</span>
                             <span className="val mono">{food.carbsPer100g}g</span>
                           </div>
                           <div className="macro-item">
-                            <span className="label">Fat</span>
+                            <span className="label">{t('common:labels.fat')}</span>
                             <span className="val mono">{food.fatPer100g}g</span>
                           </div>
                           {food.fiberPer100g > 0 && (
                             <div className="macro-item">
-                              <span className="label">Fiber</span>
+                              <span className="label">{t('common:labels.fiber')}</span>
                               <span className="val mono">{food.fiberPer100g}g</span>
                             </div>
                           )}
@@ -303,14 +321,14 @@ const FoodRecipeAdmin: React.FC = () => {
                             icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>}
                             className="edit-btn"
                           >
-                            Edit
+                            {t('common:actions.edit')}
                           </Button>
                           <Popconfirm
-                            title="Delete food item?"
-                            description="Are you sure you want to delete this food?"
+                            title={t('coach:foodAdmin.deleteFoodConfirm')}
+                            description={t('coach:foodAdmin.deleteFoodDesc')}
                             onConfirm={() => handleDeleteFood(food.id)}
-                            okText="Yes"
-                            cancelText="No"
+                            okText={t('common:confirm.yes')}
+                            cancelText={t('common:confirm.no')}
                             okButtonProps={{ danger: true }}
                           >
                             <Button
@@ -318,7 +336,7 @@ const FoodRecipeAdmin: React.FC = () => {
                               size="small"
                               icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>}
                             >
-                              Delete
+                              {t('common:actions.delete')}
                             </Button>
                           </Popconfirm>
                         </Space>
@@ -333,17 +351,17 @@ const FoodRecipeAdmin: React.FC = () => {
                         onClick={() => setFoodPage((p) => p - 1)}
                         size="small"
                       >
-                        Prev
+                        {t('common:pagination.prev')}
                       </Button>
                       <span className="pagination-text">
-                        Page {foodPage} of {Math.ceil(foodsData.totalCount / foodPageSize)}
+                        {t('common:pagination.pageOf', { page: foodPage, total: Math.ceil(foodsData.totalCount / foodPageSize) })}
                       </span>
                       <Button
                         disabled={foodPage * foodPageSize >= foodsData.totalCount}
                         onClick={() => setFoodPage((p) => p + 1)}
                         size="small"
                       >
-                        Next
+                        {t('common:pagination.next')}
                       </Button>
                     </div>
                   )}
@@ -353,7 +371,7 @@ const FoodRecipeAdmin: React.FC = () => {
           },
           {
             key: 'recipes',
-            label: 'Joker Recipes',
+            label: t('coach:foodAdmin.tabRecipes'),
             children: (
               <div className="food-recipe-admin__tab-content">
                 <div className="food-recipe-admin__controls">
@@ -372,7 +390,7 @@ const FoodRecipeAdmin: React.FC = () => {
                     icon={<span className="material-symbols-outlined">restaurant_menu</span>}
                     className="food-recipe-admin__btn food-recipe-admin__btn--navy"
                   >
-                    Create Recipe
+                    {t('coach:foodAdmin.createRecipe')}
                   </Button>
                 </div>
 
@@ -383,7 +401,7 @@ const FoodRecipeAdmin: React.FC = () => {
                     ))}
                   </div>
                 ) : recipesData?.items.length === 0 ? (
-                  <Empty description="No recipes created yet." style={{ padding: '60px 0' }} />
+                  <Empty description={t('coach:foodAdmin.noRecipes')} style={{ padding: '60px 0' }} />
                 ) : (
                   <div className="food-recipe-admin__recipe-grid">
                     {recipesData?.items.map((recipe) => (
@@ -401,10 +419,10 @@ const FoodRecipeAdmin: React.FC = () => {
                             style={{ backgroundColor: 'var(--color-gold)', borderColor: 'var(--color-gold)', color: 'var(--color-navy)' }}
                           />
                           <Popconfirm
-                            title="Delete this recipe?"
+                            title={t('coach:foodAdmin.deleteRecipe')}
                             onConfirm={() => handleDeleteRecipe(recipe.id)}
-                            okText="Yes"
-                            cancelText="No"
+                            okText={t('common:confirm.yes')}
+                            cancelText={t('common:confirm.no')}
                             okButtonProps={{ danger: true }}
                           >
                             <Button type="primary" danger shape="circle" icon={<span className="material-symbols-outlined" style={{ fontSize: 18 }}>delete</span>} />
@@ -422,35 +440,35 @@ const FoodRecipeAdmin: React.FC = () => {
 
       {/* Manual Add/Edit Food Modal */}
       <Modal
-        title={editingFood ? 'Edit Food Item' : 'Add Food Item'}
+        title={editingFood ? t('coach:foodAdmin.modalEditFood') : t('coach:foodAdmin.modalAddFood')}
         open={isFoodModalVisible}
         onCancel={() => setIsFoodModalVisible(false)}
         onOk={handleSaveFood}
-        okText={editingFood ? 'Save' : 'Add'}
+        okText={editingFood ? t('common:actions.save') : t('common:actions.submit')}
         okButtonProps={{ loading: createFoodMutation.isPending || updateFoodMutation.isPending }}
         width={500}
       >
         <Form form={foodForm} layout="vertical" style={{ marginTop: 16 }}>
-          <Form.Item name="name" label="Food Name" rules={[{ required: true, message: 'Enter food name' }]}>
-            <Input placeholder="e.g. Avocado (Fresh)" />
+          <Form.Item name="name" label={t('coach:foodAdmin.foodName')} rules={[{ required: true, message: t('coach:foodAdmin.enterName') }]}>
+            <Input placeholder={t('coach:foodAdmin.foodNamePlaceholder')} />
           </Form.Item>
-          <Form.Item name="category" label="Category" rules={[{ required: true, message: 'Select category' }]}>
-            <Select placeholder="Select category" options={FOOD_CATEGORIES.map((c) => ({ label: c, value: c }))} />
+          <Form.Item name="category" label={t('coach:foodAdmin.table.category')} rules={[{ required: true, message: t('coach:foodAdmin.selectCategory') }]}>
+            <Select placeholder={t('coach:foodAdmin.selectCategory')} options={FOOD_CATEGORIES.map((c) => ({ label: getFoodCategoryLabel(c, t), value: c }))} />
           </Form.Item>
 
-          <Form.Item name="caloriesPer100g" label="Calories per 100g" rules={[{ required: true, message: 'Enter calories' }]}>
+          <Form.Item name="caloriesPer100g" label={t('coach:foodAdmin.cal100g')} rules={[{ required: true, message: t('coach:foodAdmin.enterCalories') }]}>
             <InputNumber min={0} placeholder="e.g. 160" style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item name="proteinPer100g" label="Protein (g) per 100g" rules={[{ required: true, message: 'Enter protein' }]}>
+          <Form.Item name="proteinPer100g" label={t('coach:foodAdmin.prot100g')} rules={[{ required: true, message: t('coach:foodAdmin.enterProtein') }]}>
             <InputNumber min={0} precision={1} placeholder="e.g. 2.0" style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item name="carbsPer100g" label="Carbs (g) per 100g" rules={[{ required: true, message: 'Enter carbs' }]}>
+          <Form.Item name="carbsPer100g" label={t('coach:foodAdmin.carb100g')} rules={[{ required: true, message: t('coach:foodAdmin.enterCarbs') }]}>
             <InputNumber min={0} precision={1} placeholder="e.g. 8.5" style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item name="fatPer100g" label="Fat (g) per 100g" rules={[{ required: true, message: 'Enter fat' }]}>
+          <Form.Item name="fatPer100g" label={t('coach:foodAdmin.fat100g')} rules={[{ required: true, message: t('coach:foodAdmin.enterFat') }]}>
             <InputNumber min={0} precision={1} placeholder="e.g. 14.7" style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item name="fiberPer100g" label="Fiber (g) per 100g" rules={[{ required: true, message: 'Enter fiber' }]}>
+          <Form.Item name="fiberPer100g" label={t('coach:foodAdmin.fib100g')} rules={[{ required: true, message: t('coach:foodAdmin.enterFiber') }]}>
             <InputNumber min={0} precision={1} placeholder="e.g. 6.7" style={{ width: '100%' }} />
           </Form.Item>
         </Form>

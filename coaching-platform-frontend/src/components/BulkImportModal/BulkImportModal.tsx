@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Tabs, Upload, Input, Button, message, List, Alert } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useBulkImportFoods } from '../../hooks/useFoods/useFoods';
 import type { BulkImportResultDto } from '../../types/Food';
 import './BulkImportModal.scss';
@@ -11,6 +12,7 @@ interface BulkImportModalProps {
 }
 
 const BulkImportModal: React.FC<BulkImportModalProps> = ({ visible, onCancel, onSuccess }) => {
+  const { t } = useTranslation(['common', 'athlete', 'coach']);
   const [activeTab, setActiveTab] = useState<string>('file');
   const [fileList, setFileList] = useState<any[]>([]);
   const [pasteContent, setPasteContent] = useState<string>('');
@@ -29,7 +31,6 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ visible, onCancel, on
   const parseCSVPreview = (text: string) => {
     const lines = text.split('\n').map((line) => line.trim()).filter(Boolean);
     const grid = lines.slice(0, 6).map((line) => {
-      // Basic comma-splitting supporting quotes is ideal, but simple split works for preview
       return line.split(',');
     });
     setCsvPreview(grid);
@@ -38,12 +39,12 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ visible, onCancel, on
   const beforeUpload = (file: File) => {
     const isCSV = file.type === 'text/csv' || file.name.endsWith('.csv');
     if (!isCSV) {
-      message.error('You can only upload CSV files!');
+      message.error(t('coach:foodAdmin.errorCsvOnly', { defaultValue: 'You can only upload CSV files!' }));
       return Upload.LIST_IGNORE;
     }
     const isLt10M = file.size / 1024 / 1024 < 10;
     if (!isLt10M) {
-      message.error('File must be smaller than 10MB!');
+      message.error(t('coach:foodAdmin.errorCsvSize', { defaultValue: 'File must be smaller than 10MB!' }));
       return Upload.LIST_IGNORE;
     }
 
@@ -75,13 +76,13 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ visible, onCancel, on
 
     if (activeTab === 'file') {
       if (fileList.length === 0) {
-        message.error('Please select a CSV file first.');
+        message.error(t('coach:foodAdmin.selectCsvFile', { defaultValue: 'Please select a CSV file first.' }));
         return;
       }
       fileToUpload = fileList[0];
     } else {
       if (!pasteContent.trim()) {
-        message.error('Please paste CSV content.');
+        message.error(t('coach:foodAdmin.pasteCsvContent', { defaultValue: 'Please paste CSV content.' }));
         return;
       }
       // Create a File object from the pasted content
@@ -113,13 +114,13 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ visible, onCancel, on
 
   return (
     <Modal
-      title="Bulk Import Foods"
+      title={t('coach:foodAdmin.bulkImport')}
       open={visible}
       onCancel={handleClose}
       width={700}
       footer={[
         <Button key="close" onClick={handleClose}>
-          Close
+          {t('common:actions.cancel')}
         </Button>,
         !importResult && (
           <Button
@@ -129,7 +130,7 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ visible, onCancel, on
             loading={importMutation.isPending}
             style={{ backgroundColor: 'var(--color-navy)', color: '#fff', border: 'none' }}
           >
-            Start Import
+            {t('coach:foodAdmin.startImport', { defaultValue: 'Start Import' })}
           </Button>
         ),
       ]}
@@ -137,41 +138,54 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ visible, onCancel, on
     >
       {!importResult ? (
         <>
-          <Tabs activeKey={activeTab} onChange={handleTabChange} className="bulk-import-modal__tabs">
-            <Tabs.TabPane tab="Upload CSV File" key="file">
-              <Upload.Dragger
-                accept=".csv"
-                beforeUpload={beforeUpload}
-                fileList={fileList}
-                onRemove={() => {
-                  setFileList([]);
-                  setCsvPreview([]);
-                }}
-                className="bulk-import-modal__dragger"
-              >
-                <p className="ant-upload-drag-icon">
-                  <span className="material-symbols-outlined" style={{ fontSize: 48, color: 'var(--color-navy)' }}>
-                    cloud_upload
-                  </span>
-                </p>
-                <p className="ant-upload-text">Click or drag CSV file to this area to upload</p>
-                <p className="ant-upload-hint">Support for a single .csv file (Max 10MB)</p>
-              </Upload.Dragger>
-            </Tabs.TabPane>
-            <Tabs.TabPane tab="Paste Raw CSV Text" key="paste">
-              <Input.TextArea
-                rows={8}
-                value={pasteContent}
-                onChange={handlePasteChange}
-                placeholder="Name,Category,CaloriesPer100g,ProteinPer100g,CarbsPer100g,FatPer100g,FiberPer100g,State&#10;Chicken Breast,Protein,165,31,0,3.6,0,Raw&#10;Brown Rice,Carbs,365,7.1,80,0.7,0.4,Dry"
-                className="bulk-import-modal__paste-area font-data"
-              />
-            </Tabs.TabPane>
-          </Tabs>
+          <Tabs
+            activeKey={activeTab}
+            onChange={handleTabChange}
+            className="bulk-import-modal__tabs"
+            items={[
+              {
+                key: 'file',
+                label: t('coach:foodAdmin.uploadCsv', { defaultValue: 'Upload CSV File' }),
+                children: (
+                  <Upload.Dragger
+                    accept=".csv"
+                    beforeUpload={beforeUpload}
+                    fileList={fileList}
+                    onRemove={() => {
+                      setFileList([]);
+                      setCsvPreview([]);
+                    }}
+                    className="bulk-import-modal__dragger"
+                  >
+                    <p className="ant-upload-drag-icon">
+                      <span className="material-symbols-outlined" style={{ fontSize: 48, color: 'var(--color-navy)' }}>
+                        cloud_upload
+                      </span>
+                    </p>
+                    <p className="ant-upload-text">{t('coach:foodAdmin.draggerText', { defaultValue: 'Click or drag CSV file to this area to upload' })}</p>
+                    <p className="ant-upload-hint">{t('coach:foodAdmin.draggerHint', { defaultValue: 'Support for a single .csv file (Max 10MB)' })}</p>
+                  </Upload.Dragger>
+                )
+              },
+              {
+                key: 'paste',
+                label: t('coach:foodAdmin.pasteCsv', { defaultValue: 'Paste Raw CSV Text' }),
+                children: (
+                  <Input.TextArea
+                    rows={8}
+                    value={pasteContent}
+                    onChange={handlePasteChange}
+                    placeholder="Name,Category,CaloriesPer100g,ProteinPer100g,CarbsPer100g,FatPer100g,FiberPer100g&#10;Chicken Breast,Protein,165,31,0,3.6,0&#10;Brown Rice,Carbs,365,7.1,80,0.7,0.4"
+                    className="bulk-import-modal__paste-area font-data"
+                  />
+                )
+              }
+            ]}
+          />
 
           {csvPreview.length > 0 && (
             <div className="bulk-import-modal__preview">
-              <h3>Preview (First 5 rows):</h3>
+              <h3>{t('coach:foodAdmin.csvPreview', { defaultValue: 'Preview (First 5 rows):' })}</h3>
               <div className="bulk-import-modal__preview-table-wrapper">
                 <table className="bulk-import-modal__preview-table font-data">
                   <thead>
@@ -198,11 +212,11 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ visible, onCancel, on
       ) : (
         <div className="bulk-import-modal__result">
           <Alert
-            message="Import Completed"
+            message={t('coach:foodAdmin.importCompleted', { defaultValue: 'Import Completed' })}
             description={
               <div>
-                <p>Foods Successfully Imported: <strong>{importResult.insertedCount}</strong></p>
-                <p>Foods Skipped (Invalid): <strong>{importResult.skippedCount}</strong></p>
+                <p>{t('coach:foodAdmin.importedCount', { defaultValue: 'Foods Successfully Imported:' })} <strong>{importResult.insertedCount}</strong></p>
+                <p>{t('coach:foodAdmin.skippedCount', { defaultValue: 'Foods Skipped (Invalid):' })} <strong>{importResult.skippedCount}</strong></p>
               </div>
             }
             type={importResult.skippedCount > 0 ? 'warning' : 'success'}
@@ -212,7 +226,7 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ visible, onCancel, on
 
           {importResult.errors && importResult.errors.length > 0 && (
             <div className="bulk-import-modal__errors-list">
-              <h4>Rejected Rows Log:</h4>
+              <h4>{t('coach:foodAdmin.rejectedRows', { defaultValue: 'Rejected Rows Log:' })}</h4>
               <List
                 size="small"
                 bordered
@@ -232,7 +246,6 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ visible, onCancel, on
   );
 };
 
-// Simple helper to avoid parsing error for CSS var references in TSX files
 const varSpaceSm = 16;
 
 export default BulkImportModal;

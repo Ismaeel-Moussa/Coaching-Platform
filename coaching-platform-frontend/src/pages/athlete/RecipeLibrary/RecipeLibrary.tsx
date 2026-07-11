@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Tabs, Skeleton, Empty, message as antMessage, Select } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useGetRecipes, useQuickAddRecipe } from '../../../hooks/useRecipes/useRecipes';
 import RecipeCard from '../../../components/RecipeCard/RecipeCard';
 import CreateRecipeModal from '../../../components/CreateRecipeModal/CreateRecipeModal';
@@ -14,6 +15,29 @@ const MEAL_TYPE_OPTIONS = [
   MealType.Breakfast, MealType.Lunch, MealType.Dinner, MealType.Snack,
 ];
 
+const getRecipeCategoryLabel = (category: RecipeCategory, t: any) => {
+  switch (category) {
+    case RecipeCategory.MuscleBuilding: return t('athlete:recipeLibrary.categories.muscleBuilding');
+    case RecipeCategory.FatLoss: return t('athlete:recipeLibrary.categories.fatLoss');
+    case RecipeCategory.Custom: return t('athlete:recipeLibrary.categories.custom');
+    default: return RECIPE_CATEGORY_LABELS[category] || String(category);
+  }
+};
+
+const getMealTypeLabel = (type: MealType, t: any) => {
+  switch (type) {
+    case MealType.Breakfast: return t('common:meals.breakfast');
+    case MealType.Lunch: return t('common:meals.lunch');
+    case MealType.Dinner: return t('common:meals.dinner');
+    case MealType.Snack: return t('common:meals.snack');
+    case MealType.Suhoor: return t('common:meals.suhoor');
+    case MealType.Iftar: return t('common:meals.iftar');
+    case MealType.PreWorkout: return t('common:meals.preWorkout');
+    case MealType.PostWorkout: return t('common:meals.postWorkout');
+    default: return MEAL_TYPE_LABELS[type];
+  }
+};
+
 interface RecipeGridProps {
   category: RecipeCategory;
   today: string;
@@ -21,6 +45,7 @@ interface RecipeGridProps {
 }
 
 const RecipeGrid: React.FC<RecipeGridProps> = ({ category, today, targetMealType }) => {
+  const { t } = useTranslation(['athlete']);
   const { data, isLoading } = useGetRecipes({ category, pageSize: 30 });
   const quickAddMutation = useQuickAddRecipe(today);
 
@@ -45,8 +70,8 @@ const RecipeGrid: React.FC<RecipeGridProps> = ({ category, today, targetMealType
       <Empty
         description={
           category === RecipeCategory.Custom
-            ? 'No custom recipes yet. Create your first recipe!'
-            : `No ${RECIPE_CATEGORY_LABELS[category]} recipes available.`
+            ? t('athlete:recipeLibrary.emptyCustom')
+            : t('athlete:recipeLibrary.emptyCategory', { category: getRecipeCategoryLabel(category, t) })
         }
         image={Empty.PRESENTED_IMAGE_SIMPLE}
         className="recipe-library__empty"
@@ -69,6 +94,7 @@ const RecipeGrid: React.FC<RecipeGridProps> = ({ category, today, targetMealType
 };
 
 const RecipeLibrary: React.FC = () => {
+  const { t } = useTranslation(['common', 'athlete']);
   const today = getTodayIso();
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [targetMealType, setTargetMealType] = useState<MealType>(MealType.Lunch);
@@ -82,7 +108,7 @@ const RecipeLibrary: React.FC = () => {
     label: (
       <span className="recipe-library__tab-label">
         <span className={`recipe-library__tab-dot recipe-library__tab-dot--${category}`} />
-        {RECIPE_CATEGORY_LABELS[category]}
+        {getRecipeCategoryLabel(category, t)}
       </span>
     ),
     children: (
@@ -101,16 +127,16 @@ const RecipeLibrary: React.FC = () => {
       {/* ── Page Header ── */}
       <div className="recipe-library__header">
         <div>
-          <h1 className="recipe-library__title">Recipe Library</h1>
+          <h1 className="recipe-library__title">{t('athlete:recipeLibrary.title')}</h1>
           <p className="recipe-library__sub">
-            Curated and custom recipes to hit your macro targets
+            {t('athlete:recipeLibrary.sub')}
           </p>
         </div>
 
         <div className="recipe-library__actions">
           {/* Meal type picker for quick-add target */}
           <div className="recipe-library__meal-picker">
-            <span className="recipe-library__meal-picker-label">Quick Add to:</span>
+            <span className="recipe-library__meal-picker-label">{t('athlete:recipeLibrary.quickAddTo')}</span>
             <Select
               id="recipe-quick-add-meal-select"
               value={targetMealType}
@@ -119,7 +145,7 @@ const RecipeLibrary: React.FC = () => {
               style={{ width: 140 }}
             >
               {MEAL_TYPE_OPTIONS.map((mt) => (
-                <Option key={mt} value={mt}>{MEAL_TYPE_LABELS[mt]}</Option>
+                <Option key={mt} value={mt}>{getMealTypeLabel(mt, t)}</Option>
               ))}
             </Select>
           </div>
@@ -130,7 +156,7 @@ const RecipeLibrary: React.FC = () => {
             onClick={() => setCreateModalOpen(true)}
           >
             <span className="material-symbols-outlined">add</span>
-            Create Recipe
+            {t('athlete:recipeLibrary.createRecipe')}
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Input, Select, InputNumber, Button, Spin, Empty, Segmented, Space } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useSearchFoods } from '../../hooks/useFoods/useFoods';
 import { useLogFood } from '../../hooks/useDiary/useDiary';
 import { useGetRecipes } from '../../hooks/useRecipes/useRecipes';
@@ -7,7 +8,7 @@ import { calcMacroPreview } from '../../utils/macroCalc';
 import { MealType, MEAL_TYPE_LABELS } from '../../types/Diary';
 import type { FoodDto } from '../../types/Food';
 import type { RecipeDto } from '../../types/Recipe';
-import { RECIPE_CATEGORY_LABELS } from '../../types/Recipe';
+import { RecipeCategory, RECIPE_CATEGORY_LABELS } from '../../types/Recipe';
 import './AddFoodModal.scss';
 
 const { Search } = Input;
@@ -20,12 +21,44 @@ interface AddFoodModalProps {
   defaultMealType?: MealType;
 }
 
+const getMealTypeLabel = (type: MealType, t: any) => {
+  switch (type) {
+    case MealType.Breakfast: return t('common:meals.breakfast');
+    case MealType.Lunch: return t('common:meals.lunch');
+    case MealType.Dinner: return t('common:meals.dinner');
+    case MealType.Snack: return t('common:meals.snack');
+    case MealType.Suhoor: return t('common:meals.suhoor');
+    case MealType.Iftar: return t('common:meals.iftar');
+    case MealType.PreWorkout: return t('common:meals.preWorkout');
+    case MealType.PostWorkout: return t('common:meals.postWorkout');
+    default: return MEAL_TYPE_LABELS[type];
+  }
+};
+
+const getRecipeCategoryLabel = (category: any, t: any) => {
+  switch (category) {
+    case 0:
+    case 'MuscleBuilding': return t('athlete:recipeLibrary.categories.muscleBuilding');
+    case 1:
+    case 'FatLoss': return t('athlete:recipeLibrary.categories.fatLoss');
+    case 2:
+    case 'Custom': return t('athlete:recipeLibrary.categories.custom');
+    default: return RECIPE_CATEGORY_LABELS[category as RecipeCategory] || String(category);
+  }
+};
+
+const getFoodCategoryLabel = (category: string, t: any) => {
+  const key = `common:foodCategories.${category.toLowerCase()}`;
+  return t(key, { defaultValue: category });
+};
+
 const AddFoodModal: React.FC<AddFoodModalProps> = ({
   open,
   onClose,
   date,
   defaultMealType = MealType.Breakfast,
 }) => {
+  const { t } = useTranslation(['common', 'athlete', 'coach']);
   const [activeTab, setActiveTab] = useState<'food' | 'recipe'>('food');
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -125,7 +158,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
       title={
         <div className="add-food-modal__title">
           <span className="material-symbols-outlined">restaurant</span>
-          Add to Diary
+          {t('athlete:components.addFoodModal.title')}
         </div>
       }
       footer={null}
@@ -136,7 +169,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
       <div className="add-food-modal__body">
         {/* Meal type selector */}
         <div className="add-food-modal__field">
-          <label className="add-food-modal__label">Meal</label>
+          <label className="add-food-modal__label">{t('athlete:components.addFoodModal.mealType')}</label>
           <Select
             value={mealType}
             onChange={setMealType}
@@ -145,7 +178,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
             id="add-food-meal-type-select"
           >
             {mealTypeOptions.map((mt) => (
-              <Option key={mt} value={mt}>{MEAL_TYPE_LABELS[mt]}</Option>
+              <Option key={mt} value={mt}>{getMealTypeLabel(mt, t)}</Option>
             ))}
           </Select>
         </div>
@@ -153,8 +186,8 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
         {/* Tab selection */}
         <Segmented
           options={[
-            { label: 'Food', value: 'food', icon: <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle', marginRight: '4px' }}>nutrition</span> },
-            { label: 'Recipe', value: 'recipe', icon: <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle', marginRight: '4px' }}>menu_book</span> }
+            { label: t('athlete:components.addFoodModal.tabFood'), value: 'food', icon: <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle', marginRight: '4px' }}>nutrition</span> },
+            { label: t('athlete:components.addFoodModal.tabRecipe'), value: 'recipe', icon: <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle', marginRight: '4px' }}>menu_book</span> }
           ]}
           value={activeTab}
           onChange={(val) => handleTabChange(val as 'food' | 'recipe')}
@@ -166,11 +199,11 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
         {/* Search Field */}
         <div className="add-food-modal__field">
           <label className="add-food-modal__label">
-            {activeTab === 'food' ? 'Search Food' : 'Search Recipe'}
+            {activeTab === 'food' ? t('athlete:components.addFoodModal.tabFood') : t('athlete:components.addFoodModal.tabRecipe')}
           </label>
           <Search
             id="add-food-search-input"
-            placeholder={activeTab === 'food' ? 'e.g. Chicken Breast, Oats, Rice...' : 'e.g. Protein Pancakes, Oats Bowl...'}
+            placeholder={activeTab === 'food' ? t('athlete:components.addFoodModal.searchFoodPlaceholder') : t('athlete:components.addFoodModal.searchRecipePlaceholder')}
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -191,7 +224,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
             {isSearching ? (
               <div className="add-food-modal__loading">
                 <Spin size="small" />
-                <span>Searching foods...</span>
+                <span>{t('common:actions.loading')}</span>
               </div>
             ) : foodsData && foodsData.items.length > 0 ? (
               <ul className="add-food-modal__list">
@@ -206,10 +239,10 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                   >
                     <div className="add-food-modal__food-info">
                       <span className="add-food-modal__food-name">{food.name}</span>
-                      <span className="add-food-modal__food-category">{food.category}</span>
+                      <span className="add-food-modal__food-category">{getFoodCategoryLabel(food.category, t)}</span>
                     </div>
                     <div className="add-food-modal__food-macros">
-                      <span className="mono">{Math.round(food.caloriesPer100g)} kcal</span>
+                      <span className="mono">{Math.round(food.caloriesPer100g)} {t('common:units.kcal')}</span>
                       <span className="mono add-food-modal__macro-pill">P {food.proteinPer100g}g</span>
                       <span className="mono add-food-modal__macro-pill">C {food.carbsPer100g}g</span>
                       <span className="mono add-food-modal__macro-pill">F {food.fatPer100g}g</span>
@@ -219,7 +252,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
               </ul>
             ) : (
               <Empty
-                description="No foods found. Try a different search term."
+                description={t('athlete:components.addFoodModal.emptyFood')}
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
               />
             )}
@@ -232,7 +265,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
             {isSearchingRecipes ? (
               <div className="add-food-modal__loading">
                 <Spin size="small" />
-                <span>Searching recipes...</span>
+                <span>{t('common:actions.loading')}</span>
               </div>
             ) : recipesData && recipesData.items.length > 0 ? (
               <ul className="add-food-modal__list">
@@ -248,11 +281,11 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                     <div className="add-food-modal__food-info">
                       <span className="add-food-modal__food-name">{recipe.name}</span>
                       <span className="add-food-modal__food-category">
-                        {RECIPE_CATEGORY_LABELS[recipe.category]} • {recipe.servings} Servings
+                        {getRecipeCategoryLabel(recipe.category, t)} • {recipe.servings} {t('athlete:components.recipeCard.servings')}
                       </span>
                     </div>
                     <div className="add-food-modal__food-macros">
-                      <span className="mono">{Math.round(recipe.totalCalories)} kcal</span>
+                      <span className="mono">{Math.round(recipe.totalCalories)} {t('common:units.kcal')}</span>
                       <span className="mono add-food-modal__macro-pill">P {Math.round(recipe.totalProtein)}g</span>
                       <span className="mono add-food-modal__macro-pill">C {Math.round(recipe.totalCarbs)}g</span>
                       <span className="mono add-food-modal__macro-pill">F {Math.round(recipe.totalFat)}g</span>
@@ -262,7 +295,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
               </ul>
             ) : (
               <Empty
-                description="No recipes found. Try a different search term."
+                description={t('athlete:components.addFoodModal.emptyRecipe')}
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
               />
             )}
@@ -276,7 +309,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
               <span className="material-symbols-outlined">check_circle</span>
               <div>
                 <div className="add-food-modal__selected-name">{selectedFood.name}</div>
-                <div className="add-food-modal__selected-category">{selectedFood.category}</div>
+                <div className="add-food-modal__selected-category">{getFoodCategoryLabel(selectedFood.category, t)}</div>
               </div>
               <button
                 className="add-food-modal__change-btn"
@@ -286,13 +319,13 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                 }}
                 type="button"
               >
-                Change
+                {t('coach:assignmentHub.changeBtn')}
               </button>
             </div>
 
             <div className="add-food-modal__row">
               <div className="add-food-modal__field" style={{ width: '100%' }}>
-                <label className="add-food-modal__label">Quantity (grams)</label>
+                <label className="add-food-modal__label">{t('athlete:components.addFoodModal.quantity')}</label>
                 <Space.Compact style={{ width: '100%' }}>
                   <InputNumber
                     id="add-food-quantity-input"
@@ -310,11 +343,11 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                     padding: '0 15px',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    borderRadius: '0 8px 8px 0', // size="large" input has 8px border-radius
+                    borderRadius: '0 8px 8px 0',
                     color: 'var(--ant-color-text-description, rgba(0, 0, 0, 0.45))',
                     fontSize: '16px'
                   }}>
-                    g
+                    {t('common:units.grams')}
                   </span>
                 </Space.Compact>
               </div>
@@ -323,23 +356,23 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
             {/* Macro preview */}
             {preview && quantity > 0 && (
               <div className="add-food-modal__preview">
-                <div className="add-food-modal__preview-title">Macro Preview</div>
+                <div className="add-food-modal__preview-title">{t('athlete:components.addFoodModal.preview')}</div>
                 <div className="add-food-modal__preview-grid">
                   <div className="add-food-modal__preview-item add-food-modal__preview-item--kcal">
                     <span className="add-food-modal__preview-value">{Math.round(preview.calories)}</span>
-                    <span className="add-food-modal__preview-label">kcal</span>
+                    <span className="add-food-modal__preview-label">{t('common:units.kcal')}</span>
                   </div>
                   <div className="add-food-modal__preview-item">
                     <span className="add-food-modal__preview-value">{preview.protein.toFixed(1)}g</span>
-                    <span className="add-food-modal__preview-label">Protein</span>
+                    <span className="add-food-modal__preview-label">{t('common:labels.protein')}</span>
                   </div>
                   <div className="add-food-modal__preview-item">
                     <span className="add-food-modal__preview-value">{preview.carbs.toFixed(1)}g</span>
-                    <span className="add-food-modal__preview-label">Carbs</span>
+                    <span className="add-food-modal__preview-label">{t('common:labels.carbs')}</span>
                   </div>
                   <div className="add-food-modal__preview-item">
                     <span className="add-food-modal__preview-value">{preview.fat.toFixed(1)}g</span>
-                    <span className="add-food-modal__preview-label">Fat</span>
+                    <span className="add-food-modal__preview-label">{t('common:labels.fat')}</span>
                   </div>
                 </div>
               </div>
@@ -355,7 +388,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
               disabled={!selectedFood || !quantity}
               className="add-food-modal__submit"
             >
-              Add to Diary
+              {logFoodMutation.isPending ? t('athlete:components.addFoodModal.adding') : t('athlete:components.addFoodModal.addBtn')}
             </Button>
           </div>
         )}
@@ -368,7 +401,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
               <div style={{ flex: 1 }}>
                 <div className="add-food-modal__selected-name">{selectedRecipe.name}</div>
                 <div className="add-food-modal__selected-category">
-                  {RECIPE_CATEGORY_LABELS[selectedRecipe.category]} • {selectedRecipe.servings} Servings
+                  {getRecipeCategoryLabel(selectedRecipe.category, t)} • {selectedRecipe.servings} {t('athlete:components.recipeCard.servings')}
                 </div>
               </div>
               <button
@@ -379,7 +412,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                 }}
                 type="button"
               >
-                Change
+                {t('coach:assignmentHub.changeBtn')}
               </button>
             </div>
 
@@ -394,17 +427,17 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
               <div className="add-food-modal__recipe-meta">
                 <div className="add-food-modal__meta-item">
                   <span className="material-symbols-outlined">schedule</span>
-                  <span>Prep: {selectedRecipe.prepTimeMinutes}m</span>
+                  <span>{t('athlete:components.createRecipeModal.prepTime')}: {selectedRecipe.prepTimeMinutes}{t('common:units.minutes')}</span>
                 </div>
                 <div className="add-food-modal__meta-item">
                   <span className="material-symbols-outlined">cooking</span>
-                  <span>Cook: {selectedRecipe.cookTimeMinutes}m</span>
+                  <span>{t('athlete:components.createRecipeModal.cookTime')}: {selectedRecipe.cookTimeMinutes}{t('common:units.minutes')}</span>
                 </div>
               </div>
 
               {selectedRecipe.ingredients && selectedRecipe.ingredients.length > 0 && (
                 <div className="add-food-modal__ingredients-list-section">
-                  <div className="add-food-modal__ingredients-title">Ingredients</div>
+                  <div className="add-food-modal__ingredients-title">{t('athlete:components.createRecipeModal.stepIngredients')}</div>
                   <ul className="add-food-modal__ingredients-list">
                     {selectedRecipe.ingredients.map((ing, idx) => (
                       <li key={idx} className="add-food-modal__ingredient-item">
@@ -419,23 +452,23 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
 
             {/* Macro preview */}
             <div className="add-food-modal__preview">
-              <div className="add-food-modal__preview-title">Total Recipe Macros</div>
+              <div className="add-food-modal__preview-title">{t('athlete:components.addFoodModal.preview')}</div>
               <div className="add-food-modal__preview-grid">
                 <div className="add-food-modal__preview-item add-food-modal__preview-item--kcal">
                   <span className="add-food-modal__preview-value">{Math.round(selectedRecipe.totalCalories)}</span>
-                  <span className="add-food-modal__preview-label">kcal</span>
+                  <span className="add-food-modal__preview-label">{t('common:units.kcal')}</span>
                 </div>
                 <div className="add-food-modal__preview-item">
                   <span className="add-food-modal__preview-value">{Math.round(selectedRecipe.totalProtein)}g</span>
-                  <span className="add-food-modal__preview-label">Protein</span>
+                  <span className="add-food-modal__preview-label">{t('common:labels.protein')}</span>
                 </div>
                 <div className="add-food-modal__preview-item">
                   <span className="add-food-modal__preview-value">{Math.round(selectedRecipe.totalCarbs)}g</span>
-                  <span className="add-food-modal__preview-label">Carbs</span>
+                  <span className="add-food-modal__preview-label">{t('common:labels.carbs')}</span>
                 </div>
                 <div className="add-food-modal__preview-item">
                   <span className="add-food-modal__preview-value">{Math.round(selectedRecipe.totalFat)}g</span>
-                  <span className="add-food-modal__preview-label">Fat</span>
+                  <span className="add-food-modal__preview-label">{t('common:labels.fat')}</span>
                 </div>
               </div>
             </div>
@@ -449,7 +482,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
               loading={logFoodMutation.isPending}
               className="add-food-modal__submit"
             >
-              Add Recipe to Diary
+              {logFoodMutation.isPending ? t('athlete:components.addFoodModal.adding') : t('athlete:components.addFoodModal.addBtn')}
             </Button>
           </div>
         )}

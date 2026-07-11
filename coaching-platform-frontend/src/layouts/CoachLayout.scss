@@ -151,10 +151,19 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     padding: var(--space-xs) var(--space-sm) var(--space-sm);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     gap: 8px;
     flex-shrink: 0;
     overflow: hidden;
+
+    // Row container for user and logout
+    &-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
   }
 
   &__user {
@@ -655,3 +664,72 @@ $sidebar-transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     }
   }
 }
+
+/* ── RTL Style Overrides ────────────────────────────────────────────────── */
+[dir="rtl"] {
+  .coach-layout {
+    &__sidebar {
+      left: auto;
+      right: 0;
+    }
+
+    &__main {
+      margin-left: 0;
+      margin-right: var(--sidebar-width);
+    }
+
+    &__nav-item {
+      &--active::before {
+        left: auto;
+        right: 0;
+        border-radius: var(--radius-full) 0 0 var(--radius-full);
+      }
+    }
+
+    &__badge {
+      margin-left: unset;
+      margin-right: auto;
+    }
+
+    &__drawer-item {
+      text-align: right;
+    }
+
+    &--collapsed {
+      .coach-layout__main {
+        margin-left: 0;
+        margin-right: $sidebar-collapsed-width;
+      }
+    }
+  }
+
+  // Adjustments for responsive viewports
+  @media (max-width: 1024px) and (min-width: 769px) {
+    .coach-layout {
+      &__main {
+        margin-left: 0 !important;
+        margin-right: $sidebar-collapsed-width !important;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .coach-layout {
+      &__main {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+      }
+    }
+  }
+}
+
+.coach-layout--collapsed {
+  .language-switcher__text {
+    display: none;
+  }
+  .language-switcher {
+    padding: 6px;
+    justify-content: center;
+  }
+}
+

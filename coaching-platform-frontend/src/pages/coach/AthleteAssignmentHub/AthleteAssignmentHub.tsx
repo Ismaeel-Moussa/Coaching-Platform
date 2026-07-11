@@ -3,6 +3,7 @@ import {
   Select, Card, Button, InputNumber, Input, 
   Modal, Skeleton, Avatar, Tooltip 
 } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useGetRoster, useGetAthleteProfile } from '../../../hooks/useCoachHub/useCoachHub';
 import { useGetWorkoutTemplates, useAssignTemplate } from '../../../hooks/useWorkoutTemplates/useWorkoutTemplates';
 import { 
@@ -18,6 +19,7 @@ import './AthleteAssignmentHub.scss';
 const { Option } = Select;
 
 const AthleteAssignmentHub: React.FC = () => {
+  const { t } = useTranslation(['common', 'athlete', 'coach']);
   const [selectedAthleteId, setSelectedAthleteId] = useState<number | null>(null);
 
   // Roster and Templates lists
@@ -94,7 +96,7 @@ const AthleteAssignmentHub: React.FC = () => {
       water === null || 
       steps === null
     ) {
-      Modal.error({ title: 'Validation Error', content: 'All daily target fields are required.' });
+      Modal.error({ title: t('common:actions.confirm'), content: t('coach:assignmentHub.requiredFieldsDesc', { defaultValue: 'All daily target fields are required.' }) });
       return;
     }
 
@@ -111,7 +113,7 @@ const AthleteAssignmentHub: React.FC = () => {
   // Assign program template
   const handleAssignProgram = () => {
     if (!tempSelectedProgramId || !selectedAthleteId) {
-      Modal.error({ title: 'Validation Error', content: 'Please select a program template.' });
+      Modal.error({ title: t('common:actions.confirm'), content: t('coach:assignmentHub.selectTemplate') });
       return;
     }
 
@@ -149,7 +151,7 @@ const AthleteAssignmentHub: React.FC = () => {
   // Save Supplement (Add or Edit)
   const handleSaveSupplement = () => {
     if (!supName.trim()) {
-      Modal.error({ title: 'Validation Error', content: 'Supplement name is required.' });
+      Modal.error({ title: t('common:actions.confirm'), content: t('coach:assignmentHub.suppNameRequired', { defaultValue: 'Supplement name is required.' }) });
       return;
     }
 
@@ -177,10 +179,11 @@ const AthleteAssignmentHub: React.FC = () => {
   // Delete Supplement
   const handleDeleteSupplement = (id: number) => {
     Modal.confirm({
-      title: 'Delete Supplement',
-      content: 'Are you sure you want to delete this supplement schedule? This action cannot be undone.',
-      okText: 'Delete',
+      title: t('coach:assignmentHub.deleteSupp'),
+      content: t('coach:assignmentHub.deleteConfirm'),
+      okText: t('common:actions.delete'),
       okType: 'danger',
+      cancelText: t('common:actions.cancel'),
       onOk: () => {
         deleteSupplementMutation.mutate(id);
       }
@@ -192,9 +195,9 @@ const AthleteAssignmentHub: React.FC = () => {
       
       {/* Page Header */}
       <div className="athlete-assignment-hub__header">
-        <h1 className="athlete-assignment-hub__title">Athlete Assignment Hub</h1>
+        <h1 className="athlete-assignment-hub__title">{t('coach:assignmentHub.title')}</h1>
         <p className="athlete-assignment-hub__subtitle">
-          Manage workout programs, macro targets, hydration, steps, and supplement schedules.
+          {t('coach:assignmentHub.subtitle')}
         </p>
       </div>
 
@@ -206,7 +209,7 @@ const AthleteAssignmentHub: React.FC = () => {
           </div>
           <div className="athlete-assignment-hub__select-wrapper">
             <Select
-              placeholder="Search roster..."
+              placeholder={t('coach:assignmentHub.searchPlaceholder')}
               onChange={handleAthleteChange}
               value={selectedAthleteId}
               className="athlete-assignment-hub__select"
@@ -255,8 +258,8 @@ const AthleteAssignmentHub: React.FC = () => {
           <div className="empty-icon">
             <span className="material-symbols-outlined">assignment_ind</span>
           </div>
-          <h3>No Athlete Selected</h3>
-          <p>Select an athlete from the dropdown above to configure their workout program, nutrition targets, and supplement schedule.</p>
+          <h3>{t('coach:assignmentHub.noAthleteSelected')}</h3>
+          <p>{t('coach:assignmentHub.noAthleteSelectedDesc')}</p>
         </div>
       ) : isProfileLoading ? (
         <div style={{ backgroundColor: 'var(--color-white)', padding: 28, borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border-light)' }}>
@@ -276,7 +279,7 @@ const AthleteAssignmentHub: React.FC = () => {
                   <div className="icon-bubble">
                     <span className="material-symbols-outlined">fitness_center</span>
                   </div>
-                  <h3>Workout Program</h3>
+                  <h3>{t('coach:assignmentHub.workoutProgram')}</h3>
                 </div>
               }
               variant="borderless"
@@ -284,7 +287,7 @@ const AthleteAssignmentHub: React.FC = () => {
               {selectedRosterItem?.activeProgramName ? (
                 <div className="athlete-assignment-hub__current-program">
                   <div className="athlete-assignment-hub__program-info">
-                    <span className="program-label">Active Workout Template</span>
+                    <span className="program-label">{t('coach:assignmentHub.activeTemplate')}</span>
                     <span className="program-name">{selectedRosterItem.activeProgramName}</span>
                   </div>
                   <Button 
@@ -292,19 +295,19 @@ const AthleteAssignmentHub: React.FC = () => {
                     onClick={() => setIsProgramModalVisible(true)}
                     icon={<span className="material-symbols-outlined" style={{ fontSize: 15 }}>sync</span>}
                   >
-                    Change
+                    {t('coach:assignmentHub.changeBtn')}
                   </Button>
                 </div>
               ) : (
                 <div>
-                  <p className="athlete-assignment-hub__no-program">No workout program assigned yet.</p>
+                  <p className="athlete-assignment-hub__no-program">{t('coach:assignmentHub.noProgram')}</p>
                   <Button 
                     type="primary" 
                     block 
                     onClick={() => setIsProgramModalVisible(true)}
                     icon={<span className="material-symbols-outlined" style={{ fontSize: 15 }}>add</span>}
                   >
-                    Assign Workout Template
+                    {t('coach:assignmentHub.assignTemplate')}
                   </Button>
                 </div>
               )}
@@ -318,7 +321,7 @@ const AthleteAssignmentHub: React.FC = () => {
                   <div className="icon-bubble">
                     <span className="material-symbols-outlined">nutrition</span>
                   </div>
-                  <h3>Daily Nutrition Targets</h3>
+                  <h3>{t('coach:assignmentHub.nutritionTargets')}</h3>
                 </div>
               }
               variant="borderless"
@@ -328,7 +331,7 @@ const AthleteAssignmentHub: React.FC = () => {
                   <div className="athlete-assignment-hub__macro-field">
                     <span className="athlete-assignment-hub__macro-label athlete-assignment-hub__macro-label--calories">
                       <span className="macro-dot" />
-                      Calories (kcal)
+                      {t('coach:assignmentHub.calories')}
                     </span>
                     <InputNumber
                       min={100}
@@ -340,7 +343,7 @@ const AthleteAssignmentHub: React.FC = () => {
                   <div className="athlete-assignment-hub__macro-field">
                     <span className="athlete-assignment-hub__macro-label athlete-assignment-hub__macro-label--protein">
                       <span className="macro-dot" />
-                      Protein (g)
+                      {t('coach:assignmentHub.protein')}
                     </span>
                     <InputNumber
                       min={10}
@@ -352,7 +355,7 @@ const AthleteAssignmentHub: React.FC = () => {
                   <div className="athlete-assignment-hub__macro-field">
                     <span className="athlete-assignment-hub__macro-label athlete-assignment-hub__macro-label--carbs">
                       <span className="macro-dot" />
-                      Carbohydrates (g)
+                      {t('coach:assignmentHub.carbs')}
                     </span>
                     <InputNumber
                       min={10}
@@ -364,7 +367,7 @@ const AthleteAssignmentHub: React.FC = () => {
                   <div className="athlete-assignment-hub__macro-field">
                     <span className="athlete-assignment-hub__macro-label athlete-assignment-hub__macro-label--fat">
                       <span className="macro-dot" />
-                      Fat (g)
+                      {t('coach:assignmentHub.fat')}
                     </span>
                     <InputNumber
                       min={5}
@@ -381,7 +384,7 @@ const AthleteAssignmentHub: React.FC = () => {
                   loading={setMacroTargetsMutation.isPending}
                   icon={<span className="material-symbols-outlined" style={{ fontSize: 15 }}>save</span>}
                 >
-                  Update Nutrition Targets
+                  {t('coach:assignmentHub.updateNutrition')}
                 </Button>
               </div>
             </Card>
@@ -398,7 +401,7 @@ const AthleteAssignmentHub: React.FC = () => {
                   <div className="icon-bubble">
                     <span className="material-symbols-outlined">track_changes</span>
                   </div>
-                  <h3>Water & Steps Targets</h3>
+                  <h3>{t('coach:assignmentHub.waterSteps')}</h3>
                 </div>
               }
               variant="borderless"
@@ -406,7 +409,7 @@ const AthleteAssignmentHub: React.FC = () => {
               <div className="athlete-assignment-hub__form">
                 <div className="athlete-assignment-hub__form-grid">
                   <div className="athlete-assignment-hub__form-field">
-                    <span className="athlete-assignment-hub__field-label">Daily Water (Liters)</span>
+                    <span className="athlete-assignment-hub__field-label">{t('coach:assignmentHub.dailyWater')}</span>
                     <InputNumber
                       min={0.5}
                       max={20}
@@ -416,7 +419,7 @@ const AthleteAssignmentHub: React.FC = () => {
                     />
                   </div>
                   <div className="athlete-assignment-hub__form-field">
-                    <span className="athlete-assignment-hub__field-label">Daily Steps Goal</span>
+                    <span className="athlete-assignment-hub__field-label">{t('coach:assignmentHub.dailySteps')}</span>
                     <InputNumber
                       min={100}
                       max={100000}
@@ -433,7 +436,7 @@ const AthleteAssignmentHub: React.FC = () => {
                   loading={setMacroTargetsMutation.isPending}
                   icon={<span className="material-symbols-outlined" style={{ fontSize: 15 }}>save</span>}
                 >
-                  Update Activity Targets
+                  {t('coach:assignmentHub.updateActivity')}
                 </Button>
               </div>
             </Card>
@@ -446,7 +449,7 @@ const AthleteAssignmentHub: React.FC = () => {
                   <div className="icon-bubble">
                     <span className="material-symbols-outlined">medication</span>
                   </div>
-                  <h3>Supplement Schedule</h3>
+                  <h3>{t('coach:assignmentHub.supplementSchedule')}</h3>
                 </div>
               }
               variant="borderless"
@@ -458,7 +461,7 @@ const AthleteAssignmentHub: React.FC = () => {
                   onClick={openAddSupplement}
                   icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>}
                 >
-                  Add Supplement Item
+                  {t('coach:assignmentHub.addSupplement')}
                 </Button>
 
                 {isSupplementsLoading ? (
@@ -466,7 +469,7 @@ const AthleteAssignmentHub: React.FC = () => {
                 ) : !supplements || supplements.length === 0 ? (
                   <div className="athlete-assignment-hub__no-supplements">
                     <span className="material-symbols-outlined">medication_liquid</span>
-                    No supplements scheduled yet.
+                    {t('coach:assignmentHub.noSupplements')}
                   </div>
                 ) : (
                   <div className="athlete-assignment-hub__supplements-list">
@@ -476,7 +479,7 @@ const AthleteAssignmentHub: React.FC = () => {
                           <div className="sup-name-row">
                             <span className="sup-name">{sup.name}</span>
                             <span className={`sup-type-badge sup-type-badge--${sup.type.toLowerCase()}`}>
-                              {sup.type}
+                              {sup.type === 'Essential' ? t('coach:assignmentHub.essential') : t('coach:assignmentHub.optional')}
                             </span>
                           </div>
                           {sup.dosage && (
@@ -492,7 +495,7 @@ const AthleteAssignmentHub: React.FC = () => {
                           )}
                         </div>
                         <div className="athlete-assignment-hub__supplement-actions">
-                          <Tooltip title="Edit">
+                          <Tooltip title={t('common:actions.edit')}>
                             <Button 
                               type="text" 
                               size="small"
@@ -500,7 +503,7 @@ const AthleteAssignmentHub: React.FC = () => {
                               icon={<span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>}
                             />
                           </Tooltip>
-                          <Tooltip title="Delete">
+                          <Tooltip title={t('common:actions.delete')}>
                             <Button 
                               type="text" 
                               danger 
@@ -524,30 +527,30 @@ const AthleteAssignmentHub: React.FC = () => {
 
       {/* Program Template Assignment Modal */}
       <Modal
-        title="Assign Workout Template"
+        title={t('coach:assignmentHub.modalAssignTitle')}
         open={isProgramModalVisible}
         onCancel={() => {
           setIsProgramModalVisible(false);
           setTempSelectedProgramId(null);
         }}
         onOk={handleAssignProgram}
-        okText="Assign Template"
+        okText={t('coach:assignmentHub.assignTemplate')}
         okButtonProps={{ loading: assignTemplateMutation.isPending }}
         width={450}
       >
         <div style={{ padding: '8px 0' }}>
-          <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 16 }}>
-            Select a workout template below to assign it to <strong>{profile?.fullName}</strong>. This will replace their current program.
-          </p>
+          <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 16 }}
+             dangerouslySetInnerHTML={{ __html: t('coach:assignmentHub.modalAssignDesc', { name: profile?.fullName }) }}
+          />
           <Select
-            placeholder="Select template..."
+            placeholder={t('coach:assignmentHub.selectTemplate')}
             style={{ width: '100%' }}
             value={tempSelectedProgramId}
             onChange={(val) => setTempSelectedProgramId(val)}
             loading={isTemplatesLoading}
             options={templatesData?.items?.map((tmpl: any) => ({
               value: tmpl.id,
-              label: `${tmpl.name} (${tmpl.dayCount} Days)`
+              label: `${tmpl.name} (${tmpl.dayCount} ${t('coach:templateBuilder.daysCount', { count: tmpl.dayCount })})`
             })) || []}
           />
         </div>
@@ -555,11 +558,11 @@ const AthleteAssignmentHub: React.FC = () => {
 
       {/* Supplement Add/Edit Modal */}
       <Modal
-        title={editingSupplement ? 'Edit Supplement Item' : 'Add Supplement Item'}
+        title={editingSupplement ? t('coach:assignmentHub.modalEditSupp') : t('coach:assignmentHub.modalAddSupp')}
         open={isSupplementModalVisible}
         onCancel={() => setIsSupplementModalVisible(false)}
         onOk={handleSaveSupplement}
-        okText={editingSupplement ? 'Update Schedule' : 'Add to Schedule'}
+        okText={editingSupplement ? t('coach:assignmentHub.updateSchedule') : t('coach:assignmentHub.addSchedule')}
         okButtonProps={{ 
           loading: addSupplementMutation.isPending || updateSupplementMutation.isPending 
         }}
@@ -567,35 +570,35 @@ const AthleteAssignmentHub: React.FC = () => {
       >
         <div className="supplement-modal-form" style={{ padding: '8px 0' }}>
           <div className="athlete-assignment-hub__form-field">
-            <span className="athlete-assignment-hub__field-label">Supplement Name</span>
+            <span className="athlete-assignment-hub__field-label">{t('coach:assignmentHub.suppName')}</span>
             <Input 
-              placeholder="e.g. Creatine Monohydrate" 
+              placeholder={t('coach:assignmentHub.suppNamePlaceholder', { defaultValue: 'e.g. Creatine Monohydrate' })} 
               value={supName} 
               onChange={(e) => setSupName(e.target.value)}
             />
           </div>
           <div className="athlete-assignment-hub__form-field">
-            <span className="athlete-assignment-hub__field-label">Type</span>
+            <span className="athlete-assignment-hub__field-label">{t('coach:assignmentHub.suppType')}</span>
             <Select 
               value={supType} 
               onChange={(val) => setSupType(val as 'Essential' | 'Optional')}
             >
-              <Option value="Essential">Essential (Daily Critical)</Option>
-              <Option value="Optional">Optional (As Needed)</Option>
+              <Option value="Essential">{t('coach:assignmentHub.essential')}</Option>
+              <Option value="Optional">{t('coach:assignmentHub.optional')}</Option>
             </Select>
           </div>
           <div className="athlete-assignment-hub__form-field">
-            <span className="athlete-assignment-hub__field-label">Dosage</span>
+            <span className="athlete-assignment-hub__field-label">{t('coach:assignmentHub.suppDosage')}</span>
             <Input 
-              placeholder="e.g. 5g daily post-workout" 
+              placeholder={t('coach:assignmentHub.suppDosagePlaceholder', { defaultValue: 'e.g. 5g daily post-workout' })} 
               value={supDosage} 
               onChange={(e) => setSupDosage(e.target.value)}
             />
           </div>
           <div className="athlete-assignment-hub__form-field">
-            <span className="athlete-assignment-hub__field-label">Coach Notes / Instructions</span>
+            <span className="athlete-assignment-hub__field-label">{t('coach:assignmentHub.suppNotes')}</span>
             <Input.TextArea 
-              placeholder="e.g. Take with warm water, ensure lots of hydration." 
+              placeholder={t('coach:assignmentHub.suppNotesPlaceholder')} 
               rows={3} 
               value={supNotes} 
               onChange={(e) => setSupNotes(e.target.value)}

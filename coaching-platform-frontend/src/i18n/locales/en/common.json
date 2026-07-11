@@ -1,0 +1,153 @@
+{
+  "brand": {
+    "title": "JOKER NUTRITION",
+    "coachHub": "Coach Hub",
+    "clientPortal": "Client Portal"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "clientRoster": "Client Roster",
+    "athleteHub": "Plans & Targets",
+    "exerciseLibrary": "Exercise Library",
+    "foodRecipes": "Food & Recipes",
+    "templateBuilder": "Template Builder",
+    "invitations": "Invitations",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "nutrition": "Nutrition",
+    "workouts": "Workouts",
+    "supplements": "Supplements",
+    "recipes": "Recipes",
+    "checkIn": "Check-In",
+    "signOut": "Sign Out"
+  },
+  "actions": {
+    "back": "Back",
+    "next": "Next",
+    "save": "Save Changes",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "done": "Done"
+  },
+  "language": {
+    "english": "English",
+    "arabic": "Arabic",
+    "select": "Select Language"
+  },
+  "notifications": {
+    "title": "Notification Center",
+    "subtitle": "Stay updated with your daily programs, feedback, and logs. You have <span class=\"notifications-page__count\">{{count}}</span> unread messages.",
+    "markAllRead": "Mark all as read",
+    "emptyAll": "You have no notifications.",
+    "emptyUnread": "No unread notifications! All caught up.",
+    "emptyRead": "No read notifications.",
+    "filterAll": "All",
+    "filterUnread": "Unread ({{count}})",
+    "filterRead": "Read",
+    "markReadTooltip": "Mark as read",
+    "tags": {
+      "nutrition": "Nutrition",
+      "feedback": "Coach Feedback",
+      "workout": "Workout",
+      "checkIn": "Check-In",
+      "roster": "Roster",
+      "general": "General"
+    }
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "code": "404",
+    "message": "The page you're looking for doesn't exist or has been moved.",
+    "backHome": "Back to Home"
+  },
+  "units": {
+    "kcal": "kcal",
+    "grams": "g",
+    "kg": "kg",
+    "cm": "cm",
+    "liters": "L",
+    "minutes": "min",
+    "steps": "steps",
+    "serving": "serving",
+    "servings": "servings"
+  },
+  "confirm": {
+    "yes": "Yes",
+    "no": "No",
+    "remove": "Remove",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "delete": "Delete",
+    "areYouSure": "Are you sure?"
+  },
+  "pagination": {
+    "prev": "Prev",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{total}}"
+  },
+  "labels": {
+    "calories": "Calories",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat",
+    "fiber": "Fiber",
+    "weight": "Weight",
+    "waist": "Waist",
+    "chest": "Chest",
+    "thigh": "Thigh"
+  },
+  "status": {
+    "active": "Active",
+    "archived": "Archived",
+    "noneAssigned": "None Assigned",
+    "never": "Never",
+    "unknown": "Unknown",
+    "loading": "Loading...",
+    "done": "Done",
+    "pending": "Pending",
+    "accepted": "Accepted",
+    "expired": "Expired",
+    "revoked": "Revoked",
+    "all": "All"
+  },
+  "meals": {
+    "breakfast": "Breakfast",
+    "lunch": "Lunch",
+    "dinner": "Dinner",
+    "snack": "Snack",
+    "suhoor": "Suhoor",
+    "iftar": "Iftar",
+    "preWorkout": "Pre-Workout",
+    "postWorkout": "Post-Workout"
+  },
+  "foodCategories": {
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat",
+    "vegetable": "Vegetable",
+    "dairy": "Dairy",
+    "fruit": "Fruit",
+    "meat": "Meat",
+    "bakery": "Bakery",
+    "cheese": "Cheese",
+    "poultry": "Poultry",
+    "nuts": "Nuts",
+    "oils": "Oils",
+    "condiments": "Condiments",
+    "juice": "Juice",
+    "snacks": "Snacks"
+  },
+  "muscleGroups": {
+    "chest": "Chest",
+    "back": "Back",
+    "shoulders": "Shoulders",
+    "arms": "Arms",
+    "legs": "Legs",
+    "cardio": "Cardio",
+    "core": "Core"
+  }
+}

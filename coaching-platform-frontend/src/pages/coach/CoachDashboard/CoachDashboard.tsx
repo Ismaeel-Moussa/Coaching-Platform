@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Skeleton, Empty, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   useGetCoachDashboard,
   useGetLiveFeed,
@@ -11,6 +12,7 @@ import ComplianceBar from '../../../components/ComplianceBar/ComplianceBar';
 import './CoachDashboard.scss';
 
 const CoachDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [feedPage, setFeedPage] = useState<number>(1);
   const FEED_PAGE_SIZE = 10;
@@ -56,10 +58,10 @@ const CoachDashboard: React.FC = () => {
     return (
       <div className="coach-dashboard coach-dashboard--error">
         <span className="material-symbols-outlined">error_outline</span>
-        <h2>Error Loading Dashboard</h2>
-        <p>There was a problem loading the coaching data. Please check your connection or refresh the page.</p>
+        <h2>{t('coach:dashboard.errorTitle')}</h2>
+        <p>{t('coach:dashboard.errorDesc')}</p>
         <Button type="primary" onClick={() => window.location.reload()}>
-          Refresh Page
+          {t('coach:dashboard.refreshBtn')}
         </Button>
       </div>
     );
@@ -76,12 +78,12 @@ const CoachDashboard: React.FC = () => {
       {/* Header */}
       <div className="coach-dashboard__header">
         <div>
-          <h1 className="coach-dashboard__title">Coach Dashboard</h1>
-          <p className="coach-dashboard__subtitle">Monitor athlete progress and compliance in real-time</p>
+          <h1 className="coach-dashboard__title">{t('coach:dashboard.title')}</h1>
+          <p className="coach-dashboard__subtitle">{t('coach:dashboard.subtitle')}</p>
         </div>
         <button className="coach-dashboard__action-btn" onClick={handleRosterClick}>
           <span className="material-symbols-outlined">group</span>
-          View Client Roster
+          {t('coach:dashboard.viewRosterBtn')}
         </button>
       </div>
 
@@ -93,7 +95,7 @@ const CoachDashboard: React.FC = () => {
             <span className="material-symbols-outlined">groups</span>
           </div>
           <div className="coach-dashboard__kpi-info">
-            <span className="coach-dashboard__kpi-label">Active Athletes</span>
+            <span className="coach-dashboard__kpi-label">{t('coach:dashboard.activeAthletes')}</span>
             {isDashboardLoading ? (
               <Skeleton.Input active size="small" style={{ width: 80 }} />
             ) : (
@@ -135,8 +137,8 @@ const CoachDashboard: React.FC = () => {
             </div>
           </div>
           <div className="coach-dashboard__kpi-info">
-            <span className="coach-dashboard__kpi-label">Workout Completion</span>
-            <span className="coach-dashboard__kpi-sub">Weekly average</span>
+            <span className="coach-dashboard__kpi-label">{t('coach:dashboard.workoutCompletion')}</span>
+            <span className="coach-dashboard__kpi-sub">{t('coach:dashboard.weeklyAvg')}</span>
           </div>
         </div>
 
@@ -155,7 +157,7 @@ const CoachDashboard: React.FC = () => {
             <span className="material-symbols-outlined">pending_actions</span>
           </div>
           <div className="coach-dashboard__kpi-info">
-            <span className="coach-dashboard__kpi-label">Pending Check-ins</span>
+            <span className="coach-dashboard__kpi-label">{t('coach:dashboard.pendingCheckIns')}</span>
             {isDashboardLoading ? (
               <Skeleton.Input active size="small" style={{ width: 80 }} />
             ) : (
@@ -164,7 +166,7 @@ const CoachDashboard: React.FC = () => {
                   {dashboardData?.pendingCheckInsCount ?? 0}
                 </span>
                 {(dashboardData?.pendingCheckInsCount ?? 0) > 0 && (
-                  <span className="coach-dashboard__kpi-alert-badge">Action Required</span>
+                  <span className="coach-dashboard__kpi-alert-badge">{t('coach:dashboard.actionRequired')}</span>
                 )}
               </div>
             )}
@@ -180,9 +182,9 @@ const CoachDashboard: React.FC = () => {
           <div className="coach-dashboard__panel-header">
             <div className="coach-dashboard__panel-title-wrapper">
               <span className="material-symbols-outlined">bolt</span>
-              <h2>Real-Time Live Feed</h2>
+              <h2>{t('coach:dashboard.liveFeed')}</h2>
             </div>
-            <span className="coach-dashboard__pulse-indicator" title="Monitoring active logs"></span>
+            <span className="coach-dashboard__pulse-indicator" title={t('coach:dashboard.monitoringLogs')}></span>
           </div>
 
           <div className="coach-dashboard__panel-body">
@@ -199,7 +201,7 @@ const CoachDashboard: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <Empty description="No workout logs found." style={{ padding: '40px 0' }} />
+              <Empty description={t('coach:dashboard.noLogs')} style={{ padding: '40px 0' }} />
             )}
           </div>
 
@@ -212,17 +214,17 @@ const CoachDashboard: React.FC = () => {
                 disabled={feedPage === 1}
               >
                 <span className="material-symbols-outlined">chevron_left</span>
-                Previous
+                {t('coach:dashboard.prevBtn')}
               </button>
               <span className="coach-dashboard__page-num mono">
-                Page {feedPage} of {feedData.totalPages}
+                {t('coach:dashboard.pageNum', { page: feedPage, total: feedData.totalPages })}
               </span>
               <button
                 className="coach-dashboard__page-btn"
                 onClick={handleNextPage}
                 disabled={!feedData.hasNextPage}
               >
-                Next
+                {t('coach:dashboard.nextBtn')}
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>
             </div>
@@ -234,7 +236,7 @@ const CoachDashboard: React.FC = () => {
           <div className="coach-dashboard__panel-header">
             <div className="coach-dashboard__panel-title-wrapper">
               <span className="material-symbols-outlined">restaurant</span>
-              <h2>Today's Compliance</h2>
+              <h2>{t('coach:dashboard.compliance')}</h2>
             </div>
           </div>
 
@@ -260,7 +262,7 @@ const CoachDashboard: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <Empty description="No compliance logs for today yet." style={{ padding: '40px 0' }} />
+              <Empty description={t('coach:dashboard.noCompliance')} style={{ padding: '40px 0' }} />
             )}
           </div>
         </div>
