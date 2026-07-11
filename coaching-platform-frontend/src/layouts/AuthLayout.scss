@@ -48,11 +48,22 @@
     box-sizing: border-box;
   }
 
+  &__logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-xl);
+    width: 100%;
+  }
+
   &__logo {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: var(--space-xl);
+  }
+
+  &__brand-lang {
+    display: none;
   }
 
   &__logo-icon {
@@ -197,6 +208,14 @@
     &__brand-content {
       padding: var(--space-md);
       max-width: 100%;
+    }
+
+    &__brand-lang {
+      display: block;
+    }
+
+    &__lang-container {
+      display: none;
     }
 
     &__tagline {

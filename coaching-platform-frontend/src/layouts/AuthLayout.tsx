@@ -13,11 +13,16 @@ const AuthLayout: React.FC = () => {
       {/* Left branding panel */}
       <div className="auth-layout__brand">
         <div className="auth-layout__brand-content">
-          <div className="auth-layout__logo">
-            <div className="auth-layout__logo-icon">
-              <span>JN</span>
+          <div className="auth-layout__logo-container">
+            <div className="auth-layout__logo">
+              <div className="auth-layout__logo-icon">
+                <span>JN</span>
+              </div>
+              <span className="auth-layout__logo-text">{t('brand.title')}</span>
             </div>
-            <span className="auth-layout__logo-text">{t('brand.title')}</span>
+            <div className="auth-layout__brand-lang">
+              <LanguageSwitcher />
+            </div>
           </div>
           <h1 className="auth-layout__tagline">
             {t('auth:authLayout.tagline').split('\n').map((line, idx) => (
