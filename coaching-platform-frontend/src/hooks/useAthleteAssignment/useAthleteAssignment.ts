@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
+import i18n from '../../i18n/i18n';
 import {
   setMacroTargets,
   getAthleteSupplements,
@@ -16,11 +17,11 @@ export const useSetMacroTargets = (athleteId: number) => {
   return useMutation({
     mutationFn: (form: SetMacroTargetsForm) => setMacroTargets(athleteId, form),
     onSuccess: () => {
-      antMessage.success('Daily targets updated successfully!');
+      antMessage.success(i18n.t('common:alerts.targetsUpdated'));
       queryClient.invalidateQueries({ queryKey: ['coach-athlete-profile', athleteId] });
     },
     onError: (error: any) => {
-      const msg = error.response?.data?.message || 'Failed to update daily targets.';
+      const msg = error.response?.data?.message || i18n.t('common:alerts.targetsUpdateFailed');
       antMessage.error(msg);
     },
   });
@@ -39,11 +40,11 @@ export const useAddAthleteSupplement = (athleteId: number) => {
   return useMutation({
     mutationFn: (form: AddSupplementForm) => addAthleteSupplement(athleteId, form),
     onSuccess: () => {
-      antMessage.success('Supplement schedule added successfully!');
+      antMessage.success(i18n.t('common:alerts.suppScheduleAdded'));
       queryClient.invalidateQueries({ queryKey: ['athlete-supplements', athleteId] });
     },
     onError: (error: any) => {
-      const msg = error.response?.data?.message || 'Failed to add supplement schedule.';
+      const msg = error.response?.data?.message || i18n.t('common:alerts.suppScheduleAddFailed');
       antMessage.error(msg);
     },
   });
@@ -55,11 +56,11 @@ export const useUpdateAthleteSupplement = (athleteId: number) => {
     mutationFn: ({ id, form }: { id: number; form: UpdateSupplementForm }) =>
       updateAthleteSupplement(id, form),
     onSuccess: () => {
-      antMessage.success('Supplement schedule updated successfully!');
+      antMessage.success(i18n.t('common:alerts.suppScheduleUpdated'));
       queryClient.invalidateQueries({ queryKey: ['athlete-supplements', athleteId] });
     },
     onError: (error: any) => {
-      const msg = error.response?.data?.message || 'Failed to update supplement schedule.';
+      const msg = error.response?.data?.message || i18n.t('common:alerts.suppScheduleUpdateFailed');
       antMessage.error(msg);
     },
   });
@@ -86,11 +87,11 @@ export const useDeleteAthleteSupplement = (athleteId: number) => {
       if (context?.previousSupplements) {
         queryClient.setQueryData(['athlete-supplements', athleteId], context.previousSupplements);
       }
-      const msg = error.response?.data?.message || 'Failed to delete supplement schedule.';
+      const msg = error.response?.data?.message || i18n.t('common:alerts.suppScheduleDeleteFailed');
       antMessage.error(msg);
     },
     onSuccess: () => {
-      antMessage.success('Supplement schedule deleted successfully!');
+      antMessage.success(i18n.t('common:alerts.suppScheduleDeleted'));
       queryClient.invalidateQueries({ queryKey: ['athlete-supplements', athleteId] });
     },
   });

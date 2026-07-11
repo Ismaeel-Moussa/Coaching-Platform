@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
 import type { AxiosError } from 'axios';
+import i18n from '../../i18n/i18n';
 import {
   getExercises,
   getExerciseById,
@@ -37,13 +38,13 @@ export const useCreateExercise = () => {
   return useMutation<ExerciseAdminDto, AxiosError, CreateExerciseForm>({
     mutationFn: createExercise,
     onSuccess: (data) => {
-      antMessage.success(`Exercise "${data.name}" created successfully!`);
+      antMessage.success(i18n.t('common:alerts.exerciseCreated', { name: data.name }));
       queryClient.invalidateQueries({ queryKey: ['exercises'] });
     },
     onError: (error) => {
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to create exercise.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
   });
@@ -54,14 +55,14 @@ export const useUpdateExercise = () => {
   return useMutation<ExerciseAdminDto, AxiosError, { id: number; form: UpdateExerciseForm }>({
     mutationFn: ({ id, form }) => updateExercise(id, form),
     onSuccess: (data) => {
-      antMessage.success(`Exercise "${data.name}" updated successfully!`);
+      antMessage.success(i18n.t('common:alerts.exerciseUpdated', { name: data.name }));
       queryClient.invalidateQueries({ queryKey: ['exercises'] });
       queryClient.invalidateQueries({ queryKey: ['exercise', data.id] });
     },
     onError: (error) => {
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to update exercise.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
   });
@@ -94,11 +95,11 @@ export const useDeleteExercise = () => {
       });
       const msg =
         (error.response?.data as { message?: string })?.message ??
-        'Failed to delete exercise.';
+        i18n.t('common:alerts.genericError');
       antMessage.error(msg);
     },
     onSuccess: () => {
-      antMessage.success('Exercise deleted successfully!');
+      antMessage.success(i18n.t('common:alerts.exerciseDeleted'));
       queryClient.invalidateQueries({ queryKey: ['exercises'] });
     },
   });

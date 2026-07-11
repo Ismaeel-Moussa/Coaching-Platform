@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Button, Progress, message as antMessage } from 'antd';
+import { useTranslation } from 'react-i18next';
 import './PhotoUploadZone.scss';
 
 interface PhotoUploadZoneProps {
@@ -21,6 +22,7 @@ const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
   uploading = false,
   uploadProgress = 0,
 }) => {
+  const { t } = useTranslation(['common']);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState<boolean>(false);
 
@@ -41,14 +43,14 @@ const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
     // Validate size (max 10MB)
     const isLessThan10MB = selectedFile.size / 1024 / 1024 < 10;
     if (!isLessThan10MB) {
-      antMessage.error('Image must be smaller than 10MB!');
+      antMessage.error(t('common:alerts.imageTooLarge'));
       return;
     }
 
     // Validate type
     const isJpgOrPng = selectedFile.type === 'image/jpeg' || selectedFile.type === 'image/png';
     if (!isJpgOrPng) {
-      antMessage.error('You can only upload JPG or PNG files!');
+      antMessage.error(t('common:alerts.imageTypeInvalid'));
       return;
     }
 

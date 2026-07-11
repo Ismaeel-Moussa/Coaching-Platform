@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useRef } from 'r
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { notification } from 'antd';
 import { useQueryClient } from '@tanstack/react-query';
+import i18n from '../i18n/i18n';
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from '../api/notifications';
 import type { NotificationDto } from '../types/Notification';
 
@@ -127,16 +128,16 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       // Show browser/app toast notification
       const getToastTitle = (notif: NotificationDto) => {
-        if (notif.type === 'MacroAlert') return 'Nutrition Update';
-        if (notif.type === 'InvitationAccepted') return 'Roster Update';
-        if (notif.type === 'WorkoutCompleted') return 'Workout Completed';
-        if (notif.type === 'CheckInSubmitted') return 'Check-In Submitted';
+        if (notif.type === 'MacroAlert') return i18n.t('common:toastTitles.nutritionUpdate');
+        if (notif.type === 'InvitationAccepted') return i18n.t('common:toastTitles.rosterUpdate');
+        if (notif.type === 'WorkoutCompleted') return i18n.t('common:toastTitles.workoutCompleted');
+        if (notif.type === 'CheckInSubmitted') return i18n.t('common:toastTitles.checkInSubmitted');
         if (notif.type === 'CoachNote') {
           return notif.message.toLowerCase().includes('workout program template assigned') 
-            ? 'Workout Update' 
-            : 'New Feedback';
+            ? i18n.t('common:toastTitles.workoutUpdate') 
+            : i18n.t('common:toastTitles.newFeedback');
         }
-        return 'New Notification';
+        return i18n.t('common:toastTitles.newNotification');
       };
 
       notification.info({

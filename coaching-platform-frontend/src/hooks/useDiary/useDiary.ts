@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
+import i18n from '../../i18n/i18n';
 import {
   getDiary,
   getMacroSummary,
@@ -30,12 +31,12 @@ export const useLogFood = (date: string) => {
   return useMutation({
     mutationFn: (form: LogFoodForm) => logFood(form),
     onSuccess: () => {
-      antMessage.success('Food logged successfully!');
+      antMessage.success(i18n.t('common:alerts.foodLogged'));
       queryClient.invalidateQueries({ queryKey: ['diary', date] });
       queryClient.invalidateQueries({ queryKey: ['diary-summary', date] });
       queryClient.invalidateQueries({ queryKey: ['athlete-dashboard'] });
     },
-    onError: () => antMessage.error('Failed to log food. Please try again.'),
+    onError: () => antMessage.error(i18n.t('common:alerts.foodLogFailed')),
   });
 };
 
@@ -60,10 +61,10 @@ export const useRemoveLogEntry = (date: string) => {
       if (context?.previousDiary) {
         queryClient.setQueryData(['diary', date], context.previousDiary);
       }
-      antMessage.error('Failed to remove entry.');
+      antMessage.error(i18n.t('common:alerts.entryRemoveFailed'));
     },
     onSuccess: () => {
-      antMessage.success('Entry removed.');
+      antMessage.success(i18n.t('common:alerts.entryRemoved'));
       queryClient.invalidateQueries({ queryKey: ['diary', date] });
       queryClient.invalidateQueries({ queryKey: ['diary-summary', date] });
       queryClient.invalidateQueries({ queryKey: ['athlete-dashboard'] });
@@ -92,7 +93,7 @@ export const useUpdateWater = (date: string) => {
       if (context?.previousDiary) {
         queryClient.setQueryData(['diary', date], context.previousDiary);
       }
-      antMessage.error('Failed to update water intake.');
+      antMessage.error(i18n.t('common:alerts.waterUpdateFailed'));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['diary', date] });
@@ -122,7 +123,7 @@ export const useUpdateSteps = (date: string) => {
       if (context?.previousDiary) {
         queryClient.setQueryData(['diary', date], context.previousDiary);
       }
-      antMessage.error('Failed to update steps.');
+      antMessage.error(i18n.t('common:alerts.stepsUpdateFailed'));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['diary', date] });

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
+import i18n from '../../i18n/i18n';
 import {
   getTodaysWorkout,
   getWorkoutProgram,
@@ -36,10 +37,10 @@ export const useLogSet = () => {
   return useMutation({
     mutationFn: (form: LogSetForm) => logSet(form),
     onSuccess: () => {
-      antMessage.success('Set logged!');
+      antMessage.success(i18n.t('common:alerts.setLogged'));
       queryClient.invalidateQueries({ queryKey: ['workout-today'] });
     },
-    onError: () => antMessage.error('Failed to log set. Please try again.'),
+    onError: () => antMessage.error(i18n.t('common:alerts.setLogFailed')),
   });
 };
 
@@ -48,10 +49,10 @@ export const useCompleteWorkout = () => {
   return useMutation({
     mutationFn: (form: CompleteWorkoutForm) => completeWorkout(form),
     onSuccess: () => {
-      antMessage.success('Workout completed! 🔥 Streak updated.');
+      antMessage.success(i18n.t('common:alerts.workoutCompleted'));
       queryClient.invalidateQueries({ queryKey: ['workout-today'] });
       queryClient.invalidateQueries({ queryKey: ['athlete-dashboard'] });
     },
-    onError: () => antMessage.error('Failed to complete workout. Please try again.'),
+    onError: () => antMessage.error(i18n.t('common:alerts.workoutCompleteFailed')),
   });
 };

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
+import i18n from '../../i18n/i18n';
 import { getSupplements, toggleSupplement } from '../../api/supplement';
 import type { ToggleSupplementForm } from '../../types/Supplement';
 
@@ -43,7 +44,7 @@ export const useToggleSupplement = () => {
       if (context?.previousSupplements) {
         queryClient.setQueryData(['supplements'], context.previousSupplements);
       }
-      antMessage.error('Failed to update supplement. Please try again.');
+      antMessage.error(i18n.t('common:alerts.supplementToggleFailed'));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['supplements'] });
