@@ -256,5 +256,32 @@
       "save": "Save Exercise",
       "adding": "Adding..."
     }
+  },
+  "history": {
+    "title": "Daily History Logs",
+    "subtitle": "Track your complete history of workouts, meals, and supplements day-by-day.",
+    "selectDate": "Select Date",
+    "workoutTab": "Workouts",
+    "nutritionTab": "Nutrition",
+    "supplementsTab": "Supplements",
+    "noWorkout": "No workout log or program found for this day.",
+    "noNutrition": "No meals or nutrition logged for this day.",
+    "noSupplements": "No supplement logs or schedule found for this day.",
+    "workoutStatus": "Status: {{status}}",
+    "completedAt": "Completed at: {{time}}",
+    "targetReps": "Target: {{sets}} sets x {{reps}} reps",
+    "progressiveOverload": "Overload Target: {{weight}} kg",
+    "setsLogged": "Logged Sets",
+    "setNumber": "Set {{num}}",
+    "loggedMeals": "Logged Meals",
+    "hydration": "Hydration (Water)",
+    "steps": "Steps Walked",
+    "taken": "Taken",
+    "takenAt": "Taken at: {{time}}",
+    "pending": "Pending",
+    "notTaken": "Not Taken",
+    "dosage": "Dosage",
+    "notes": "Notes",
+    "errorLoading": "Failed to load daily log history."
   }
 }

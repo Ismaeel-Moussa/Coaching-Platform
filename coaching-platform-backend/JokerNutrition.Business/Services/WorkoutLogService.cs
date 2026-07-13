@@ -88,6 +88,7 @@ public class WorkoutLogService : _BaseService, IWorkoutLogService
         {
             WorkoutLogId = workoutLog.Id,
             Status = workoutLog.Status.ToString(),
+            CompletedAt = workoutLog.CompletedAt,
             Day = WorkoutMapper.MapDay(todayDay),
             LoggedSets = loggedSets.Select(WorkoutMapper.MapSet).ToList()
         };

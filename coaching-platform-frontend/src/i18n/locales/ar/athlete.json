@@ -256,5 +256,32 @@
       "save": "حفظ التمرين",
       "adding": "جاري الإضافة..."
     }
+  },
+  "history": {
+    "title": "سجل المتابعة اليومي",
+    "subtitle": "تتبع سجل تمارينك ووجباتك ومكملاتك يوماً بيوم بالتفصيل.",
+    "selectDate": "اختر التاريخ",
+    "workoutTab": "التمارين",
+    "nutritionTab": "التغذية",
+    "supplementsTab": "المكملات",
+    "noWorkout": "لا توجد تمارين مسجلة أو برنامج مجدول لهذا اليوم.",
+    "noNutrition": "لم يتم تسجيل أي وجبات أو تغذية لهذا اليوم.",
+    "noSupplements": "لا توجد مكملات مسجلة أو مجدولة لهذا اليوم.",
+    "workoutStatus": "الحالة: {{status}}",
+    "completedAt": "تم الإكمال في: {{time}}",
+    "targetReps": "الهدف: {{sets}} جولات × {{reps}} تكرارات",
+    "progressiveOverload": "هدف زيادة الوزن: {{weight}} كجم",
+    "setsLogged": "الجولات المسجلة",
+    "setNumber": "الجولة {{num}}",
+    "loggedMeals": "الوجبات المسجلة",
+    "hydration": "الترطيب (الماء)",
+    "steps": "الخطوات الممشية",
+    "taken": "تم أخذها",
+    "takenAt": "تم أخذها في: {{time}}",
+    "pending": "قيد الانتظار",
+    "notTaken": "لم تؤخذ",
+    "dosage": "الجرعة",
+    "notes": "ملاحظات",
+    "errorLoading": "فشل تحميل سجل المتابعة اليومي."
   }
 }

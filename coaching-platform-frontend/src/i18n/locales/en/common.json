@@ -21,7 +21,8 @@
     "checkIn": "Check-In",
     "feedback": "Coach Feedback",
     "signOut": "Sign Out",
-    "more": "More"
+    "more": "More",
+    "history": "History"
   },
   "actions": {
     "back": "Back",
