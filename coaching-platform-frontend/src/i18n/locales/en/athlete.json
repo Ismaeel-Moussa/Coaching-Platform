@@ -36,7 +36,8 @@
     },
     "feedback": {
       "title": "Coach Feedback",
-      "empty": "No feedback notes from your coach yet."
+      "empty": "No feedback notes from your coach yet.",
+      "viewAllBtn": "View All Feedback"
     }
   },
   "checkIn": {
@@ -82,7 +83,22 @@
     "sideView": "Side View",
     "backView": "Back View",
     "uploadingProgress": "Uploading progress photos ({{progress}}%)...",
-    "submitBtn": "Submit Check-In"
+    "submitBtn": "Submit Check-In",
+    "reviewedTitle": "Check-In Reviewed!",
+    "coachFeedback": "Coach Feedback"
+  },
+  "feedback": {
+    "title": "Coach Feedback & Reviews",
+    "subtitle": "Track your notes, instructions, and weekly check-in reviews.",
+    "empty": "No feedback notes or reviews from your coach yet.",
+    "errorTitle": "Failed to load feedback",
+    "errorDesc": "Something went wrong while fetching your feedback history.",
+    "viewSubmissionBtn": "View Submission",
+    "submissionDetails": "Submission Details",
+    "tags": {
+      "checkIn": "Weekly Check-In",
+      "general": "Coach Note"
+    }
   },
   "mealLogger": {
     "title": "Meal Logger",

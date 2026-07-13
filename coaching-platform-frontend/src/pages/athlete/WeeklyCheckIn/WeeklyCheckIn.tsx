@@ -436,9 +436,24 @@ const WeeklyCheckIn: React.FC = () => {
           {isAlreadySubmittedThisWeek || isSubmissionSuccessful ? (
             <Card className="weekly-check-in__card weekly-check-in__card--confirm">
               <Result
-                status="success"
-                title={t('athlete:checkIn.successTitle')}
-                subTitle={t('athlete:checkIn.successDesc')}
+                status={isAlreadySubmittedThisWeek && latestCheckIn?.coachNotes ? "info" : "success"}
+                title={isAlreadySubmittedThisWeek && latestCheckIn?.coachNotes ? t('athlete:checkIn.reviewedTitle') : t('athlete:checkIn.successTitle')}
+                subTitle={
+                  isAlreadySubmittedThisWeek && latestCheckIn?.coachNotes ? (
+                    <div className="weekly-check-in__coach-review-box" style={{ textAlign: 'left', margin: '20px auto', maxWidth: '600px' }}>
+                      <Alert
+                        message={t('athlete:checkIn.coachFeedback')}
+                        description={latestCheckIn.coachNotes}
+                        type="info"
+                        showIcon
+                        icon={<span className="material-symbols-outlined" style={{ color: 'var(--color-gold)', fontSize: '24px' }}>chat</span>}
+                        style={{ borderLeft: '4px solid var(--color-gold)', borderRadius: 'var(--radius-md)', background: 'var(--color-white)', border: '1px solid var(--color-border-light)', padding: '16px' }}
+                      />
+                    </div>
+                  ) : (
+                    t('athlete:checkIn.successDesc')
+                  )
+                }
                 extra={
                   <div className="weekly-check-in__confirm-actions">
                     <Button

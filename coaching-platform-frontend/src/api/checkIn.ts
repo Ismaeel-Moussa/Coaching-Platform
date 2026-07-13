@@ -68,3 +68,8 @@ export const getCheckInPhotos = async (id: number): Promise<CheckInPhotoDto[]> =
   const response = await axiosInstance.get<CheckInPhotoDto[]>(`/checkins/${id}/photos`);
   return response.data;
 };
+
+export const getCheckInById = async (id: number): Promise<CheckInDto> => {
+  const response = await axiosInstance.get<CheckInDto>(`/checkins/${id}`);
+  return response.data;
+};

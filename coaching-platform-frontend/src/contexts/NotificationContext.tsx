@@ -126,6 +126,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setNotifications((prev) => [newNotif, ...prev]);
       setUnreadCount((prev) => prev + 1);
 
+      // Invalidate queries so athlete views update in real-time
+      queryClient.invalidateQueries({ queryKey: ['athlete-feedback-history'] });
+      queryClient.invalidateQueries({ queryKey: ['athlete-dashboard'] });
+
       // Show browser/app toast notification
       const getToastTitle = (notif: NotificationDto) => {
         if (notif.type === 'MacroAlert') return i18n.t('common:toastTitles.nutritionUpdate');

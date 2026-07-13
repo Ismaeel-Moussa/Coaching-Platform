@@ -26,6 +26,7 @@ const RecipeLibrary = lazy(() => import('../pages/athlete/RecipeLibrary/RecipeLi
 const WorkoutLogger = lazy(() => import('../pages/athlete/WorkoutLogger/WorkoutLogger'));
 const SupplementsTracker = lazy(() => import('../pages/athlete/SupplementsTracker/SupplementsTracker'));
 const WeeklyCheckIn = lazy(() => import('../pages/athlete/WeeklyCheckIn/WeeklyCheckIn'));
+const Feedback = lazy(() => import('../pages/athlete/Feedback/Feedback'));
 
 // Coach pages (lazy — loaded only when coach logs in)
 const CoachDashboard = lazy(() => import('../pages/coach/CoachDashboard/CoachDashboard'));
@@ -121,6 +122,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <WeeklyCheckIn />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'feedback',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <Feedback />
           </Suspense>
         ),
       },

@@ -68,6 +68,8 @@ export interface CoachFeedbackNoteDto {
   noteText: string;
   coachName: string;
   createdAt: string;
+  type?: 'General' | 'CheckIn';
+  weekOf?: string;
 }
 
 export interface AthleteDeepProfileDto {
