@@ -71,7 +71,8 @@
     "reviewTitle": "Check-In Review & Adjustment Notes",
     "reviewPlaceholder": "Provide feedback, nutrition tweaks, or program adjustments for this check-in...",
     "reviewedAt": "Reviewed: {{date}}",
-    "saveReview": "Save Review"
+    "saveReview": "Save Review",
+    "dailyHistoryTab": "Daily History Logs"
   },
   "assignmentHub": {
     "title": "Plans & Targets",

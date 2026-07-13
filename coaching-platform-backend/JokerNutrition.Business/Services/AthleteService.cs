@@ -10,6 +10,9 @@ using JokerNutrition.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+using JokerNutrition.Business.DTOs.Workouts;
+using JokerNutrition.Business.DTOs.Supplements;
+
 namespace JokerNutrition.Business.Services;
 
 public interface IAthleteService
@@ -19,6 +22,7 @@ public interface IAthleteService
     Task<MacroTargetDto> GetActiveTargetsAsync();
     Task<MacroTargetDto> GetTargetsForAthleteAsync(int athleteId);
     Task<MacroTargetDto> SetTargetsAsync(int athleteId, SetMacroTargetForm form);
+    Task<DailyLogHistoryDto> GetDailyLogAsync(int athleteId, DateOnly date);
 }
 
 public class AthleteService : _BaseService, IAthleteService
@@ -33,6 +37,9 @@ public class AthleteService : _BaseService, IAthleteService
     private readonly INotificationService _notificationService;
     private readonly ICoachFeedbackNoteRepository _feedbackNoteRepo;
     private readonly IClientCheckInRepository _checkInRepo;
+    private readonly ISupplementScheduleRepository _scheduleRepo;
+    private readonly ISupplementLogRepository _supplementLogRepo;
+    private readonly IExerciseSetLogRepository _setLogRepo;
 
     public AthleteService(
         IPrincipal principal,
@@ -46,7 +53,10 @@ public class AthleteService : _BaseService, IAthleteService
         IDiaryService diaryService,
         INotificationService notificationService,
         ICoachFeedbackNoteRepository feedbackNoteRepo,
-        IClientCheckInRepository checkInRepo)
+        IClientCheckInRepository checkInRepo,
+        ISupplementScheduleRepository scheduleRepo,
+        ISupplementLogRepository supplementLogRepo,
+        IExerciseSetLogRepository setLogRepo)
         : base(principal, logger)
     {
         _athleteRepo = athleteRepo;
@@ -59,6 +69,9 @@ public class AthleteService : _BaseService, IAthleteService
         _notificationService = notificationService;
         _feedbackNoteRepo = feedbackNoteRepo;
         _checkInRepo = checkInRepo;
+        _scheduleRepo = scheduleRepo;
+        _supplementLogRepo = supplementLogRepo;
+        _setLogRepo = setLogRepo;
     }
 
     public async Task<AthleteDashboardDto> GetDashboardAsync()
@@ -279,5 +292,107 @@ public class AthleteService : _BaseService, IAthleteService
 
         var coachName = $"{coach.User.FirstName} {coach.User.LastName}";
         return MacroTargetMapper.Map(target, coachName);
+    }
+
+    public async Task<DailyLogHistoryDto> GetDailyLogAsync(int athleteId, DateOnly date)
+    {
+        var athlete = await _athleteRepo.Query()
+            .AsNoTracking()
+            .Include(a => a.User)
+            .FirstOrDefaultAsync(a => a.Id == athleteId)
+            ?? throw new KeyNotFoundException("Athlete profile not found.");
+
+        // Authorization check
+        var currentUserId = LoggedInUser.Id;
+        var role = LoggedInUser.Role;
+
+        if (role == "Athlete")
+        {
+            if (athlete.UserId != currentUserId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to view this athlete's logs.");
+            }
+        }
+        else if (role == "Coach")
+        {
+            var coach = await _coachRepo.Query()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.UserId == currentUserId)
+                ?? throw new UnauthorizedAccessException("Coach profile not found.");
+
+            if (athlete.AssignedCoachId != coach.Id)
+            {
+                throw new UnauthorizedAccessException("This athlete is not on your roster.");
+            }
+        }
+        else if (role != "Admin")
+        {
+            throw new UnauthorizedAccessException("Invalid role permissions.");
+        }
+
+        // 1. Fetch Workout Log
+        var workoutLog = await _workoutLogRepo.Query()
+            .AsNoTracking()
+            .Include(w => w.Day).ThenInclude(d => d.Exercises).ThenInclude(e => e.Exercise)
+            .Include(w => w.Sets).ThenInclude(s => s.Exercise)
+            .FirstOrDefaultAsync(w => w.AthleteId == athleteId && w.Date == date);
+
+        TodaysWorkoutDto? workoutDto = null;
+        if (workoutLog is not null)
+        {
+            var loggedSets = workoutLog.Sets
+                .OrderBy(s => s.ExerciseId)
+                .ThenBy(s => s.SetNumber)
+                .ToList();
+
+            workoutDto = new TodaysWorkoutDto
+            {
+                WorkoutLogId = workoutLog.Id,
+                Status = workoutLog.Status.ToString(),
+                CompletedAt = workoutLog.CompletedAt,
+                Day = workoutLog.Day is not null ? WorkoutMapper.MapDay(workoutLog.Day) : null,
+                LoggedSets = loggedSets.Select(WorkoutMapper.MapSet).ToList()
+            };
+        }
+
+        // 2. Fetch Nutrition Diary Log
+        var diary = await _diaryRepo.Query()
+            .AsNoTracking()
+            .Include(d => d.MealLogs).ThenInclude(l => l.Food)
+            .Include(d => d.MealLogs).ThenInclude(l => l.Recipe)
+            .FirstOrDefaultAsync(d => d.AthleteId == athleteId && d.Date == date);
+
+        DailyDiaryDto? nutritionDto = null;
+        if (diary is not null)
+        {
+            var logs = diary.MealLogs.OrderBy(l => l.LoggedAt).ToList();
+            nutritionDto = DiaryMapper.Map(diary, logs);
+        }
+
+        // 3. Fetch Supplement Logs
+        var supplementsDto = await _scheduleRepo.QueryAll()
+            .AsNoTracking()
+            .Where(s => s.AthleteId == athleteId && (s.IsActive || s.Logs.Any(l => l.Date == date)))
+            .OrderBy(s => s.Type)
+            .ThenBy(s => s.Name)
+            .Select(s => new SupplementDto
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Type = s.Type.ToString(),
+                Dosage = s.Dosage,
+                Notes = s.Notes,
+                IsTakenToday = s.Logs.Where(l => l.Date == date).Select(l => l.IsTaken).FirstOrDefault(),
+                TakenAt = s.Logs.Where(l => l.Date == date).Select(l => l.TakenAt).FirstOrDefault()
+            })
+            .ToListAsync();
+
+        return new DailyLogHistoryDto
+        {
+            Date = date,
+            Workout = workoutDto,
+            Nutrition = nutritionDto,
+            Supplements = supplementsDto
+        };
     }
 }

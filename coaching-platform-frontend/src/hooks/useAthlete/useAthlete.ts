@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAthleteDashboard, getFeedbackHistory } from '../../api/athlete';
-import type { AthleteDashboardDto } from '../../types/Athlete';
+import { getAthleteDashboard, getFeedbackHistory, getDailyLog } from '../../api/athlete';
+import type { AthleteDashboardDto, DailyLogHistoryDto } from '../../types/Athlete';
 import type { CoachFeedbackNoteDto } from '../../types/CoachHub';
 
 export const useGetDashboard = () =>
@@ -16,4 +16,11 @@ export const useGetFeedbackHistory = () =>
   useQuery<CoachFeedbackNoteDto[]>({
     queryKey: ['athlete-feedback-history'],
     queryFn: getFeedbackHistory,
+  });
+
+export const useGetDailyLog = (athleteId: number, date: string) =>
+  useQuery<DailyLogHistoryDto>({
+    queryKey: ['daily-log-history', athleteId, date],
+    queryFn: () => getDailyLog(athleteId, date),
+    enabled: !!athleteId && !!date,
   });

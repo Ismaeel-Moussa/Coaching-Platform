@@ -56,6 +56,7 @@ export interface SetLogDto {
 export interface TodaysWorkoutDto {
   workoutLogId: number;
   status: WorkoutStatus;
+  completedAt?: string | null;
   day: WorkoutDayDto | null;
   loggedSets: SetLogDto[];
 }

@@ -52,3 +52,14 @@ export interface MacroTargetDto {
   setAt: string;
   setByCoachName: string;
 }
+
+import type { TodaysWorkoutDto } from './Workout';
+import type { DailyDiaryDto } from './Diary';
+import type { SupplementDto } from './Supplement';
+
+export interface DailyLogHistoryDto {
+  date: string;
+  workout: TodaysWorkoutDto | null;
+  nutrition: DailyDiaryDto | null;
+  supplements: SupplementDto[];
+}

@@ -63,4 +63,12 @@ public class AthletesController : ControllerBase
         var result = await _athleteService.SetTargetsAsync(id, form);
         return Created("", result);
     }
+
+    /// <summary>Get the detailed daily log (workout, nutrition, supplements) for a specific athlete and date.</summary>
+    [HttpGet("{id:int}/daily-log/{date}")]
+    public async Task<IActionResult> GetDailyLog(int id, DateOnly date)
+    {
+        var result = await _athleteService.GetDailyLogAsync(id, date);
+        return Ok(result);
+    }
 }
