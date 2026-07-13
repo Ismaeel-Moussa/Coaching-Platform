@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Tag, Empty, Button, Skeleton, Result, Modal, Divider, Descriptions, Col, Row } from 'antd';
+import { Card, Tag, Empty, Button, Skeleton, Result, Modal, Divider, Descriptions, Col, Row, Image, Progress } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGetFeedbackHistory } from '../../../hooks/useAthlete/useAthlete';
@@ -186,7 +186,7 @@ const Feedback: React.FC = () => {
             {t('common:actions.done', 'Close')}
           </Button>
         ]}
-        width={700}
+        width={720}
         className="feedback-page__modal"
       >
         {detailsLoading ? (
@@ -206,12 +206,60 @@ const Feedback: React.FC = () => {
               </Col>
               <Col xs={24} sm={12}>
                 <Card title={t('athlete:checkIn.subjectiveTitle', 'Subjective Markers')} size="small" className="check-in-preview__section-card">
-                  <Descriptions column={1} size="small" bordered={false}>
-                    <Descriptions.Item label={t('athlete:checkIn.sleepLabel', 'Sleep Quality')}>{checkInDetails.sleepQuality}/10</Descriptions.Item>
-                    <Descriptions.Item label={t('athlete:checkIn.energyLabel', 'Energy Level')}>{checkInDetails.energyLevel}/10</Descriptions.Item>
-                    <Descriptions.Item label={t('athlete:checkIn.gutLabel', 'Gut Health')}>{checkInDetails.gutHealth}/10</Descriptions.Item>
-                    <Descriptions.Item label={t('athlete:checkIn.stressLabel', 'Training Stress')}>{checkInDetails.trainingStress}/10</Descriptions.Item>
-                  </Descriptions>
+                  <div className="check-in-preview__subjectives">
+                    <div className="check-in-preview__subjective-item">
+                      <span className="check-in-preview__subjective-label">
+                        <span className="material-symbols-outlined check-in-preview__sub-icon">bedtime</span>
+                        {t('athlete:checkIn.sleepLabel', 'Sleep Quality')}
+                      </span>
+                      <Progress 
+                        percent={checkInDetails.sleepQuality * 10} 
+                        format={() => `${checkInDetails.sleepQuality}/10`} 
+                        strokeColor="#52c41a"
+                        status="normal"
+                        className="check-in-preview__progress"
+                      />
+                    </div>
+                    <div className="check-in-preview__subjective-item">
+                      <span className="check-in-preview__subjective-label">
+                        <span className="material-symbols-outlined check-in-preview__sub-icon">bolt</span>
+                        {t('athlete:checkIn.energyLabel', 'Energy Level')}
+                      </span>
+                      <Progress 
+                        percent={checkInDetails.energyLevel * 10} 
+                        format={() => `${checkInDetails.energyLevel}/10`} 
+                        strokeColor="#faad14"
+                        status="normal"
+                        className="check-in-preview__progress"
+                      />
+                    </div>
+                    <div className="check-in-preview__subjective-item">
+                      <span className="check-in-preview__subjective-label">
+                        <span className="material-symbols-outlined check-in-preview__sub-icon">restaurant</span>
+                        {t('athlete:checkIn.gutLabel', 'Gut Health')}
+                      </span>
+                      <Progress 
+                        percent={checkInDetails.gutHealth * 10} 
+                        format={() => `${checkInDetails.gutHealth}/10`} 
+                        strokeColor="#13c2c2"
+                        status="normal"
+                        className="check-in-preview__progress"
+                      />
+                    </div>
+                    <div className="check-in-preview__subjective-item">
+                      <span className="check-in-preview__subjective-label">
+                        <span className="material-symbols-outlined check-in-preview__sub-icon">fitness_center</span>
+                        {t('athlete:checkIn.stressLabel', 'Training Stress')}
+                      </span>
+                      <Progress 
+                        percent={checkInDetails.trainingStress * 10} 
+                        format={() => `${checkInDetails.trainingStress}/10`} 
+                        strokeColor="#ff4d4f"
+                        status="normal"
+                        className="check-in-preview__progress"
+                      />
+                    </div>
+                  </div>
                 </Card>
               </Col>
             </Row>
@@ -223,29 +271,31 @@ const Feedback: React.FC = () => {
                 <span className="material-symbols-outlined">photo_camera</span>
                 {t('athlete:checkIn.photosSummary', 'Submitted Progress Photos')}
               </h3>
-              <div className="check-in-preview__photos-grid">
-                {['Front', 'Side', 'Back'].map((angle) => {
-                  const photo = checkInDetails.photos?.find((p: any) => p.angle === angle);
-                  return (
-                    <div key={angle} className="check-in-preview__photo-item">
-                      <span className="mono check-in-preview__photo-label">
-                        {angle === 'Front' ? t('athlete:checkIn.frontView') : angle === 'Side' ? t('athlete:checkIn.sideView') : t('athlete:checkIn.backView')}
-                      </span>
-                      {photo?.signedDownloadUrl ? (
-                        <img 
-                          src={photo.signedDownloadUrl} 
-                          alt={`${angle} View`} 
-                          className="check-in-preview__photo-img"
-                        />
-                      ) : (
-                        <div className="check-in-preview__photo-empty">
-                          {t('athlete:checkIn.noPhotoSelected', 'No photo')}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              <Image.PreviewGroup>
+                <div className="check-in-preview__photos-grid">
+                  {['Front', 'Side', 'Back'].map((angle) => {
+                    const photo = checkInDetails.photos?.find((p: any) => p.angle === angle);
+                    return (
+                      <div key={angle} className="check-in-preview__photo-item">
+                        <span className="mono check-in-preview__photo-label">
+                          {angle === 'Front' ? t('athlete:checkIn.frontView') : angle === 'Side' ? t('athlete:checkIn.sideView') : t('athlete:checkIn.backView')}
+                        </span>
+                        {photo?.signedDownloadUrl ? (
+                          <Image 
+                            src={photo.signedDownloadUrl} 
+                            alt={`${angle} View`} 
+                            className="check-in-preview__photo-img"
+                          />
+                        ) : (
+                          <div className="check-in-preview__photo-empty">
+                            {t('athlete:checkIn.noPhotoSelected', 'No photo')}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </Image.PreviewGroup>
             </div>
           </div>
         ) : null}
