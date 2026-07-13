@@ -1,6 +1,7 @@
 using System.Security.Principal;
 using JokerNutrition.Business.DTOs.Athletes;
 using JokerNutrition.Business.DTOs.Diary;
+using JokerNutrition.Business.DTOs.Coach;
 using JokerNutrition.Business.Forms.Athletes;
 using JokerNutrition.Business.Mappers;
 using JokerNutrition.Data.Entities;
@@ -14,6 +15,7 @@ namespace JokerNutrition.Business.Services;
 public interface IAthleteService
 {
     Task<AthleteDashboardDto> GetDashboardAsync();
+    Task<List<CoachFeedbackNoteDto>> GetFeedbackHistoryAsync();
     Task<MacroTargetDto> GetActiveTargetsAsync();
     Task<MacroTargetDto> GetTargetsForAthleteAsync(int athleteId);
     Task<MacroTargetDto> SetTargetsAsync(int athleteId, SetMacroTargetForm form);
@@ -30,6 +32,7 @@ public class AthleteService : _BaseService, IAthleteService
     private readonly IDiaryService _diaryService;
     private readonly INotificationService _notificationService;
     private readonly ICoachFeedbackNoteRepository _feedbackNoteRepo;
+    private readonly IClientCheckInRepository _checkInRepo;
 
     public AthleteService(
         IPrincipal principal,
@@ -42,7 +45,8 @@ public class AthleteService : _BaseService, IAthleteService
         IWorkoutLogRepository workoutLogRepo,
         IDiaryService diaryService,
         INotificationService notificationService,
-        ICoachFeedbackNoteRepository feedbackNoteRepo)
+        ICoachFeedbackNoteRepository feedbackNoteRepo,
+        IClientCheckInRepository checkInRepo)
         : base(principal, logger)
     {
         _athleteRepo = athleteRepo;
@@ -54,6 +58,7 @@ public class AthleteService : _BaseService, IAthleteService
         _diaryService = diaryService;
         _notificationService = notificationService;
         _feedbackNoteRepo = feedbackNoteRepo;
+        _checkInRepo = checkInRepo;
     }
 
     public async Task<AthleteDashboardDto> GetDashboardAsync()
@@ -61,6 +66,7 @@ public class AthleteService : _BaseService, IAthleteService
         var userId = LoggedInUser.Id;
         var athlete = await _athleteRepo.Query()
             .Include(a => a.User)
+            .Include(a => a.AssignedCoach).ThenInclude(c => c.User)
             .FirstOrDefaultAsync(a => a.UserId == userId)
             ?? throw new UnauthorizedAccessException("Athlete profile not found.");
 
@@ -85,13 +91,11 @@ public class AthleteService : _BaseService, IAthleteService
             _ => "NoProgram"
         };
 
-        // Fetch recent coach feedback notes
-        var feedbackNotes = await _feedbackNoteRepo.Query()
-            .Include(n => n.Coach).ThenInclude(c => c.User)
-            .Where(n => n.AthleteId == athlete.Id)
-            .OrderByDescending(n => n.CreatedAt)
-            .Take(5)
-            .ToListAsync();
+        var coachName = athlete.AssignedCoach != null
+            ? $"{athlete.AssignedCoach.User.FirstName} {athlete.AssignedCoach.User.LastName}"
+            : "Coach";
+
+        var recentFeedback = await GetMergedFeedbackNotesAsync(athlete.Id, coachName, 2);
 
         return new AthleteDashboardDto
         {
@@ -107,8 +111,81 @@ public class AthleteService : _BaseService, IAthleteService
             },
             Today = macroSummary,
             TodaysWorkoutStatus = workoutStatus,
-            RecentFeedbackNotes = feedbackNotes.Select(CoachHubMapper.MapFeedbackNote).ToList()
+            RecentFeedbackNotes = recentFeedback
         };
+    }
+
+    public async Task<List<CoachFeedbackNoteDto>> GetFeedbackHistoryAsync()
+    {
+        var userId = LoggedInUser.Id;
+        var athlete = await _athleteRepo.Query()
+            .Include(a => a.AssignedCoach).ThenInclude(c => c.User)
+            .FirstOrDefaultAsync(a => a.UserId == userId)
+            ?? throw new UnauthorizedAccessException("Athlete profile not found.");
+
+        var coachName = athlete.AssignedCoach != null
+            ? $"{athlete.AssignedCoach.User.FirstName} {athlete.AssignedCoach.User.LastName}"
+            : "Coach";
+
+        return await GetMergedFeedbackNotesAsync(athlete.Id, coachName);
+    }
+
+    private async Task<List<CoachFeedbackNoteDto>> GetMergedFeedbackNotesAsync(int athleteId, string coachName, int? takeCount = null)
+    {
+        var feedbackQuery = _feedbackNoteRepo.Query()
+            .Include(n => n.Coach).ThenInclude(c => c.User)
+            .Where(n => n.AthleteId == athleteId)
+            .OrderByDescending(n => n.CreatedAt);
+
+        List<CoachFeedbackNote> feedbackNotes;
+        if (takeCount.HasValue)
+        {
+            feedbackNotes = await feedbackQuery.Take(takeCount.Value).ToListAsync();
+        }
+        else
+        {
+            feedbackNotes = await feedbackQuery.ToListAsync();
+        }
+
+        var checkInQuery = _checkInRepo.Query()
+            .Where(ci => ci.AthleteId == athleteId && ci.CoachReviewedAt != null && !string.IsNullOrEmpty(ci.CoachNotes))
+            .OrderByDescending(ci => ci.CoachReviewedAt!.Value);
+
+        List<ClientCheckIn> checkInReviews;
+        if (takeCount.HasValue)
+        {
+            checkInReviews = await checkInQuery.Take(takeCount.Value).ToListAsync();
+        }
+        else
+        {
+            checkInReviews = await checkInQuery.ToListAsync();
+        }
+
+        var merged = feedbackNotes.Select(n => {
+            var dto = CoachHubMapper.MapFeedbackNote(n);
+            dto.Type = "General";
+            return dto;
+        }).ToList();
+
+        foreach (var review in checkInReviews)
+        {
+            merged.Add(new CoachFeedbackNoteDto
+            {
+                Id = -review.Id,
+                NoteText = review.CoachNotes!,
+                CoachName = coachName,
+                CreatedAt = review.CoachReviewedAt!.Value,
+                Type = "CheckIn",
+                WeekOf = review.WeekOf.ToString("yyyy-MM-dd")
+            });
+        }
+
+        var sorted = merged.OrderByDescending(f => f.CreatedAt);
+        if (takeCount.HasValue)
+        {
+            return sorted.Take(takeCount.Value).ToList();
+        }
+        return sorted.ToList();
     }
 
     public async Task<MacroTargetDto> GetActiveTargetsAsync()

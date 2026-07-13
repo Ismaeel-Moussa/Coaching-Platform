@@ -28,6 +28,15 @@ public class AthletesController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>Get the current athlete's history of coach feedback and check-in reviews.</summary>
+    [HttpGet("me/feedback")]
+    [Authorize(Roles = "Athlete")]
+    public async Task<IActionResult> GetFeedbackHistory()
+    {
+        var result = await _athleteService.GetFeedbackHistoryAsync();
+        return Ok(result);
+    }
+
     /// <summary>Get the current athlete's active macro targets set by their coach.</summary>
     [HttpGet("me/targets")]
     [Authorize(Roles = "Athlete")]

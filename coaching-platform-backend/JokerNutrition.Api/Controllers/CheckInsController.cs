@@ -153,6 +153,17 @@ public class CheckInsController : ControllerBase
     }
 
     /// <summary>
+    /// Returns a single check-in by ID (with permissions check).
+    /// </summary>
+    [HttpGet("{id:int}")]
+    [Authorize(Roles = "Coach,Admin,Athlete")]
+    public async Task<IActionResult> GetCheckIn(int id)
+    {
+        var result = await _checkInService.GetCheckInByIdAsync(id);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Returns signed 24-hour download URLs for all progress photos on a check-in.
     /// </summary>
     [HttpGet("{id:int}/photos")]

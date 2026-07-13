@@ -434,41 +434,107 @@ const WeeklyCheckIn: React.FC = () => {
 
         <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
           {isAlreadySubmittedThisWeek || isSubmissionSuccessful ? (
-            <Card className="weekly-check-in__card weekly-check-in__card--confirm">
-              <Result
-                status="success"
-                title={t('athlete:checkIn.successTitle')}
-                subTitle={t('athlete:checkIn.successDesc')}
-                extra={
-                  <div className="weekly-check-in__confirm-actions">
-                    <Button
-                      type="primary"
-                      onClick={() => navigate('/athlete/dashboard')}
-                      size="large"
-                      className="weekly-check-in__done-btn"
-                    >
-                      {t('athlete:checkIn.returnDashboard')}
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setHasExplicitlyChosenToResubmit(true);
-                        setCurrentStep(0);
-                        setFrontFile(null);
-                        setSideFile(null);
-                        setBackFile(null);
-                        setDeletedAngles([]);
-                        setIsSubmissionSuccessful(false);
-                        setIsAlreadySubmittedThisWeek(false);
-                      }}
-                      size="large"
-                      className="weekly-check-in__resubmit-btn"
-                    >
-                      {t('athlete:checkIn.resubmitBtn')}
-                    </Button>
+            isAlreadySubmittedThisWeek && latestCheckIn?.coachNotes ? (
+              <Card className="weekly-check-in__card weekly-check-in__card--confirm weekly-check-in__card--reviewed-state animate-fade-in">
+                <div className="weekly-check-in__reviewed-header">
+                  <div className="weekly-check-in__reviewed-icon-outer">
+                    <div className="weekly-check-in__reviewed-icon-inner">
+                      <span className="material-symbols-outlined">verified</span>
+                    </div>
                   </div>
-                }
-              />
-            </Card>
+                  <h2 className="weekly-check-in__reviewed-title">{t('athlete:checkIn.reviewedTitle')}</h2>
+                  <p className="weekly-check-in__reviewed-subtitle">
+                    {t('athlete:feedback.reviewedSubtitle', 'Your coach has reviewed your weekly progress and left notes for you.')}
+                  </p>
+                </div>
+
+                <div className="weekly-check-in__reviewed-feedback-card">
+                  <div className="weekly-check-in__reviewed-feedback-header">
+                    <span className="material-symbols-outlined text-gold">chat</span>
+                    <h3>{t('athlete:checkIn.coachFeedback')}</h3>
+                  </div>
+                  <div className="weekly-check-in__reviewed-feedback-body">
+                    <p className="weekly-check-in__reviewed-feedback-text">{latestCheckIn.coachNotes}</p>
+                  </div>
+                  <div className="weekly-check-in__reviewed-feedback-footer">
+                    <span className="material-symbols-outlined" style={{ fontSize: '14px', verticalAlign: 'middle', marginRight: '4px' }}>info</span>
+                    <span>{t('athlete:feedback.viewFullHistoryNote', 'You can view all past check-ins and notes in your feedback history.')}</span>
+                  </div>
+                </div>
+
+                <div className="weekly-check-in__confirm-actions">
+                  <Button
+                    type="primary"
+                    onClick={() => navigate('/athlete/dashboard')}
+                    size="large"
+                    className="weekly-check-in__done-btn"
+                  >
+                    {t('athlete:checkIn.returnDashboard')}
+                  </Button>
+                  <Button
+                    type="dashed"
+                    onClick={() => navigate('/athlete/feedback')}
+                    size="large"
+                    className="weekly-check-in__history-btn"
+                    icon={<span className="material-symbols-outlined" style={{ verticalAlign: 'middle', fontSize: '18px' }}>history</span>}
+                  >
+                    {t('athlete:feedback.title', 'Coach Feedback')}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setHasExplicitlyChosenToResubmit(true);
+                      setCurrentStep(0);
+                      setFrontFile(null);
+                      setSideFile(null);
+                      setBackFile(null);
+                      setDeletedAngles([]);
+                      setIsSubmissionSuccessful(false);
+                      setIsAlreadySubmittedThisWeek(false);
+                    }}
+                    size="large"
+                    className="weekly-check-in__resubmit-btn"
+                  >
+                    {t('athlete:checkIn.resubmitBtn')}
+                  </Button>
+                </div>
+              </Card>
+            ) : (
+              <Card className="weekly-check-in__card weekly-check-in__card--confirm">
+                <Result
+                  status="success"
+                  title={t('athlete:checkIn.successTitle')}
+                  subTitle={t('athlete:checkIn.successDesc')}
+                  extra={
+                    <div className="weekly-check-in__confirm-actions">
+                      <Button
+                        type="primary"
+                        onClick={() => navigate('/athlete/dashboard')}
+                        size="large"
+                        className="weekly-check-in__done-btn"
+                      >
+                        {t('athlete:checkIn.returnDashboard')}
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setHasExplicitlyChosenToResubmit(true);
+                          setCurrentStep(0);
+                          setFrontFile(null);
+                          setSideFile(null);
+                          setBackFile(null);
+                          setDeletedAngles([]);
+                          setIsSubmissionSuccessful(false);
+                          setIsAlreadySubmittedThisWeek(false);
+                        }}
+                        size="large"
+                        className="weekly-check-in__resubmit-btn"
+                      >
+                        {t('athlete:checkIn.resubmitBtn')}
+                      </Button>
+                    </div>
+                  }
+                />
+              </Card>
+            )
           ) : (
             <Card className="weekly-check-in__card">
               <h2 className="weekly-check-in__section-title">{t('athlete:checkIn.step3Title')}</h2>

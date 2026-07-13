@@ -17,6 +17,7 @@ const athleteNavItems = [
   { path: '/athlete/supplements', icon: 'medication', labelKey: 'nav.supplements' },
   { path: '/athlete/recipes', icon: 'menu_book', labelKey: 'nav.recipes' },
   { path: '/athlete/check-in', icon: 'assignment', labelKey: 'nav.checkIn' },
+  { path: '/athlete/feedback', icon: 'chat', labelKey: 'nav.feedback' },
   { path: '/athlete/notifications', icon: 'notifications', labelKey: 'nav.notifications' },
   { path: '/athlete/profile', icon: 'person', labelKey: 'nav.profile' },
 ];

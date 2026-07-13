@@ -37,6 +37,9 @@ public interface ICheckInService
 
     /// <summary>Returns signed 24h download URLs for all photos on a check-in.</summary>
     Task<List<CheckInPhotoDto>> GetCheckInPhotosAsync(int checkInId);
+
+    /// <summary>Get a single check-in by ID (with permissions check).</summary>
+    Task<CheckInDto> GetCheckInByIdAsync(int checkInId);
 }
 
 public class CheckInService : _BaseService, ICheckInService
@@ -345,6 +348,20 @@ public class CheckInService : _BaseService, ICheckInService
         _checkInRepo.Update(checkIn);
         await _checkInRepo.SaveChangesAsync();
 
+        // Send notification to athlete
+        try
+        {
+            await _notificationService.CreateAndSendNotificationAsync(
+                checkIn.Athlete.UserId,
+                NotificationType.CoachNote,
+                $"Your coach reviewed your weekly check-in: \"{checkIn.CoachNotes}\""
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send check-in review notification to user {UserId}.", checkIn.Athlete.UserId);
+        }
+
         var photoDtos = await BuildPhotoDtosAsync(checkInId);
         return CheckInMapper.Map(checkIn, photoDtos);
     }
@@ -358,6 +375,23 @@ public class CheckInService : _BaseService, ICheckInService
             .ToListAsync();
 
         return await MapPhotosWithSignedUrlsAsync(photos);
+    }
+
+    public async Task<CheckInDto> GetCheckInByIdAsync(int checkInId)
+    {
+        var checkIn = await _checkInRepo.Query()
+            .Include(ci => ci.Athlete).ThenInclude(a => a.User)
+            .FirstOrDefaultAsync(ci => ci.Id == checkInId)
+            ?? throw new KeyNotFoundException("Check-in not found.");
+
+        // Permission check
+        if (LoggedInUser.Role == "Athlete" && checkIn.Athlete.UserId != LoggedInUser.Id)
+        {
+            throw new UnauthorizedAccessException("You can only access your own check-ins.");
+        }
+
+        var photoDtos = await BuildPhotoDtosAsync(checkInId);
+        return CheckInMapper.Map(checkIn, photoDtos);
     }
 
     // ─── Private Helpers ──────────────────────────────────────────────

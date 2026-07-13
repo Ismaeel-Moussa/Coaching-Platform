@@ -3,12 +3,14 @@ import { Button, Tag, Segmented, Skeleton, Empty, Tooltip } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useNotifications } from '../../../contexts/NotificationContext';
+import { useQueryClient } from '@tanstack/react-query';
 import { getRoster } from '../../../api/coachHub';
 import './Notifications.scss';
 
 const Notifications: React.FC = () => {
   const { t } = useTranslation(['common', 'athlete', 'coach']);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     notifications,
     unreadCount,
@@ -151,7 +153,11 @@ const Notifications: React.FC = () => {
                   if (notif.message.toLowerCase().includes('workout program template assigned')) {
                     navigate(isCoachPath ? '/coach/roster' : '/athlete/workouts');
                   } else {
-                    navigate(isCoachPath ? '/coach/roster' : '/athlete/dashboard#coach-feedback');
+                    if (!isCoachPath) {
+                      queryClient.invalidateQueries({ queryKey: ['athlete-feedback-history'] });
+                      queryClient.invalidateQueries({ queryKey: ['athlete-dashboard'] });
+                    }
+                    navigate(isCoachPath ? '/coach/roster' : '/athlete/feedback');
                   }
                 } else if (notif.type === 'CheckInSubmitted') {
                   if (isCoachPath) {

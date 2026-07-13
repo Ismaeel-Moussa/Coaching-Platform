@@ -283,9 +283,18 @@ const AthleteDashboard: React.FC = () => {
                       minute: '2-digit',
                     })}
                   </div>
-                  <p className="dashboard__feedback-text">{note.noteText}</p>
+                  <p className="dashboard__feedback-text">
+                    {note.type === 'CheckIn' ? `[Check-In Review] ${note.noteText}` : note.noteText}
+                  </p>
                 </div>
               ))}
+              <button 
+                className="dashboard__feedback-view-all-btn" 
+                onClick={() => navigate('/athlete/feedback')}
+              >
+                {t('athlete:dashboard.feedback.viewAllBtn', 'View All Feedback')}
+                <span className="material-symbols-outlined">arrow_forward</span>
+              </button>
             </div>
           ) : (
             <div className="dashboard__feedback-empty">

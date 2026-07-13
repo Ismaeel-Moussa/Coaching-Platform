@@ -9,6 +9,7 @@ import {
   getPendingCheckIns,
   addCoachNotes,
   getCheckInPhotos,
+  getCheckInById,
 } from '../../api/checkIn';
 import type { SubmitCheckInForm, AddCoachNotesForm, PhotoAngle } from '../../types/CheckIn';
 
@@ -97,4 +98,11 @@ export const useGetCheckInPhotos = (id: number) =>
     queryKey: ['checkin-photos', id],
     queryFn: () => getCheckInPhotos(id),
     enabled: !!id,
+  });
+
+export const useGetCheckInById = (id: number, enabled: boolean = true) =>
+  useQuery({
+    queryKey: ['checkin-detail', id],
+    queryFn: () => getCheckInById(id),
+    enabled: enabled && !!id,
   });
