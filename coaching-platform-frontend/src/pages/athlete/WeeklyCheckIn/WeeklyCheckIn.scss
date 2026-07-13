@@ -307,6 +307,193 @@
     font-size: 14px;
     font-style: italic;
   }
+
+  // Reviewed success state styling
+  &__card--confirm.weekly-check-in__card--reviewed-state {
+    min-height: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl) var(--space-md) !important;
+    text-align: center;
+    background: var(--color-white) !important;
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid var(--color-border-light) !important;
+  }
+
+  &__reviewed-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: var(--space-md);
+  }
+
+  &__reviewed-icon-outer {
+    width: 72px;
+    height: 72px;
+    background: rgba(0, 180, 216, 0.08);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-sm);
+    animation: weekly-checkin-pulse-ring 2s infinite;
+  }
+
+  &__reviewed-icon-inner {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--color-cyan, #00b4d8) 0%, #0096c7 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 180, 216, 0.3);
+
+    .material-symbols-outlined {
+      color: #ffffff;
+      font-size: 32px;
+    }
+  }
+
+  &__reviewed-title {
+    font-family: var(--font-heading);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-navy);
+    margin-bottom: 6px;
+  }
+
+  &__reviewed-subtitle {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    max-width: 480px;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  &__reviewed-feedback-card {
+    width: 100%;
+    max-width: 600px;
+    background: var(--surface-container-low, #f8f9fa);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin: 0 auto var(--space-lg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    text-align: left;
+    
+    [dir='rtl'] & {
+      text-align: right;
+    }
+  }
+
+  &__reviewed-feedback-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--color-border-light);
+    padding-bottom: 8px;
+    margin-bottom: var(--space-sm);
+
+    h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+  }
+
+  &__reviewed-feedback-body {
+    padding: var(--space-xs) 0;
+  }
+
+  &__reviewed-feedback-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    white-space: pre-wrap;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  &__reviewed-feedback-footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+    border-top: 1px dashed var(--color-border-light);
+    padding-top: var(--space-sm);
+    margin-top: var(--space-sm);
+
+    .material-symbols-outlined {
+      font-size: 14px;
+    }
+  }
+
+  &__confirm-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+
+    @media (max-width: 576px) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+      
+      button {
+        width: 100% !important;
+        margin: 0 !important;
+      }
+    }
+  }
+
+  &__done-btn {
+    min-width: 160px;
+  }
+
+  &__history-btn {
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+    background: transparent;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: var(--color-gold-dim);
+      color: var(--color-gold-dim);
+      background: rgba(212, 163, 89, 0.05) !important;
+    }
+  }
+
+  &__resubmit-btn {
+    min-width: 150px;
+  }
+}
+
+@keyframes weekly-checkin-pulse-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 180, 216, 0.4);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(0, 180, 216, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 180, 216, 0);
+  }
 }
 
 @media (max-width: 992px) {

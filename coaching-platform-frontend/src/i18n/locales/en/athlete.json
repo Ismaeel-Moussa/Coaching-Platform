@@ -95,6 +95,8 @@
     "errorDesc": "Something went wrong while fetching your feedback history.",
     "viewSubmissionBtn": "View Submission",
     "submissionDetails": "Submission Details",
+    "reviewedSubtitle": "Your coach has reviewed your weekly progress and left notes for you.",
+    "viewFullHistoryNote": "You can view all past check-ins and notes in your feedback history.",
     "tags": {
       "checkIn": "Weekly Check-In",
       "general": "Coach Note"
