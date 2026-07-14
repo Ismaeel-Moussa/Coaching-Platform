@@ -5,10 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { useNotifications } from '../../../contexts/NotificationContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { getRoster } from '../../../api/coachHub';
+import { translateNotificationMessage } from '../../../utils/notificationTranslator';
 import './Notifications.scss';
 
 const Notifications: React.FC = () => {
-  const { t } = useTranslation(['common', 'athlete', 'coach']);
+  const { t, i18n } = useTranslation(['common', 'athlete', 'coach']);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const {
@@ -70,7 +71,7 @@ const Notifications: React.FC = () => {
   const formatTimestamp = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
-      return date.toLocaleString(undefined, {
+      return date.toLocaleString(i18n.resolvedLanguage || undefined, {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -202,7 +203,7 @@ const Notifications: React.FC = () => {
                     {formatTimestamp(notif.createdAt)}
                   </span>
                 </div>
-                <p className="notifications-page__item-message">{notif.message}</p>
+                <p className="notifications-page__item-message">{translateNotificationMessage(notif.message, t)}</p>
               </div>
 
               {!notif.isRead && (

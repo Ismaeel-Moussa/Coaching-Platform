@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import i18n from '../i18n/i18n';
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from '../api/notifications';
 import type { NotificationDto } from '../types/Notification';
+import { translateNotificationMessage } from '../utils/notificationTranslator';
 
 interface NotificationContextType {
   notifications: NotificationDto[];
@@ -146,7 +147,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       notification.info({
         message: getToastTitle(newNotif),
-        description: newNotif.message,
+        description: translateNotificationMessage(newNotif.message, i18n.t),
         placement: 'topRight',
         duration: 4.5,
       });

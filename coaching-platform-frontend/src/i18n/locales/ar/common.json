@@ -59,6 +59,19 @@
       "checkIn": "المتابعة",
       "roster": "قائمة اللاعبين",
       "general": "عام"
+    },
+    "messages": {
+      "newWorkoutTemplate": "تم تعيين نموذج برنامج تمارين جديد: {{templateName}}",
+      "newFeedbackNote": "ترك لك مدربك ملاحظة تعليق جديدة: \"{{noteText}}\"",
+      "dailyTargetsUpdated": "تم تحديث الأهداف اليومية: {{calories}} سعرة حرارية، {{protein}} غ بروتين، {{carbs}} غ كربوهيدرات، {{fat}} غ دهون، {{water}} لتر ماء، {{steps}} خطوة.",
+      "dailyNutritionUpdated": "تم تحديث أهداف التغذية اليومية: {{calories}} سعرة حرارية، {{protein}} غ بروتين، {{carbs}} غ كربوهيدرات، {{fat}} غ دهون.",
+      "dailyActivityUpdated": "تم تحديث أهداف النشاط اليومي: {{water}} لتر ماء، {{steps}} خطوة.",
+      "dailyTargetsUpdatedSimple": "تم تحديث الأهداف اليومية.",
+      "checkInSubmitted": "قام {{athleteName}} بتقديم المتابعة الأسبوعية الخاصة به.",
+      "checkInUpdated": "قام {{athleteName}} بتحديث المتابعة الأسبوعية الخاصة به.",
+      "checkInReviewed": "قام مدربك بمراجعة المتابعة الأسبوعية الخاصة بك: \"{{notes}}\"",
+      "invitationAccepted": "قبل اللاعب {{athleteName}} دعوتك.",
+      "macroTargetsUpdated": "قام المدرب {{coachName}} بتحديث أهداف الماكروز اليومية الخاصة بك."
     }
   },
   "notFound": {
