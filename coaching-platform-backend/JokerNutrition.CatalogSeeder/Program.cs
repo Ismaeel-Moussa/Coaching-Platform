@@ -100,7 +100,11 @@ var rawConnection = FirstConfigured(
     ?? throw new InvalidOperationException("No database connection string environment variable is configured.");
 
 var options = new DbContextOptionsBuilder<JokerNutritionContext>()
-    .UseNpgsql(NormalizeConnectionString(rawConnection), npgsql => npgsql.EnableRetryOnFailure(5))
+    // The importer owns one explicit all-or-nothing transaction. Enabling EF's
+    // automatic retrying strategy here is incompatible with user transactions;
+    // a failed run is safe to rerun because catalog upserts and blob names are
+    // deterministic.
+    .UseNpgsql(NormalizeConnectionString(rawConnection))
     .Options;
 
 await using var context = new JokerNutritionContext(options);
