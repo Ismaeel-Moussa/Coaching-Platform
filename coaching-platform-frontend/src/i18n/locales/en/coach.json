@@ -72,6 +72,7 @@
     "reviewPlaceholder": "Provide feedback, nutrition tweaks, or program adjustments for this check-in...",
     "reviewedAt": "Reviewed: {{date}}",
     "saveReview": "Save Review",
+    "editTargets": "Edit Plans & Targets",
     "dailyHistoryTab": "Daily History Logs"
   },
   "assignmentHub": {

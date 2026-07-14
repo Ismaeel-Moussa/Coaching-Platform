@@ -72,6 +72,7 @@
     "reviewPlaceholder": "اكتب ملاحظات المراجعة، تعديلات التغذية، أو تغييرات البرنامج لهذه المتابعة...",
     "reviewedAt": "تمت المراجعة: {{date}}",
     "saveReview": "حفظ المراجعة",
+    "editTargets": "تعديل الخطط والأهداف",
     "dailyHistoryTab": "سجل المتابعة اليومي"
   },
   "assignmentHub": {

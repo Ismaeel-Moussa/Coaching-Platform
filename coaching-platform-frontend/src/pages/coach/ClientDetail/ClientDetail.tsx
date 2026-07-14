@@ -217,9 +217,20 @@ const ClientDetail: React.FC = () => {
                         
                         {/* Targets Card */}
                         <div className="client-detail__card">
-                          <div className="client-detail__card-header">
-                            <span className="material-symbols-outlined text-gold">adjust</span>
-                            <h3>{t('coach:clientDetail.assignedTargets')}</h3>
+                          <div className="client-detail__card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span className="material-symbols-outlined text-gold">adjust</span>
+                              <h3>{t('coach:clientDetail.assignedTargets')}</h3>
+                            </div>
+                            <Button
+                              type="link"
+                              icon={<span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>}
+                              onClick={() => navigate(`/coach/athlete-hub?athleteId=${id}`)}
+                              className="client-detail__edit-targets-link"
+                              style={{ padding: 0, height: 'auto', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-gold)' }}
+                            >
+                              {t('common:actions.edit')}
+                            </Button>
                           </div>
                           {profile.currentTargets ? (
                             <div className="client-detail__targets-grid">
@@ -265,6 +276,12 @@ const ClientDetail: React.FC = () => {
                           )}
                         </div>
 
+                        
+                      </div>
+
+                      {/* Right: Weight Chart & Feedback Notes */}
+                      <div className="client-detail__right-col">
+                        
                         {/* Weight Trend Chart */}
                         <div className="client-detail__card">
                           <div className="client-detail__card-header">
@@ -320,64 +337,62 @@ const ClientDetail: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Right: Feedback Notes */}
-                      <div className="client-detail__right-col">
-                        <div className="client-detail__card client-detail__card--notes">
-                          <div className="client-detail__card-header">
-                            <span className="material-symbols-outlined text-gold">feedback</span>
-                            <h3>{t('coach:clientDetail.feedbackTitle')}</h3>
-                          </div>
+                    </div>
 
-                          {/* Add Note Input */}
-                          <div className="client-detail__add-note">
-                            <TextArea
-                              placeholder={t('coach:clientDetail.notePlaceholder')}
-                              rows={4}
-                              value={noteText}
-                              onChange={(e) => setNoteText(e.target.value)}
-                              maxLength={2000}
-                              disabled={saveNoteMutation.isPending}
-                            />
-                            <div className="client-detail__note-actions">
-                              <span className="client-detail__note-count">
-                                {t('coach:clientDetail.charCount', { count: noteText.length })}
-                              </span>
-                              <Button
-                                type="primary"
-                                onClick={handleSaveNote}
-                                loading={saveNoteMutation.isPending}
-                                disabled={!noteText.trim()}
-                                className="client-detail__submit-note-btn"
-                              >
-                                {t('coach:clientDetail.saveNote')}
-                              </Button>
-                            </div>
-                          </div>
+                    {/* Feedback Notes (Full Width) */}
+                    <div className="client-detail__card client-detail__card--notes" style={{ marginTop: '24px' }}>
+                      <div className="client-detail__card-header">
+                        <span className="material-symbols-outlined text-gold">feedback</span>
+                        <h3>{t('coach:clientDetail.feedbackTitle')}</h3>
+                      </div>
 
-                          {/* Notes List */}
-                          <div className="client-detail__notes-list">
-                            {notesList.length > 0 ? (
-                              notesList.map((note) => (
-                                <div className="client-detail__note-item" key={note.id}>
-                                  <div className="client-detail__note-header">
-                                    <span className="client-detail__note-author">{t('coach:templateBuilder.byCoach', { name: note.coachName })}</span>
-                                    <span className="client-detail__note-date mono">
-                                      {formatDateDisplay(note.createdAt.substring(0, 10))}
-                                    </span>
-                                  </div>
-                                  <p className="client-detail__note-text">{note.noteText}</p>
-                                </div>
-                              ))
-                            ) : (
-                              <div className="client-detail__no-notes">
-                                <span className="material-symbols-outlined">forum</span>
-                                <p>{t('coach:clientDetail.noNotes')}</p>
-                              </div>
-                            )}
-                          </div>
+                      {/* Add Note Input */}
+                      <div className="client-detail__add-note">
+                        <TextArea
+                          placeholder={t('coach:clientDetail.notePlaceholder')}
+                          rows={4}
+                          value={noteText}
+                          onChange={(e) => setNoteText(e.target.value)}
+                          maxLength={2000}
+                          disabled={saveNoteMutation.isPending}
+                        />
+                        <div className="client-detail__note-actions">
+                          <span className="client-detail__note-count">
+                            {t('coach:clientDetail.charCount', { count: noteText.length })}
+                          </span>
+                          <Button
+                            type="primary"
+                            onClick={handleSaveNote}
+                            loading={saveNoteMutation.isPending}
+                            disabled={!noteText.trim()}
+                            className="client-detail__submit-note-btn"
+                          >
+                            {t('coach:clientDetail.saveNote')}
+                          </Button>
                         </div>
                       </div>
 
+                      {/* Notes List */}
+                      <div className="client-detail__notes-list">
+                        {notesList.length > 0 ? (
+                          notesList.map((note) => (
+                            <div className="client-detail__note-item" key={note.id}>
+                              <div className="client-detail__note-header">
+                                <span className="client-detail__note-author">{t('coach:templateBuilder.byCoach', { name: note.coachName })}</span>
+                                <span className="client-detail__note-date mono">
+                                  {formatDateDisplay(note.createdAt.substring(0, 10))}
+                                </span>
+                              </div>
+                              <p className="client-detail__note-text">{note.noteText}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="client-detail__no-notes">
+                            <span className="material-symbols-outlined">forum</span>
+                            <p>{t('coach:clientDetail.noNotes')}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </>
                 )

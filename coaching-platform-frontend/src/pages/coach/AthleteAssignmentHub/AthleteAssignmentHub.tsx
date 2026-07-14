@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Select, Card, Button, InputNumber, Input, 
   Modal, Skeleton, Avatar, Tooltip 
@@ -20,7 +21,23 @@ const { Option } = Select;
 
 const AthleteAssignmentHub: React.FC = () => {
   const { t } = useTranslation(['common', 'athlete', 'coach']);
-  const [selectedAthleteId, setSelectedAthleteId] = useState<number | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [selectedAthleteId, setSelectedAthleteId] = useState<number | null>(() => {
+    const param = searchParams.get('athleteId');
+    return param ? parseInt(param, 10) : null;
+  });
+
+  // Sync state if URL param changes
+  useEffect(() => {
+    const param = searchParams.get('athleteId');
+    if (param) {
+      const parsedId = parseInt(param, 10);
+      if (!isNaN(parsedId)) {
+        setSelectedAthleteId(parsedId);
+      }
+    }
+  }, [searchParams]);
 
   // Roster and Templates lists
   const { data: rosterData, isLoading: isRosterLoading } = useGetRoster(1, 100);
@@ -81,6 +98,7 @@ const AthleteAssignmentHub: React.FC = () => {
   // Handle selected athlete changes
   const handleAthleteChange = (value: number) => {
     setSelectedAthleteId(value);
+    setSearchParams({ athleteId: value.toString() }, { replace: true });
   };
 
   // Find roster info for active program display
