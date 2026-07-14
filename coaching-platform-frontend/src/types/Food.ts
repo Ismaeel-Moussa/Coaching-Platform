@@ -12,6 +12,7 @@ export interface FoodDto {
   fatPer100g: number;
   fiberPer100g: number;
   isCustom: boolean;
+  isFavorite?: boolean;
 }
 
 export interface FoodsPagedResult {

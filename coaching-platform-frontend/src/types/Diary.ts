@@ -74,6 +74,18 @@ export interface LogFoodForm {
   quantityGrams: number;
 }
 
+export interface BulkLogFoodItem {
+  foodId: number | null;
+  recipeId: number | null;
+  quantityGrams: number;
+}
+
+export interface BulkLogFoodForm {
+  date: string;
+  mealType: MealType;
+  items: BulkLogFoodItem[];
+}
+
 export interface UpdateWaterForm {
   waterLiters: number;
 }

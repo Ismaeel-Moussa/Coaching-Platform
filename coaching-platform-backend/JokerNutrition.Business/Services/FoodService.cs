@@ -61,7 +61,7 @@ public class FoodService : _BaseService, IFoodService
 
             return new PagedResult<FoodDto>
             {
-                Items = foods.Select(FoodMapper.Map),
+                Items = foods.Select(food => FoodMapper.Map(food)),
                 TotalCount = totalCount,
                 Page = form.Page,
                 PageSize = form.PageSize

@@ -190,7 +190,16 @@
       "carbs": "Carbs",
       "fat": "Fat",
       "fiber": "Fiber",
-      "preview": "Macro Preview"
+      "preview": "Macro Preview",
+      "prompt": "What did you have for {{meal}}?",
+      "searchPlaceholder": "Search foods and recipes",
+      "recent": "Recent",
+      "frequent": "Frequent",
+      "favorites": "Favorites",
+      "done": "Done",
+      "stage": "Stage item",
+      "noStaged": "No items staged yet.",
+      "emptyFiltered": "No items here yet. Search to browse the library."
     },
     "exerciseCard": {
       "markDone": "Mark Done",

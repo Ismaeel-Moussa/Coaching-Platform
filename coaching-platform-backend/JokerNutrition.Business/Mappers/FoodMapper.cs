@@ -5,7 +5,7 @@ namespace JokerNutrition.Business.Mappers;
 
 public static class FoodMapper
 {
-    public static FoodDto Map(Food food) => new()
+    public static FoodDto Map(Food food, bool isFavorite = false) => new()
     {
         Id = food.Id,
         Name = food.Name,
@@ -15,6 +15,7 @@ public static class FoodMapper
         CarbsPer100g = food.CarbsPer100g,
         FatPer100g = food.FatPer100g,
         FiberPer100g = food.FiberPer100g,
-        IsCustom = food.IsCustom
+        IsCustom = food.IsCustom,
+        IsFavorite = isFavorite
     };
 }

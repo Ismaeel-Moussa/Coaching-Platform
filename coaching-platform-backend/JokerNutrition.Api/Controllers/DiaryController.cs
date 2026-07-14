@@ -45,6 +45,38 @@ public class DiaryController : ControllerBase
         return Created("", result);
     }
 
+    /// <summary>Log several foods and/or recipes to one meal in a single operation.</summary>
+    [HttpPost("log/bulk")]
+    public async Task<IActionResult> BulkLogFoods([FromBody] BulkLogFoodForm form)
+    {
+        var result = await _mealLogService.BulkLogFoodsAsync(form);
+        return Created("", result);
+    }
+
+    /// <summary>Get recent, frequent, or favorite foods or recipes for the current athlete.</summary>
+    [HttpGet("filters")]
+    public async Task<IActionResult> GetFilteredItems([FromQuery] string type, [FromQuery] string source)
+    {
+        var result = await _mealLogService.GetFilteredItemsAsync(type, source);
+        return Ok(result);
+    }
+
+    /// <summary>Add or remove a food from the current athlete's favorites.</summary>
+    [HttpPost("favorites/food/{id:int}/toggle")]
+    public async Task<IActionResult> ToggleFavoriteFood(int id)
+    {
+        var isFavorite = await _mealLogService.ToggleFavoriteFoodAsync(id);
+        return Ok(new { isFavorite });
+    }
+
+    /// <summary>Add or remove a recipe from the current athlete's favorites.</summary>
+    [HttpPost("favorites/recipe/{id:int}/toggle")]
+    public async Task<IActionResult> ToggleFavoriteRecipe(int id)
+    {
+        var isFavorite = await _mealLogService.ToggleFavoriteRecipeAsync(id);
+        return Ok(new { isFavorite });
+    }
+
     /// <summary>Remove a food log entry from the diary.</summary>
     [HttpDelete("log/{id:int}")]
     public async Task<IActionResult> RemoveEntry(int id)

@@ -18,6 +18,8 @@ public class JokerNutritionContext : IdentityDbContext<User, Role, int,
     public DbSet<RecipeIngredient> RecipeIngredients => Set<RecipeIngredient>();
     public DbSet<DailyDiary> DailyDiaries => Set<DailyDiary>();
     public DbSet<MealLog> MealLogs => Set<MealLog>();
+    public DbSet<FavoriteFood> FavoriteFoods => Set<FavoriteFood>();
+    public DbSet<FavoriteRecipe> FavoriteRecipes => Set<FavoriteRecipe>();
     public DbSet<MacroTarget> MacroTargets => Set<MacroTarget>();
     public DbSet<Exercise> Exercises => Set<Exercise>();
     public DbSet<WorkoutTemplate> WorkoutTemplates => Set<WorkoutTemplate>();
