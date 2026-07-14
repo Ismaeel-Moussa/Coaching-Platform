@@ -57,11 +57,15 @@ public class RecipeService : _BaseService, IRecipeService
 
     public async Task<PagedResult<RecipeDto>> GetRecipesAsync(RecipeCategory? category, string? search, int page, int pageSize)
     {
-        string cacheKey = $"recipes:search:{category}:{search}:{page}:{pageSize}";
+        string cacheKey = $"recipes:search:{LoggedInUser.Role}:{category}:{search}:{page}:{pageSize}";
         return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
         {
-            var query = _recipeRepo.QueryAll()
-                .Include(r => r.Ingredients).ThenInclude(i => i.Food);
+            IQueryable<Recipe> query = _recipeRepo.QueryAll()
+                .Include(r => r.Ingredients).ThenInclude(i => i.Food)
+                .Include(r => r.Steps);
+
+            if (LoggedInUser.Role == "Athlete")
+                query = query.Where(r => r.ContentStatus == ContentStatus.Published);
 
             var filtered = category.HasValue
                 ? query.Where(r => r.Category == category.Value)
@@ -95,12 +99,14 @@ public class RecipeService : _BaseService, IRecipeService
 
     public async Task<RecipeDto> GetRecipeByIdAsync(int id)
     {
-        string cacheKey = $"recipe:{id}";
+        string cacheKey = $"recipe:{LoggedInUser.Role}:{id}";
         return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
         {
             var recipe = await _recipeRepo.QueryAll()
                 .Include(r => r.Ingredients).ThenInclude(i => i.Food)
-                .FirstOrDefaultAsync(r => r.Id == id)
+                .Include(r => r.Steps)
+                .FirstOrDefaultAsync(r => r.Id == id &&
+                    (LoggedInUser.Role != "Athlete" || r.ContentStatus == ContentStatus.Published))
                 ?? throw new KeyNotFoundException($"Recipe {id} not found.");
 
             return RecipeMapper.Map(recipe);
@@ -212,10 +218,11 @@ public class RecipeService : _BaseService, IRecipeService
         await _recipeRepo.SaveChangesAsync();
 
         _cacheService.EvictByPrefix("recipes:search:");
-        _cacheService.Evict($"recipe:{recipeId}");
+        _cacheService.EvictByPrefix("recipe:");
 
         var updatedRecipe = await _recipeRepo.Query()
             .Include(r => r.Ingredients).ThenInclude(i => i.Food)
+            .Include(r => r.Steps)
             .FirstOrDefaultAsync(r => r.Id == recipeId);
 
         return RecipeMapper.Map(updatedRecipe!);
@@ -225,6 +232,7 @@ public class RecipeService : _BaseService, IRecipeService
     {
         var recipe = await _recipeRepo.Query()
             .Include(r => r.Ingredients).ThenInclude(i => i.Food)
+            .Include(r => r.Steps)
             .FirstOrDefaultAsync(r => r.Id == recipeId)
             ?? throw new KeyNotFoundException($"Recipe {recipeId} not found.");
 
@@ -245,7 +253,7 @@ public class RecipeService : _BaseService, IRecipeService
         await _recipeRepo.SaveChangesAsync();
 
         _cacheService.EvictByPrefix("recipes:search:");
-        _cacheService.Evict($"recipe:{recipeId}");
+        _cacheService.EvictByPrefix("recipe:");
 
         return RecipeMapper.Map(recipe);
     }
@@ -259,7 +267,8 @@ public class RecipeService : _BaseService, IRecipeService
 
         var recipe = await _recipeRepo.Query()
             .Include(r => r.Ingredients).ThenInclude(i => i.Food)
-            .FirstOrDefaultAsync(r => r.Id == recipeId)
+            .Include(r => r.Steps)
+            .FirstOrDefaultAsync(r => r.Id == recipeId && r.ContentStatus == ContentStatus.Published)
             ?? throw new KeyNotFoundException($"Recipe {recipeId} not found.");
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);

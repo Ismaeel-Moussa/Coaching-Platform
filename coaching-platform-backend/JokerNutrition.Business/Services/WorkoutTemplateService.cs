@@ -168,7 +168,7 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
         var coachId = await GetCoachIdAsync();
 
         var template = await _templateRepo.Query()
-            .FirstOrDefaultAsync(t => t.Id == templateId && t.IsActive)
+            .FirstOrDefaultAsync(t => t.Id == templateId && t.IsActive && t.ContentStatus == ContentStatus.Published)
             ?? throw new KeyNotFoundException($"Workout template {templateId} not found.");
 
         int count = 0;

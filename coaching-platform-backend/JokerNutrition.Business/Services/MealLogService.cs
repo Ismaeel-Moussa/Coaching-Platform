@@ -4,6 +4,7 @@ using JokerNutrition.Business.Forms.Diary;
 using JokerNutrition.Business.Helpers;
 using JokerNutrition.Business.Mappers;
 using JokerNutrition.Data.Entities;
+using JokerNutrition.Data.Enums;
 using JokerNutrition.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -226,7 +227,7 @@ public class MealLogService : _BaseService, IMealLogService
         if (source == "favorites")
         {
             recipes = await _favoriteRecipeRepo.QueryAll()
-                .Where(f => f.AthleteId == athleteId)
+                .Where(f => f.AthleteId == athleteId && f.Recipe.ContentStatus == ContentStatus.Published)
                 .Include(f => f.Recipe).ThenInclude(r => r.Ingredients).ThenInclude(i => i.Food)
                 .OrderByDescending(f => f.CreatedAt)
                 .Select(f => f.Recipe).ToListAsync();
@@ -257,7 +258,8 @@ public class MealLogService : _BaseService, IMealLogService
     }
 
     private Task<List<Recipe>> GetRecipesByIdsAsync(List<int> ids) => _recipeRepo.QueryAll()
-        .Where(r => ids.Contains(r.Id)).Include(r => r.Ingredients).ThenInclude(i => i.Food).ToListAsync();
+        .Where(r => ids.Contains(r.Id) && r.ContentStatus == ContentStatus.Published)
+        .Include(r => r.Ingredients).ThenInclude(i => i.Food).ToListAsync();
 
     private async Task<MealLog> CreateMealLogAsync(int diaryId, JokerNutrition.Data.Enums.MealType mealType, int? foodId, int? recipeId, decimal quantityGrams)
     {
@@ -275,7 +277,7 @@ public class MealLogService : _BaseService, IMealLogService
         }
 
         var recipe = await _recipeRepo.Query().Include(r => r.Ingredients).ThenInclude(i => i.Food)
-            .FirstOrDefaultAsync(r => r.Id == recipeId!.Value)
+            .FirstOrDefaultAsync(r => r.Id == recipeId!.Value && r.ContentStatus == ContentStatus.Published)
             ?? throw new KeyNotFoundException($"Recipe {recipeId} not found.");
         var totalWeight = recipe.Ingredients.Sum(i => i.QuantityGrams);
         var multiplier = totalWeight > 0 ? quantityGrams / totalWeight : 1m;

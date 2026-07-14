@@ -51,6 +51,40 @@ public enum SupplementType
     Optional
 }
 
+public enum ContentStatus
+{
+    Draft,
+    InReview,
+    Published,
+    Archived
+}
+
+public enum FoodPreparationState
+{
+    Unspecified,
+    Raw,
+    Cooked,
+    Drained
+}
+
+public enum IngredientUnit
+{
+    Gram,
+    Milliliter,
+    Piece,
+    Tablespoon,
+    Teaspoon,
+    Cup,
+    Scoop
+}
+
+public enum SeedImportStatus
+{
+    Running,
+    Succeeded,
+    Failed
+}
+
 public enum PhotoAngle
 {
     Front,

@@ -16,16 +16,35 @@ export interface RecipeIngredientDto {
   foodId: number;
   foodName: string;
   quantityGrams: number;
+  displayQuantity?: number;
+  unit?: string;
+  measurementState?: string;
+  displayText?: string;
+  displayTextAr?: string;
+  isOptional?: boolean;
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
 }
 
+export interface RecipeStepDto {
+  orderIndex: number;
+  instruction?: string;
+  instructionAr: string;
+  mediaUrl?: string;
+}
+
 export interface RecipeDto {
   id: number;
+  seedKey?: string;
   name: string;
+  nameAr?: string;
   description: string;
+  descriptionAr?: string;
+  usageNotes?: string;
+  usageNotesAr?: string;
+  contentStatus?: 'Draft' | 'InReview' | 'Published' | 'Archived';
   category: RecipeCategory;
   prepTimeMinutes: number;
   cookTimeMinutes: number;
@@ -35,10 +54,13 @@ export interface RecipeDto {
   totalProtein: number;
   totalCarbs: number;
   totalFat: number;
+  declaredCalories?: number;
+  declaredProtein?: number;
   createdAt: string;
   imageUrl?: string;
   videoUrl?: string;
   ingredients: RecipeIngredientDto[];
+  steps?: RecipeStepDto[];
   isFavorite?: boolean;
 }
 

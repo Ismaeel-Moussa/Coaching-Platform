@@ -3,6 +3,7 @@ using System;
 using JokerNutrition.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JokerNutrition.Data.Migrations
 {
     [DbContext(typeof(JokerNutritionContext))]
-    partial class JokerNutritionContextModelSnapshot : ModelSnapshot
+    [Migration("20260714155717_AddCoachCatalogFoundation")]
+    partial class AddCoachCatalogFoundation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

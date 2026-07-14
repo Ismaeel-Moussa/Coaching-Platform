@@ -16,6 +16,7 @@ public class JokerNutritionContext : IdentityDbContext<User, Role, int,
     public DbSet<Food> Foods => Set<Food>();
     public DbSet<Recipe> Recipes => Set<Recipe>();
     public DbSet<RecipeIngredient> RecipeIngredients => Set<RecipeIngredient>();
+    public DbSet<RecipeStep> RecipeSteps => Set<RecipeStep>();
     public DbSet<DailyDiary> DailyDiaries => Set<DailyDiary>();
     public DbSet<MealLog> MealLogs => Set<MealLog>();
     public DbSet<FavoriteFood> FavoriteFoods => Set<FavoriteFood>();
@@ -30,6 +31,13 @@ public class JokerNutritionContext : IdentityDbContext<User, Role, int,
     public DbSet<ExerciseSetLog> ExerciseSetLogs => Set<ExerciseSetLog>();
     public DbSet<SupplementSchedule> SupplementSchedules => Set<SupplementSchedule>();
     public DbSet<SupplementLog> SupplementLogs => Set<SupplementLog>();
+    public DbSet<SupplementCatalogItem> SupplementCatalogItems => Set<SupplementCatalogItem>();
+    public DbSet<NutritionPlanTemplate> NutritionPlanTemplates => Set<NutritionPlanTemplate>();
+    public DbSet<NutritionMealBlock> NutritionMealBlocks => Set<NutritionMealBlock>();
+    public DbSet<NutritionMealOption> NutritionMealOptions => Set<NutritionMealOption>();
+    public DbSet<NutritionOptionItem> NutritionOptionItems => Set<NutritionOptionItem>();
+    public DbSet<NutritionPlanRule> NutritionPlanRules => Set<NutritionPlanRule>();
+    public DbSet<SeedImportBatch> SeedImportBatches => Set<SeedImportBatch>();
     public DbSet<ClientCheckIn> ClientCheckIns => Set<ClientCheckIn>();
     public DbSet<CheckInPhoto> CheckInPhotos => Set<CheckInPhoto>();
     public DbSet<CoachFeedbackNote> CoachFeedbackNotes => Set<CoachFeedbackNote>();
