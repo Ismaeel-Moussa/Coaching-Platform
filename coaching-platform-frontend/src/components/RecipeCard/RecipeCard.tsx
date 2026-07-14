@@ -3,6 +3,7 @@ import { Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { RecipeCategory, RECIPE_CATEGORY_LABELS, type RecipeDto } from '../../types/Recipe';
 import { MealType } from '../../types/Diary';
+import { useLanguage } from '../../contexts/LanguageContext';
 import './RecipeCard.scss';
 
 interface RecipeCardProps {
@@ -29,15 +30,20 @@ const getRecipeCategoryLabel = (category: RecipeCategory, t: any) => {
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onQuickAdd, onViewDetails, isAdding = false }) => {
   const { t } = useTranslation(['common', 'athlete']);
+  const { language } = useLanguage();
   const totalTime = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
   const categoryColor = CATEGORY_COLORS[recipe.category];
+  const displayName = language === 'ar' && recipe.nameAr ? recipe.nameAr : recipe.name;
+  const displayDescription = language === 'ar' && recipe.descriptionAr
+    ? recipe.descriptionAr
+    : recipe.description;
 
   return (
     <div className="recipe-card" onClick={() => onViewDetails?.(recipe)}>
       {/* Recipe Image or Placeholder with Overlays */}
       <div className="recipe-card__image-wrapper">
         {recipe.imageUrl ? (
-          <img src={recipe.imageUrl} alt={recipe.name} className="recipe-card__image" />
+          <img src={recipe.imageUrl} alt={displayName} className="recipe-card__image" />
         ) : (
           <div className="recipe-card__image-placeholder">
             <span className="material-symbols-outlined">restaurant</span>
@@ -72,9 +78,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onQuickAdd, onViewDetai
 
       {/* Body */}
       <div className="recipe-card__body">
-        <h3 className="recipe-card__name">{recipe.name}</h3>
-        {recipe.description && (
-          <p className="recipe-card__description">{recipe.description}</p>
+        <h3 className="recipe-card__name">{displayName}</h3>
+        {displayDescription && (
+          <p className="recipe-card__description">{displayDescription}</p>
         )}
 
         {/* Time row */}

@@ -1,0 +1,10 @@
+# Private coach source documents and derived content packages must not be
+# published from this public repository.
+/coach-files/
+/COACH_CONTENT_ANALYSIS_AND_PRODUCTION_SEED_PLAN.md
+/tools/build_coach_catalog.py
+/tools/extract_recipe_images.py
+/coaching-platform-backend/JokerNutrition.Data/SeedData/coach-catalog/v*/
+
+# Local render/inspection output.
+/tmp/

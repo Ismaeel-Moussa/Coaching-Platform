@@ -10,13 +10,19 @@ public class FoodMapping : IEntityTypeConfiguration<Food>
     {
         builder.ToTable("Foods");
         builder.HasKey(f => f.Id);
+        builder.Property(f => f.SeedKey).HasMaxLength(200);
+        builder.HasIndex(f => f.SeedKey).IsUnique();
         builder.Property(f => f.Name).HasMaxLength(200).IsRequired();
+        builder.Property(f => f.NameAr).HasMaxLength(200);
         builder.Property(f => f.Category).HasMaxLength(50);
         builder.Property(f => f.CaloriesPer100g).HasPrecision(8, 2);
         builder.Property(f => f.ProteinPer100g).HasPrecision(8, 2);
         builder.Property(f => f.CarbsPer100g).HasPrecision(8, 2);
         builder.Property(f => f.FatPer100g).HasPrecision(8, 2);
         builder.Property(f => f.FiberPer100g).HasPrecision(8, 2);
+        builder.Property(f => f.SourceDocument).HasMaxLength(300);
+        builder.Property(f => f.ContentStatus).HasDefaultValue(JokerNutrition.Data.Enums.ContentStatus.Published);
+        builder.Property(f => f.ContentVersion).HasDefaultValue(1);
     }
 }
 
@@ -26,12 +32,26 @@ public class RecipeMapping : IEntityTypeConfiguration<Recipe>
     {
         builder.ToTable("Recipes");
         builder.HasKey(r => r.Id);
+        builder.Property(r => r.SeedKey).HasMaxLength(200);
+        builder.HasIndex(r => r.SeedKey).IsUnique();
         builder.Property(r => r.Name).HasMaxLength(200).IsRequired();
+        builder.Property(r => r.NameAr).HasMaxLength(200);
         builder.Property(r => r.Description).HasMaxLength(1000);
+        builder.Property(r => r.DescriptionAr).HasMaxLength(2000);
+        builder.Property(r => r.UsageNotes).HasMaxLength(2000);
+        builder.Property(r => r.UsageNotesAr).HasMaxLength(4000);
+        builder.Property(r => r.Tags).HasMaxLength(1000);
+        builder.Property(r => r.SourceDocument).HasMaxLength(300);
+        builder.Property(r => r.ContentStatus).HasDefaultValue(JokerNutrition.Data.Enums.ContentStatus.Published);
+        builder.Property(r => r.ContentVersion).HasDefaultValue(1);
         builder.Property(r => r.TotalCalories).HasPrecision(10, 2);
         builder.Property(r => r.TotalProtein).HasPrecision(8, 2);
         builder.Property(r => r.TotalCarbs).HasPrecision(8, 2);
         builder.Property(r => r.TotalFat).HasPrecision(8, 2);
+        builder.Property(r => r.DeclaredCalories).HasPrecision(10, 2);
+        builder.Property(r => r.DeclaredProtein).HasPrecision(8, 2);
+        builder.Property(r => r.DeclaredCarbs).HasPrecision(8, 2);
+        builder.Property(r => r.DeclaredFat).HasPrecision(8, 2);
         builder.HasOne(r => r.CreatedByAthlete).WithMany().HasForeignKey(r => r.CreatedByAthleteId).OnDelete(DeleteBehavior.SetNull);
     }
 }
@@ -43,8 +63,26 @@ public class RecipeIngredientMapping : IEntityTypeConfiguration<RecipeIngredient
         builder.ToTable("RecipeIngredients");
         builder.HasKey(ri => ri.Id);
         builder.Property(ri => ri.QuantityGrams).HasPrecision(8, 2);
+        builder.Property(ri => ri.DisplayQuantity).HasPrecision(8, 2);
+        builder.Property(ri => ri.DisplayText).HasMaxLength(500);
+        builder.Property(ri => ri.DisplayTextAr).HasMaxLength(1000);
+        builder.Property(ri => ri.AlternativeGroupKey).HasMaxLength(100);
         builder.HasOne(ri => ri.Recipe).WithMany(r => r.Ingredients).HasForeignKey(ri => ri.RecipeId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(ri => ri.Food).WithMany(f => f.RecipeIngredients).HasForeignKey(ri => ri.FoodId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class RecipeStepMapping : IEntityTypeConfiguration<RecipeStep>
+{
+    public void Configure(EntityTypeBuilder<RecipeStep> builder)
+    {
+        builder.ToTable("RecipeSteps");
+        builder.HasKey(rs => rs.Id);
+        builder.Property(rs => rs.Instruction).HasMaxLength(2000);
+        builder.Property(rs => rs.InstructionAr).HasMaxLength(4000).IsRequired();
+        builder.Property(rs => rs.MediaUrl).HasMaxLength(1000);
+        builder.HasOne(rs => rs.Recipe).WithMany(r => r.Steps).HasForeignKey(rs => rs.RecipeId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(rs => new { rs.RecipeId, rs.OrderIndex }).IsUnique();
     }
 }
 
