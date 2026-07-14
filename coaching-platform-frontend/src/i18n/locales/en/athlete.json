@@ -261,6 +261,7 @@
     "title": "Daily History Logs",
     "subtitle": "Track your complete history of workouts, meals, and supplements day-by-day.",
     "selectDate": "Select Date",
+    "selectWeek": "Select Week",
     "workoutTab": "Workouts",
     "nutritionTab": "Nutrition",
     "supplementsTab": "Supplements",
@@ -282,6 +283,8 @@
     "notTaken": "Not Taken",
     "dosage": "Dosage",
     "notes": "Notes",
-    "errorLoading": "Failed to load daily log history."
+    "errorLoading": "Failed to load daily log history.",
+    "dailyLogsTab": "Daily Logs",
+    "checkInHistoryTab": "Weekly Check-ins"
   }
 }

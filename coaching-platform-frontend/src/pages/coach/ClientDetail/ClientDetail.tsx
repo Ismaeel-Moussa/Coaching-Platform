@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Skeleton, Input, Button, Avatar, Card, Breadcrumb, Empty, Pagination, Modal, Tag, Progress, Divider, Tabs, DatePicker } from 'antd';
+import { Skeleton, Input, Button, Avatar, Card, Breadcrumb, Empty, Pagination, Modal, Tag, Progress, Divider, Tabs, DatePicker, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient, useIsFetching } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -17,164 +17,14 @@ import {
   useGetAthleteProfile,
   useSaveFeedbackNote,
 } from '../../../hooks/useCoachHub/useCoachHub';
-import { useGetCheckInHistory, useAddCoachNotes } from '../../../hooks/useCheckIn/useCheckIn';
+import { useGetCheckInHistory } from '../../../hooks/useCheckIn/useCheckIn';
 import { formatDateDisplay } from '../../../utils/date';
 import type { CoachFeedbackNoteDto } from '../../../types/CoachHub';
 import DailyLogHistoryView from '../../../components/DailyLogHistoryView/DailyLogHistoryView';
+import CheckInCard from '../../../components/CheckInCard/CheckInCard';
 import './ClientDetail.scss';
 
 const { TextArea } = Input;
-
-const getSubjectiveLabel = (label: string, t: any) => {
-  switch (label) {
-    case 'Sleep Quality': return t('athlete:checkIn.sleepLabel');
-    case 'Energy Level': return t('athlete:checkIn.energyLabel');
-    case 'Gut Health': return t('athlete:checkIn.gutLabel');
-    case 'Training Stress': return t('athlete:checkIn.stressLabel');
-    default: return label;
-  }
-};
-
-const CheckInCard: React.FC<{ checkIn: any; onPhotoClick: (url: string) => void }> = React.memo(({
-  checkIn,
-  onPhotoClick,
-}) => {
-  const { t, i18n } = useTranslation(['common', 'athlete', 'coach']);
-  const [notes, setNotes] = useState<string>(checkIn.coachNotes || '');
-  const addCoachNotesMutation = useAddCoachNotes(checkIn.id);
-
-  const handleSaveCheckInNotes = () => {
-    if (!notes.trim()) return;
-    addCoachNotesMutation.mutate({ notes: notes.trim() });
-  };
-
-  const getSliderTrackColor = (val: number) => {
-    if (val <= 3) return 'var(--color-red)';
-    if (val <= 6) return 'var(--color-gold)';
-    return 'var(--color-success)';
-  };
-
-  return (
-    <div className="checkin-card-item">
-      <div className="checkin-card-item__header">
-        <div className="checkin-card-item__week-title">
-          {t('coach:clientDetail.weekOf', { date: formatDateDisplay(checkIn.weekOf) })}
-        </div>
-        <div className="checkin-card-item__submit-time mono">
-          {t('coach:clientDetail.submittedAt', { date: new Date(checkIn.submittedAt).toLocaleString(i18n.language) })}
-        </div>
-      </div>
-
-      <div className="checkin-card-item__body">
-        {/* Measurements */}
-        <div className="checkin-card-item__section">
-          <h4 className="checkin-card-item__section-title">{t('coach:clientDetail.measurements')}</h4>
-          <div className="checkin-card-item__biometrics-grid mono">
-            <div className="checkin-card-item__metric">
-              <span className="label">{t('common:labels.weight')}</span>
-              <span className="value">{checkIn.weightKg} {t('common:units.kg')}</span>
-            </div>
-            <div className="checkin-card-item__metric">
-              <span className="label">{t('common:labels.waist')}</span>
-              <span className="value">{checkIn.waistCm ? `${checkIn.waistCm} ${t('common:units.cm')}` : '—'}</span>
-            </div>
-            <div className="checkin-card-item__metric">
-              <span className="label">{t('common:labels.chest')}</span>
-              <span className="value">{checkIn.chestCm ? `${checkIn.chestCm} ${t('common:units.cm')}` : '—'}</span>
-            </div>
-            <div className="checkin-card-item__metric">
-              <span className="label">{t('common:labels.thigh')}</span>
-              <span className="value">{checkIn.thighCm ? `${checkIn.thighCm} ${t('common:units.cm')}` : '—'}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Well-being sliders */}
-        <div className="checkin-card-item__section">
-          <h4 className="checkin-card-item__section-title">{t('coach:clientDetail.subjective')}</h4>
-          <div className="checkin-card-item__subjective-list">
-            {[
-              { label: 'Sleep Quality', val: checkIn.sleepQuality },
-              { label: 'Energy Level', val: checkIn.energyLevel },
-              { label: 'Gut Health', val: checkIn.gutHealth },
-              { label: 'Training Stress', val: checkIn.trainingStress },
-            ].map((marker) => (
-              <div className="checkin-card-item__subjective-row" key={marker.label}>
-                <span className="label">{getSubjectiveLabel(marker.label, t)}</span>
-                <div className="progress-container">
-                  <Progress
-                    percent={marker.val * 10}
-                    strokeColor={getSliderTrackColor(marker.val)}
-                    format={() => `${marker.val}/10`}
-                    size="small"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Photos */}
-        <div className="checkin-card-item__section checkin-card-item__section--photos">
-          <h4 className="checkin-card-item__section-title">{t('coach:clientDetail.photos')}</h4>
-          <div className="checkin-card-item__photos-row">
-            {checkIn.photos && checkIn.photos.length > 0 ? (
-              checkIn.photos.map((photo: any) => (
-                <div
-                  className="checkin-card-item__photo-thumb"
-                  key={photo.id}
-                  onClick={() => onPhotoClick(photo.signedDownloadUrl)}
-                >
-                  <img src={photo.signedDownloadUrl} alt={`${photo.angle} view`} />
-                  <span className="angle-label">{photo.angle}</span>
-                </div>
-              ))
-            ) : (
-              <div className="checkin-card-item__no-photos">
-                <span className="material-symbols-outlined">hide_image</span>
-                <span>{t('coach:clientDetail.noPhotos')}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <Divider style={{ margin: '16px 0' }} />
-
-      {/* Coach Notes */}
-      <div className="checkin-card-item__feedback-section">
-        <h4 className="checkin-card-item__section-title">{t('coach:clientDetail.reviewTitle')}</h4>
-        <div className="checkin-card-item__notes-form">
-          <TextArea
-            rows={2}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder={t('coach:clientDetail.reviewPlaceholder')}
-            maxLength={2000}
-            disabled={addCoachNotesMutation.isPending}
-          />
-          <div className="checkin-card-item__notes-actions">
-            {checkIn.coachReviewedAt && (
-              <span className="reviewed-at-text mono">
-                {t('coach:clientDetail.reviewedAt', { date: new Date(checkIn.coachReviewedAt).toLocaleDateString(i18n.language) })}
-              </span>
-            )}
-            <Button
-              type="primary"
-              size="small"
-              onClick={handleSaveCheckInNotes}
-              loading={addCoachNotesMutation.isPending}
-              disabled={notes.trim() === (checkIn.coachNotes || '').trim() || !notes.trim()}
-              className="save-checkin-notes-btn"
-            >
-              {t('coach:clientDetail.saveReview')}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-});
 
 const ClientDetail: React.FC = () => {
   const { t, i18n } = useTranslation(['common', 'athlete', 'coach']);
@@ -199,10 +49,24 @@ const ClientDetail: React.FC = () => {
   const [noteText, setNoteText] = useState<string>('');
   const [notesList, setNotesList] = useState<CoachFeedbackNoteDto[]>([]);
 
-  // Check-In History Pagination & Lightbox Photo State
-  const [historyPage, setHistoryPage] = useState<number>(1);
-  const { data: checkInHistory, isLoading: isHistoryLoading } = useGetCheckInHistory(historyPage, 5, id);
+  // Check-In History Week Dropdown & Lightbox Photo State
+  const [selectedCheckInId, setSelectedCheckInId] = useState<number | null>(null);
+  const { data: checkInHistory, isLoading: isHistoryLoading } = useGetCheckInHistory(1, 100, id);
   const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
+
+  const selectedCheckIn = checkInHistory?.items.find(item => item.id === selectedCheckInId) || checkInHistory?.items[0];
+
+  // Sync default selection to the most recent check-in
+  useEffect(() => {
+    if (checkInHistory?.items && checkInHistory.items.length > 0) {
+      const exists = checkInHistory.items.some(item => item.id === selectedCheckInId);
+      if (!selectedCheckInId || !exists) {
+        setSelectedCheckInId(checkInHistory.items[0].id);
+      }
+    } else {
+      setSelectedCheckInId(null);
+    }
+  }, [checkInHistory, selectedCheckInId]);
 
   const handlePhotoClick = React.useCallback((url: string) => {
     setLightboxPhoto(url);
@@ -515,43 +379,54 @@ const ClientDetail: React.FC = () => {
                       </div>
 
                     </div>
-
-                    {/* Check-In History Full Width Section */}
-                    <div id="check-in-history-section" className="client-detail__history-section">
-                      <div className="client-detail__card">
-                        <div className="client-detail__card-header">
-                          <span className="material-symbols-outlined text-gold">assignment_turned_in</span>
-                          <h3>{t('coach:clientDetail.checkinHistory')}</h3>
-                        </div>
-                        {isHistoryLoading ? (
-                          <div style={{ padding: '20px' }}>
-                            <Skeleton active paragraph={{ rows: 6 }} />
-                          </div>
-                        ) : checkInHistory?.items && checkInHistory.items.length > 0 ? (
-                          <div className="client-detail__history-list">
-                            {checkInHistory.items.map((checkIn) => (
-                              <CheckInCard
-                                key={checkIn.id}
-                                checkIn={checkIn}
-                                onPhotoClick={handlePhotoClick}
-                              />
-                            ))}
-                            <div className="client-detail__history-pagination">
-                              <Pagination
-                                current={historyPage}
-                                pageSize={5}
-                                total={checkInHistory.totalCount}
-                                onChange={(page) => setHistoryPage(page)}
-                                showSizeChanger={false}
-                              />
-                            </div>
-                          </div>
-                        ) : (
-                          <Empty description={t('coach:clientDetail.noCheckins')} style={{ padding: '40px 0' }} />
-                        )}
-                      </div>
-                    </div>
                   </>
+                )
+              },
+              {
+                key: 'check-in-history',
+                label: (
+                  <span className="client-detail__tab-label">
+                    <span className="material-symbols-outlined icon">assignment_turned_in</span>
+                    {t('coach:clientDetail.checkinHistory')}
+                  </span>
+                ),
+                children: (
+                  <div className="client-detail__history-section" style={{ marginTop: '16px' }}>
+                    <div className="client-detail__card">
+                      {isHistoryLoading ? (
+                        <div style={{ padding: '20px' }}>
+                          <Skeleton active paragraph={{ rows: 6 }} />
+                        </div>
+                      ) : checkInHistory?.items && checkInHistory.items.length > 0 ? (
+                        <div className="client-detail__history-list" style={{ gap: '16px' }}>
+                          <div className="client-detail__history-tab-header" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--color-white)', border: '1px solid var(--color-border-light)', padding: '8px 16px', borderRadius: 'var(--radius-md)', width: 'fit-content', boxShadow: 'var(--shadow-sm)', marginBottom: '16px' }}>
+                            <span className="label" style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-text-primary)' }}>{t('athlete:history.selectWeek', 'Select Week')}:</span>
+                            <Select
+                              value={selectedCheckInId}
+                              onChange={(val) => setSelectedCheckInId(val)}
+                              style={{ minWidth: 200 }}
+                              options={checkInHistory.items.map(item => ({
+                                value: item.id,
+                                label: t('coach:clientDetail.weekOf', { date: formatDateDisplay(item.weekOf) })
+                              }))}
+                            />
+                          </div>
+                          {selectedCheckIn ? (
+                            <CheckInCard
+                              key={selectedCheckIn.id}
+                              checkIn={selectedCheckIn}
+                              isCoach={true}
+                              onPhotoClick={handlePhotoClick}
+                            />
+                          ) : (
+                            <Empty description={t('coach:clientDetail.noCheckins')} style={{ padding: '40px 0' }} />
+                          )}
+                        </div>
+                      ) : (
+                        <Empty description={t('coach:clientDetail.noCheckins')} style={{ padding: '40px 0' }} />
+                      )}
+                    </div>
+                  </div>
                 )
               },
               {

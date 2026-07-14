@@ -296,11 +296,42 @@ public class AthleteService : _BaseService, IAthleteService
 
     public async Task<DailyLogHistoryDto> GetDailyLogAsync(int athleteId, DateOnly date)
     {
-        var athlete = await _athleteRepo.Query()
+        // 1. Fetch Athlete info (including User & AssignedCoach for authorization) and Supplement logs in a single query (using SQL supplement projection)
+        var athleteData = await _athleteRepo.Query()
             .AsNoTracking()
-            .Include(a => a.User)
-            .FirstOrDefaultAsync(a => a.Id == athleteId)
-            ?? throw new KeyNotFoundException("Athlete profile not found.");
+            .Where(a => a.Id == athleteId)
+            .Select(a => new
+            {
+                Athlete = a,
+                User = a.User,
+                AssignedCoach = a.AssignedCoach,
+                Supplements = a.SupplementSchedules
+                    .Where(s => s.IsActive || s.Logs.Any(l => l.Date == date))
+                    .OrderBy(s => s.Type)
+                    .ThenBy(s => s.Name)
+                    .Select(s => new SupplementDto
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        Type = s.Type.ToString(),
+                        Dosage = s.Dosage,
+                        Notes = s.Notes,
+                        IsTakenToday = s.Logs.Where(l => l.Date == date).Select(l => l.IsTaken).FirstOrDefault(),
+                        TakenAt = s.Logs.Where(l => l.Date == date).Select(l => l.TakenAt).FirstOrDefault()
+                    })
+                    .ToList()
+            })
+            .FirstOrDefaultAsync();
+
+        if (athleteData is null)
+        {
+            throw new KeyNotFoundException("Athlete profile not found.");
+        }
+
+        var athlete = athleteData.Athlete;
+        athlete.User = athleteData.User;
+        athlete.AssignedCoach = athleteData.AssignedCoach;
+        var supplementsDto = athleteData.Supplements;
 
         // Authorization check
         var currentUserId = LoggedInUser.Id;
@@ -315,12 +346,7 @@ public class AthleteService : _BaseService, IAthleteService
         }
         else if (role == "Coach")
         {
-            var coach = await _coachRepo.Query()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.UserId == currentUserId)
-                ?? throw new UnauthorizedAccessException("Coach profile not found.");
-
-            if (athlete.AssignedCoachId != coach.Id)
+            if (athlete.AssignedCoach == null || athlete.AssignedCoach.UserId != currentUserId)
             {
                 throw new UnauthorizedAccessException("This athlete is not on your roster.");
             }
@@ -330,11 +356,12 @@ public class AthleteService : _BaseService, IAthleteService
             throw new UnauthorizedAccessException("Invalid role permissions.");
         }
 
-        // 1. Fetch Workout Log
+        // 2. Fetch Workout Log with eager collection loading
         var workoutLog = await _workoutLogRepo.Query()
             .AsNoTracking()
             .Include(w => w.Day).ThenInclude(d => d.Exercises).ThenInclude(e => e.Exercise)
             .Include(w => w.Sets).ThenInclude(s => s.Exercise)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(w => w.AthleteId == athleteId && w.Date == date);
 
         TodaysWorkoutDto? workoutDto = null;
@@ -355,7 +382,7 @@ public class AthleteService : _BaseService, IAthleteService
             };
         }
 
-        // 2. Fetch Nutrition Diary Log
+        // 3. Fetch Nutrition Diary Log with eager collection loading
         var diary = await _diaryRepo.Query()
             .AsNoTracking()
             .Include(d => d.MealLogs).ThenInclude(l => l.Food)
@@ -368,24 +395,6 @@ public class AthleteService : _BaseService, IAthleteService
             var logs = diary.MealLogs.OrderBy(l => l.LoggedAt).ToList();
             nutritionDto = DiaryMapper.Map(diary, logs);
         }
-
-        // 3. Fetch Supplement Logs
-        var supplementsDto = await _scheduleRepo.QueryAll()
-            .AsNoTracking()
-            .Where(s => s.AthleteId == athleteId && (s.IsActive || s.Logs.Any(l => l.Date == date)))
-            .OrderBy(s => s.Type)
-            .ThenBy(s => s.Name)
-            .Select(s => new SupplementDto
-            {
-                Id = s.Id,
-                Name = s.Name,
-                Type = s.Type.ToString(),
-                Dosage = s.Dosage,
-                Notes = s.Notes,
-                IsTakenToday = s.Logs.Where(l => l.Date == date).Select(l => l.IsTaken).FirstOrDefault(),
-                TakenAt = s.Logs.Where(l => l.Date == date).Select(l => l.TakenAt).FirstOrDefault()
-            })
-            .ToListAsync();
 
         return new DailyLogHistoryDto
         {

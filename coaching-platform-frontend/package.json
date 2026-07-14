@@ -16,8 +16,6 @@
     "@vitejs/plugin-react": "^6.0.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
-    "genie-react": "^0.5.0",
-    "genie-react-agent": "github:y0u-0/genie-react#path:packages/cli",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.61.1",
     "vite": "^8.0.12",

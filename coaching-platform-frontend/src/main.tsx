@@ -31,7 +31,6 @@ import { GlobalConfirmModalProvider } from './contexts/GlobalConfirmModalContext
 import { LanguageProvider } from './contexts/LanguageContext';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from '@vercel/analytics/react';
-import { Genie } from 'genie-react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,7 +52,6 @@ createRoot(document.getElementById('root')!).render(
           <Analytics />
         </GlobalConfirmModalProvider>
       </LanguageProvider>
-      {import.meta.env.DEV && <Genie />}
     </QueryClientProvider>
   </StrictMode>,
 );
