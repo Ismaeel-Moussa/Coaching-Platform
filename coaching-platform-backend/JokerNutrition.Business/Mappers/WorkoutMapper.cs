@@ -21,24 +21,24 @@ public static class WorkoutMapper
 
     public static WorkoutDayDto MapDay(WorkoutTemplateDay day) => new()
     {
-        DayNumber = day.DayNumber,
-        DayLabel = day.DayLabel,
-        IsRestDay = day.IsRestDay,
-        WarmUp = day.Exercises
+        DayNumber = day?.DayNumber ?? 0,
+        DayLabel = day?.DayLabel ?? string.Empty,
+        IsRestDay = day?.IsRestDay ?? true,
+        WarmUp = day?.Exercises?
             .Where(e => e.Section == ExerciseSection.WarmUp)
             .OrderBy(e => e.OrderIndex)
             .Select(MapTemplateExercise)
-            .ToList(),
-        Main = day.Exercises
+            .ToList() ?? new List<TemplateExerciseDto>(),
+        Main = day?.Exercises?
             .Where(e => e.Section == ExerciseSection.Main)
             .OrderBy(e => e.OrderIndex)
             .Select(MapTemplateExercise)
-            .ToList(),
-        CoolDown = day.Exercises
+            .ToList() ?? new List<TemplateExerciseDto>(),
+        CoolDown = day?.Exercises?
             .Where(e => e.Section == ExerciseSection.CoolDown)
             .OrderBy(e => e.OrderIndex)
             .Select(MapTemplateExercise)
-            .ToList()
+            .ToList() ?? new List<TemplateExerciseDto>()
     };
 
     public static SetLogDto MapSet(ExerciseSetLog s) => new()

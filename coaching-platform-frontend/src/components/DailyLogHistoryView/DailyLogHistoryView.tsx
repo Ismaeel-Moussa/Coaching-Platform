@@ -190,8 +190,8 @@ const DailyLogHistoryView: React.FC<DailyLogHistoryViewProps> = ({ athleteId, da
                     target={nutrition.targetCalories}
                     unit=" kcal"
                   />
-                  <Row gutter={16} style={{ marginTop: '16px' }}>
-                    <Col span={8}>
+                  <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+                    <Col xs={24} sm={8}>
                       <MacroProgressBar
                         label={t('athlete:dashboard.dailyMacros.protein')}
                         consumed={nutrition.totalProtein}
@@ -200,7 +200,7 @@ const DailyLogHistoryView: React.FC<DailyLogHistoryViewProps> = ({ athleteId, da
                         color="var(--color-success)"
                       />
                     </Col>
-                    <Col span={8}>
+                    <Col xs={24} sm={8}>
                       <MacroProgressBar
                         label={t('athlete:dashboard.dailyMacros.carbs')}
                         consumed={nutrition.totalCarbs}
@@ -209,7 +209,7 @@ const DailyLogHistoryView: React.FC<DailyLogHistoryViewProps> = ({ athleteId, da
                         color="#40a9ff"
                       />
                     </Col>
-                    <Col span={8}>
+                    <Col xs={24} sm={8}>
                       <MacroProgressBar
                         label={t('athlete:dashboard.dailyMacros.fat')}
                         consumed={nutrition.totalFat}
