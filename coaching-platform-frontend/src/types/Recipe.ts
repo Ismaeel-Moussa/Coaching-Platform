@@ -39,6 +39,7 @@ export interface RecipeDto {
   imageUrl?: string;
   videoUrl?: string;
   ingredients: RecipeIngredientDto[];
+  isFavorite?: boolean;
 }
 
 export interface RecipesPagedResult {

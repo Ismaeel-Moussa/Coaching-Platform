@@ -101,3 +101,27 @@ public class MacroTargetMapping : IEntityTypeConfiguration<MacroTarget>
         builder.HasIndex(mt => new { mt.AthleteId, mt.IsActive });
     }
 }
+
+public class FavoriteFoodMapping : IEntityTypeConfiguration<FavoriteFood>
+{
+    public void Configure(EntityTypeBuilder<FavoriteFood> builder)
+    {
+        builder.ToTable("FavoriteFoods");
+        builder.HasKey(ff => ff.Id);
+        builder.HasOne(ff => ff.Athlete).WithMany().HasForeignKey(ff => ff.AthleteId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(ff => ff.Food).WithMany().HasForeignKey(ff => ff.FoodId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(ff => new { ff.AthleteId, ff.FoodId }).IsUnique();
+    }
+}
+
+public class FavoriteRecipeMapping : IEntityTypeConfiguration<FavoriteRecipe>
+{
+    public void Configure(EntityTypeBuilder<FavoriteRecipe> builder)
+    {
+        builder.ToTable("FavoriteRecipes");
+        builder.HasKey(fr => fr.Id);
+        builder.HasOne(fr => fr.Athlete).WithMany().HasForeignKey(fr => fr.AthleteId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(fr => fr.Recipe).WithMany().HasForeignKey(fr => fr.RecipeId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(fr => new { fr.AthleteId, fr.RecipeId }).IsUnique();
+    }
+}

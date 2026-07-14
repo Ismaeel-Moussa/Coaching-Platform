@@ -85,7 +85,7 @@ public class RecipeService : _BaseService, IRecipeService
 
             return new PagedResult<RecipeDto>
             {
-                Items = recipes.Select(RecipeMapper.Map),
+                Items = recipes.Select(recipe => RecipeMapper.Map(recipe)),
                 TotalCount = totalCount,
                 Page = page,
                 PageSize = pageSize

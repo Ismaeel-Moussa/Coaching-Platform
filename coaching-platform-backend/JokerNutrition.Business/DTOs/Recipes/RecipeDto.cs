@@ -20,6 +20,7 @@ public class RecipeDto
     public string? ImageUrl { get; set; }
     public string? VideoUrl { get; set; }
     public List<RecipeIngredientDto> Ingredients { get; set; } = new();
+    public bool IsFavorite { get; set; }
 }
 
 public class RecipeIngredientDto

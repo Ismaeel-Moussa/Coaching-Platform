@@ -11,7 +11,9 @@ public class RepositoriesModule : Module
         builder.RegisterType<CoachRepository>().As<ICoachRepository>().InstancePerLifetimeScope();
         builder.RegisterType<InvitationRepository>().As<IInvitationRepository>().InstancePerLifetimeScope();
         builder.RegisterType<FoodRepository>().As<IFoodRepository>().InstancePerLifetimeScope();
+        builder.RegisterType<FavoriteFoodRepository>().As<IFavoriteFoodRepository>().InstancePerLifetimeScope();
         builder.RegisterType<RecipeRepository>().As<IRecipeRepository>().InstancePerLifetimeScope();
+        builder.RegisterType<FavoriteRecipeRepository>().As<IFavoriteRecipeRepository>().InstancePerLifetimeScope();
         builder.RegisterType<DailyDiaryRepository>().As<IDailyDiaryRepository>().InstancePerLifetimeScope();
         builder.RegisterType<MealLogRepository>().As<IMealLogRepository>().InstancePerLifetimeScope();
         builder.RegisterType<MacroTargetRepository>().As<IMacroTargetRepository>().InstancePerLifetimeScope();

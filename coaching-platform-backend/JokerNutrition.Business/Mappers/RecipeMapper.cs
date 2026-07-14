@@ -6,7 +6,7 @@ namespace JokerNutrition.Business.Mappers;
 
 public static class RecipeMapper
 {
-    public static RecipeDto Map(Recipe recipe) => new()
+    public static RecipeDto Map(Recipe recipe, bool isFavorite = false) => new()
     {
         Id = recipe.Id,
         Name = recipe.Name,
@@ -23,7 +23,8 @@ public static class RecipeMapper
         CreatedAt = recipe.CreatedAt,
         ImageUrl = recipe.ImageUrl,
         VideoUrl = recipe.VideoUrl,
-        Ingredients = recipe.Ingredients.Select(MapIngredient).ToList()
+        Ingredients = recipe.Ingredients.Select(MapIngredient).ToList(),
+        IsFavorite = isFavorite
     };
 
     public static RecipeIngredientDto MapIngredient(RecipeIngredient ingredient)

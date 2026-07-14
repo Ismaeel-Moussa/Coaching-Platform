@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Input, Select, InputNumber, Button, Spin, Empty, Segmented, Space } from 'antd';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Button, Drawer, Empty, Input, InputNumber, Modal, Popover, Select, Space, Spin } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSearchFoods } from '../../hooks/useFoods/useFoods';
-import { useLogFood } from '../../hooks/useDiary/useDiary';
 import { useGetRecipes } from '../../hooks/useRecipes/useRecipes';
+import {
+  useBulkLogFood,
+  useGetFilteredNutritionItems,
+  useToggleFavoriteFood,
+  useToggleFavoriteRecipe,
+} from '../../hooks/useDiary/useDiary';
 import { calcMacroPreview } from '../../utils/macroCalc';
 import { MealType, MEAL_TYPE_LABELS } from '../../types/Diary';
 import type { FoodDto } from '../../types/Food';
@@ -11,8 +16,15 @@ import type { RecipeDto } from '../../types/Recipe';
 import { RecipeCategory, RECIPE_CATEGORY_LABELS } from '../../types/Recipe';
 import './AddFoodModal.scss';
 
-const { Search } = Input;
-const { Option } = Select;
+type ItemType = 'food' | 'recipe';
+type Source = 'recent' | 'frequent' | 'favorites';
+type NutritionItem = FoodDto | RecipeDto;
+
+interface StagedItem {
+  item: NutritionItem;
+  type: ItemType;
+  quantityGrams: number;
+}
 
 interface AddFoodModalProps {
   open: boolean;
@@ -21,472 +33,203 @@ interface AddFoodModalProps {
   defaultMealType?: MealType;
 }
 
-const getMealTypeLabel = (type: MealType, t: any) => {
-  switch (type) {
-    case MealType.Breakfast: return t('common:meals.breakfast');
-    case MealType.Lunch: return t('common:meals.lunch');
-    case MealType.Dinner: return t('common:meals.dinner');
-    case MealType.Snack: return t('common:meals.snack');
-    case MealType.Suhoor: return t('common:meals.suhoor');
-    case MealType.Iftar: return t('common:meals.iftar');
-    case MealType.PreWorkout: return t('common:meals.preWorkout');
-    case MealType.PostWorkout: return t('common:meals.postWorkout');
-    default: return MEAL_TYPE_LABELS[type];
-  }
+const mealLabel = (type: MealType, t: (key: string) => string) => {
+  const keys: Partial<Record<MealType, string>> = {
+    [MealType.Breakfast]: 'common:meals.breakfast', [MealType.Lunch]: 'common:meals.lunch',
+    [MealType.Dinner]: 'common:meals.dinner', [MealType.Snack]: 'common:meals.snack',
+    [MealType.Suhoor]: 'common:meals.suhoor', [MealType.Iftar]: 'common:meals.iftar',
+    [MealType.PreWorkout]: 'common:meals.preWorkout', [MealType.PostWorkout]: 'common:meals.postWorkout',
+  };
+  return t(keys[type] ?? MEAL_TYPE_LABELS[type]);
 };
 
-const getRecipeCategoryLabel = (category: any, t: any) => {
-  switch (category) {
-    case 0:
-    case 'MuscleBuilding': return t('athlete:recipeLibrary.categories.muscleBuilding');
-    case 1:
-    case 'FatLoss': return t('athlete:recipeLibrary.categories.fatLoss');
-    case 2:
-    case 'Custom': return t('athlete:recipeLibrary.categories.custom');
-    default: return RECIPE_CATEGORY_LABELS[category as RecipeCategory] || String(category);
-  }
-};
+const isFood = (item: NutritionItem): item is FoodDto => 'caloriesPer100g' in item;
+const recipeCategory = (recipe: RecipeDto) => RECIPE_CATEGORY_LABELS[recipe.category as RecipeCategory] ?? String(recipe.category);
 
-const getFoodCategoryLabel = (category: string, t: any) => {
-  const key = `common:foodCategories.${category.toLowerCase()}`;
-  return t(key, { defaultValue: category });
-};
-
-const AddFoodModal: React.FC<AddFoodModalProps> = ({
-  open,
-  onClose,
-  date,
-  defaultMealType = MealType.Breakfast,
-}) => {
-  const { t } = useTranslation(['common', 'athlete', 'coach']);
-  const [activeTab, setActiveTab] = useState<'food' | 'recipe'>('food');
-  const [searchTerm, setSearchTerm] = useState('');
+const AddFoodModal: React.FC<AddFoodModalProps> = ({ open, onClose, date, defaultMealType = MealType.Breakfast }) => {
+  const { t } = useTranslation(['common', 'athlete']);
+  const [itemType, setItemType] = useState<ItemType>('food');
+  const [source, setSource] = useState<Source>('recent');
+  const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedFood, setSelectedFood] = useState<FoodDto | null>(null);
-  const [selectedRecipe, setSelectedRecipe] = useState<RecipeDto | null>(null);
-  const [quantity, setQuantity] = useState<number>(100);
-  const [mealType, setMealType] = useState<MealType>(defaultMealType);
+  const [selected, setSelected] = useState<NutritionItem | null>(null);
+  const [selectedType, setSelectedType] = useState<ItemType>('food');
+  const [quantity, setQuantity] = useState(100);
+  const [staged, setStaged] = useState<StagedItem[]>([]);
 
-  // Debounce search
+  // Local favorites cache for real-time toggling state in search
+  const favoriteFoodsList = useGetFilteredNutritionItems('food', 'favorites', open);
+  const favoriteRecipesList = useGetFilteredNutritionItems('recipe', 'favorites', open);
+
+  const favoriteIds = useMemo(() => {
+    const foods = new Set((favoriteFoodsList.data ?? []).map(f => f.id));
+    const recipes = new Set((favoriteRecipesList.data ?? []).map(r => r.id));
+    return { foods, recipes };
+  }, [favoriteFoodsList.data, favoriteRecipesList.data]);
+
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 400);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+    const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 300);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
-  const { data: foodsData, isLoading: isSearching } = useSearchFoods(
-    { search: debouncedSearch, pageSize: 20 },
-    open && activeTab === 'food' && debouncedSearch.length >= 1,
-  );
+  const filteredItems = useGetFilteredNutritionItems(itemType, source, open && !debouncedSearch);
+  const foodSearch = useSearchFoods({ search: debouncedSearch, pageSize: 30 }, open && itemType === 'food' && !!debouncedSearch);
+  const recipeSearch = useGetRecipes({ search: debouncedSearch, pageSize: 30 }, open && itemType === 'recipe' && !!debouncedSearch);
+  const bulkLog = useBulkLogFood(date);
+  const toggleFood = useToggleFavoriteFood();
+  const toggleRecipe = useToggleFavoriteRecipe();
 
-  const { data: recipesData, isLoading: isSearchingRecipes } = useGetRecipes(
-    { search: debouncedSearch, pageSize: 20 },
-    open && activeTab === 'recipe'
-  );
+  const items = useMemo<NutritionItem[]>(() => {
+    if (debouncedSearch) return itemType === 'food' ? (foodSearch.data?.items ?? []) : (recipeSearch.data?.items ?? []);
+    return filteredItems.data ?? [];
+  }, [debouncedSearch, itemType, foodSearch.data, recipeSearch.data, filteredItems.data]);
+  const loading = debouncedSearch ? (itemType === 'food' ? foodSearch.isLoading : recipeSearch.isLoading) : filteredItems.isLoading;
 
-  const logFoodMutation = useLogFood(date);
+  const preview = useMemo(() => {
+    if (!selected) return null;
+    if (isFood(selected)) return calcMacroPreview(selected, quantity);
+    const totalWeight = selected.ingredients.reduce((sum, ingredient) => sum + ingredient.quantityGrams, 0) || 100;
+    const multiplier = quantity / totalWeight;
+    return {
+      calories: selected.totalCalories * multiplier,
+      protein: selected.totalProtein * multiplier,
+      carbs: selected.totalCarbs * multiplier,
+      fat: selected.totalFat * multiplier,
+    };
+  }, [selected, quantity]);
 
-  const preview = selectedFood
-    ? calcMacroPreview(selectedFood, quantity ?? 0)
-    : null;
-
-  const handleTabChange = (tab: 'food' | 'recipe') => {
-    setActiveTab(tab);
-    setSearchTerm('');
-    setDebouncedSearch('');
-    setSelectedFood(null);
-    setSelectedRecipe(null);
-    setQuantity(100);
+  const selectItem = (item: NutritionItem) => {
+    setSelected(item);
+    setSelectedType(isFood(item) ? 'food' : 'recipe');
+    setQuantity(isFood(item) ? 100 : item.ingredients.reduce((sum, ingredient) => sum + ingredient.quantityGrams, 0) || 100);
   };
 
-  const handleAddFood = () => {
-    if (activeTab === 'food') {
-      if (!selectedFood || !quantity) return;
-      logFoodMutation.mutate(
-        {
-          date,
-          mealType,
-          foodId: selectedFood.id,
-          recipeId: null,
-          quantityGrams: quantity,
-        },
-        {
-          onSuccess: () => {
-            handleClose();
-          },
-        },
-      );
-    } else {
-      if (!selectedRecipe) return;
-      const totalWeight = selectedRecipe.ingredients?.reduce((sum, i) => sum + i.quantityGrams, 0) || 100;
-      logFoodMutation.mutate(
-        {
-          date,
-          mealType,
-          foodId: null,
-          recipeId: selectedRecipe.id,
-          quantityGrams: totalWeight,
-        },
-        {
-          onSuccess: () => {
-            handleClose();
-          },
-        },
-      );
-    }
+  const stageSelected = () => {
+    if (!selected || quantity <= 0) return;
+    setStaged(current => {
+      const next = current.filter(entry => !(entry.type === selectedType && entry.item.id === selected.id));
+      return [...next, { item: selected, type: selectedType, quantityGrams: quantity }];
+    });
+    setSelected(null);
   };
 
-  const handleClose = () => {
-    setSearchTerm('');
-    setDebouncedSearch('');
-    setSelectedFood(null);
-    setSelectedRecipe(null);
-    setQuantity(100);
-    setMealType(defaultMealType);
-    setActiveTab('food');
+  const resetAndClose = () => {
+    setItemType('food'); setSource('recent'); setSearch(''); setDebouncedSearch('');
+    setSelected(null); setQuantity(100); setStaged([]);
     onClose();
   };
 
-  const mealTypeOptions = [
-    MealType.Breakfast, MealType.Lunch, MealType.Dinner, MealType.Snack,
-    MealType.Suhoor, MealType.Iftar, MealType.PreWorkout, MealType.PostWorkout,
-  ];
+  const submit = () => {
+    if (!staged.length) return;
+    bulkLog.mutate({
+      date,
+      mealType: defaultMealType,
+      items: staged.map(entry => ({
+        foodId: entry.type === 'food' ? entry.item.id : null,
+        recipeId: entry.type === 'recipe' ? entry.item.id : null,
+        quantityGrams: entry.quantityGrams,
+      })),
+    }, { onSuccess: resetAndClose });
+  };
+
+  const stagedContent = (
+    <div className="add-food-modal__staged-popover">
+      {staged.length === 0 ? <span>{t('athlete:components.addFoodModal.noStaged', { defaultValue: 'No items staged yet.' })}</span> : staged.map(entry => (
+        <div className="add-food-modal__staged-row" key={`${entry.type}-${entry.item.id}`}>
+          <span>{entry.item.name} · {entry.quantityGrams}g</span>
+          <button type="button" aria-label="Remove staged item" onClick={() => setStaged(current => current.filter(item => item !== entry))}>
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
-    <Modal
-      open={open}
-      onCancel={handleClose}
-      title={
-        <div className="add-food-modal__title">
-          <span className="material-symbols-outlined">restaurant</span>
-          {t('athlete:components.addFoodModal.title')}
-        </div>
-      }
-      footer={null}
-      width={600}
-      className="add-food-modal"
-      destroyOnHidden
-    >
-      <div className="add-food-modal__body">
-        {/* Meal type selector */}
-        <div className="add-food-modal__field">
-          <label className="add-food-modal__label">{t('athlete:components.addFoodModal.mealType')}</label>
-          <Select
-            value={mealType}
-            onChange={setMealType}
-            style={{ width: '100%' }}
-            size="large"
-            id="add-food-meal-type-select"
-          >
-            {mealTypeOptions.map((mt) => (
-              <Option key={mt} value={mt}>{getMealTypeLabel(mt, t)}</Option>
-            ))}
-          </Select>
-        </div>
+    <Modal open={open} onCancel={resetAndClose} footer={null} closable={false} width={680} className="add-food-modal" destroyOnHidden>
+      <div className="add-food-modal__screen">
+        <header className="add-food-modal__header">
+          <button type="button" className="add-food-modal__close" onClick={resetAndClose} aria-label="Close"><span className="material-symbols-outlined">close</span></button>
+          <div>
+            <span className="add-food-modal__eyebrow">{mealLabel(defaultMealType, t)}</span>
+            <h2>{t('athlete:components.addFoodModal.prompt', { meal: mealLabel(defaultMealType, t).toLowerCase(), defaultValue: `What did you have for ${mealLabel(defaultMealType, t).toLowerCase()}?` })}</h2>
+          </div>
+        </header>
 
-        {/* Tab selection */}
-        <Segmented
-          options={[
-            { label: t('athlete:components.addFoodModal.tabFood'), value: 'food', icon: <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle', marginRight: '4px' }}>nutrition</span> },
-            { label: t('athlete:components.addFoodModal.tabRecipe'), value: 'recipe', icon: <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle', marginRight: '4px' }}>menu_book</span> }
-          ]}
-          value={activeTab}
-          onChange={(val) => handleTabChange(val as 'food' | 'recipe')}
-          block
+        <Input
+          value={search}
+          onChange={event => setSearch(event.target.value)}
+          allowClear
+          prefix={<span className="material-symbols-outlined">search</span>}
+          placeholder={t('athlete:components.addFoodModal.searchPlaceholder', { defaultValue: 'Search foods and recipes' })}
+          className="add-food-modal__search"
           size="large"
-          className="add-food-modal__segmented"
         />
 
-        {/* Search Field */}
-        <div className="add-food-modal__field">
-          <label className="add-food-modal__label">
-            {activeTab === 'food' ? t('athlete:components.addFoodModal.tabFood') : t('athlete:components.addFoodModal.tabRecipe')}
-          </label>
-          <Search
-            id="add-food-search-input"
-            placeholder={activeTab === 'food' ? t('athlete:components.addFoodModal.searchFoodPlaceholder') : t('athlete:components.addFoodModal.searchRecipePlaceholder')}
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              if (activeTab === 'food') {
-                setSelectedFood(null);
-              } else {
-                setSelectedRecipe(null);
-              }
-            }}
-            size="large"
-            allowClear
-          />
+        <div className="add-food-modal__filters">
+          <Select value={itemType} onChange={value => { setItemType(value); setSearch(''); }} options={[
+            { value: 'food', label: t('athlete:components.addFoodModal.tabFood') },
+            { value: 'recipe', label: t('athlete:components.addFoodModal.tabRecipe') },
+          ]} />
+          <Select value={source} onChange={setSource} options={[
+            { value: 'recent', label: t('athlete:components.addFoodModal.recent', { defaultValue: 'Recent' }) },
+            { value: 'frequent', label: t('athlete:components.addFoodModal.frequent', { defaultValue: 'Frequent' }) },
+            { value: 'favorites', label: t('athlete:components.addFoodModal.favorites', { defaultValue: 'Favorites' }) },
+          ]} />
         </div>
 
-        {/* Food Search results */}
-        {activeTab === 'food' && debouncedSearch.length >= 1 && !selectedFood && (
-          <div className="add-food-modal__results">
-            {isSearching ? (
-              <div className="add-food-modal__loading">
-                <Spin size="small" />
-                <span>{t('common:actions.loading')}</span>
+        <main className="add-food-modal__results">
+          {loading ? <div className="add-food-modal__loading"><Spin /> </div> : items.length === 0 ? (
+            <Empty description={debouncedSearch ? t('athlete:components.addFoodModal.emptyRecipe') : t('athlete:components.addFoodModal.emptyFiltered', { defaultValue: 'No items here yet. Search to browse the library.' })} />
+          ) : items.map(item => {
+            const food = isFood(item);
+            const favorite = food ? favoriteIds.foods.has(item.id) : favoriteIds.recipes.has(item.id);
+            return <article className="add-food-modal__card" role="button" tabIndex={0} key={`${itemType}-${item.id}`} onClick={() => selectItem(item)} onKeyDown={event => event.key === 'Enter' && selectItem(item)}>
+              <div className="add-food-modal__item-copy">
+                <div className="add-food-modal__item-name">
+                  {item.name}
+                  {food && !item.isCustom && <span className="material-symbols-outlined add-food-modal__verified" title="Verified">verified</span>}
+                  <button type="button" className={favorite ? 'is-favorite' : ''} aria-label="Toggle favorite" onClick={event => { event.stopPropagation(); food ? toggleFood.mutate(item.id) : toggleRecipe.mutate(item.id); }}>
+                    <span className="material-symbols-outlined">{favorite ? 'star' : 'star_outline'}</span>
+                  </button>
+                </div>
+                <span className="add-food-modal__subtitle">{food ? (item.category ? `${item.category} · 100g` : '100g') : `${recipeCategory(item)} · ${item.servings} ${t('athlete:components.recipeCard.servings')}`}</span>
+                <span className="add-food-modal__calories">{Math.round(food ? item.caloriesPer100g : item.totalCalories)} {t('common:units.kcal')}</span>
               </div>
-            ) : foodsData && foodsData.items.length > 0 ? (
-              <ul className="add-food-modal__list">
-                {foodsData.items.map((food) => (
-                  <li
-                    key={food.id}
-                    className="add-food-modal__list-item"
-                    onClick={() => setSelectedFood(food)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && setSelectedFood(food)}
-                  >
-                    <div className="add-food-modal__food-info">
-                      <span className="add-food-modal__food-name">{food.name}</span>
-                      <span className="add-food-modal__food-category">{getFoodCategoryLabel(food.category, t)}</span>
-                    </div>
-                    <div className="add-food-modal__food-macros">
-                      <span className="mono">{Math.round(food.caloriesPer100g)} {t('common:units.kcal')}</span>
-                      <span className="mono add-food-modal__macro-pill">P {food.proteinPer100g}g</span>
-                      <span className="mono add-food-modal__macro-pill">C {food.carbsPer100g}g</span>
-                      <span className="mono add-food-modal__macro-pill">F {food.fatPer100g}g</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <Empty
-                description={t('athlete:components.addFoodModal.emptyFood')}
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
-            )}
-          </div>
-        )}
+              <button type="button" className="add-food-modal__quick-add" aria-label="Choose quantity" onClick={event => { event.stopPropagation(); selectItem(item); }}><span className="material-symbols-outlined">add</span></button>
+            </article>;
+          })}
+        </main>
 
-        {/* Recipe search results */}
-        {activeTab === 'recipe' && !selectedRecipe && (
-          <div className="add-food-modal__results">
-            {isSearchingRecipes ? (
-              <div className="add-food-modal__loading">
-                <Spin size="small" />
-                <span>{t('common:actions.loading')}</span>
-              </div>
-            ) : recipesData && recipesData.items.length > 0 ? (
-              <ul className="add-food-modal__list">
-                {recipesData.items.map((recipe) => (
-                  <li
-                    key={recipe.id}
-                    className="add-food-modal__list-item"
-                    onClick={() => setSelectedRecipe(recipe)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && setSelectedRecipe(recipe)}
-                  >
-                    <div className="add-food-modal__food-info">
-                      <span className="add-food-modal__food-name">{recipe.name}</span>
-                      <span className="add-food-modal__food-category">
-                        {getRecipeCategoryLabel(recipe.category, t)} • {recipe.servings} {t('athlete:components.recipeCard.servings')}
-                      </span>
-                    </div>
-                    <div className="add-food-modal__food-macros">
-                      <span className="mono">{Math.round(recipe.totalCalories)} {t('common:units.kcal')}</span>
-                      <span className="mono add-food-modal__macro-pill">P {Math.round(recipe.totalProtein)}g</span>
-                      <span className="mono add-food-modal__macro-pill">C {Math.round(recipe.totalCarbs)}g</span>
-                      <span className="mono add-food-modal__macro-pill">F {Math.round(recipe.totalFat)}g</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <Empty
-                description={t('athlete:components.addFoodModal.emptyRecipe')}
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
-            )}
-          </div>
-        )}
-
-        {/* Selected food configuration */}
-        {activeTab === 'food' && selectedFood && (
-          <div className="add-food-modal__config animate-fade-in">
-            <div className="add-food-modal__selected-food">
-              <span className="material-symbols-outlined">check_circle</span>
-              <div>
-                <div className="add-food-modal__selected-name">{selectedFood.name}</div>
-                <div className="add-food-modal__selected-category">{getFoodCategoryLabel(selectedFood.category, t)}</div>
-              </div>
-              <button
-                className="add-food-modal__change-btn"
-                onClick={() => {
-                  setSelectedFood(null);
-                  setSearchTerm('');
-                }}
-                type="button"
-              >
-                {t('coach:assignmentHub.changeBtn')}
-              </button>
-            </div>
-
-            <div className="add-food-modal__row">
-              <div className="add-food-modal__field" style={{ width: '100%' }}>
-                <label className="add-food-modal__label">{t('athlete:components.addFoodModal.quantity')}</label>
-                <Space.Compact style={{ width: '100%' }}>
-                  <InputNumber
-                    id="add-food-quantity-input"
-                    value={quantity}
-                    onChange={(v) => setQuantity(v ?? 0)}
-                    min={1}
-                    max={9999}
-                    size="large"
-                    style={{ width: '100%' }}
-                  />
-                  <span style={{
-                    background: 'var(--ant-color-fill-alter, #fafafa)',
-                    border: '1px solid var(--ant-color-border, #d9d9d9)',
-                    borderLeft: 'none',
-                    padding: '0 15px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    borderRadius: '0 8px 8px 0',
-                    color: 'var(--ant-color-text-description, rgba(0, 0, 0, 0.45))',
-                    fontSize: '16px'
-                  }}>
-                    {t('common:units.grams')}
-                  </span>
-                </Space.Compact>
-              </div>
-            </div>
-
-            {/* Macro preview */}
-            {preview && quantity > 0 && (
-              <div className="add-food-modal__preview">
-                <div className="add-food-modal__preview-title">{t('athlete:components.addFoodModal.preview')}</div>
-                <div className="add-food-modal__preview-grid">
-                  <div className="add-food-modal__preview-item add-food-modal__preview-item--kcal">
-                    <span className="add-food-modal__preview-value">{Math.round(preview.calories)}</span>
-                    <span className="add-food-modal__preview-label">{t('common:units.kcal')}</span>
-                  </div>
-                  <div className="add-food-modal__preview-item">
-                    <span className="add-food-modal__preview-value">{preview.protein.toFixed(1)}g</span>
-                    <span className="add-food-modal__preview-label">{t('common:labels.protein')}</span>
-                  </div>
-                  <div className="add-food-modal__preview-item">
-                    <span className="add-food-modal__preview-value">{preview.carbs.toFixed(1)}g</span>
-                    <span className="add-food-modal__preview-label">{t('common:labels.carbs')}</span>
-                  </div>
-                  <div className="add-food-modal__preview-item">
-                    <span className="add-food-modal__preview-value">{preview.fat.toFixed(1)}g</span>
-                    <span className="add-food-modal__preview-label">{t('common:labels.fat')}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <Button
-              id="add-food-submit-btn"
-              type="primary"
-              size="large"
-              block
-              onClick={handleAddFood}
-              loading={logFoodMutation.isPending}
-              disabled={!selectedFood || !quantity}
-              className="add-food-modal__submit"
-            >
-              {logFoodMutation.isPending ? t('athlete:components.addFoodModal.adding') : t('athlete:components.addFoodModal.addBtn')}
-            </Button>
-          </div>
-        )}
-
-        {/* Selected recipe configuration */}
-        {activeTab === 'recipe' && selectedRecipe && (
-          <div className="add-food-modal__config animate-fade-in">
-            <div className="add-food-modal__selected-food add-food-modal__selected-food--recipe">
-              <span className="material-symbols-outlined">check_circle</span>
-              <div style={{ flex: 1 }}>
-                <div className="add-food-modal__selected-name">{selectedRecipe.name}</div>
-                <div className="add-food-modal__selected-category">
-                  {getRecipeCategoryLabel(selectedRecipe.category, t)} • {selectedRecipe.servings} {t('athlete:components.recipeCard.servings')}
-                </div>
-              </div>
-              <button
-                className="add-food-modal__change-btn"
-                onClick={() => {
-                  setSelectedRecipe(null);
-                  setSearchTerm('');
-                }}
-                type="button"
-              >
-                {t('coach:assignmentHub.changeBtn')}
-              </button>
-            </div>
-
-            {/* Recipe details */}
-            <div className="add-food-modal__recipe-details">
-              {selectedRecipe.description && (
-                <div className="add-food-modal__recipe-desc">
-                  {selectedRecipe.description}
-                </div>
-              )}
-              
-              <div className="add-food-modal__recipe-meta">
-                <div className="add-food-modal__meta-item">
-                  <span className="material-symbols-outlined">schedule</span>
-                  <span>{t('athlete:components.createRecipeModal.prepTime')}: {selectedRecipe.prepTimeMinutes}{t('common:units.minutes')}</span>
-                </div>
-                <div className="add-food-modal__meta-item">
-                  <span className="material-symbols-outlined">cooking</span>
-                  <span>{t('athlete:components.createRecipeModal.cookTime')}: {selectedRecipe.cookTimeMinutes}{t('common:units.minutes')}</span>
-                </div>
-              </div>
-
-              {selectedRecipe.ingredients && selectedRecipe.ingredients.length > 0 && (
-                <div className="add-food-modal__ingredients-list-section">
-                  <div className="add-food-modal__ingredients-title">{t('athlete:components.createRecipeModal.stepIngredients')}</div>
-                  <ul className="add-food-modal__ingredients-list">
-                    {selectedRecipe.ingredients.map((ing, idx) => (
-                      <li key={idx} className="add-food-modal__ingredient-item">
-                        <span>{ing.foodName}</span>
-                        <span className="mono">{ing.quantityGrams}g</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-
-            {/* Macro preview */}
-            <div className="add-food-modal__preview">
-              <div className="add-food-modal__preview-title">{t('athlete:components.addFoodModal.preview')}</div>
-              <div className="add-food-modal__preview-grid">
-                <div className="add-food-modal__preview-item add-food-modal__preview-item--kcal">
-                  <span className="add-food-modal__preview-value">{Math.round(selectedRecipe.totalCalories)}</span>
-                  <span className="add-food-modal__preview-label">{t('common:units.kcal')}</span>
-                </div>
-                <div className="add-food-modal__preview-item">
-                  <span className="add-food-modal__preview-value">{Math.round(selectedRecipe.totalProtein)}g</span>
-                  <span className="add-food-modal__preview-label">{t('common:labels.protein')}</span>
-                </div>
-                <div className="add-food-modal__preview-item">
-                  <span className="add-food-modal__preview-value">{Math.round(selectedRecipe.totalCarbs)}g</span>
-                  <span className="add-food-modal__preview-label">{t('common:labels.carbs')}</span>
-                </div>
-                <div className="add-food-modal__preview-item">
-                  <span className="add-food-modal__preview-value">{Math.round(selectedRecipe.totalFat)}g</span>
-                  <span className="add-food-modal__preview-label">{t('common:labels.fat')}</span>
-                </div>
-              </div>
-            </div>
-
-            <Button
-              id="add-recipe-submit-btn"
-              type="primary"
-              size="large"
-              block
-              onClick={handleAddFood}
-              loading={logFoodMutation.isPending}
-              className="add-food-modal__submit"
-            >
-              {logFoodMutation.isPending ? t('athlete:components.addFoodModal.adding') : t('athlete:components.addFoodModal.addBtn')}
-            </Button>
-          </div>
-        )}
+        <footer className="add-food-modal__bottom-bar">
+          <Popover content={stagedContent} trigger="click" placement="topLeft">
+            <button type="button" className="add-food-modal__stage-count" aria-label="Review staged items">{staged.length}</button>
+          </Popover>
+          <Button type="primary" size="large" disabled={!staged.length} loading={bulkLog.isPending} onClick={submit}>{t('athlete:components.addFoodModal.done', { defaultValue: 'Done' })}</Button>
+        </footer>
       </div>
+
+      <Drawer open={!!selected} onClose={() => setSelected(null)} placement="bottom" height="auto" mask={false} rootClassName="add-food-modal__drawer-root" className="add-food-modal__drawer" title={selected?.name}>
+        {selected && preview && <>
+          <div className="add-food-modal__drawer-subtitle">{isFood(selected) ? (selected.category ? `${selected.category} · 100g` : '100g') : `${recipeCategory(selected)} · ${selected.servings} ${t('athlete:components.recipeCard.servings')}`}</div>
+          <label className="add-food-modal__quantity-label">{t('athlete:components.addFoodModal.quantity')}</label>
+          <Space.Compact size="large" style={{ width: '100%' }}>
+            <InputNumber
+              value={quantity}
+              min={1}
+              max={9999}
+              onChange={value => setQuantity(value ?? 0)}
+              className="add-food-modal__quantity"
+              style={{ flex: 1 }}
+            />
+            <Button disabled style={{ color: 'var(--color-text-secondary)', backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--color-border)' }}>g</Button>
+          </Space.Compact>
+          <div className="add-food-modal__macro-preview">
+            <span><b>{Math.round(preview.calories)}</b> kcal</span><span><b>{preview.protein.toFixed(1)}g</b> P</span><span><b>{preview.carbs.toFixed(1)}g</b> C</span><span><b>{preview.fat.toFixed(1)}g</b> F</span>
+          </div>
+          <Button type="primary" size="large" block disabled={quantity <= 0} onClick={stageSelected}>{t('athlete:components.addFoodModal.stage', { defaultValue: 'Stage item' })}</Button>
+        </>}
+      </Drawer>
     </Modal>
   );
 };

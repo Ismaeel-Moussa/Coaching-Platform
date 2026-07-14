@@ -11,4 +11,5 @@ public class FoodDto
     public decimal FatPer100g { get; set; }
     public decimal FiberPer100g { get; set; }
     public bool IsCustom { get; set; }
+    public bool IsFavorite { get; set; }
 }

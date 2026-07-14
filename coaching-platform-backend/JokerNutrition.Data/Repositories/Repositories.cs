@@ -37,11 +37,25 @@ public class FoodRepository : _BaseRepository<Food>, IFoodRepository
         : base(context, logger) { }
 }
 
+public interface IFavoriteFoodRepository : _IBaseRepository<FavoriteFood> { }
+public class FavoriteFoodRepository : _BaseRepository<FavoriteFood>, IFavoriteFoodRepository
+{
+    public FavoriteFoodRepository(JokerNutritionContext context, ILogger<FavoriteFoodRepository> logger)
+        : base(context, logger) { }
+}
+
 // ─── Recipe ────────────────────────────────────────────────────────
 public interface IRecipeRepository : _IBaseRepository<Recipe> { }
 public class RecipeRepository : _BaseRepository<Recipe>, IRecipeRepository
 {
     public RecipeRepository(JokerNutritionContext context, ILogger<RecipeRepository> logger)
+        : base(context, logger) { }
+}
+
+public interface IFavoriteRecipeRepository : _IBaseRepository<FavoriteRecipe> { }
+public class FavoriteRecipeRepository : _BaseRepository<FavoriteRecipe>, IFavoriteRecipeRepository
+{
+    public FavoriteRecipeRepository(JokerNutritionContext context, ILogger<FavoriteRecipeRepository> logger)
         : base(context, logger) { }
 }
 

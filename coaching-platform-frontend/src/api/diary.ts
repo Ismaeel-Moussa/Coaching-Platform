@@ -2,11 +2,14 @@ import axiosInstance from './axiosInstance';
 import type {
   DailyDiaryDto,
   LogFoodForm,
+  BulkLogFoodForm,
   MealLogDto,
   UpdateWaterForm,
   UpdateStepsForm,
 } from '../types/Diary';
 import type { MacroSummaryDto } from '../types/Athlete';
+import type { FoodDto } from '../types/Food';
+import type { RecipeDto } from '../types/Recipe';
 
 export const getDiary = async (date: string): Promise<DailyDiaryDto> => {
   const response = await axiosInstance.get<DailyDiaryDto>(`/diary/${date}`);
@@ -20,6 +23,29 @@ export const getMacroSummary = async (date: string): Promise<MacroSummaryDto> =>
 
 export const logFood = async (form: LogFoodForm): Promise<MealLogDto> => {
   const response = await axiosInstance.post<MealLogDto>('/diary/log', form);
+  return response.data;
+};
+
+export const bulkLogFood = async (form: BulkLogFoodForm): Promise<MealLogDto[]> => {
+  const response = await axiosInstance.post<MealLogDto[]>('/diary/log/bulk', form);
+  return response.data;
+};
+
+export const getFilteredItems = async (
+  type: 'food' | 'recipe',
+  source: 'recent' | 'frequent' | 'favorites',
+): Promise<(FoodDto | RecipeDto)[]> => {
+  const response = await axiosInstance.get<(FoodDto | RecipeDto)[]>('/diary/filters', { params: { type, source } });
+  return response.data;
+};
+
+export const toggleFavoriteFood = async (id: number): Promise<{ isFavorite: boolean }> => {
+  const response = await axiosInstance.post<{ isFavorite: boolean }>(`/diary/favorites/food/${id}/toggle`);
+  return response.data;
+};
+
+export const toggleFavoriteRecipe = async (id: number): Promise<{ isFavorite: boolean }> => {
+  const response = await axiosInstance.post<{ isFavorite: boolean }>(`/diary/favorites/recipe/${id}/toggle`);
   return response.data;
 };
 

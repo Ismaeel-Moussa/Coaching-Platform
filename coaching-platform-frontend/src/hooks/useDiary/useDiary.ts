@@ -5,11 +5,17 @@ import {
   getDiary,
   getMacroSummary,
   logFood,
+  bulkLogFood,
+  getFilteredItems,
+  toggleFavoriteFood,
+  toggleFavoriteRecipe,
   removeLogEntry,
   updateWater,
   updateSteps,
 } from '../../api/diary';
-import type { DailyDiaryDto, LogFoodForm, UpdateWaterForm, UpdateStepsForm } from '../../types/Diary';
+import type { BulkLogFoodForm, DailyDiaryDto, LogFoodForm, UpdateWaterForm, UpdateStepsForm } from '../../types/Diary';
+import type { FoodDto } from '../../types/Food';
+import type { RecipeDto } from '../../types/Recipe';
 import type { MacroSummaryDto } from '../../types/Athlete';
 
 export const useGetDiary = (date: string) =>
@@ -37,6 +43,47 @@ export const useLogFood = (date: string) => {
       queryClient.invalidateQueries({ queryKey: ['athlete-dashboard'] });
     },
     onError: () => antMessage.error(i18n.t('common:alerts.foodLogFailed')),
+  });
+};
+
+export const useBulkLogFood = (date: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (form: BulkLogFoodForm) => bulkLogFood(form),
+    onSuccess: () => {
+      antMessage.success(i18n.t('common:alerts.foodLogged'));
+      queryClient.invalidateQueries({ queryKey: ['diary', date] });
+      queryClient.invalidateQueries({ queryKey: ['diary-summary', date] });
+      queryClient.invalidateQueries({ queryKey: ['athlete-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['filtered-nutrition-items'] });
+    },
+    onError: () => antMessage.error(i18n.t('common:alerts.foodLogFailed')),
+  });
+};
+
+export const useGetFilteredNutritionItems = (
+  type: 'food' | 'recipe',
+  source: 'recent' | 'frequent' | 'favorites',
+  enabled = true,
+) => useQuery<(FoodDto | RecipeDto)[]>({
+  queryKey: ['filtered-nutrition-items', type, source],
+  queryFn: () => getFilteredItems(type, source),
+  enabled,
+});
+
+export const useToggleFavoriteFood = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: toggleFavoriteFood,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['filtered-nutrition-items'] }),
+  });
+};
+
+export const useToggleFavoriteRecipe = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: toggleFavoriteRecipe,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['filtered-nutrition-items'] }),
   });
 };
 
