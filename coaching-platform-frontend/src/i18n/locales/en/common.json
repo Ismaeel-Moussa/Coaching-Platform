@@ -54,6 +54,7 @@
     "markReadTooltip": "Mark as read",
     "tags": {
       "nutrition": "Nutrition",
+      "activity": "Activity",
       "feedback": "Coach Feedback",
       "workout": "Workout",
       "checkIn": "Check-In",
@@ -168,6 +169,7 @@
   },
   "toastTitles": {
     "nutritionUpdate": "Nutrition Update",
+    "activityUpdate": "Activity Update",
     "rosterUpdate": "Roster Update",
     "workoutCompleted": "Workout Completed",
     "checkInSubmitted": "Check-In Submitted",

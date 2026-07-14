@@ -34,6 +34,9 @@ const Notifications: React.FC = () => {
     }
     switch (type) {
       case 'MacroAlert':
+        if (message.toLowerCase().includes('daily activity targets updated')) {
+          return 'directions_run';
+        }
         return 'nutrition';
       case 'CoachNote':
         return 'chat';
@@ -54,6 +57,9 @@ const Notifications: React.FC = () => {
     }
     switch (type) {
       case 'MacroAlert':
+        if (message.toLowerCase().includes('daily activity targets updated')) {
+          return <Tag color="orange">{t('common:notifications.tags.activity')}</Tag>;
+        }
         return <Tag color="blue">{t('common:notifications.tags.nutrition')}</Tag>;
       case 'CoachNote':
         return <Tag color="gold">{t('common:notifications.tags.feedback')}</Tag>;

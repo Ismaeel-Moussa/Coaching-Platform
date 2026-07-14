@@ -54,6 +54,7 @@
     "markReadTooltip": "تحديد كمقروء",
     "tags": {
       "nutrition": "التغذية",
+      "activity": "النشاط",
       "feedback": "ملاحظات المدرب",
       "workout": "التمرين",
       "checkIn": "المتابعة",
@@ -168,6 +169,7 @@
   },
   "toastTitles": {
     "nutritionUpdate": "تحديث التغذية",
+    "activityUpdate": "تحديث النشاط",
     "rosterUpdate": "تحديث المشتركين",
     "workoutCompleted": "اكتمل التمرين",
     "checkInSubmitted": "تم تقديم التقييم",

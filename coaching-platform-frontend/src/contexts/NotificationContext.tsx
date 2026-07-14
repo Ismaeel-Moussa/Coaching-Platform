@@ -133,7 +133,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       // Show browser/app toast notification
       const getToastTitle = (notif: NotificationDto) => {
-        if (notif.type === 'MacroAlert') return i18n.t('common:toastTitles.nutritionUpdate');
+        if (notif.type === 'MacroAlert') {
+          if (notif.message.toLowerCase().includes('daily activity targets updated')) {
+            return i18n.t('common:toastTitles.activityUpdate');
+          }
+          return i18n.t('common:toastTitles.nutritionUpdate');
+        }
         if (notif.type === 'InvitationAccepted') return i18n.t('common:toastTitles.rosterUpdate');
         if (notif.type === 'WorkoutCompleted') return i18n.t('common:toastTitles.workoutCompleted');
         if (notif.type === 'CheckInSubmitted') return i18n.t('common:toastTitles.checkInSubmitted');
