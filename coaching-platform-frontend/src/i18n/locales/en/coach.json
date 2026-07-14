@@ -68,7 +68,7 @@
     "subjective": "Subjective Well-being",
     "photos": "Progress Photos",
     "noPhotos": "No photos",
-    "reviewTitle": "Check-In Review & Adjustment Notes",
+    "reviewTitle": "Check-In Review",
     "reviewPlaceholder": "Provide feedback, nutrition tweaks, or program adjustments for this check-in...",
     "reviewedAt": "Reviewed: {{date}}",
     "saveReview": "Save Review",
