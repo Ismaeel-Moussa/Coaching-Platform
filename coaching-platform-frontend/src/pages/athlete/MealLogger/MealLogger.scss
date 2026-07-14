@@ -92,67 +92,185 @@
     gap: 14px;
   }
 
-  // ── Tabs card ───────────────────────────────────────────────────────────────
-  &__tabs-card {
+  // ── Dashboard card ──────────────────────────────────────────────────────────
+  &__dashboard-card {
     background: var(--color-white);
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  &__row-wrapper {
+    border-bottom: 1px solid var(--color-border-light);
+    border-left: 3px solid transparent;
+    display: flex;
+    flex-direction: column;
+    transition: border-left-color var(--transition-fast), background-color var(--transition-fast);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &.is-expanded {
+      border-left-color: var(--color-gold);
+      background: var(--background-color);
+    }
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    min-width: 0;
+    transition: background-color var(--transition-fast);
+
+    &:hover {
+      background-color: var(--surface-container-low);
+    }
+
+    @media (max-width: 480px) {
+      padding: 14px 14px;
+      gap: 12px;
+    }
+  }
+
+  &__ring-container {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    flex: none;
+    display: grid;
+    place-items: center;
+  }
+
+  &__ring-svg {
+    transform: rotate(-90deg);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  &__ring-bg {
+    stroke: var(--surface-container);
+  }
+
+  &__ring-fill {
+    stroke: var(--color-success);
+  }
+
+  &__ring-icon {
+    font-size: 20px;
+    line-height: 1;
+    z-index: 1;
+  }
+
+  &__meal-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
     min-width: 0;
   }
 
-  &__tabs {
-    .ant-tabs-nav {
-      background: var(--surface-container-low);
-      margin: 0;
-      padding: 0 16px;
-
-      @media (max-width: 480px) {
-        padding: 0 8px;
-      }
-    }
-
-    .ant-tabs-tab {
-      @media (max-width: 480px) {
-        padding: 12px 6px !important;
-        margin-inline-start: 0 !important;
-        margin-inline-end: 8px !important; // Sleek 8px gap between tabs on mobile
-      }
-    }
-
-    .ant-tabs-tab-active .ant-tabs-tab-btn {
-      color: var(--color-navy) !important;
-    }
-
-    .ant-tabs-ink-bar {
-      background: var(--color-gold) !important;
-    }
-
-    .ant-tabs-content-holder {
-      padding: 0;
-    }
-  }
-
-  &__tab-label {
+  &__meal-title-row {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-family: var(--font-body);
-    font-size: 14px;
 
-    @media (max-width: 480px) {
-      font-size: 12px;
-      gap: 4px;
+    h3 {
+      margin: 0;
+      color: var(--color-text-primary);
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+    }
+  }
+
+  &__chevron {
+    color: var(--color-gold-text);
+    font-size: 18px;
+    transition: transform var(--transition-fast);
+
+    .is-expanded & {
+      transform: rotate(90deg);
+    }
+  }
+
+  &__meal-calories {
+    color: var(--color-navy);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  &__meal-summary {
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__quick-add-btn {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    flex: none;
+    place-items: center;
+    border: 0;
+    border-radius: var(--radius-full);
+    color: var(--color-navy);
+    background: var(--color-gold);
+    box-shadow: var(--shadow-gold);
+    cursor: pointer;
+    transition: transform var(--transition-fast), background-color var(--transition-fast);
+
+    &:hover {
+      transform: scale(1.06);
+      background: var(--color-gold-dim);
     }
 
     .material-symbols-outlined {
-      font-size: 16px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+  }
 
-      @media (max-width: 480px) {
-        font-size: 14px;
+  &__expanded-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--transition-base);
+    border-top: 1px dashed transparent;
+    background: transparent;
+    overflow: hidden;
+
+    & > div {
+      min-height: 0;
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+
+    .is-expanded & {
+      grid-template-rows: 1fr;
+      border-top: 1px dashed var(--color-border-light);
+      background: var(--background-color);
+
+      & > div {
+        opacity: 1;
       }
+    }
+
+    .meal-section {
+      padding: var(--space-sm) var(--space-md);
     }
   }
 }
@@ -415,5 +533,16 @@
       color: var(--color-gold-text);
       background: var(--color-gold-bg);
     }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

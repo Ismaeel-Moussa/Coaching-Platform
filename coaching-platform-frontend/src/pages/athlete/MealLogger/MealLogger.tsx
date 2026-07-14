@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Tabs, Skeleton, Empty, Tooltip, Popconfirm } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useGetDiary, useGetMacroSummary, useRemoveLogEntry } from '../../../hooks/useDiary/useDiary';
@@ -8,20 +8,28 @@ import { MealType, MEAL_TYPE_LABELS, type MealLogDto } from '../../../types/Diar
 import { getTodayIso } from '../../../utils/date';
 import './MealLogger.scss';
 
-const MEAL_TABS = [
-  { type: MealType.Breakfast, icon: 'wb_sunny' },
-  { type: MealType.Lunch, icon: 'partly_cloudy_day' },
-  { type: MealType.Dinner, icon: 'dinner_dining' },
-  { type: MealType.Snack, icon: 'cookie' },
-];
+const MEAL_ICONS: Record<MealType, string> = {
+  [MealType.Breakfast]: '☕',
+  [MealType.Lunch]: '🍝',
+  [MealType.Dinner]: '🥗',
+  [MealType.Snack]: '🍎',
+  [MealType.Suhoor]: '🌙',
+  [MealType.Iftar]: '🍇',
+  [MealType.PreWorkout]: '⚡',
+  [MealType.PostWorkout]: '💪',
+};
 
 const getMealEntries = (diary: ReturnType<typeof useGetDiary>['data'], mealType: MealType): MealLogDto[] => {
   if (!diary) return [];
   switch (mealType) {
-    case MealType.Breakfast: return diary.breakfast;
-    case MealType.Lunch: return diary.lunch;
-    case MealType.Dinner: return diary.dinner;
-    case MealType.Snack: return diary.snack;
+    case MealType.Breakfast: return diary.breakfast ?? [];
+    case MealType.Lunch: return diary.lunch ?? [];
+    case MealType.Dinner: return diary.dinner ?? [];
+    case MealType.Snack: return diary.snack ?? [];
+    case MealType.Suhoor: return diary.suhoor ?? [];
+    case MealType.Iftar: return diary.iftar ?? [];
+    case MealType.PreWorkout: return diary.preWorkout ?? [];
+    case MealType.PostWorkout: return diary.postWorkout ?? [];
     default: return [];
   }
 };
@@ -31,7 +39,7 @@ interface MealSectionProps {
   isLoading: boolean;
   mealType: MealType;
   date: string;
-  onAddFood: (mealType: MealType) => void;
+  onAddFood?: (mealType: MealType) => void;
 }
 
 const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType, date, onAddFood }) => {
@@ -131,14 +139,16 @@ const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType,
         </div>
       )}
 
-      <button
-        className="meal-section__add-btn"
-        onClick={() => onAddFood(mealType)}
-        id={`add-food-btn-${mealType}`}
-      >
-        <span className="material-symbols-outlined">add</span>
-        {t('athlete:mealLogger.addFood')}
-      </button>
+      {onAddFood && (
+        <button
+          className="meal-section__add-btn"
+          onClick={() => onAddFood(mealType)}
+          id={`add-food-btn-${mealType}`}
+        >
+          <span className="material-symbols-outlined">add</span>
+          {t('athlete:mealLogger.addFood')}
+        </button>
+      )}
     </div>
   );
 };
@@ -164,32 +174,30 @@ const MealLogger: React.FC = () => {
     open: false,
     mealType: MealType.Breakfast,
   });
+  const [expandedMeal, setExpandedMeal] = useState<MealType | null>(null);
 
   const { data: diary, isLoading: isDiaryLoading } = useGetDiary(today);
   const { data: summary, isLoading: isSummaryLoading } = useGetMacroSummary(today);
 
   const handleOpenAddFood = (mealType: MealType) => {
     setAddFoodModal({ open: true, mealType });
+    setExpandedMeal(mealType);
   };
 
-  const tabItems = MEAL_TABS.map(({ type, icon }) => ({
-    key: String(type),
-    label: (
-      <span className="meal-logger__tab-label">
-        <span className="material-symbols-outlined">{icon}</span>
-        {getMealTypeLabel(type, t)}
-      </span>
-    ),
-    children: (
-      <MealSection
-        entries={getMealEntries(diary, type)}
-        isLoading={isDiaryLoading}
-        mealType={type}
-        date={today}
-        onAddFood={handleOpenAddFood}
-      />
-    ),
-  }));
+  const toggleExpand = (mealType: MealType) => {
+    setExpandedMeal(prev => prev === mealType ? null : mealType);
+  };
+
+  const activeMealTypes = useMemo(() => {
+    const types = new Set([MealType.Breakfast, MealType.Lunch, MealType.Dinner, MealType.Snack]);
+    if (diary) {
+      if (diary.suhoor?.length) types.add(MealType.Suhoor);
+      if (diary.iftar?.length) types.add(MealType.Iftar);
+      if (diary.preWorkout?.length) types.add(MealType.PreWorkout);
+      if (diary.postWorkout?.length) types.add(MealType.PostWorkout);
+    }
+    return Array.from(types);
+  }, [diary]);
 
   return (
     <div id="meal-logger-page" className="meal-logger animate-fade-in">
@@ -248,14 +256,95 @@ const MealLogger: React.FC = () => {
         ) : null}
       </div>
 
-      {/* ── Meal Tabs ── */}
-      <div className="meal-logger__tabs-card">
-        <Tabs
-          items={tabItems}
-          className="meal-logger__tabs"
-          defaultActiveKey={String(MealType.Breakfast)}
-          size="large"
-        />
+      {/* ── Meals Dashboard Card ── */}
+      <div className="meal-logger__dashboard-card">
+        {activeMealTypes.map(type => {
+          const entries = getMealEntries(diary, type);
+          const totalCalories = entries.reduce((sum, e) => sum + e.calories, 0);
+          
+          const dailyTarget = summary?.targetCalories ?? 0;
+          const percent = dailyTarget > 0 ? Math.min(100, Math.round((totalCalories / dailyTarget) * 100)) : 0;
+          
+          const isExpanded = expandedMeal === type;
+          const foodNames = entries.map(e => e.food?.name ?? e.recipe?.name ?? '').filter(Boolean).join(', ');
+          
+          return (
+            <div key={type} className={`meal-logger__row-wrapper ${isExpanded ? 'is-expanded' : ''}`}>
+              <div 
+                className="meal-logger__row" 
+                role="button" 
+                tabIndex={0} 
+                onClick={() => toggleExpand(type)}
+                onKeyDown={e => e.key === 'Enter' && toggleExpand(type)}
+              >
+                {/* SVG Progress Ring */}
+                <div className="meal-logger__ring-container">
+                  <svg width="48" height="48" viewBox="0 0 36 36" className="meal-logger__ring-svg">
+                    <circle
+                      className="meal-logger__ring-bg"
+                      cx="18"
+                      cy="18"
+                      r="15.915"
+                      fill="transparent"
+                      stroke="rgba(255, 255, 255, 0.08)"
+                      strokeWidth="2.8"
+                    />
+                    <circle
+                      className="meal-logger__ring-fill"
+                      cx="18"
+                      cy="18"
+                      r="15.915"
+                      fill="transparent"
+                      stroke="var(--color-success)"
+                      strokeWidth="2.8"
+                      strokeDasharray={`${percent} ${100 - percent}`}
+                      strokeDashoffset="25"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span className="meal-logger__ring-icon">{MEAL_ICONS[type] ?? '🍽️'}</span>
+                </div>
+
+                {/* Text Copy */}
+                <div className="meal-logger__meal-info">
+                  <div className="meal-logger__meal-title-row">
+                    <h3>{getMealTypeLabel(type, t)}</h3>
+                    <span className="material-symbols-outlined meal-logger__chevron">arrow_forward</span>
+                  </div>
+                  <span className="meal-logger__meal-calories mono">{Math.round(totalCalories)} {t('athlete:mealLogger.kcalHeader')}</span>
+                  <span className="meal-logger__meal-summary" title={foodNames}>
+                    {foodNames || t('athlete:mealLogger.emptyPlaceholder', { defaultValue: 'No foods logged yet' })}
+                  </span>
+                </div>
+
+                {/* Quick Add Button */}
+                <button
+                  type="button"
+                  className="meal-logger__quick-add-btn"
+                  aria-label={`Add food to ${getMealTypeLabel(type, t)}`}
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleOpenAddFood(type);
+                  }}
+                >
+                  <span className="material-symbols-outlined">add</span>
+                </button>
+              </div>
+
+              {/* Collapsible Panel */}
+              <div className="meal-logger__expanded-panel">
+                <div>
+                  <MealSection
+                    entries={entries}
+                    isLoading={isDiaryLoading}
+                    mealType={type}
+                    date={today}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* ── Add Food Modal ── */}

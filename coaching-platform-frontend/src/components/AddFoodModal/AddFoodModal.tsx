@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button, Drawer, Empty, Input, InputNumber, Modal, Popover, Select, Spin } from 'antd';
+import { Button, Drawer, Empty, Input, InputNumber, Modal, Popover, Select, Space, Spin } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSearchFoods } from '../../hooks/useFoods/useFoods';
 import { useGetRecipes } from '../../hooks/useRecipes/useRecipes';
@@ -213,7 +213,17 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({ open, onClose, date, defaul
         {selected && preview && <>
           <div className="add-food-modal__drawer-subtitle">{isFood(selected) ? (selected.category ? `${selected.category} · 100g` : '100g') : `${recipeCategory(selected)} · ${selected.servings} ${t('athlete:components.recipeCard.servings')}`}</div>
           <label className="add-food-modal__quantity-label">{t('athlete:components.addFoodModal.quantity')}</label>
-          <InputNumber value={quantity} min={1} max={9999} addonAfter="g" size="large" onChange={value => setQuantity(value ?? 0)} className="add-food-modal__quantity" />
+          <Space.Compact size="large" style={{ width: '100%' }}>
+            <InputNumber
+              value={quantity}
+              min={1}
+              max={9999}
+              onChange={value => setQuantity(value ?? 0)}
+              className="add-food-modal__quantity"
+              style={{ flex: 1 }}
+            />
+            <Button disabled style={{ color: 'var(--color-text-secondary)', backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--color-border)' }}>g</Button>
+          </Space.Compact>
           <div className="add-food-modal__macro-preview">
             <span><b>{Math.round(preview.calories)}</b> kcal</span><span><b>{preview.protein.toFixed(1)}g</b> P</span><span><b>{preview.carbs.toFixed(1)}g</b> C</span><span><b>{preview.fat.toFixed(1)}g</b> F</span>
           </div>
