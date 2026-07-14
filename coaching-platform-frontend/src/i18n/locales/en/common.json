@@ -59,6 +59,19 @@
       "checkIn": "Check-In",
       "roster": "Roster",
       "general": "General"
+    },
+    "messages": {
+      "newWorkoutTemplate": "New workout program template assigned: {{templateName}}",
+      "newFeedbackNote": "Your coach left you a new feedback note: \"{{noteText}}\"",
+      "dailyTargetsUpdated": "Daily targets updated: {{calories}} kcal, {{protein}}g P, {{carbs}}g C, {{fat}}g F, {{water}}L Water, {{steps}} Steps.",
+      "dailyNutritionUpdated": "Daily nutrition targets updated: {{calories}} kcal, {{protein}}g P, {{carbs}}g C, {{fat}}g F.",
+      "dailyActivityUpdated": "Daily activity targets updated: {{water}}L Water, {{steps}} Steps.",
+      "dailyTargetsUpdatedSimple": "Daily targets updated.",
+      "checkInSubmitted": "{{athleteName}} submitted their weekly check-in.",
+      "checkInUpdated": "{{athleteName}} updated their weekly check-in.",
+      "checkInReviewed": "Your coach reviewed your weekly check-in: \"{{notes}}\"",
+      "invitationAccepted": "Athlete {{athleteName}} has accepted your invitation.",
+      "macroTargetsUpdated": "Coach {{coachName}} updated your daily macro targets."
     }
   },
   "notFound": {
