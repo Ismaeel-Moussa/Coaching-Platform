@@ -82,6 +82,36 @@ public static class SeedExtensions
             await context.SaveChangesAsync();
         }
 
+        // ─── Extra Coaches for Load Testing ──────────────────────────────
+        for (int i = 1; i <= 5; i++)
+        {
+            string extraCoachEmail = $"coach{i}@jokernutrition.com";
+            if (await userManager.FindByEmailAsync(extraCoachEmail) == null)
+            {
+                var coachUser = new User
+                {
+                    UserName = extraCoachEmail,
+                    Email = extraCoachEmail,
+                    FirstName = $"Marcus{i}",
+                    LastName = "Steel",
+                    CreatedAt = DateTime.UtcNow,
+                    IsActive = true,
+                    EmailConfirmed = true
+                };
+                await userManager.CreateAsync(coachUser, "Coach@Joker123!");
+                await userManager.AddToRoleAsync(coachUser, "Coach");
+
+                var coach = new Coach
+                {
+                    UserId = coachUser.Id,
+                    Bio = $"Load testing coach #{i}.",
+                    IsActive = true
+                };
+                context.Coaches.Add(coach);
+            }
+        }
+        await context.SaveChangesAsync();
+
         // ─── Demo Athlete ─────────────────────────────────────────────────
         const string athleteEmail = "athlete@jokernutrition.com";
         if (await userManager.FindByEmailAsync(athleteEmail) == null)
@@ -113,6 +143,43 @@ public static class SeedExtensions
             context.Athletes.Add(athlete);
             await context.SaveChangesAsync();
         }
+
+        // ─── Extra Athletes for Load Testing ─────────────────────────────
+        var coachesList = await context.Coaches.ToListAsync();
+        for (int i = 1; i <= 20; i++)
+        {
+            string extraAthleteEmail = $"athlete{i}@jokernutrition.com";
+            if (await userManager.FindByEmailAsync(extraAthleteEmail) == null)
+            {
+                var assignedCoach = coachesList.Count > 0 ? coachesList[i % coachesList.Count] : null;
+                var athleteUser = new User
+                {
+                    UserName = extraAthleteEmail,
+                    Email = extraAthleteEmail,
+                    FirstName = $"Sarah{i}",
+                    LastName = "Lopez",
+                    CreatedAt = DateTime.UtcNow,
+                    IsActive = true,
+                    EmailConfirmed = true
+                };
+                await userManager.CreateAsync(athleteUser, "Athlete@Joker123!");
+                await userManager.AddToRoleAsync(athleteUser, "Athlete");
+
+                var athlete = new Athlete
+                {
+                    UserId = athleteUser.Id,
+                    AssignedCoachId = assignedCoach?.Id,
+                    WeightKg = 70m,
+                    HeightCm = 175m,
+                    TargetGoal = "Muscle Gain",
+                    CurrentStreak = 0,
+                    LongestStreak = 0
+                };
+                context.Athletes.Add(athlete);
+            }
+        }
+        await context.SaveChangesAsync();
+
 
         // ─── Foods (50+ with accurate macro data per 100g) ─────────────────
         if (!await context.Foods.AnyAsync())
@@ -369,6 +436,34 @@ public static class SeedExtensions
                 context.MacroTargets.Add(target);
                 await context.SaveChangesAsync();
             }
+        }
+
+        // ─── Macro Targets for ALL Athletes ───────────────────────────────
+        var allAthletes = await context.Athletes.Include(a => a.MacroTargets).ToListAsync();
+        var defaultCoach = await context.Coaches.FirstOrDefaultAsync();
+        if (defaultCoach != null)
+        {
+            foreach (var athlete in allAthletes)
+            {
+                if (!athlete.MacroTargets.Any(t => t.IsActive))
+                {
+                    var target = new MacroTarget
+                    {
+                        AthleteId = athlete.Id,
+                        SetByCoachId = athlete.AssignedCoachId ?? defaultCoach.Id,
+                        TargetCalories = 2000m,
+                        TargetProtein = 150m,
+                        TargetCarbs = 200m,
+                        TargetFat = 65m,
+                        WaterLitersTarget = 3.0m,
+                        StepsTarget = 10000,
+                        IsActive = true,
+                        SetAt = DateTime.UtcNow
+                    };
+                    context.MacroTargets.Add(target);
+                }
+            }
+            await context.SaveChangesAsync();
         }
 
         // ─── Exercises (30+ with YouTube video IDs) ───────────────────────
