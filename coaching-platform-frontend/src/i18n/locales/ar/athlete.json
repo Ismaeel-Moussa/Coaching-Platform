@@ -122,6 +122,8 @@
   "nutritionPlan": {
     "logDate": "تاريخ اليومية",
     "dayType": "نوع اليوم",
+    "dailyProgress": "تقدم اليوم",
+    "mealBlock": "قسم الوجبة",
     "addOption": "إضافة هذا الخيار إلى اليومية",
     "completed": "مكتمل",
     "addTitle": "إضافة وجبة الخطة إلى اليومية",

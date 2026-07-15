@@ -122,6 +122,8 @@
   "nutritionPlan": {
     "logDate": "Diary date",
     "dayType": "Day type",
+    "dailyProgress": "Daily progress",
+    "mealBlock": "Meal block",
     "addOption": "Add this option to diary",
     "completed": "Completed",
     "addTitle": "Add plan meal to diary",
