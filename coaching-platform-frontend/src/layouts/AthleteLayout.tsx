@@ -13,6 +13,7 @@ import './AthleteLayout.scss';
 const athleteNavItems = [
   { path: '/athlete/dashboard', icon: 'dashboard', labelKey: 'nav.dashboard' },
   { path: '/athlete/meal-logger', icon: 'restaurant', labelKey: 'nav.nutrition' },
+  { path: '/athlete/nutrition-plan', icon: 'nutrition', labelKey: 'nav.myNutritionPlan' },
   { path: '/athlete/workouts', icon: 'fitness_center', labelKey: 'nav.workouts' },
   { path: '/athlete/supplements', icon: 'medication', labelKey: 'nav.supplements' },
   { path: '/athlete/recipes', icon: 'menu_book', labelKey: 'nav.recipes' },

@@ -46,7 +46,11 @@ public class FoodService : _BaseService, IFoodService
             var query = _foodRepo.QueryAll();
 
             if (!string.IsNullOrWhiteSpace(form.Search))
-                query = query.Where(f => f.Name.Contains(form.Search));
+            {
+                var search = form.Search.Trim().ToLower();
+                query = query.Where(f => f.Name.ToLower().Contains(search) ||
+                                         (f.NameAr != null && f.NameAr.ToLower().Contains(search)));
+            }
 
             if (!string.IsNullOrWhiteSpace(form.Category))
                 query = query.Where(f => f.Category == form.Category);

@@ -1,0 +1,55 @@
+.athlete-plan {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px;
+
+  &--empty { min-height: 60vh; display: grid; place-items: center; }
+
+  &__hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 32px;
+    align-items: center;
+    padding: 32px;
+    color: white;
+    background: linear-gradient(130deg, var(--color-navy, #182345), #293b73);
+    border-radius: 20px;
+  }
+
+  &__hero h1, &__hero p { color: white; }
+  &__hero h1 { margin: 5px 0 8px; }
+  &__eyebrow { color: var(--color-yellow, #fff200) !important; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+  &__targets { display: flex; gap: 12px; }
+  &__targets > div { min-width: 130px; padding: 18px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); border-radius: 14px; text-align: center; }
+  &__targets strong { display: block; font-size: 28px; color: var(--color-yellow, #fff200); }
+  &__targets span { display: block; font-size: 12px; margin-top: 4px; }
+  &__meta { color: #737b90; margin: 12px 4px 20px; }
+  &__notes { margin-bottom: 20px; }
+  &__meals { display: grid; gap: 18px; }
+  &__meal { border-radius: 16px; overflow: hidden; }
+  &__meal-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  &__meal-header > div:first-child { display: flex; align-items: center; gap: 10px; }
+  &__meal-header .material-symbols-outlined { color: #e1c900; font-size: 30px; }
+  &__meal-header h3 { margin: 0; }
+  &__instructions { padding: 12px 14px; background: #f5f7fb; border-radius: 10px; margin-top: 14px; }
+  &__options { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; margin-top: 10px; }
+  &__option { border: 1px solid #e7eaf0; border-radius: 12px; overflow: hidden; }
+  &__option h4 { display: flex; gap: 8px; margin: 0; padding: 12px 14px; background: #f8f9fb; }
+  &__option h4 span { color: #7c8497; font-weight: 500; }
+  &__option ul { list-style: none; padding: 8px 14px; margin: 0; }
+  &__option li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid #eef0f4; }
+  &__option li:last-child { border-bottom: 0; }
+  &__option li strong { white-space: nowrap; color: #243259; }
+  &__rules { margin-top: 20px; border-inline-start: 4px solid var(--color-yellow, #fff200); }
+  &__rules li { margin-bottom: 10px; padding-inline-start: 5px; }
+}
+
+@media (max-width: 760px) {
+  .athlete-plan {
+    padding: 18px 14px 90px;
+    &__hero { grid-template-columns: 1fr; padding: 24px 20px; }
+    &__targets { width: 100%; }
+    &__targets > div { flex: 1; min-width: 0; }
+    &__meal-header { flex-direction: column; }
+  }
+}

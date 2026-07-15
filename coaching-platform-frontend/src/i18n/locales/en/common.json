@@ -5,6 +5,8 @@
     "clientPortal": "Client Portal"
   },
   "nav": {
+    "nutritionPlans": "Nutrition Plans",
+    "myNutritionPlan": "My Nutrition Plan",
     "dashboard": "Dashboard",
     "clientRoster": "Client Roster",
     "athleteHub": "Plans & Targets",

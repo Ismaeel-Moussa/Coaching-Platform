@@ -76,6 +76,13 @@
     "dailyHistoryTab": "Daily History Logs"
   },
   "assignmentHub": {
+    "nutritionPlan": "Nutrition Plan",
+    "activeNutritionPlan": "Active nutrition plan",
+    "noNutritionPlan": "No nutrition plan assigned yet.",
+    "assignNutritionPlan": "Assign nutrition plan",
+    "selectNutritionPlan": "Select a nutrition plan",
+    "nutritionPlanNotes": "Optional notes for the athlete",
+    "meals": "meals",
     "title": "Plans & Targets",
     "subtitle": "Manage workout programs, macro targets, hydration, steps, and supplement schedules.",
     "searchPlaceholder": "Search roster...",

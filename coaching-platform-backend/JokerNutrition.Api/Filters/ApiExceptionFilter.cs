@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using JokerNutrition.Business.Common;
 
 namespace JokerNutrition.Api.Filters;
 
@@ -23,6 +24,7 @@ public class ApiExceptionFilter : IExceptionFilter
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, exception.Message),
             KeyNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
             ArgumentException => (StatusCodes.Status400BadRequest, exception.Message),
+            ConflictException => (StatusCodes.Status409Conflict, exception.Message),
             InvalidOperationException => (StatusCodes.Status422UnprocessableEntity, exception.Message),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
         };

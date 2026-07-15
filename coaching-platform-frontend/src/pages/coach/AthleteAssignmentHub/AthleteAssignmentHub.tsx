@@ -7,6 +7,11 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useGetRoster, useGetAthleteProfile } from '../../../hooks/useCoachHub/useCoachHub';
 import { useGetWorkoutTemplates, useAssignTemplate } from '../../../hooks/useWorkoutTemplates/useWorkoutTemplates';
+import {
+  useAssignNutritionPlan,
+  useAthleteNutritionPlan,
+  useNutritionPlans,
+} from '../../../hooks/useNutritionPlans/useNutritionPlans';
 import { 
   useSetMacroTargets, 
   useGetAthleteSupplements, 
@@ -20,7 +25,7 @@ import './AthleteAssignmentHub.scss';
 const { Option } = Select;
 
 const AthleteAssignmentHub: React.FC = () => {
-  const { t } = useTranslation(['common', 'athlete', 'coach']);
+  const { t, i18n } = useTranslation(['common', 'athlete', 'coach']);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [selectedAthleteId, setSelectedAthleteId] = useState<number | null>(() => {
@@ -42,14 +47,17 @@ const AthleteAssignmentHub: React.FC = () => {
   // Roster and Templates lists
   const { data: rosterData, isLoading: isRosterLoading } = useGetRoster(1, 100);
   const { data: templatesData, isLoading: isTemplatesLoading } = useGetWorkoutTemplates({ page: 1, pageSize: 100 });
+  const { data: nutritionPlansData, isLoading: isNutritionPlansLoading } = useNutritionPlans({ status: 'Published', page: 1, pageSize: 100 });
 
   // Selected athlete detail query
   const { data: profile, isLoading: isProfileLoading } = useGetAthleteProfile(selectedAthleteId!);
   const { data: supplements, isLoading: isSupplementsLoading } = useGetAthleteSupplements(selectedAthleteId!);
+  const { data: currentNutritionPlan, isLoading: isCurrentNutritionPlanLoading } = useAthleteNutritionPlan(selectedAthleteId ?? undefined);
 
   // Mutations
   const setMacroTargetsMutation = useSetMacroTargets(selectedAthleteId!);
   const assignTemplateMutation = useAssignTemplate();
+  const assignNutritionPlanMutation = useAssignNutritionPlan();
   const addSupplementMutation = useAddAthleteSupplement(selectedAthleteId!);
   const updateSupplementMutation = useUpdateAthleteSupplement(selectedAthleteId!);
   const deleteSupplementMutation = useDeleteAthleteSupplement(selectedAthleteId!);
@@ -57,6 +65,9 @@ const AthleteAssignmentHub: React.FC = () => {
   // Program Assign modal state
   const [isProgramModalVisible, setIsProgramModalVisible] = useState(false);
   const [tempSelectedProgramId, setTempSelectedProgramId] = useState<number | null>(null);
+  const [isNutritionPlanModalVisible, setIsNutritionPlanModalVisible] = useState(false);
+  const [tempSelectedNutritionPlanId, setTempSelectedNutritionPlanId] = useState<number | null>(null);
+  const [nutritionPlanNotes, setNutritionPlanNotes] = useState('');
 
   // Supplements modal state
   const [isSupplementModalVisible, setIsSupplementModalVisible] = useState(false);
@@ -143,6 +154,25 @@ const AthleteAssignmentHub: React.FC = () => {
         setIsProgramModalVisible(false);
         setTempSelectedProgramId(null);
       }
+    });
+  };
+
+  const handleAssignNutritionPlan = () => {
+    if (!tempSelectedNutritionPlanId || !selectedAthleteId) {
+      Modal.error({ title: t('common:actions.confirm'), content: t('coach:assignmentHub.selectNutritionPlan', { defaultValue: 'Select a nutrition plan.' }) });
+      return;
+    }
+
+    assignNutritionPlanMutation.mutate({
+      id: tempSelectedNutritionPlanId,
+      athleteIds: [selectedAthleteId],
+      notes: nutritionPlanNotes.trim() || undefined,
+    }, {
+      onSuccess: () => {
+        setIsNutritionPlanModalVisible(false);
+        setTempSelectedNutritionPlanId(null);
+        setNutritionPlanNotes('');
+      },
     });
   };
 
@@ -326,6 +356,40 @@ const AthleteAssignmentHub: React.FC = () => {
                     icon={<span className="material-symbols-outlined" style={{ fontSize: 15 }}>add</span>}
                   >
                     {t('coach:assignmentHub.assignTemplate')}
+                  </Button>
+                </div>
+              )}
+            </Card>
+
+            {/* Assigned Nutrition Plan Card */}
+            <Card
+              className="athlete-assignment-hub__card"
+              title={
+                <div className="athlete-assignment-hub__card-header">
+                  <div className="icon-bubble">
+                    <span className="material-symbols-outlined">restaurant_menu</span>
+                  </div>
+                  <h3>{t('coach:assignmentHub.nutritionPlan', { defaultValue: 'Nutrition Plan' })}</h3>
+                </div>
+              }
+              variant="borderless"
+            >
+              {isCurrentNutritionPlanLoading ? <Skeleton active paragraph={{ rows: 2 }} /> : currentNutritionPlan ? (
+                <div className="athlete-assignment-hub__current-program">
+                  <div className="athlete-assignment-hub__program-info">
+                    <span className="program-label">{t('coach:assignmentHub.activeNutritionPlan', { defaultValue: 'Active nutrition plan' })}</span>
+                    <span className="program-name">{i18n.resolvedLanguage === 'ar' ? currentNutritionPlan.plan.nameAr || currentNutritionPlan.plan.name : currentNutritionPlan.plan.name}</span>
+                    <span className="program-label">{currentNutritionPlan.plan.targetCalories} kcal · {currentNutritionPlan.plan.mealBlockCount} {t('coach:assignmentHub.meals', { defaultValue: 'meals' })}</span>
+                  </div>
+                  <Button type="primary" onClick={() => setIsNutritionPlanModalVisible(true)} icon={<span className="material-symbols-outlined" style={{ fontSize: 15 }}>sync</span>}>
+                    {t('coach:assignmentHub.changeBtn')}
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <p className="athlete-assignment-hub__no-program">{t('coach:assignmentHub.noNutritionPlan', { defaultValue: 'No nutrition plan assigned yet.' })}</p>
+                  <Button type="primary" block onClick={() => setIsNutritionPlanModalVisible(true)} icon={<span className="material-symbols-outlined" style={{ fontSize: 15 }}>add</span>}>
+                    {t('coach:assignmentHub.assignNutritionPlan', { defaultValue: 'Assign nutrition plan' })}
                   </Button>
                 </div>
               )}
@@ -572,6 +636,41 @@ const AthleteAssignmentHub: React.FC = () => {
               value: tmpl.id,
               label: `${tmpl.name} (${tmpl.dayCount} ${t('coach:templateBuilder.daysCount', { count: tmpl.dayCount })})`
             })) || []}
+          />
+        </div>
+      </Modal>
+
+      {/* Nutrition Plan Assignment Modal */}
+      <Modal
+        title={t('coach:assignmentHub.assignNutritionPlan', { defaultValue: 'Assign nutrition plan' })}
+        open={isNutritionPlanModalVisible}
+        onCancel={() => {
+          setIsNutritionPlanModalVisible(false);
+          setTempSelectedNutritionPlanId(null);
+          setNutritionPlanNotes('');
+        }}
+        onOk={handleAssignNutritionPlan}
+        okText={t('coach:assignmentHub.assignNutritionPlan', { defaultValue: 'Assign nutrition plan' })}
+        okButtonProps={{ loading: assignNutritionPlanMutation.isPending }}
+        width={480}
+      >
+        <div style={{ padding: '8px 0', display: 'grid', gap: 14 }}>
+          <Select
+            placeholder={t('coach:assignmentHub.selectNutritionPlan', { defaultValue: 'Select a nutrition plan' })}
+            style={{ width: '100%' }}
+            value={tempSelectedNutritionPlanId}
+            onChange={setTempSelectedNutritionPlanId}
+            loading={isNutritionPlansLoading}
+            options={nutritionPlansData?.items.map(plan => ({
+              value: plan.id,
+              label: `${plan.name} (${plan.targetCalories} kcal)`,
+            }))}
+          />
+          <Input.TextArea
+            rows={3}
+            value={nutritionPlanNotes}
+            onChange={event => setNutritionPlanNotes(event.target.value)}
+            placeholder={t('coach:assignmentHub.nutritionPlanNotes', { defaultValue: 'Optional notes for the athlete' })}
           />
         </div>
       </Modal>

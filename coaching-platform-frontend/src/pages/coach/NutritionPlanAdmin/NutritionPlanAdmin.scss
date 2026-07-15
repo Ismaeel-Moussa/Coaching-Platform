@@ -1,0 +1,62 @@
+.nutrition-admin {
+  padding: 32px;
+  max-width: 1500px;
+  margin: 0 auto;
+
+  &__header,
+  &__section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__header { margin-bottom: 24px; }
+  &__header h2 { margin-bottom: 4px; }
+  &__filters { margin-bottom: 16px; }
+  &__filters .ant-input-search { width: min(360px, 70vw); }
+  &__filters .ant-select { min-width: 180px; }
+  &__table .ant-pagination { margin-top: 20px; text-align: end; }
+  &__version { display: block; color: #8b92a5; margin-top: 3px; }
+  &__mismatch { color: #c53b2c; font-weight: 700; }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 16px;
+  }
+
+  &__grid--meal { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  &__meal { margin-bottom: 18px; border-inline-start: 4px solid var(--color-yellow, #ffec00); }
+  &__options > .ant-card { margin: 10px 0; background: #fafafa; }
+
+  &__item,
+  &__rule {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(150px, 1.2fr)) repeat(2, minmax(150px, 1fr)) repeat(4, minmax(110px, .8fr)) auto;
+    gap: 10px;
+    align-items: end;
+    padding: 12px 0;
+    border-bottom: 1px solid #eef0f4;
+  }
+
+  &__rule { grid-template-columns: .7fr 1fr 1fr auto; }
+  &__issues { display: grid; gap: 10px; margin-top: 16px; }
+}
+
+.nutrition-admin__editor .ant-modal-body { max-height: 72vh; overflow-y: auto; padding-inline-end: 10px; }
+
+@media (max-width: 900px) {
+  .nutrition-admin {
+    padding: 20px 14px 90px;
+    &__header { align-items: flex-start; flex-direction: column; }
+    &__grid, &__grid--meal { grid-template-columns: 1fr 1fr; }
+    &__item, &__rule { grid-template-columns: 1fr 1fr; }
+  }
+}
+
+@media (max-width: 560px) {
+  .nutrition-admin {
+    &__grid, &__grid--meal, &__item, &__rule { grid-template-columns: 1fr; }
+  }
+}
