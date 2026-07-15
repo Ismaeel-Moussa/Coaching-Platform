@@ -161,7 +161,9 @@
   "recipeLibrary": {
     "title": "Recipe Library",
     "sub": "Curated and custom recipes to hit your macro targets",
-    "quickAddTo": "Quick Add to:",
+    "chooseMealTitle": "Choose a meal",
+    "chooseMealDescription": "Where would you like to add {{name}}?",
+    "addToDiary": "Add to Diary",
     "createRecipe": "Create Recipe",
     "emptyCoach": "No coach recipes are published yet.",
     "emptyCustom": "No custom recipes yet. Create your first recipe!",

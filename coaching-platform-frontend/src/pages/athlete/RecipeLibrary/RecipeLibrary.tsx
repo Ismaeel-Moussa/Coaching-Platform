@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tabs, Skeleton, Empty, Select } from 'antd';
+import { Tabs, Skeleton, Empty, Modal, Radio } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useGetRecipes, useQuickAddRecipe } from '../../../hooks/useRecipes/useRecipes';
 import RecipeCard from '../../../components/RecipeCard/RecipeCard';
@@ -8,8 +8,6 @@ import { RecipeCategory, type RecipeDto } from '../../../types/Recipe';
 import { MealType, MEAL_TYPE_LABELS } from '../../../types/Diary';
 import { getTodayIso } from '../../../utils/date';
 import './RecipeLibrary.scss';
-
-const { Option } = Select;
 
 const MEAL_TYPE_OPTIONS = [
   MealType.Breakfast, MealType.Lunch, MealType.Dinner, MealType.Snack,
@@ -32,18 +30,13 @@ const getMealTypeLabel = (type: MealType, t: any) => {
 interface RecipeGridProps {
   category?: RecipeCategory;
   isJokerRecipe?: boolean;
-  today: string;
-  targetMealType: MealType;
+  onQuickAdd: (recipe: RecipeDto) => void;
+  addingRecipeId?: number;
 }
 
-const RecipeGrid: React.FC<RecipeGridProps> = ({ category, isJokerRecipe, today, targetMealType }) => {
+const RecipeGrid: React.FC<RecipeGridProps> = ({ category, isJokerRecipe, onQuickAdd, addingRecipeId }) => {
   const { t } = useTranslation(['athlete']);
   const { data, isLoading } = useGetRecipes({ category, isJokerRecipe, pageSize: 30 });
-  const quickAddMutation = useQuickAddRecipe(today);
-
-  const handleQuickAdd = (recipe: RecipeDto) => {
-    quickAddMutation.mutate({ id: recipe.id, mealType: targetMealType });
-  };
 
   if (isLoading) {
     return (
@@ -77,8 +70,8 @@ const RecipeGrid: React.FC<RecipeGridProps> = ({ category, isJokerRecipe, today,
         <RecipeCard
           key={recipe.id}
           recipe={recipe}
-          onQuickAdd={handleQuickAdd}
-          isAdding={quickAddMutation.isPending && quickAddMutation.variables?.id === recipe.id}
+          onQuickAdd={onQuickAdd}
+          isAdding={addingRecipeId === recipe.id}
         />
       ))}
     </div>
@@ -89,7 +82,32 @@ const RecipeLibrary: React.FC = () => {
   const { t } = useTranslation(['common', 'athlete']);
   const today = getTodayIso();
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [targetMealType, setTargetMealType] = useState<MealType>(MealType.Lunch);
+  const [selectedRecipe, setSelectedRecipe] = useState<RecipeDto | null>(null);
+  const [selectedMealType, setSelectedMealType] = useState<MealType>(MealType.Lunch);
+  const quickAddMutation = useQuickAddRecipe(today);
+
+  const openMealPicker = (recipe: RecipeDto) => {
+    setSelectedRecipe(recipe);
+    setSelectedMealType(MealType.Lunch);
+  };
+
+  const closeMealPicker = () => {
+    if (!quickAddMutation.isPending) setSelectedRecipe(null);
+  };
+
+  const handleQuickAdd = async () => {
+    if (!selectedRecipe) return;
+
+    try {
+      await quickAddMutation.mutateAsync({
+        id: selectedRecipe.id,
+        mealType: selectedMealType,
+      });
+      setSelectedRecipe(null);
+    } catch {
+      // The mutation hook displays the error message.
+    }
+  };
 
   const recipeTabs: Array<{
     key: string;
@@ -123,8 +141,8 @@ const RecipeLibrary: React.FC = () => {
         <RecipeGrid
           category={tab.category}
           isJokerRecipe={tab.isJokerRecipe}
-          today={today}
-          targetMealType={targetMealType}
+          onQuickAdd={openMealPicker}
+          addingRecipeId={quickAddMutation.isPending ? selectedRecipe?.id : undefined}
         />
       </div>
     ),
@@ -142,22 +160,6 @@ const RecipeLibrary: React.FC = () => {
         </div>
 
         <div className="recipe-library__actions">
-          {/* Meal type picker for quick-add target */}
-          <div className="recipe-library__meal-picker">
-            <span className="recipe-library__meal-picker-label">{t('athlete:recipeLibrary.quickAddTo')}</span>
-            <Select
-              id="recipe-quick-add-meal-select"
-              value={targetMealType}
-              onChange={setTargetMealType}
-              size="middle"
-              style={{ width: 140 }}
-            >
-              {MEAL_TYPE_OPTIONS.map((mt) => (
-                <Option key={mt} value={mt}>{getMealTypeLabel(mt, t)}</Option>
-              ))}
-            </Select>
-          </div>
-
           <button
             id="create-recipe-btn"
             className="recipe-library__create-btn"
@@ -180,6 +182,37 @@ const RecipeLibrary: React.FC = () => {
       </div>
 
       {/* ── Create Recipe Modal ── */}
+      <Modal
+        open={selectedRecipe !== null}
+        title={t('athlete:recipeLibrary.chooseMealTitle')}
+        okText={t('athlete:recipeLibrary.addToDiary')}
+        cancelText={t('common:actions.cancel')}
+        onOk={handleQuickAdd}
+        onCancel={closeMealPicker}
+        confirmLoading={quickAddMutation.isPending}
+        closable={!quickAddMutation.isPending}
+        maskClosable={!quickAddMutation.isPending}
+        className="recipe-library__meal-modal"
+        destroyOnHidden
+      >
+        <p className="recipe-library__meal-modal-copy">
+          {t('athlete:recipeLibrary.chooseMealDescription', { name: selectedRecipe?.name })}
+        </p>
+        <Radio.Group
+          value={selectedMealType}
+          onChange={(event) => setSelectedMealType(event.target.value)}
+          className="recipe-library__meal-options"
+          optionType="button"
+          buttonStyle="solid"
+        >
+          {MEAL_TYPE_OPTIONS.map((mealType) => (
+            <Radio.Button key={mealType} value={mealType}>
+              {getMealTypeLabel(mealType, t)}
+            </Radio.Button>
+          ))}
+        </Radio.Group>
+      </Modal>
+
       <CreateRecipeModal
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}

@@ -35,20 +35,6 @@
     flex-wrap: wrap;
   }
 
-  &__meal-picker {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  &__meal-picker-label {
-    font-family: var(--font-data);
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    white-space: nowrap;
-  }
-
   &__create-btn {
     display: flex;
     align-items: center;
@@ -121,6 +107,36 @@
 
   &__empty {
     padding: 48px 0;
+  }
+
+  &__meal-modal-copy {
+    margin: 4px 0 18px;
+    color: var(--color-text-secondary);
+  }
+
+  &__meal-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+
+    .ant-radio-button-wrapper {
+      height: 44px;
+      line-height: 42px;
+      text-align: center;
+      border: 1px solid var(--color-border) !important;
+      border-radius: var(--radius-btn) !important;
+
+      &::before {
+        display: none;
+      }
+    }
+
+    .ant-radio-button-wrapper-checked {
+      background: var(--color-navy) !important;
+      border-color: var(--color-navy) !important;
+      color: var(--color-gold) !important;
+    }
   }
 }
 
