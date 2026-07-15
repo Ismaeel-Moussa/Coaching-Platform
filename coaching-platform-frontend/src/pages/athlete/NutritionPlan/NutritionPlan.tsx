@@ -138,49 +138,65 @@ const NutritionPlan: React.FC = () => {
     const end = assignment.endDate ? dayjs(assignment.endDate).endOf('day') : null;
     return date.isBefore(start) || !!end?.isBefore(date);
   };
+  const completedBlockCount = visibleBlocks.filter(block => block.id != null && completedByBlock.has(block.id)).length;
+  const completionPercent = visibleBlocks.length > 0
+    ? Math.round((completedBlockCount / visibleBlocks.length) * 100)
+    : 0;
 
   return <div className="athlete-plan">
     <header className="athlete-plan__hero">
-      <div>
+      <div className="athlete-plan__hero-content">
         <Text className="athlete-plan__eyebrow">{copy.subtitle}</Text>
         <Title>{ar ? plan.nameAr || plan.name : plan.name}</Title>
         {(ar ? plan.descriptionAr || plan.description : plan.description) && <Paragraph>{ar ? plan.descriptionAr || plan.description : plan.description}</Paragraph>}
       </div>
       <div className="athlete-plan__targets">
-        <div><strong>{plan.targetCalories}</strong><span>{copy.calories}</span></div>
-        <div><strong>{plan.minimumProteinGrams}</strong><span>{copy.protein}</span></div>
+        <div><span className="material-symbols-outlined">local_fire_department</span><strong>{plan.targetCalories}</strong><small>{copy.calories}</small></div>
+        <div><span className="material-symbols-outlined">fitness_center</span><strong>{plan.minimumProteinGrams}</strong><small>{copy.protein}</small></div>
       </div>
     </header>
 
-    <div className="athlete-plan__toolbar">
-      <div className="athlete-plan__meta">{copy.assigned}: {new Date(assignment.assignedAt).toLocaleDateString(ar ? 'ar-EG' : 'en-US')}</div>
-      <label><span>{t('athlete:nutritionPlan.logDate')}</span><DatePicker value={logDate} onChange={date => date && setLogDate(date)} disabledDate={disabledDate} allowClear={false} /></label>
-      {hasConditionalBlocks && <label><span>{t('athlete:nutritionPlan.dayType')}</span><Segmented disabled={!!lockedDayType} value={effectiveDayType} onChange={value => setDayType(value as 'training' | 'rest')} options={[{ value: 'training', label: copy.training }, { value: 'rest', label: copy.rest }]} /></label>}
-    </div>
+    <section className="athlete-plan__toolbar">
+      <div className="athlete-plan__meta">
+        <span className="material-symbols-outlined">event_available</span>
+        <div><small>{copy.assigned}</small><strong>{new Date(assignment.assignedAt).toLocaleDateString(ar ? 'ar-EG' : 'en-US')}</strong></div>
+      </div>
+      <div className="athlete-plan__controls">
+        <label><span>{t('athlete:nutritionPlan.logDate')}</span><DatePicker value={logDate} onChange={date => date && setLogDate(date)} disabledDate={disabledDate} allowClear={false} /></label>
+        {hasConditionalBlocks && <label><span>{t('athlete:nutritionPlan.dayType')}</span><Segmented disabled={!!lockedDayType} value={effectiveDayType} onChange={value => setDayType(value as 'training' | 'rest')} options={[{ value: 'training', label: copy.training }, { value: 'rest', label: copy.rest }]} /></label>}
+      </div>
+      <div className="athlete-plan__progress">
+        <div><span>{t('athlete:nutritionPlan.dailyProgress')}</span><strong>{completedBlockCount}/{visibleBlocks.length}</strong></div>
+        <div className="athlete-plan__progress-track"><span style={{ width: `${completionPercent}%` }} /></div>
+      </div>
+    </section>
     {assignment.notes && <Alert className="athlete-plan__notes" type="info" showIcon message={copy.coachNotes} description={assignment.notes} />}
 
     <main className="athlete-plan__meals">
-      {visibleBlocks.map((block) => <Card key={block.id ?? block.orderIndex} className="athlete-plan__meal">
+      {visibleBlocks.map((block, blockIndex) => <Card key={block.id ?? block.orderIndex} className="athlete-plan__meal">
         <div className="athlete-plan__meal-header">
-          <div><span className="material-symbols-outlined">restaurant</span><Title level={3}>{ar ? block.labelAr || block.label : block.label}</Title></div>
+          <div className="athlete-plan__meal-title">
+            <span className="athlete-plan__meal-number">{String(blockIndex + 1).padStart(2, '0')}</span>
+            <div><Text>{t('athlete:nutritionPlan.mealBlock')}</Text><Title level={3}>{ar ? block.labelAr || block.label : block.label}</Title></div>
+          </div>
           <div className="athlete-plan__meal-tags">
-            {block.targetCalories != null && <Tag color="gold">{block.targetCalories} {copy.calories}</Tag>}
+            {block.targetCalories != null && <Tag color="gold" icon={<span className="material-symbols-outlined">bolt</span>}>{block.targetCalories} {copy.calories}</Tag>}
             {block.trainingDayOnly && <Tag color="blue">{copy.training}</Tag>}
             {block.restDayOnly && <Tag color="purple">{copy.rest}</Tag>}
           </div>
         </div>
         {(ar ? block.instructionsAr || block.instructions : block.instructions) && <Paragraph className="athlete-plan__instructions">{ar ? block.instructionsAr || block.instructions : block.instructions}</Paragraph>}
-        <Text type="secondary">{copy.choose}</Text>
+        <div className="athlete-plan__choose-label"><span className="material-symbols-outlined">touch_app</span><Text>{copy.choose}</Text></div>
         <div className="athlete-plan__options">
           {block.options.map((option, index) => {
             const completed = block.id != null ? completedByBlock.get(block.id) : undefined;
             const isSelectedCompletion = completed?.mealOptionId === option.id;
             const canLog = optionIsLoggable(option);
             return <section key={option.id ?? option.orderIndex} className={`athlete-plan__option ${isSelectedCompletion ? 'athlete-plan__option--completed' : ''}`}>
-            <h4><span>{copy.option} {index + 1}</span>{ar ? option.labelAr || option.label : option.label}</h4>
+            <h4><span className="athlete-plan__option-number">{index + 1}</span><span className="athlete-plan__option-title"><small>{copy.option} {index + 1}</small>{ar ? option.labelAr || option.label : option.label}</span></h4>
             <ul>{option.items.map((item) => <li key={item.id ?? item.orderIndex}>
-              <span>{itemName(item)}</span>
-              <strong>{item.quantity} {unitLabel(item.unit)}</strong>
+              <span><i /><span>{itemName(item)}</span></span>
+              <strong>{item.quantity} <small>{unitLabel(item.unit)}</small></strong>
             </li>)}</ul>
             <div className="athlete-plan__option-action">
               {isSelectedCompletion && <Tag color="success" icon={<span className="material-symbols-outlined">check_circle</span>}>{t('athlete:nutritionPlan.completed')}</Tag>}
