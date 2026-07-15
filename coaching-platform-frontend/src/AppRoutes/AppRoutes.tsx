@@ -28,6 +28,7 @@ const SupplementsTracker = lazy(() => import('../pages/athlete/SupplementsTracke
 const WeeklyCheckIn = lazy(() => import('../pages/athlete/WeeklyCheckIn/WeeklyCheckIn'));
 const Feedback = lazy(() => import('../pages/athlete/Feedback/Feedback'));
 const History = lazy(() => import('../pages/athlete/History/History'));
+const AthleteNutritionPlan = lazy(() => import('../pages/athlete/NutritionPlan/NutritionPlan'));
 
 // Coach pages (lazy — loaded only when coach logs in)
 const CoachDashboard = lazy(() => import('../pages/coach/CoachDashboard/CoachDashboard'));
@@ -38,6 +39,7 @@ const AthleteAssignmentHub = lazy(() => import('../pages/coach/AthleteAssignment
 const ExerciseLibraryAdmin = lazy(() => import('../pages/coach/ExerciseLibraryAdmin/ExerciseLibraryAdmin'));
 const FoodRecipeAdmin = lazy(() => import('../pages/coach/FoodRecipeAdmin/FoodRecipeAdmin'));
 const InvitationManagement = lazy(() => import('../pages/coach/InvitationManagement/InvitationManagement'));
+const NutritionPlanAdmin = lazy(() => import('../pages/coach/NutritionPlanAdmin/NutritionPlanAdmin'));
 const Profile = lazy(() => import('../pages/shared/Profile/Profile'));
 const Notifications = lazy(() => import('../pages/shared/Notifications/Notifications'));
 
@@ -91,6 +93,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <MealLogger />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'nutrition-plan',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <AthleteNutritionPlan />
           </Suspense>
         ),
       },
@@ -220,6 +230,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <WorkoutTemplateBuilder />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'nutrition-plans',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <NutritionPlanAdmin />
           </Suspense>
         ),
       },

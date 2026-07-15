@@ -9,6 +9,7 @@ public static class FoodMapper
     {
         Id = food.Id,
         Name = food.Name,
+        NameAr = food.NameAr,
         Category = food.Category,
         CaloriesPer100g = food.CaloriesPer100g,
         ProteinPer100g = food.ProteinPer100g,

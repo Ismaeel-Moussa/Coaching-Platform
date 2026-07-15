@@ -37,6 +37,7 @@ public class JokerNutritionContext : IdentityDbContext<User, Role, int,
     public DbSet<NutritionMealOption> NutritionMealOptions => Set<NutritionMealOption>();
     public DbSet<NutritionOptionItem> NutritionOptionItems => Set<NutritionOptionItem>();
     public DbSet<NutritionPlanRule> NutritionPlanRules => Set<NutritionPlanRule>();
+    public DbSet<NutritionPlanAssignment> NutritionPlanAssignments => Set<NutritionPlanAssignment>();
     public DbSet<SeedImportBatch> SeedImportBatches => Set<SeedImportBatch>();
     public DbSet<ClientCheckIn> ClientCheckIns => Set<ClientCheckIn>();
     public DbSet<CheckInPhoto> CheckInPhotos => Set<CheckInPhoto>();

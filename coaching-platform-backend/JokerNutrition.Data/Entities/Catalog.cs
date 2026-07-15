@@ -30,11 +30,15 @@ public class NutritionPlanTemplate
     public int ContentVersion { get; set; } = 1;
     public string? SourceDocument { get; set; }
     public int? SourcePage { get; set; }
+    public bool IsManuallyEdited { get; set; }
+    public int? LastEditedByUserId { get; set; }
+    public DateTime? LastEditedAt { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 
     public ICollection<NutritionMealBlock> MealBlocks { get; set; } = new List<NutritionMealBlock>();
     public ICollection<NutritionPlanRule> Rules { get; set; } = new List<NutritionPlanRule>();
+    public ICollection<NutritionPlanAssignment> Assignments { get; set; } = new List<NutritionPlanAssignment>();
 }
 
 public class NutritionMealBlock
@@ -95,4 +99,21 @@ public class NutritionPlanRule
     public string RuleType { get; set; } = string.Empty;
     public string? Text { get; set; }
     public string TextAr { get; set; } = string.Empty;
+}
+
+public class NutritionPlanAssignment
+{
+    public int Id { get; set; }
+    public int AthleteId { get; set; }
+    public Athlete Athlete { get; set; } = null!;
+    public int NutritionPlanTemplateId { get; set; }
+    public NutritionPlanTemplate Template { get; set; } = null!;
+    public int? AssignedByCoachId { get; set; }
+    public Coach? AssignedByCoach { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public bool IsActive { get; set; } = true;
+    public string SnapshotJson { get; set; } = string.Empty;
+    public string? Notes { get; set; }
+    public DateTime AssignedAt { get; set; }
 }

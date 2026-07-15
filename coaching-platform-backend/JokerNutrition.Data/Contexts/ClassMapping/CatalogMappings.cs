@@ -35,7 +35,8 @@ public class NutritionPlanTemplateMapping : IEntityTypeConfiguration<NutritionPl
         builder.Property(t => t.TargetCalories).HasPrecision(10, 2);
         builder.Property(t => t.MinimumProteinGrams).HasPrecision(8, 2);
         builder.Property(t => t.SourceDocument).HasMaxLength(300);
-        builder.Property(t => t.ContentVersion).HasDefaultValue(1);
+        builder.Property(t => t.ContentVersion).IsConcurrencyToken().HasDefaultValue(1);
+        builder.Property(t => t.IsManuallyEdited).HasDefaultValue(false);
     }
 }
 
@@ -96,5 +97,21 @@ public class NutritionPlanRuleMapping : IEntityTypeConfiguration<NutritionPlanRu
         builder.Property(r => r.TextAr).HasMaxLength(4000).IsRequired();
         builder.HasOne(r => r.Template).WithMany(t => t.Rules).HasForeignKey(r => r.NutritionPlanTemplateId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(r => new { r.NutritionPlanTemplateId, r.OrderIndex }).IsUnique();
+    }
+}
+
+public class NutritionPlanAssignmentMapping : IEntityTypeConfiguration<NutritionPlanAssignment>
+{
+    public void Configure(EntityTypeBuilder<NutritionPlanAssignment> builder)
+    {
+        builder.ToTable("NutritionPlanAssignments");
+        builder.HasKey(a => a.Id);
+        builder.Property(a => a.SnapshotJson).HasColumnType("jsonb").IsRequired();
+        builder.Property(a => a.Notes).HasMaxLength(2000);
+        builder.HasOne(a => a.Athlete).WithMany().HasForeignKey(a => a.AthleteId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(a => a.Template).WithMany(t => t.Assignments).HasForeignKey(a => a.NutritionPlanTemplateId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(a => a.AssignedByCoach).WithMany().HasForeignKey(a => a.AssignedByCoachId).OnDelete(DeleteBehavior.SetNull);
+        builder.HasIndex(a => a.AthleteId).HasFilter("\"IsActive\" = TRUE").IsUnique();
+        builder.HasIndex(a => new { a.NutritionPlanTemplateId, a.IsActive });
     }
 }

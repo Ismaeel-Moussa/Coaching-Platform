@@ -76,6 +76,13 @@
     "dailyHistoryTab": "سجل المتابعة اليومي"
   },
   "assignmentHub": {
+    "nutritionPlan": "خطة التغذية",
+    "activeNutritionPlan": "خطة التغذية الحالية",
+    "noNutritionPlan": "لم يتم تعيين خطة تغذية بعد.",
+    "assignNutritionPlan": "تعيين خطة تغذية",
+    "selectNutritionPlan": "اختر خطة تغذية",
+    "nutritionPlanNotes": "ملاحظات اختيارية للمتدرب",
+    "meals": "وجبات",
     "title": "الخطط والأهداف",
     "subtitle": "إدارة البرامج التدريبية، أهداف الماكروز، الترطيب، الخطوات، وجداول المكملات الغذائية.",
     "searchPlaceholder": "البحث في القائمة...",

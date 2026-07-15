@@ -5,6 +5,8 @@
     "clientPortal": "بوابة العميل"
   },
   "nav": {
+    "nutritionPlans": "خطط التغذية",
+    "myNutritionPlan": "خطتي الغذائية",
     "dashboard": "لوحة التحكم",
     "clientRoster": "قائمة العملاء",
     "athleteHub": "الخطط والأهداف",

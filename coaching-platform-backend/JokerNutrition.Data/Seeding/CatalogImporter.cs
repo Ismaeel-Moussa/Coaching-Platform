@@ -522,6 +522,7 @@ public sealed class CatalogImporter(JokerNutritionContext context)
             }
             else
             {
+                if (entity.IsManuallyEdited) continue;
                 if (record.ContentVersion <= entity.ContentVersion) continue;
                 context.NutritionMealBlocks.RemoveRange(entity.MealBlocks);
                 context.NutritionPlanRules.RemoveRange(entity.Rules);

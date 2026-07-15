@@ -16,6 +16,7 @@ const coachNavItems = [
   { path: '/coach/athlete-hub', icon: 'assignment_ind', labelKey: 'nav.athleteHub' },
   { path: '/coach/exercise-library', icon: 'fitness_center', labelKey: 'nav.exerciseLibrary' },
   { path: '/coach/food-admin', icon: 'restaurant_menu', labelKey: 'nav.foodRecipes' },
+  { path: '/coach/nutrition-plans', icon: 'nutrition', labelKey: 'nav.nutritionPlans' },
   { path: '/coach/template-builder', icon: 'view_week', labelKey: 'nav.templateBuilder' },
   { path: '/coach/invitations', icon: 'mail', labelKey: 'nav.invitations' },
   { path: '/coach/notifications', icon: 'notifications', labelKey: 'nav.notifications' },
