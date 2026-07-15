@@ -39,14 +39,15 @@ const getMealTypeLabel = (type: MealType, t: any) => {
 };
 
 interface RecipeGridProps {
-  category: RecipeCategory;
+  category?: RecipeCategory;
+  isJokerRecipe?: boolean;
   today: string;
   targetMealType: MealType;
 }
 
-const RecipeGrid: React.FC<RecipeGridProps> = ({ category, today, targetMealType }) => {
+const RecipeGrid: React.FC<RecipeGridProps> = ({ category, isJokerRecipe, today, targetMealType }) => {
   const { t } = useTranslation(['athlete']);
-  const { data, isLoading } = useGetRecipes({ category, pageSize: 30 });
+  const { data, isLoading } = useGetRecipes({ category, isJokerRecipe, pageSize: 30 });
   const quickAddMutation = useQuickAddRecipe(today);
 
   const handleQuickAdd = (recipe: RecipeDto) => {
@@ -69,9 +70,11 @@ const RecipeGrid: React.FC<RecipeGridProps> = ({ category, today, targetMealType
     return (
       <Empty
         description={
-          category === RecipeCategory.Custom
+          isJokerRecipe
+            ? t('athlete:recipeLibrary.emptyCoach')
+            : category === RecipeCategory.Custom
             ? t('athlete:recipeLibrary.emptyCustom')
-            : t('athlete:recipeLibrary.emptyCategory', { category: getRecipeCategoryLabel(category, t) })
+            : t('athlete:recipeLibrary.emptyCategory', { category: getRecipeCategoryLabel(category!, t) })
         }
         image={Empty.PRESENTED_IMAGE_SIMPLE}
         className="recipe-library__empty"
@@ -99,22 +102,48 @@ const RecipeLibrary: React.FC = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [targetMealType, setTargetMealType] = useState<MealType>(MealType.Lunch);
 
-  const tabItems = [
-    RecipeCategory.MuscleBuilding,
-    RecipeCategory.FatLoss,
-    RecipeCategory.Custom,
-  ].map((category) => ({
-    key: String(category),
+  const recipeTabs: Array<{
+    key: string;
+    label: string;
+    category?: RecipeCategory;
+    isJokerRecipe?: boolean;
+  }> = [
+    {
+      key: 'coach',
+      label: t('athlete:recipeLibrary.categories.coach'),
+      isJokerRecipe: true,
+    },
+    {
+      key: String(RecipeCategory.MuscleBuilding),
+      label: getRecipeCategoryLabel(RecipeCategory.MuscleBuilding, t),
+      category: RecipeCategory.MuscleBuilding,
+    },
+    {
+      key: String(RecipeCategory.FatLoss),
+      label: getRecipeCategoryLabel(RecipeCategory.FatLoss, t),
+      category: RecipeCategory.FatLoss,
+    },
+    {
+      key: String(RecipeCategory.Custom),
+      label: getRecipeCategoryLabel(RecipeCategory.Custom, t),
+      category: RecipeCategory.Custom,
+      isJokerRecipe: false,
+    },
+  ];
+
+  const tabItems = recipeTabs.map((tab) => ({
+    key: tab.key,
     label: (
       <span className="recipe-library__tab-label">
-        <span className={`recipe-library__tab-dot recipe-library__tab-dot--${category}`} />
-        {getRecipeCategoryLabel(category, t)}
+        <span className={`recipe-library__tab-dot recipe-library__tab-dot--${tab.key}`} />
+        {tab.label}
       </span>
     ),
     children: (
       <div className="recipe-library__tab-content">
         <RecipeGrid
-          category={category}
+          category={tab.category}
+          isJokerRecipe={tab.isJokerRecipe}
           today={today}
           targetMealType={targetMealType}
         />
@@ -166,7 +195,7 @@ const RecipeLibrary: React.FC = () => {
         <Tabs
           items={tabItems}
           className="recipe-library__tabs"
-          defaultActiveKey={String(RecipeCategory.MuscleBuilding)}
+          defaultActiveKey="coach"
           size="large"
         />
       </div>

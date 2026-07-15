@@ -16,7 +16,12 @@ namespace JokerNutrition.Business.Services;
 
 public interface IRecipeService
 {
-    Task<PagedResult<RecipeDto>> GetRecipesAsync(RecipeCategory? category, string? search, int page, int pageSize);
+    Task<PagedResult<RecipeDto>> GetRecipesAsync(
+        RecipeCategory? category,
+        bool? isJokerRecipe,
+        string? search,
+        int page,
+        int pageSize);
     Task<RecipeDto> GetRecipeByIdAsync(int id);
     Task<RecipeDto> CreateRecipeAsync(CreateRecipeForm form);
     Task<RecipeDto> UpdateRecipeAsync(int recipeId, UpdateRecipeForm form);
@@ -55,9 +60,14 @@ public class RecipeService : _BaseService, IRecipeService
         _cacheService = cacheService;
     }
 
-    public async Task<PagedResult<RecipeDto>> GetRecipesAsync(RecipeCategory? category, string? search, int page, int pageSize)
+    public async Task<PagedResult<RecipeDto>> GetRecipesAsync(
+        RecipeCategory? category,
+        bool? isJokerRecipe,
+        string? search,
+        int page,
+        int pageSize)
     {
-        string cacheKey = $"recipes:search:{LoggedInUser.Role}:{category}:{search}:{page}:{pageSize}";
+        string cacheKey = $"recipes:search:{LoggedInUser.Role}:{category}:{isJokerRecipe}:{search}:{page}:{pageSize}";
         return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
         {
             IQueryable<Recipe> query = _recipeRepo.QueryAll()
@@ -70,6 +80,9 @@ public class RecipeService : _BaseService, IRecipeService
             var filtered = category.HasValue
                 ? query.Where(r => r.Category == category.Value)
                 : query;
+
+            if (isJokerRecipe.HasValue)
+                filtered = filtered.Where(r => r.IsJokerRecipe == isJokerRecipe.Value);
 
             if (!string.IsNullOrWhiteSpace(search))
             {

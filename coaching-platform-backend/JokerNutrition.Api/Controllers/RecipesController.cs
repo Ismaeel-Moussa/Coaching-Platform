@@ -21,15 +21,19 @@ public class RecipesController : ControllerBase
         _recipeService = recipeService;
     }
 
-    /// <summary>List recipes with optional category filter (MuscleBuilding=0, FatLoss=1, Custom=2).</summary>
+    /// <summary>
+    /// List recipes with optional category and source filters
+    /// (MuscleBuilding=0, FatLoss=1, Custom=2; isJokerRecipe=true for coach recipes).
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetRecipes(
         [FromQuery] RecipeCategory? category,
+        [FromQuery] bool? isJokerRecipe,
         [FromQuery] string? search,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
-        var result = await _recipeService.GetRecipesAsync(category, search, page, pageSize);
+        var result = await _recipeService.GetRecipesAsync(category, isJokerRecipe, search, page, pageSize);
         return Ok(result);
     }
 

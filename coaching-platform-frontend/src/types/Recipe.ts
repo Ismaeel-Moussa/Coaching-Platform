@@ -94,6 +94,7 @@ export type UpdateRecipeForm = CreateRecipeForm;
 
 export interface GetRecipesParams {
   category?: RecipeCategory;
+  isJokerRecipe?: boolean;
   search?: string;
   page?: number;
   pageSize?: number;

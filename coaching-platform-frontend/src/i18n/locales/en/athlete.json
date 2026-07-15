@@ -163,11 +163,13 @@
     "sub": "Curated and custom recipes to hit your macro targets",
     "quickAddTo": "Quick Add to:",
     "createRecipe": "Create Recipe",
+    "emptyCoach": "No coach recipes are published yet.",
     "emptyCustom": "No custom recipes yet. Create your first recipe!",
     "emptyCategory": "No {{category}} recipes available.",
     "categories": {
       "muscleBuilding": "Muscle Building",
       "fatLoss": "Fat Loss",
+      "coach": "Coach Recipes",
       "custom": "Custom"
     }
   },
