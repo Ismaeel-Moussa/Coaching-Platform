@@ -52,7 +52,7 @@ public class AuthTests : IClassFixture<TestWebAppFactory>
     [Fact]
     public async Task Login_WithNonExistentEmail_Returns401()
     {
-        // Arrange
+        // Arrange.
         var payload = new { email = "nobody@joker.com", password = "Whatever123!" };
 
         // Act
