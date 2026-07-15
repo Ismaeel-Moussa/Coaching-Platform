@@ -26,6 +26,7 @@ public class CatalogImporterTests
         var package = await CoachCatalogPackage.LoadAsync(catalog.DirectoryPath);
 
         Assert.Single(package.Exercises);
+        Assert.Equal(2, package.Foods.Count);
         Assert.Single(package.Recipes);
         Assert.Single(package.WorkoutTemplates);
         Assert.Single(package.Supplements);
@@ -62,7 +63,15 @@ public class CatalogImporterTests
         await importer.ImportAsync(package, false, coachUser.Email, "test");
 
         Assert.Single(await context.Exercises.Where(exercise => exercise.SeedKey != null).ToListAsync());
-        Assert.Single(await context.Recipes.Where(recipe => recipe.SeedKey != null).ToListAsync());
+        var importedRecipe = Assert.Single(await context.Recipes
+            .Include(recipe => recipe.Ingredients)
+            .Where(recipe => recipe.SeedKey != null)
+            .ToListAsync());
+        Assert.Equal(2, importedRecipe.Ingredients.Count);
+        Assert.Equal(100m, importedRecipe.TotalCalories);
+        Assert.Equal(10m, importedRecipe.TotalProtein);
+        Assert.Equal(20m, importedRecipe.TotalCarbs);
+        Assert.Equal(5m, importedRecipe.TotalFat);
         Assert.Single(await context.TemplateExercises.ToListAsync());
         Assert.Single(await context.SupplementCatalogItems.ToListAsync());
         Assert.Empty(await context.SupplementSchedules.ToListAsync());
@@ -107,6 +116,28 @@ public class CatalogImporterTests
             PrimaryMuscle = MuscleGroup.Chest,
             IsActive = true
         };
+        var defaultFood = new FoodSeedRecord
+        {
+            SeedKey = "test.food.default",
+            ContentVersion = 1,
+            ContentStatus = ContentStatus.Published,
+            Name = "Default food",
+            CaloriesPer100g = 100m,
+            ProteinPer100g = 10m,
+            CarbsPer100g = 20m,
+            FatPer100g = 5m
+        };
+        var optionalAlternative = new FoodSeedRecord
+        {
+            SeedKey = "test.food.optional-alternative",
+            ContentVersion = 1,
+            ContentStatus = ContentStatus.Published,
+            Name = "Optional alternative",
+            CaloriesPer100g = 1000m,
+            ProteinPer100g = 100m,
+            CarbsPer100g = 100m,
+            FatPer100g = 100m
+        };
         var recipe = new RecipeSeedRecord
         {
             SeedKey = "test.recipe.meal",
@@ -114,7 +145,25 @@ public class CatalogImporterTests
             ContentStatus = ContentStatus.Draft,
             Name = "Test Meal",
             Servings = 1,
-            ImageAssetPath = "assets/sample-recipe.webp"
+            ImageAssetPath = "assets/sample-recipe.webp",
+            Ingredients =
+            {
+                new RecipeIngredientSeedRecord
+                {
+                    FoodSeedKey = defaultFood.SeedKey,
+                    QuantityGrams = 100m,
+                    AlternativeGroupKey = "food-choice",
+                    OrderIndex = 1
+                },
+                new RecipeIngredientSeedRecord
+                {
+                    FoodSeedKey = optionalAlternative.SeedKey,
+                    QuantityGrams = 100m,
+                    IsOptional = true,
+                    AlternativeGroupKey = "food-choice",
+                    OrderIndex = 2
+                }
+            }
         };
         var workout = new WorkoutTemplateSeedRecord
         {
@@ -150,7 +199,7 @@ public class CatalogImporterTests
             Type = SupplementType.Optional
         };
 
-        await WriteSectionAsync("foods", "foods.json", new List<FoodSeedRecord>());
+        await WriteSectionAsync("foods", "foods.json", new List<FoodSeedRecord> { defaultFood, optionalAlternative });
         await WriteSectionAsync("exercises", "exercises.json", new List<ExerciseSeedRecord> { exercise });
         await WriteSectionAsync("recipes", "recipes.json", new List<RecipeSeedRecord> { recipe });
         await WriteSectionAsync("workoutTemplates", "workout-templates.json", new List<WorkoutTemplateSeedRecord> { workout });

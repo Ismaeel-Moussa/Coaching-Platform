@@ -150,6 +150,13 @@ public sealed class CatalogImporter(JokerNutritionContext context)
                 errors.Add($"Recipe '{recipe.SeedKey}' has duplicate step order indexes.");
             if (recipe.Ingredients.Any(i => i.QuantityGrams < 0))
                 errors.Add($"Recipe '{recipe.SeedKey}' contains a negative ingredient quantity.");
+            foreach (var alternativeGroup in recipe.Ingredients
+                         .Where(i => !string.IsNullOrWhiteSpace(i.AlternativeGroupKey))
+                         .GroupBy(i => i.AlternativeGroupKey!, StringComparer.OrdinalIgnoreCase))
+            {
+                if (alternativeGroup.Count(i => !i.IsOptional) != 1)
+                    errors.Add($"Recipe '{recipe.SeedKey}' alternative group '{alternativeGroup.Key}' must have exactly one non-optional default ingredient.");
+            }
             if (recipe.ContentStatus == ContentStatus.Published && (recipe.Ingredients.Count == 0 || recipe.Steps.Count == 0))
                 errors.Add($"Published recipe '{recipe.SeedKey}' requires ingredients and preparation steps.");
             if (recipe.ContentStatus != ContentStatus.Published && (recipe.Ingredients.Count == 0 || recipe.Steps.Count == 0))
@@ -409,10 +416,11 @@ public sealed class CatalogImporter(JokerNutritionContext context)
                 MediaUrl = step.MediaUrl
             }).ToList();
 
-            entity.TotalCalories = entity.Ingredients.Sum(i => i.Food.CaloriesPer100g * i.QuantityGrams / 100m);
-            entity.TotalProtein = entity.Ingredients.Sum(i => i.Food.ProteinPer100g * i.QuantityGrams / 100m);
-            entity.TotalCarbs = entity.Ingredients.Sum(i => i.Food.CarbsPer100g * i.QuantityGrams / 100m);
-            entity.TotalFat = entity.Ingredients.Sum(i => i.Food.FatPer100g * i.QuantityGrams / 100m);
+            var nutritionIngredients = entity.Ingredients.Where(i => !i.IsOptional).ToList();
+            entity.TotalCalories = nutritionIngredients.Sum(i => i.Food.CaloriesPer100g * i.QuantityGrams / 100m);
+            entity.TotalProtein = nutritionIngredients.Sum(i => i.Food.ProteinPer100g * i.QuantityGrams / 100m);
+            entity.TotalCarbs = nutritionIngredients.Sum(i => i.Food.CarbsPer100g * i.QuantityGrams / 100m);
+            entity.TotalFat = nutritionIngredients.Sum(i => i.Food.FatPer100g * i.QuantityGrams / 100m);
         }
     }
 
