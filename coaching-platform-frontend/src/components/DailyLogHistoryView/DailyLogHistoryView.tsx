@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Tag, Empty, Spin, Row, Col, Divider } from 'antd';
+import { Card, Tag, Empty, Spin, Row, Col, Divider, Progress } from 'antd';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import { useGetDailyLog } from '../../hooks/useAthlete/useAthlete';
@@ -68,7 +68,22 @@ const DailyLogHistoryView: React.FC<DailyLogHistoryViewProps> = ({ athleteId, da
     );
   }
 
-  const { workout, nutrition, supplements } = data;
+  const { workout, nutrition, nutritionPlanAdherences = [], supplements } = data;
+  const isArabic = i18n.resolvedLanguage === 'ar';
+
+  const dayTypeLabels = {
+    Training: t('coach:clientDetail.planAdherence.dayTypes.training'),
+    Rest: t('coach:clientDetail.planAdherence.dayTypes.rest'),
+    AllDays: t('coach:clientDetail.planAdherence.dayTypes.allDays'),
+    Unspecified: t('coach:clientDetail.planAdherence.dayTypes.unspecified'),
+  };
+
+  const blockStatus = {
+    Completed: { color: 'success', label: t('coach:clientDetail.planAdherence.status.completed'), icon: 'check_circle' },
+    Missed: { color: 'error', label: t('coach:clientDetail.planAdherence.status.missed'), icon: 'cancel' },
+    Pending: { color: 'warning', label: t('coach:clientDetail.planAdherence.status.pending'), icon: 'schedule' },
+    NotTracked: { color: 'default', label: t('coach:clientDetail.planAdherence.status.notTracked'), icon: 'remove_circle' },
+  } as const;
 
   const hasMeals = nutrition && (
     nutrition.breakfast.length > 0 ||
@@ -180,6 +195,100 @@ const DailyLogHistoryView: React.FC<DailyLogHistoryViewProps> = ({ athleteId, da
             }
             className="daily-history-view__card"
           >
+            {nutritionPlanAdherences.length > 0 && (
+              <div className="daily-history-view__plan-adherence-list">
+                {nutritionPlanAdherences.map(nutritionPlanAdherence => (
+              <section key={nutritionPlanAdherence.assignmentId} className="daily-history-view__plan-adherence">
+                <div className="daily-history-view__plan-summary">
+                  <div className="daily-history-view__plan-identity">
+                    <span className="material-symbols-outlined" aria-hidden="true">fact_check</span>
+                    <div>
+                      <span className="daily-history-view__plan-kicker">
+                        {t('coach:clientDetail.planAdherence.title')}
+                      </span>
+                      <h4>{isArabic ? nutritionPlanAdherence.planNameAr || nutritionPlanAdherence.planName : nutritionPlanAdherence.planName}</h4>
+                    </div>
+                  </div>
+                  <div className="daily-history-view__plan-tags">
+                    {nutritionPlanAdherence.isPartialDay && (
+                      <Tag color="purple">{t('coach:clientDetail.planAdherence.partialDay')}</Tag>
+                    )}
+                    <Tag color={nutritionPlanAdherence.dayType === 'Unspecified' ? 'default' : 'blue'}>
+                      {dayTypeLabels[nutritionPlanAdherence.dayType] ?? dayTypeLabels.Unspecified}
+                    </Tag>
+                  </div>
+                </div>
+
+                <div className="daily-history-view__plan-progress">
+                  <div>
+                    <span>{t('coach:clientDetail.planAdherence.progress')}</span>
+                    <strong className="mono">
+                      {nutritionPlanAdherence.totalBlocks > 0
+                        ? `${nutritionPlanAdherence.completedBlocks}/${nutritionPlanAdherence.totalBlocks}`
+                        : '—'}
+                    </strong>
+                  </div>
+                  <div
+                    className="daily-history-view__plan-progress-meter"
+                    role="progressbar"
+                    aria-label={t('coach:clientDetail.planAdherence.progress')}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={nutritionPlanAdherence.completionPercent}
+                  >
+                    <Progress
+                      percent={nutritionPlanAdherence.completionPercent}
+                      showInfo={false}
+                      strokeColor="var(--color-gold)"
+                      trailColor="var(--color-border-light)"
+                    />
+                  </div>
+                </div>
+
+                {nutritionPlanAdherence.dayType === 'Unspecified' && (
+                  <div className="daily-history-view__plan-day-warning">
+                    <span className="material-symbols-outlined" aria-hidden="true">info</span>
+                    {t('coach:clientDetail.planAdherence.dayTypeUnknown')}
+                  </div>
+                )}
+
+                {nutritionPlanAdherence.blocks.length > 0 && (
+                  <div className="daily-history-view__plan-blocks">
+                    {nutritionPlanAdherence.blocks.map(block => {
+                      const status = blockStatus[block.status] ?? blockStatus.NotTracked;
+                      const blockLabel = isArabic ? block.labelAr || block.label : block.label;
+                      const optionLabel = isArabic ? block.optionLabelAr || block.optionLabel : block.optionLabel;
+                      return (
+                        <article key={block.mealBlockId} className={`daily-history-view__plan-block daily-history-view__plan-block--${block.status.toLowerCase()}`}>
+                          <div className="daily-history-view__plan-block-header">
+                            <span className="daily-history-view__plan-block-number mono">
+                              {String(block.orderIndex).padStart(2, '0')}
+                            </span>
+                            <div>
+                              <h5>{blockLabel}</h5>
+                              {block.targetCalories != null && <small>{Math.round(block.targetCalories)} {t('common:units.kcal')}</small>}
+                            </div>
+                            <Tag color={status.color} icon={<span className="material-symbols-outlined">{status.icon}</span>}>
+                              {status.label}
+                            </Tag>
+                          </div>
+                          {optionLabel && (
+                            <div className="daily-history-view__plan-option">
+                              <span>{t('coach:clientDetail.planAdherence.selectedOption')}</span>
+                              <strong>{optionLabel}</strong>
+                            </div>
+                          )}
+                        </article>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+                ))}
+              </div>
+            )}
+
+            {nutritionPlanAdherences.length > 0 && <Divider style={{ margin: '20px 0' }} />}
             {nutrition ? (
               <div className="daily-history-view__nutrition">
                 {/* Macros Progress List */}
@@ -269,7 +378,12 @@ const DailyLogHistoryView: React.FC<DailyLogHistoryViewProps> = ({ athleteId, da
                               {mealEntries.map((e: any) => (
                                 <div key={e.id} className="meal-entry-item">
                                   <div className="info">
-                                    <span className="name">{(i18n.resolvedLanguage === 'ar' ? e.nameAr || e.name : e.name) ?? e.food?.name ?? e.recipe?.name ?? 'Food'}</span>
+                                    <div className="name-row">
+                                      <span className="name">{(isArabic ? e.nameAr || e.name : e.name) ?? e.food?.name ?? e.recipe?.name ?? 'Food'}</span>
+                                      {e.nutritionPlanDiaryEntryId != null && (
+                                        <Tag color="gold">{t('coach:clientDetail.planAdherence.fromPlan')}</Tag>
+                                      )}
+                                    </div>
                                     <span className="qty mono">{e.quantityGrams}g</span>
                                   </div>
                                   <div className="macros mono">

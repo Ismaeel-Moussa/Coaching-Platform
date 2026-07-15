@@ -73,7 +73,27 @@
     "reviewedAt": "Reviewed: {{date}}",
     "saveReview": "Save Review",
     "editTargets": "Edit Plans & Targets",
-    "dailyHistoryTab": "Daily History Logs"
+    "dailyHistoryTab": "Daily History Logs",
+    "planAdherence": {
+      "title": "Assigned plan adherence",
+      "progress": "Meal blocks completed",
+      "selectedOption": "Selected option",
+      "fromPlan": "From plan",
+      "partialDay": "Partial-day assignment",
+      "dayTypeUnknown": "The nutrition day type could not be determined because no conditional plan meal or workout day was logged.",
+      "dayTypes": {
+        "training": "Training day",
+        "rest": "Rest day",
+        "allDays": "Daily plan",
+        "unspecified": "Day type not set"
+      },
+      "status": {
+        "completed": "Completed",
+        "missed": "Missed",
+        "pending": "Pending",
+        "notTracked": "Not tracked"
+      }
+    }
   },
   "assignmentHub": {
     "nutritionPlan": "Nutrition Plan",

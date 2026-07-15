@@ -1,11 +1,14 @@
 using System.Security.Principal;
+using System.Text.Json;
 using JokerNutrition.Business.DTOs.Athletes;
 using JokerNutrition.Business.DTOs.Diary;
 using JokerNutrition.Business.DTOs.Coach;
+using JokerNutrition.Business.DTOs.NutritionPlans;
 using JokerNutrition.Business.Forms.Athletes;
 using JokerNutrition.Business.Mappers;
 using JokerNutrition.Data.Entities;
 using JokerNutrition.Data.Enums;
+using JokerNutrition.Data.Contexts;
 using JokerNutrition.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -40,6 +43,7 @@ public class AthleteService : _BaseService, IAthleteService
     private readonly ISupplementScheduleRepository _scheduleRepo;
     private readonly ISupplementLogRepository _supplementLogRepo;
     private readonly IExerciseSetLogRepository _setLogRepo;
+    private readonly JokerNutritionContext _context;
 
     public AthleteService(
         IPrincipal principal,
@@ -56,7 +60,8 @@ public class AthleteService : _BaseService, IAthleteService
         IClientCheckInRepository checkInRepo,
         ISupplementScheduleRepository scheduleRepo,
         ISupplementLogRepository supplementLogRepo,
-        IExerciseSetLogRepository setLogRepo)
+        IExerciseSetLogRepository setLogRepo,
+        JokerNutritionContext context)
         : base(principal, logger)
     {
         _athleteRepo = athleteRepo;
@@ -72,6 +77,7 @@ public class AthleteService : _BaseService, IAthleteService
         _scheduleRepo = scheduleRepo;
         _supplementLogRepo = supplementLogRepo;
         _setLogRepo = setLogRepo;
+        _context = context;
     }
 
     public async Task<AthleteDashboardDto> GetDashboardAsync()
@@ -396,12 +402,190 @@ public class AthleteService : _BaseService, IAthleteService
             nutritionDto = DiaryMapper.Map(diary, logs);
         }
 
+        var nutritionPlanAdherences = await GetNutritionPlanAdherencesAsync(
+            athleteId,
+            date,
+            diary?.Id,
+            workoutDto);
+
         return new DailyLogHistoryDto
         {
             Date = date,
             Workout = workoutDto,
             Nutrition = nutritionDto,
+            NutritionPlanAdherences = nutritionPlanAdherences,
             Supplements = supplementsDto
         };
+    }
+
+    private async Task<List<NutritionPlanAdherenceDto>> GetNutritionPlanAdherencesAsync(
+        int athleteId,
+        DateOnly date,
+        int? diaryId,
+        TodaysWorkoutDto? workout)
+    {
+        var entries = diaryId.HasValue
+            ? await _context.NutritionPlanDiaryEntries
+                .AsNoTracking()
+                .Where(entry => entry.DailyDiaryId == diaryId.Value)
+                .OrderBy(entry => entry.LoggedAt)
+                .ToListAsync()
+            : new List<NutritionPlanDiaryEntry>();
+
+        var loggedAssignmentIds = entries
+            .Select(entry => entry.NutritionPlanAssignmentId)
+            .Distinct()
+            .ToList();
+        var dayStart = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
+        var nextDay = dayStart.AddDays(1);
+        var assignments = await _context.NutritionPlanAssignments
+            .AsNoTracking()
+            .Where(item => item.AthleteId == athleteId &&
+                           (loggedAssignmentIds.Contains(item.Id) ||
+                            (item.StartDate < nextDay &&
+                             (!item.EndDate.HasValue || item.EndDate.Value >= nextDay))))
+            .OrderBy(item => item.StartDate)
+            .ToListAsync();
+
+        var result = new List<NutritionPlanAdherenceDto>();
+        foreach (var assignment in assignments)
+        {
+            NutritionPlanDto? plan;
+            try
+            {
+                plan = JsonSerializer.Deserialize<NutritionPlanDto>(
+                    assignment.SnapshotJson,
+                    NutritionPlanMapper.SnapshotJsonOptions);
+            }
+            catch (JsonException)
+            {
+                continue;
+            }
+
+            if (plan is null)
+                continue;
+
+            result.Add(BuildNutritionPlanAdherence(
+                assignment,
+                plan,
+                entries.Where(entry => entry.NutritionPlanAssignmentId == assignment.Id).ToList(),
+                date,
+                workout));
+        }
+
+        return result;
+    }
+
+    private static NutritionPlanAdherenceDto BuildNutritionPlanAdherence(
+        NutritionPlanAssignment assignment,
+        NutritionPlanDto plan,
+        List<NutritionPlanDiaryEntry> entries,
+        DateOnly date,
+        TodaysWorkoutDto? workout)
+    {
+        var entriesByBlock = entries
+            .GroupBy(entry => entry.NutritionMealBlockId)
+            .ToDictionary(group => group.Key, group => group.OrderByDescending(entry => entry.LoggedAt).First());
+
+        var hasConditionalBlocks = plan.MealBlocks.Any(block => block.TrainingDayOnly || block.RestDayOnly);
+        var hasTrainingEntry = plan.MealBlocks.Any(block =>
+            block.TrainingDayOnly && entriesByBlock.ContainsKey(block.Id));
+        var hasRestEntry = plan.MealBlocks.Any(block =>
+            block.RestDayOnly && entriesByBlock.ContainsKey(block.Id));
+
+        var dayType = !hasConditionalBlocks
+            ? "AllDays"
+            : hasTrainingEntry
+                ? "Training"
+                : hasRestEntry
+                    ? "Rest"
+                    : workout?.Day is not null
+                        ? workout.Day.IsRestDay ? "Rest" : "Training"
+                        : "Unspecified";
+
+        var visibleBlocks = plan.MealBlocks
+            .Where(block => dayType switch
+            {
+                "Training" => !block.RestDayOnly,
+                "Rest" => !block.TrainingDayOnly,
+                _ => true
+            })
+            .OrderBy(block => block.OrderIndex)
+            .ToList();
+        var isPastDate = date < DateOnly.FromDateTime(DateTime.UtcNow);
+        var isPartialDay = DateOnly.FromDateTime(assignment.StartDate) == date ||
+                           (assignment.EndDate.HasValue && DateOnly.FromDateTime(assignment.EndDate.Value) == date);
+
+        var blockDtos = visibleBlocks.Select(block =>
+        {
+            entriesByBlock.TryGetValue(block.Id, out var entry);
+            var option = entry is null
+                ? null
+                : block.Options.FirstOrDefault(item => item.Id == entry.NutritionMealOptionId);
+            var isConditionalDayUnknown = dayType == "Unspecified" &&
+                                          (block.TrainingDayOnly || block.RestDayOnly);
+            var isTrackable = block.Options.Any(OptionIsLoggable);
+            var status = entry is not null
+                ? "Completed"
+                : !isTrackable || isConditionalDayUnknown || isPartialDay
+                    ? "NotTracked"
+                    : isPastDate ? "Missed" : "Pending";
+
+            return new NutritionPlanBlockAdherenceDto
+            {
+                MealBlockId = block.Id,
+                OrderIndex = block.OrderIndex,
+                Label = block.Label,
+                LabelAr = block.LabelAr,
+                TargetCalories = block.TargetCalories,
+                Status = status,
+                MealOptionId = entry?.NutritionMealOptionId,
+                OptionLabel = option?.Label,
+                OptionLabelAr = option?.LabelAr,
+                LoggedMealType = entry?.MealType,
+                Servings = entry?.Servings,
+                LoggedAt = entry?.LoggedAt
+            };
+        }).ToList();
+
+        var completedBlocks = blockDtos.Count(block => block.Status == "Completed");
+        var trackedBlocks = blockDtos.Count(block => block.Status != "NotTracked");
+        return new NutritionPlanAdherenceDto
+        {
+            AssignmentId = assignment.Id,
+            PlanName = plan.Name,
+            PlanNameAr = plan.NameAr,
+            DayType = dayType,
+            IsPartialDay = isPartialDay,
+            CompletedBlocks = completedBlocks,
+            TotalBlocks = trackedBlocks,
+            CompletionPercent = trackedBlocks == 0
+                ? 0
+                : Math.Round((decimal)completedBlocks / trackedBlocks * 100, 1),
+            Blocks = blockDtos
+        };
+    }
+
+    private static bool OptionIsLoggable(NutritionMealOptionDto option)
+    {
+        if (option.Items.Count == 0)
+            return false;
+
+        static string? GroupKey(NutritionOptionItemDto item) =>
+            string.IsNullOrWhiteSpace(item.AlternativeGroupKey)
+                ? null
+                : item.AlternativeGroupKey.Trim().ToLowerInvariant();
+        static bool ItemIsLoggable(NutritionOptionItemDto item) =>
+            (item.FoodId.HasValue && item.Unit == IngredientUnit.Gram) ||
+            (item.RecipeId.HasValue && item.Unit is IngredientUnit.Gram or IngredientUnit.Piece);
+
+        var fixedItems = option.Items.Where(item => GroupKey(item) is null).ToList();
+        if (fixedItems.Any(item => !ItemIsLoggable(item)))
+            return false;
+
+        return option.Items
+            .Where(item => GroupKey(item) is not null)
+            .GroupBy(item => GroupKey(item)!)
+            .All(group => group.Any(ItemIsLoggable));
     }
 }
