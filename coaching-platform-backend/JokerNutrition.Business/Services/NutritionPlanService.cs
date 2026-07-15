@@ -230,28 +230,9 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
         if (athletes.Count != athleteIds.Count)
             throw new UnauthorizedAccessException("One or more athletes are outside your roster.");
 
-        var currentAssignments = await _context.NutritionPlanAssignments
-            .Where(assignment => athleteIds.Contains(assignment.AthleteId) && assignment.IsActive)
-            .ToListAsync();
-
-        await using var transaction = _context.Database.IsRelational()
-            ? await _context.Database.BeginTransactionAsync()
-            : null;
-
         var now = DateTime.UtcNow;
         if (form.StartDate.HasValue && form.StartDate.Value.ToUniversalTime() > now)
             throw new ArgumentException("Future nutrition-plan assignments are not supported yet.");
-
-        foreach (var current in currentAssignments)
-        {
-            current.IsActive = false;
-            current.EndDate = now;
-        }
-
-        // Flush deactivations before inserts so the filtered unique index on active
-        // athlete assignments is never violated when a plan is replaced.
-        if (currentAssignments.Count > 0)
-            await _context.SaveChangesAsync();
 
         var coachId = await _context.Coaches
             .Where(coach => coach.UserId == LoggedInUser.Id)
@@ -259,24 +240,50 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
             .FirstOrDefaultAsync();
         var snapshot = JsonSerializer.Serialize(NutritionPlanMapper.MapFull(template), NutritionPlanMapper.SnapshotJsonOptions);
 
-        foreach (var athlete in athletes)
+        var executionStrategy = _context.Database.CreateExecutionStrategy();
+        await executionStrategy.ExecuteAsync(async () =>
         {
-            _context.NutritionPlanAssignments.Add(new NutritionPlanAssignment
-            {
-                AthleteId = athlete.Id,
-                NutritionPlanTemplateId = template.Id,
-                AssignedByCoachId = coachId,
-                StartDate = form.StartDate?.ToUniversalTime() ?? now,
-                IsActive = true,
-                SnapshotJson = snapshot,
-                Notes = form.Notes,
-                AssignedAt = now
-            });
-        }
+            // A retry must start from database state rather than entities retained
+            // from the failed attempt.
+            _context.ChangeTracker.Clear();
+            await using var transaction = _context.Database.IsRelational()
+                ? await _context.Database.BeginTransactionAsync()
+                : null;
 
-        await _context.SaveChangesAsync();
-        if (transaction is not null)
-            await transaction.CommitAsync();
+            var currentAssignments = await _context.NutritionPlanAssignments
+                .Where(assignment => athleteIds.Contains(assignment.AthleteId) && assignment.IsActive)
+                .ToListAsync();
+
+            foreach (var current in currentAssignments)
+            {
+                current.IsActive = false;
+                current.EndDate = now;
+            }
+
+            // Flush deactivations before inserts so the filtered unique index on
+            // active athlete assignments is never violated when a plan is replaced.
+            if (currentAssignments.Count > 0)
+                await _context.SaveChangesAsync();
+
+            foreach (var athleteId in athleteIds)
+            {
+                _context.NutritionPlanAssignments.Add(new NutritionPlanAssignment
+                {
+                    AthleteId = athleteId,
+                    NutritionPlanTemplateId = template.Id,
+                    AssignedByCoachId = coachId,
+                    StartDate = form.StartDate?.ToUniversalTime() ?? now,
+                    IsActive = true,
+                    SnapshotJson = snapshot,
+                    Notes = form.Notes,
+                    AssignedAt = now
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            if (transaction is not null)
+                await transaction.CommitAsync();
+        });
 
         foreach (var athlete in athletes)
         {
