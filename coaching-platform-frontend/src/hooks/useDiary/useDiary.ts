@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
+import type { AxiosError } from 'axios';
 import i18n from '../../i18n/i18n';
 import {
   getDiary,
@@ -12,8 +13,11 @@ import {
   removeLogEntry,
   updateWater,
   updateSteps,
+  getNutritionPlanEntries,
+  logNutritionPlanOption,
+  removeNutritionPlanEntry,
 } from '../../api/diary';
-import type { BulkLogFoodForm, DailyDiaryDto, LogFoodForm, UpdateWaterForm, UpdateStepsForm } from '../../types/Diary';
+import type { BulkLogFoodForm, DailyDiaryDto, LogFoodForm, UpdateWaterForm, UpdateStepsForm, LogNutritionPlanOptionForm } from '../../types/Diary';
 import type { FoodDto } from '../../types/Food';
 import type { RecipeDto } from '../../types/Recipe';
 import type { MacroSummaryDto } from '../../types/Athlete';
@@ -58,6 +62,31 @@ export const useBulkLogFood = (date: string) => {
       queryClient.invalidateQueries({ queryKey: ['filtered-nutrition-items'] });
     },
     onError: () => antMessage.error(i18n.t('common:alerts.foodLogFailed')),
+  });
+};
+
+export const useNutritionPlanEntries = (assignmentId: number | undefined, date: string) =>
+  useQuery({
+    queryKey: ['nutrition-plan-diary-entries', assignmentId, date],
+    queryFn: () => getNutritionPlanEntries(assignmentId!, date),
+    enabled: !!assignmentId && !!date,
+  });
+
+export const useLogNutritionPlanOption = (assignmentId: number | undefined, date: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (form: LogNutritionPlanOptionForm) => logNutritionPlanOption(form),
+    onSuccess: () => {
+      antMessage.success(i18n.t('athlete:nutritionPlan.addedToDiary'));
+      queryClient.invalidateQueries({ queryKey: ['nutrition-plan-diary-entries', assignmentId, date] });
+      queryClient.invalidateQueries({ queryKey: ['diary', date] });
+      queryClient.invalidateQueries({ queryKey: ['diary-summary', date] });
+      queryClient.invalidateQueries({ queryKey: ['athlete-dashboard'] });
+    },
+    onError: (error: AxiosError) => {
+      const apiMessage = (error.response?.data as { message?: string } | undefined)?.message;
+      antMessage.error(apiMessage ?? i18n.t('athlete:nutritionPlan.addFailed'));
+    },
   });
 };
 
@@ -116,6 +145,21 @@ export const useRemoveLogEntry = (date: string) => {
       queryClient.invalidateQueries({ queryKey: ['diary-summary', date] });
       queryClient.invalidateQueries({ queryKey: ['athlete-dashboard'] });
     },
+  });
+};
+
+export const useRemoveNutritionPlanEntry = (date: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => removeNutritionPlanEntry(id),
+    onSuccess: () => {
+      antMessage.success(i18n.t('athlete:mealLogger.planMealRemoved'));
+      queryClient.invalidateQueries({ queryKey: ['diary', date] });
+      queryClient.invalidateQueries({ queryKey: ['diary-summary', date] });
+      queryClient.invalidateQueries({ queryKey: ['nutrition-plan-diary-entries'] });
+      queryClient.invalidateQueries({ queryKey: ['athlete-dashboard'] });
+    },
+    onError: () => antMessage.error(i18n.t('common:alerts.entryRemoveFailed')),
   });
 };
 

@@ -6,6 +6,19 @@ namespace JokerNutrition.Business.Mappers;
 
 public static class DiaryMapper
 {
+    public static NutritionPlanDiaryEntryDto Map(NutritionPlanDiaryEntry entry) => new()
+    {
+        Id = entry.Id,
+        AssignmentId = entry.NutritionPlanAssignmentId,
+        MealBlockId = entry.NutritionMealBlockId,
+        MealOptionId = entry.NutritionMealOptionId,
+        Date = entry.DailyDiary.Date,
+        MealType = entry.MealType,
+        Servings = entry.Servings,
+        LoggedAt = entry.LoggedAt,
+        MealLogs = entry.MealLogs.OrderBy(log => log.Id).Select(Map).ToList()
+    };
+
     public static MealLogDto Map(MealLog log) => new()
     {
         Id = log.Id,
@@ -21,6 +34,9 @@ public static class DiaryMapper
             Id = log.Recipe.Id,
             Name = log.Recipe.Name
         },
+        Name = log.SnapshotName ?? log.Food?.Name ?? log.Recipe?.Name,
+        NameAr = log.SnapshotNameAr ?? log.Food?.NameAr ?? log.Recipe?.NameAr,
+        NutritionPlanDiaryEntryId = log.NutritionPlanDiaryEntryId,
         QuantityGrams = log.QuantityGrams,
         Calories = log.Calories,
         Protein = log.Protein,

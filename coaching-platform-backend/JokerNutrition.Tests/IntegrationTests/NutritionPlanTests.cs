@@ -4,8 +4,10 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Nodes;
 using JokerNutrition.Business.DTOs.NutritionPlans;
+using JokerNutrition.Business.DTOs.Diary;
 using JokerNutrition.Data.Contexts;
 using JokerNutrition.Data.Entities;
+using JokerNutrition.Data.Enums;
 using JokerNutrition.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -88,6 +90,114 @@ public class NutritionPlanTests : IClassFixture<TestWebAppFactory>
         Assert.Equal("Integration nutrition plan", assignment.TemplateName);
         Assert.Equal("Integration nutrition plan", assignment.Plan.Name);
         Assert.Equal("Follow this plan for the next week.", assignment.Notes);
+    }
+
+    [Fact]
+    public async Task Athlete_CanLogAssignedPlanOption_OnlyOncePerBlockAndDate()
+    {
+        const int foodId = 910;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<JokerNutritionContext>();
+            if (!await db.Foods.AnyAsync(food => food.Id == foodId))
+            {
+                db.Foods.Add(new Food
+                {
+                    Id = foodId,
+                    Name = "Plan diary food",
+                    NameAr = "طعام الخطة",
+                    ContentStatus = ContentStatus.Published,
+                    CaloriesPer100g = 100,
+                    ProteinPer100g = 20,
+                    CarbsPer100g = 5,
+                    FatPer100g = 2
+                });
+                await db.SaveChangesAsync();
+            }
+        }
+
+        await AuthenticateCoachAsync();
+        var createResponse = await _client.PostAsJsonAsync(
+            "/api/nutrition-plans", BuildLoggablePlan(foodId));
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<NutritionPlanDto>(_jsonOptions);
+        Assert.NotNull(created);
+        var reviewResponse = await _client.PostAsJsonAsync(
+            $"/api/nutrition-plans/{created.Id}/status",
+            new { status = 1, expectedContentVersion = created.ContentVersion });
+        var reviewed = await reviewResponse.Content.ReadFromJsonAsync<NutritionPlanDto>(_jsonOptions);
+        Assert.NotNull(reviewed);
+        var publishResponse = await _client.PostAsJsonAsync(
+            $"/api/nutrition-plans/{created.Id}/status",
+            new { status = 2, expectedContentVersion = reviewed.ContentVersion });
+        var published = await publishResponse.Content.ReadFromJsonAsync<NutritionPlanDto>(_jsonOptions);
+        Assert.NotNull(published);
+        Assert.Equal(HttpStatusCode.OK, (await _client.PostAsJsonAsync(
+            $"/api/nutrition-plans/{published.Id}/assign", new { athleteIds = new[] { 1 } })).StatusCode);
+
+        // The assignment snapshot must keep its original nutrients even if the
+        // live food catalog changes later.
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<JokerNutritionContext>();
+            var food = await db.Foods.SingleAsync(item => item.Id == foodId);
+            food.CaloriesPer100g = 500;
+            food.ProteinPer100g = 1;
+            await db.SaveChangesAsync();
+        }
+
+        await AuthenticateAthleteAsync();
+        var assignment = await _client.GetFromJsonAsync<NutritionPlanAssignmentDto>(
+            "/api/nutrition-plans/me/current", _jsonOptions);
+        Assert.NotNull(assignment);
+        var block = Assert.Single(assignment.Plan.MealBlocks);
+        var option = Assert.Single(block.Options);
+        var date = DateOnly.FromDateTime(DateTime.UtcNow);
+        var payload = new
+        {
+            assignmentId = assignment.Id,
+            mealBlockId = block.Id,
+            mealOptionId = option.Id,
+            date = date.ToString("yyyy-MM-dd"),
+            mealType = 0,
+            servings = 2
+        };
+
+        var logResponse = await _client.PostAsJsonAsync("/api/diary/log/nutrition-plan", payload);
+        Assert.Equal(HttpStatusCode.Created, logResponse.StatusCode);
+        var entry = await logResponse.Content.ReadFromJsonAsync<NutritionPlanDiaryEntryDto>(_jsonOptions);
+        Assert.NotNull(entry);
+        var mealLog = Assert.Single(entry.MealLogs);
+        Assert.Equal(300, mealLog.QuantityGrams);
+        Assert.Equal(300, mealLog.Calories);
+
+        var duplicateResponse = await _client.PostAsJsonAsync("/api/diary/log/nutrition-plan", payload);
+        Assert.Equal(HttpStatusCode.Created, duplicateResponse.StatusCode);
+
+        var completed = await _client.GetFromJsonAsync<List<NutritionPlanDiaryEntryDto>>(
+            $"/api/diary/nutrition-plan/{assignment.Id}/{date:yyyy-MM-dd}", _jsonOptions);
+        Assert.NotNull(completed);
+        Assert.Single(completed);
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity,
+            (await _client.DeleteAsync($"/api/diary/log/{mealLog.Id}")).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent,
+            (await _client.DeleteAsync($"/api/diary/nutrition-plan/{entry.Id}")).StatusCode);
+        completed = await _client.GetFromJsonAsync<List<NutritionPlanDiaryEntryDto>>(
+            $"/api/diary/nutrition-plan/{assignment.Id}/{date:yyyy-MM-dd}", _jsonOptions);
+        Assert.NotNull(completed);
+        Assert.Empty(completed);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<JokerNutritionContext>();
+            var storedAssignment = await db.NutritionPlanAssignments.SingleAsync(item => item.Id == assignment.Id);
+            storedAssignment.IsActive = false;
+            storedAssignment.EndDate = DateTime.UtcNow;
+            await db.SaveChangesAsync();
+        }
+        Assert.Equal(HttpStatusCode.UnprocessableEntity,
+            (await _client.PostAsJsonAsync("/api/diary/log/nutrition-plan", payload)).StatusCode);
     }
 
     [Fact]
@@ -363,6 +473,46 @@ public class NutritionPlanTests : IClassFixture<TestWebAppFactory>
             BuildMealBlock("Shared meals", "الوجبات المشتركة", 1000, false, false),
             BuildMealBlock("Training meal", "وجبة التدريب", 900, true, false),
             BuildMealBlock("Rest meal", "وجبة الراحة", 900, false, true),
+        },
+        rules = Array.Empty<object>()
+    };
+
+    private static object BuildLoggablePlan(int foodId) => new
+    {
+        name = $"Loggable plan {Guid.NewGuid():N}",
+        nameAr = "خطة قابلة للتسجيل",
+        targetCalories = 300,
+        minimumProteinGrams = 60,
+        mealBlocks = new[]
+        {
+            new
+            {
+                mealType = 0,
+                label = "Breakfast",
+                labelAr = "الفطور",
+                targetCalories = 300,
+                trainingDayOnly = false,
+                restDayOnly = false,
+                options = new[]
+                {
+                    new
+                    {
+                        label = "Oats option",
+                        labelAr = "خيار الشوفان",
+                        isCompleteOption = true,
+                        items = new[]
+                        {
+                            new
+                            {
+                                foodId,
+                                quantity = 150,
+                                unit = 0,
+                                measurementState = 0
+                            }
+                        }
+                    }
+                }
+            }
         },
         rules = Array.Empty<object>()
     };

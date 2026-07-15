@@ -33,6 +33,9 @@ export interface MealLogDto {
   mealType: MealType;
   food: MealLogFoodRef | null;
   recipe: { id: number; name: string } | null;
+  name?: string | null;
+  nameAr?: string | null;
+  nutritionPlanDiaryEntryId?: number | null;
   quantityGrams: number;
   calories: number;
   protein: number;
@@ -84,6 +87,28 @@ export interface BulkLogFoodForm {
   date: string;
   mealType: MealType;
   items: BulkLogFoodItem[];
+}
+
+export interface LogNutritionPlanOptionForm {
+  assignmentId: number;
+  mealBlockId: number;
+  mealOptionId: number;
+  date: string;
+  mealType: MealType;
+  servings: number;
+  selectedAlternativeItemIds: number[];
+}
+
+export interface NutritionPlanDiaryEntry {
+  id: number;
+  assignmentId: number;
+  mealBlockId: number;
+  mealOptionId: number;
+  date: string;
+  mealType: MealType;
+  servings: number;
+  loggedAt: string;
+  mealLogs: MealLogDto[];
 }
 
 export interface UpdateWaterForm {

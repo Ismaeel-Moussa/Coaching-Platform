@@ -8,6 +8,9 @@ public class MealLogDto
     public MealType MealType { get; set; }
     public FoodSummaryDto? Food { get; set; }
     public RecipeSummaryDto? Recipe { get; set; }
+    public string? Name { get; set; }
+    public string? NameAr { get; set; }
+    public int? NutritionPlanDiaryEntryId { get; set; }
     public decimal QuantityGrams { get; set; }
     public decimal Calories { get; set; }
     public decimal Protein { get; set; }

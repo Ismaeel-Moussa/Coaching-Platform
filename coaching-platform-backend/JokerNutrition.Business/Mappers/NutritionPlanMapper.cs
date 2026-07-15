@@ -94,7 +94,17 @@ public static class NutritionPlanMapper
                         Quantity = item.Quantity,
                         Unit = item.Unit,
                         MeasurementState = item.MeasurementState,
-                        AlternativeGroupKey = item.AlternativeGroupKey
+                        AlternativeGroupKey = item.AlternativeGroupKey,
+                        CatalogContentVersion = item.Food?.ContentVersion ?? item.Recipe?.ContentVersion,
+                        CaloriesPer100Grams = item.Food?.CaloriesPer100g,
+                        ProteinPer100Grams = item.Food?.ProteinPer100g,
+                        CarbsPer100Grams = item.Food?.CarbsPer100g,
+                        FatPer100Grams = item.Food?.FatPer100g,
+                        RecipeTotalWeightGrams = item.Recipe?.Ingredients.Sum(ingredient => ingredient.QuantityGrams),
+                        RecipeTotalCalories = item.Recipe?.TotalCalories,
+                        RecipeTotalProtein = item.Recipe?.TotalProtein,
+                        RecipeTotalCarbs = item.Recipe?.TotalCarbs,
+                        RecipeTotalFat = item.Recipe?.TotalFat
                     }).ToList()
                 }).ToList()
             }).ToList(),

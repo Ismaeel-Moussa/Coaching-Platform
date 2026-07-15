@@ -113,7 +113,30 @@
     "kcalHeader": "سعرة",
     "subtotal": "المجموع الفرعي",
     "removeConfirm": "هل تريد إزالة هذا المدخل؟",
-    "remove": "إزالة"
+    "remove": "إزالة",
+    "planMeal": "وجبة من الخطة",
+    "removePlanMealConfirm": "هل تريد إزالة وجبة الخطة كاملة مع جميع عناصرها؟",
+    "removePlanMeal": "إزالة وجبة الخطة",
+    "planMealRemoved": "تمت إزالة وجبة الخطة من يوميتك."
+  },
+  "nutritionPlan": {
+    "logDate": "تاريخ اليومية",
+    "dayType": "نوع اليوم",
+    "addOption": "إضافة هذا الخيار إلى اليومية",
+    "completed": "مكتمل",
+    "addTitle": "إضافة وجبة الخطة إلى اليومية",
+    "addDescription": "اختر وقت تناول هذا الخيار وعدّل عدد الحصص.",
+    "meal": "الوجبة",
+    "servings": "عدد الحصص",
+    "alternatives": "اختر عنصراً واحداً من {{group}}",
+    "cancel": "إلغاء",
+    "confirmAdd": "إضافة إلى اليومية",
+    "adding": "جاري الإضافة...",
+    "addedToDiary": "تمت إضافة وجبة الخطة إلى يوميتك.",
+    "addFailed": "تعذرت إضافة وجبة الخطة إلى اليومية.",
+    "completedForDate": "مكتمل بتاريخ {{date}}",
+    "alreadyCompleted": "تمت إضافة خيار آخر من هذه الوجبة إلى يوميتك في هذا التاريخ.",
+    "notDiaryReady": "يجب على المدرب ربط العناصر واستخدام وحدات مدعومة"
   },
   "workoutLogger": {
     "title": "مسجل التمارين",

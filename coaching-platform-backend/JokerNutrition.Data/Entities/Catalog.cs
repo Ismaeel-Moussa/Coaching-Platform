@@ -116,4 +116,6 @@ public class NutritionPlanAssignment
     public string SnapshotJson { get; set; } = string.Empty;
     public string? Notes { get; set; }
     public DateTime AssignedAt { get; set; }
+
+    public ICollection<NutritionPlanDiaryEntry> DiaryEntries { get; set; } = new List<NutritionPlanDiaryEntry>();
 }

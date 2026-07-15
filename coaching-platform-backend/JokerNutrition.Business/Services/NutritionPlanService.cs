@@ -331,7 +331,8 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
             .Include(template => template.MealBlocks)
                 .ThenInclude(block => block.Options)
                     .ThenInclude(option => option.Items)
-                        .ThenInclude(item => item.Recipe);
+                        .ThenInclude(item => item.Recipe)
+                            .ThenInclude(recipe => recipe!.Ingredients);
 
         return asNoTracking ? query.AsNoTracking() : query;
     }
@@ -434,6 +435,13 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
             Message = message,
             Path = path
         });
+        void Warning(string code, string message, string? path = null) => result.Issues.Add(new NutritionPlanValidationIssueDto
+        {
+            Severity = "Warning",
+            Code = code,
+            Message = message,
+            Path = path
+        });
 
         if (string.IsNullOrWhiteSpace(template.Name) || string.IsNullOrWhiteSpace(template.NameAr))
             Error("bilingual_name_required", "English and Arabic plan names are required.", "name");
@@ -481,6 +489,18 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
                     if (item.FoodId is null && item.RecipeId is null &&
                         (string.IsNullOrWhiteSpace(item.ItemName) || string.IsNullOrWhiteSpace(item.ItemNameAr)))
                         Error("bilingual_custom_item_required", "Custom items need English and Arabic names.", optionPath);
+                    if (item.FoodId is null && item.RecipeId is null)
+                        Warning("diary_logging_unavailable",
+                            "Custom text items cannot be added automatically to the athlete diary. Link this item to a food or recipe.",
+                            optionPath);
+                    if (item.FoodId.HasValue && item.Unit != IngredientUnit.Gram)
+                        Warning("diary_logging_unavailable",
+                            $"Food '{item.Food?.Name}' must use grams before athletes can add it automatically to the diary.",
+                            optionPath);
+                    if (item.RecipeId.HasValue && item.Unit is not (IngredientUnit.Gram or IngredientUnit.Piece))
+                        Warning("diary_logging_unavailable",
+                            $"Recipe '{item.Recipe?.Name}' must use grams or pieces before athletes can add it automatically to the diary.",
+                            optionPath);
                 }
             }
         }

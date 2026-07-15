@@ -113,7 +113,30 @@
     "kcalHeader": "kcal",
     "subtotal": "Subtotal",
     "removeConfirm": "Remove this entry?",
-    "remove": "Remove"
+    "remove": "Remove",
+    "planMeal": "Plan meal",
+    "removePlanMealConfirm": "Remove this entire plan meal and all of its items?",
+    "removePlanMeal": "Remove plan meal",
+    "planMealRemoved": "Plan meal removed from your diary."
+  },
+  "nutritionPlan": {
+    "logDate": "Diary date",
+    "dayType": "Day type",
+    "addOption": "Add this option to diary",
+    "completed": "Completed",
+    "addTitle": "Add plan meal to diary",
+    "addDescription": "Choose when you ate this option and adjust the number of servings.",
+    "meal": "Meal",
+    "servings": "Servings",
+    "alternatives": "Choose one from {{group}}",
+    "cancel": "Cancel",
+    "confirmAdd": "Add to diary",
+    "adding": "Adding...",
+    "addedToDiary": "Plan meal added to your diary.",
+    "addFailed": "Could not add this plan meal to your diary.",
+    "completedForDate": "Completed for {{date}}",
+    "alreadyCompleted": "Another option from this meal block is already in your diary for this date.",
+    "notDiaryReady": "Coach must link items and use supported units"
   },
   "workoutLogger": {
     "title": "Workout Logger",
