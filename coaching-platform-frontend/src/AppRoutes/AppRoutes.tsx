@@ -3,6 +3,7 @@ import { lazy, Suspense } from 'react';
 
 import ProtectedRoute from './ProtectedRoute';
 import RoleGuard from './RoleGuard';
+import OnboardingGuard from './OnboardingGuard';
 
 // Layouts
 import AuthLayout from '../layouts/AuthLayout';
@@ -29,6 +30,7 @@ const WeeklyCheckIn = lazy(() => import('../pages/athlete/WeeklyCheckIn/WeeklyCh
 const Feedback = lazy(() => import('../pages/athlete/Feedback/Feedback'));
 const History = lazy(() => import('../pages/athlete/History/History'));
 const AthleteNutritionPlan = lazy(() => import('../pages/athlete/NutritionPlan/NutritionPlan'));
+const AthleteOnboarding = lazy(() => import('../pages/athlete/Onboarding/Onboarding'));
 
 // Coach pages (lazy — loaded only when coach logs in)
 const CoachDashboard = lazy(() => import('../pages/coach/CoachDashboard/CoachDashboard'));
@@ -73,13 +75,23 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <RoleGuard allowedRoles={['Athlete']}>
           <NotificationProvider>
-            <AthleteLayout />
+            <OnboardingGuard>
+              <AthleteLayout />
+            </OnboardingGuard>
           </NotificationProvider>
         </RoleGuard>
       </ProtectedRoute>
     ),
     children: [
       { index: true, element: <Navigate to="/athlete/dashboard" replace /> },
+      {
+        path: 'onboarding',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <AthleteOnboarding />
+          </Suspense>
+        ),
+      },
       {
         path: 'dashboard',
         element: (

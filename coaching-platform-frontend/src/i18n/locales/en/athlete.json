@@ -1,4 +1,40 @@
 {
+  "onboarding": {
+    "eyebrow": "YOUR COACHING STARTING POINT",
+    "title": "Tell us what your coach needs to know",
+    "subtitle": "Your answers help your coach build a safer training and nutrition plan around your goals, routine, preferences, and limitations.",
+    "coachNote": "Coach review note",
+    "saveDraft": "Save draft",
+    "submit": "Submit to coach",
+    "readyTitle": "Ready to send it?",
+    "readyHint": "Required answers must be complete before submission.",
+    "status": { "NotStarted": "Not started", "Draft": "Draft", "Submitted": "Waiting for review", "Reviewed": "Reviewed" },
+    "sections": {
+      "basics": "Goals & baseline", "basicsHint": "The outcome you want and where you are starting.",
+      "training": "Training profile", "trainingHint": "Your experience, schedule, and available equipment.",
+      "safety": "Health & recovery", "safetyHint": "Be specific about pain or limitations so your coach can train you safely.",
+      "nutrition": "Nutrition habits", "nutritionHint": "Preferences and restrictions your meal plan must respect.",
+      "photos": "Progress Photos (Optional)", "photosHint": "Upload front, side, and back photos so your coach can assess your starting physical condition."
+    },
+    "fields": {
+      "primaryGoal": "Primary goal", "weightKg": "Current weight", "heightCm": "Height", "activityLevel": "Daily activity level",
+      "trainingExperience": "Training experience", "trainingDays": "Training days per week", "preferredDays": "Preferred training days", "equipment": "Available equipment",
+      "injuries": "Injuries or movement limitations", "currentPain": "Current pain or discomfort", "sleepHours": "Average sleep hours", "sleepQuality": "Sleep quality",
+      "allergies": "Food allergies", "intolerances": "Food intolerances", "preferredFoods": "Foods you enjoy", "foodsToAvoid": "Foods to avoid",
+      "mealsPerDay": "Typical meals per day", "mealSchedule": "Typical meal times", "supplements": "Current supplements", "notes": "Anything else your coach should know",
+      "photos": "Progress photos"
+    },
+    "placeholders": { "none": "Write “None” if this does not apply" },
+    "options": {
+      "goals": { "FatLoss": "Fat loss", "MuscleGain": "Muscle gain", "Strength": "Strength", "Fitness": "General fitness", "Health": "Health & wellbeing" },
+      "activity": { "Sedentary": "Sedentary", "Light": "Lightly active", "Moderate": "Moderately active", "High": "Highly active", "VeryHigh": "Very highly active" },
+      "experience": { "Beginner": "Beginner", "Intermediate": "Intermediate", "Advanced": "Advanced" },
+      "sleep": { "Poor": "Poor", "Fair": "Fair", "Good": "Good", "Excellent": "Excellent" },
+      "days": { "Monday": "Monday", "Tuesday": "Tuesday", "Wednesday": "Wednesday", "Thursday": "Thursday", "Friday": "Friday", "Saturday": "Saturday", "Sunday": "Sunday" },
+      "equipment": { "Gym": "Full gym", "Dumbbells": "Dumbbells", "Bands": "Resistance bands", "Bodyweight": "Bodyweight only", "HomeMachines": "Home machines", "Other": "Other" }
+    },
+    "messages": { "draftSaved": "Assessment draft saved.", "saveFailed": "Could not save the draft.", "submitted": "Assessment sent to your coach.", "submitFailed": "Could not submit the assessment.", "loadFailed": "Could not load your assessment.", "readOnly": "This assessment has been submitted and is now read-only. Contact your coach if an answer must be changed.", "photosUploaded": "Progress photos uploaded successfully.", "uploadFailed": "Could not upload photos.", "photoDeleted": "Photo deleted successfully.", "deleteFailed": "Could not delete photo." }
+  },
   "dashboard": {
     "greeting": "Good morning, <span>{{name}}</span> 👋",
     "streakLabel": "Day Streak",

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Button, Progress, message as antMessage } from 'antd';
+import { Button, Progress, Spin, message as antMessage } from 'antd';
 import { useTranslation } from 'react-i18next';
 import './PhotoUploadZone.scss';
 
@@ -107,12 +107,16 @@ const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
 
       {uploading ? (
         <div className="upload-zone__progress-container">
-          <Progress
-            type="circle"
-            percent={uploadProgress}
-            strokeColor="var(--color-gold)"
-            size={80}
-          />
+          {uploadProgress > 0 ? (
+            <Progress
+              type="circle"
+              percent={uploadProgress}
+              strokeColor="var(--color-gold)"
+              size={80}
+            />
+          ) : (
+            <Spin size="large" />
+          )}
           <span className="upload-zone__upload-label">
             {t('common:photoUpload.uploadingAngle', { angle: t(`common:photoUpload.angles.${angle.toLowerCase()}`) })}
           </span>

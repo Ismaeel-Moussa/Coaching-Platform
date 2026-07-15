@@ -44,6 +44,10 @@ const Notifications: React.FC = () => {
         return 'fitness_center';
       case 'CheckInSubmitted':
         return 'assignment';
+      case 'OnboardingSubmitted':
+        return 'assignment_ind';
+      case 'OnboardingReviewed':
+        return 'rate_review';
       case 'InvitationAccepted':
         return 'person_add';
       default:
@@ -67,6 +71,9 @@ const Notifications: React.FC = () => {
         return <Tag color="success">{t('common:notifications.tags.workout')}</Tag>;
       case 'CheckInSubmitted':
         return <Tag color="cyan">{t('common:notifications.tags.checkIn')}</Tag>;
+      case 'OnboardingSubmitted':
+      case 'OnboardingReviewed':
+        return <Tag color="purple">{t('common:notifications.tags.onboarding')}</Tag>;
       case 'InvitationAccepted':
         return <Tag color="purple">{t('common:notifications.tags.roster')}</Tag>;
       default:
@@ -185,6 +192,30 @@ const Notifications: React.FC = () => {
                       }
                     }
                     navigate('/coach/roster');
+                  }
+                } else if (notif.type === 'OnboardingSubmitted') {
+                  if (isCoachPath) {
+                    const match = notif.message.match(/^(.*?) submitted their onboarding assessment\.?$/i);
+                    if (match) {
+                      const athleteName = match[1].trim();
+                      try {
+                        const rosterData = await getRoster(1, 100);
+                        const athlete = rosterData.items.find(
+                          (a) => a.athleteName.trim().toLowerCase() === athleteName.toLowerCase()
+                        );
+                        if (athlete) {
+                          navigate(`/coach/roster/${athlete.athleteId}#onboarding-assessment`);
+                          return;
+                        }
+                      } catch (err) {
+                        console.error('Error fetching roster to locate notification athlete:', err);
+                      }
+                    }
+                    navigate('/coach/roster');
+                  }
+                } else if (notif.type === 'OnboardingReviewed') {
+                  if (!isCoachPath) {
+                    navigate('/athlete/onboarding');
                   }
                 } else if (notif.type === 'WorkoutCompleted') {
                   if (isCoachPath) navigate('/coach/dashboard');

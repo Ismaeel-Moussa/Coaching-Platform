@@ -11,6 +11,7 @@ public class JokerNutritionContext : IdentityDbContext<User, Role, int,
     public JokerNutritionContext(DbContextOptions<JokerNutritionContext> options) : base(options) { }
 
     public DbSet<Athlete> Athletes => Set<Athlete>();
+    public DbSet<AthleteOnboardingAssessment> AthleteOnboardingAssessments => Set<AthleteOnboardingAssessment>();
     public DbSet<Coach> Coaches => Set<Coach>();
     public DbSet<Invitation> Invitations => Set<Invitation>();
     public DbSet<Food> Foods => Set<Food>();
@@ -42,6 +43,7 @@ public class JokerNutritionContext : IdentityDbContext<User, Role, int,
     public DbSet<SeedImportBatch> SeedImportBatches => Set<SeedImportBatch>();
     public DbSet<ClientCheckIn> ClientCheckIns => Set<ClientCheckIn>();
     public DbSet<CheckInPhoto> CheckInPhotos => Set<CheckInPhoto>();
+    public DbSet<OnboardingPhoto> OnboardingPhotos => Set<OnboardingPhoto>();
     public DbSet<CoachFeedbackNote> CoachFeedbackNotes => Set<CoachFeedbackNote>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();

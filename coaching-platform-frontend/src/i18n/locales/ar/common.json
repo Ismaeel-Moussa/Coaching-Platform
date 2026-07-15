@@ -21,12 +21,14 @@
     "supplements": "المكملات",
     "recipes": "الوصفات",
     "checkIn": "تسجيل المتابعة",
+    "onboarding": "تقييمي الأولي",
     "feedback": "ملاحظات المدرب",
     "signOut": "تسجيل الخروج",
     "more": "المزيد",
     "history": "سجل المتابعة"
   },
   "actions": {
+    "retry": "إعادة المحاولة",
     "back": "رجوع",
     "next": "التالي",
     "save": "حفظ التغييرات",
@@ -61,7 +63,8 @@
       "workout": "التمرين",
       "checkIn": "المتابعة",
       "roster": "قائمة اللاعبين",
-      "general": "عام"
+      "general": "عام",
+      "onboarding": "التقييم الأول"
     },
     "messages": {
       "newWorkoutTemplate": "تم تعيين نموذج برنامج تمارين جديد: {{templateName}}",
@@ -74,7 +77,9 @@
       "checkInUpdated": "قام {{athleteName}} بتحديث المتابعة الأسبوعية الخاصة به.",
       "checkInReviewed": "قام مدربك بمراجعة المتابعة الأسبوعية الخاصة بك: \"{{notes}}\"",
       "invitationAccepted": "قبل اللاعب {{athleteName}} دعوتك.",
-      "macroTargetsUpdated": "قام المدرب {{coachName}} بتحديث أهداف الماكروز اليومية الخاصة بك."
+      "macroTargetsUpdated": "قام المدرب {{coachName}} بتحديث أهداف الماكروز اليومية الخاصة بك.",
+      "onboardingSubmitted": "قام {{athleteName}} بتقديم تقييم البداية الخاص به.",
+      "onboardingReviewed": "قام مدربك بمراجعة تقييم البداية الخاص بك."
     }
   },
   "notFound": {
@@ -177,7 +182,9 @@
     "checkInSubmitted": "تم تقديم التقييم",
     "workoutUpdate": "تحديث التمرين",
     "newFeedback": "ملاحظات جديدة",
-    "newNotification": "إشعار جديد"
+    "newNotification": "إشعار جديد",
+    "onboardingSubmitted": "تم تقديم تقييم البداية",
+    "onboardingReviewed": "تمت مراجعة تقييم البداية"
   },
   "alerts": {
     "genericError": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
