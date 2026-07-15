@@ -143,6 +143,7 @@
     "subtitle": "Manage master food databases and premium recipes",
     "tabFoods": "Foods",
     "tabRecipes": "Recipes",
+    "tabCoachRecipes": "Coach Recipes",
     "recipeCategoryAll": "All Recipes",
     "searchPlaceholder": "Search foods...",
     "categoryPlaceholder": "Category",

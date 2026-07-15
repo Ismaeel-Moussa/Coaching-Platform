@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Modal, Steps, Input, Select, InputNumber, Button, Spin, Empty, Form, message, Space
+  Modal, Steps, Input, InputNumber, Button, Spin, Empty, Form, message, Space
 } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSearchFoods } from '../../hooks/useFoods/useFoods';
 import { useCreateRecipe, useUpdateRecipe, useUploadRecipeImage } from '../../hooks/useRecipes/useRecipes';
 import { calcMacroPreview } from '../../utils/macroCalc';
-import { RecipeCategory, RECIPE_CATEGORY_LABELS, type CreateRecipeIngredient, type RecipeDto, type RecipeIngredientDto } from '../../types/Recipe';
+import { RecipeCategory, type CreateRecipeIngredient, type RecipeDto, type RecipeIngredientDto } from '../../types/Recipe';
 import type { FoodDto } from '../../types/Food';
 import './CreateRecipeModal.scss';
 
 const { Search } = Input;
-const { Option } = Select;
 
 interface IngredientEntry {
   food: FoodDto;
@@ -22,18 +21,10 @@ interface CreateRecipeModalProps {
   open: boolean;
   onClose: () => void;
   recipeToEdit?: RecipeDto | null;
+  source: 'athlete' | 'coach';
 }
 
-const getRecipeCategoryLabel = (category: RecipeCategory, t: any) => {
-  switch (category) {
-    case RecipeCategory.MuscleBuilding: return t('athlete:recipeLibrary.categories.muscleBuilding');
-    case RecipeCategory.FatLoss: return t('athlete:recipeLibrary.categories.fatLoss');
-    case RecipeCategory.Custom: return t('athlete:recipeLibrary.categories.custom');
-    default: return RECIPE_CATEGORY_LABELS[category] || String(category);
-  }
-};
-
-const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, recipeToEdit }) => {
+const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, recipeToEdit, source }) => {
   const { t } = useTranslation(['common', 'athlete']);
   const [currentStep, setCurrentStep] = useState(0);
   const [ingredients, setIngredients] = useState<IngredientEntry[]>([]);
@@ -45,7 +36,6 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
   // Recipe metadata (Step 2)
   const [recipeName, setRecipeName] = useState('');
   const [recipeDesc, setRecipeDesc] = useState('');
-  const [recipeCategory, setRecipeCategory] = useState<RecipeCategory>(RecipeCategory.Custom);
   const [prepTime, setPrepTime] = useState<number>(5);
   const [cookTime, setCookTime] = useState<number>(0);
   const [servings, setServings] = useState<number>(1);
@@ -68,7 +58,6 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
     if (recipeToEdit && open) {
       setRecipeName(recipeToEdit.name);
       setRecipeDesc(recipeToEdit.description || '');
-      setRecipeCategory(recipeToEdit.category);
       setPrepTime(recipeToEdit.prepTimeMinutes);
       setCookTime(recipeToEdit.cookTimeMinutes);
       setServings(recipeToEdit.servings);
@@ -142,7 +131,8 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
     const payload = {
       name: recipeName,
       description: recipeDesc,
-      category: recipeCategory,
+      category: recipeToEdit?.category
+        ?? (source === 'athlete' ? RecipeCategory.Custom : RecipeCategory.MuscleBuilding),
       prepTimeMinutes: prepTime,
       cookTimeMinutes: cookTime,
       servings: servings,
@@ -180,7 +170,6 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
     setPendingFood(null);
     setRecipeName('');
     setRecipeDesc('');
-    setRecipeCategory(RecipeCategory.Custom);
     setPrepTime(5);
     setCookTime(0);
     setServings(1);
@@ -365,19 +354,6 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
                   rows={2}
                 />
               </Form.Item>
-              <Form.Item label={t('athlete:components.createRecipeModal.categoryLabel')}>
-                <Select
-                  id="create-recipe-category-select"
-                  value={recipeCategory}
-                  onChange={setRecipeCategory}
-                  size="large"
-                  style={{ width: '100%' }}
-                >
-                  {([RecipeCategory.MuscleBuilding, RecipeCategory.FatLoss, RecipeCategory.Custom] as RecipeCategory[]).map((rc) => (
-                    <Option key={rc} value={rc}>{getRecipeCategoryLabel(rc, t)}</Option>
-                  ))}
-                </Select>
-              </Form.Item>
               <div className="create-recipe-modal__row">
                 <Form.Item label={t('athlete:components.createRecipeModal.prepTime')} style={{ flex: 1 }}>
                   <InputNumber value={prepTime} onChange={(v) => setPrepTime(v ?? 0)} min={0} size="large" style={{ width: '100%' }} />
@@ -466,7 +442,7 @@ const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({ open, onClose, re
               <div className="create-recipe-modal__preview-header">
                 <h3 className="create-recipe-modal__preview-name">{recipeName}</h3>
                 <span className="create-recipe-modal__preview-category">
-                  {getRecipeCategoryLabel(recipeCategory, t)}
+                  {t(`athlete:recipeLibrary.categories.${source === 'coach' ? 'coach' : 'custom'}`)}
                 </span>
               </div>
               {recipeDesc && <p className="create-recipe-modal__preview-desc">{recipeDesc}</p>}

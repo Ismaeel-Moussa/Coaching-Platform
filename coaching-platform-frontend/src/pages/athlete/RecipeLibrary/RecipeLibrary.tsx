@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Tabs, Skeleton, Empty, message as antMessage, Select } from 'antd';
+import { Tabs, Skeleton, Empty, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useGetRecipes, useQuickAddRecipe } from '../../../hooks/useRecipes/useRecipes';
 import RecipeCard from '../../../components/RecipeCard/RecipeCard';
 import CreateRecipeModal from '../../../components/CreateRecipeModal/CreateRecipeModal';
-import { RecipeCategory, RECIPE_CATEGORY_LABELS, type RecipeDto } from '../../../types/Recipe';
+import { RecipeCategory, type RecipeDto } from '../../../types/Recipe';
 import { MealType, MEAL_TYPE_LABELS } from '../../../types/Diary';
 import { getTodayIso } from '../../../utils/date';
 import './RecipeLibrary.scss';
@@ -14,15 +14,6 @@ const { Option } = Select;
 const MEAL_TYPE_OPTIONS = [
   MealType.Breakfast, MealType.Lunch, MealType.Dinner, MealType.Snack,
 ];
-
-const getRecipeCategoryLabel = (category: RecipeCategory, t: any) => {
-  switch (category) {
-    case RecipeCategory.MuscleBuilding: return t('athlete:recipeLibrary.categories.muscleBuilding');
-    case RecipeCategory.FatLoss: return t('athlete:recipeLibrary.categories.fatLoss');
-    case RecipeCategory.Custom: return t('athlete:recipeLibrary.categories.custom');
-    default: return RECIPE_CATEGORY_LABELS[category] || String(category);
-  }
-};
 
 const getMealTypeLabel = (type: MealType, t: any) => {
   switch (type) {
@@ -72,9 +63,7 @@ const RecipeGrid: React.FC<RecipeGridProps> = ({ category, isJokerRecipe, today,
         description={
           isJokerRecipe
             ? t('athlete:recipeLibrary.emptyCoach')
-            : category === RecipeCategory.Custom
-            ? t('athlete:recipeLibrary.emptyCustom')
-            : t('athlete:recipeLibrary.emptyCategory', { category: getRecipeCategoryLabel(category!, t) })
+            : t('athlete:recipeLibrary.emptyCustom')
         }
         image={Empty.PRESENTED_IMAGE_SIMPLE}
         className="recipe-library__empty"
@@ -114,18 +103,8 @@ const RecipeLibrary: React.FC = () => {
       isJokerRecipe: true,
     },
     {
-      key: String(RecipeCategory.MuscleBuilding),
-      label: getRecipeCategoryLabel(RecipeCategory.MuscleBuilding, t),
-      category: RecipeCategory.MuscleBuilding,
-    },
-    {
-      key: String(RecipeCategory.FatLoss),
-      label: getRecipeCategoryLabel(RecipeCategory.FatLoss, t),
-      category: RecipeCategory.FatLoss,
-    },
-    {
       key: String(RecipeCategory.Custom),
-      label: getRecipeCategoryLabel(RecipeCategory.Custom, t),
+      label: t('athlete:recipeLibrary.categories.custom'),
       category: RecipeCategory.Custom,
       isJokerRecipe: false,
     },
@@ -204,6 +183,7 @@ const RecipeLibrary: React.FC = () => {
       <CreateRecipeModal
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
+        source="athlete"
       />
     </div>
   );

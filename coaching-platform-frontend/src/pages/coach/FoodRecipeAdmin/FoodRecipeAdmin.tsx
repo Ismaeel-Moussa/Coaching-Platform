@@ -7,21 +7,10 @@ import BulkImportModal from '../../../components/BulkImportModal/BulkImportModal
 import CreateRecipeModal from '../../../components/CreateRecipeModal/CreateRecipeModal';
 import RecipeCard from '../../../components/RecipeCard/RecipeCard';
 import type { FoodDto, FoodCategory, CreateFoodForm } from '../../../types/Food';
-import type { RecipeDto, GetRecipesParams } from '../../../types/Recipe';
-import { RecipeCategory } from '../../../types/Recipe';
+import type { RecipeDto } from '../../../types/Recipe';
 import './FoodRecipeAdmin.scss';
 
 const FOOD_CATEGORIES: FoodCategory[] = ['Protein', 'Carbs', 'Fat', 'Vegetable', 'Dairy', 'Fruit', 'Meat', 'Bakery', 'Cheese', 'Poultry', 'Nuts', 'Oils', 'Condiments', 'Juice', 'Snacks'];
-
-const getRecipeCategoryLabel = (category: string, t: any) => {
-  switch (category) {
-    case 'All': return t('coach:foodAdmin.recipeCategoryAll', { defaultValue: 'All Recipes' });
-    case RecipeCategory.MuscleBuilding.toString(): return t('athlete:recipeLibrary.categories.muscleBuilding');
-    case RecipeCategory.FatLoss.toString(): return t('athlete:recipeLibrary.categories.fatLoss');
-    case RecipeCategory.Custom.toString(): return t('athlete:recipeLibrary.categories.custom');
-    default: return category;
-  }
-};
 
 const getFoodCategoryLabel = (category: string, t: any) => {
   const key = `common:foodCategories.${category.toLowerCase()}`;
@@ -42,7 +31,6 @@ const FoodRecipeAdmin: React.FC = () => {
   const [isBulkImportVisible, setIsBulkImportVisible] = useState<boolean>(false);
 
   // Recipes state
-  const [recipeCategory, setRecipeCategory] = useState<string>('All');
   const [isRecipeModalVisible, setIsRecipeModalVisible] = useState<boolean>(false);
   const [editingRecipe, setEditingRecipe] = useState<RecipeDto | null>(null);
 
@@ -57,8 +45,9 @@ const FoodRecipeAdmin: React.FC = () => {
   });
 
   const { data: recipesData, isLoading: isRecipesLoading } = useGetRecipes({
-    category: recipeCategory !== 'All' ? parseInt(recipeCategory, 10) : undefined,
-  } as GetRecipesParams);
+    isJokerRecipe: true,
+    pageSize: 100,
+  });
 
   const createFoodMutation = useCreateFood();
   const updateFoodMutation = useUpdateFood();
@@ -68,18 +57,6 @@ const FoodRecipeAdmin: React.FC = () => {
   const FOOD_CATEGORY_OPTIONS = FOOD_CATEGORIES.map((cat) => ({
     label: getFoodCategoryLabel(cat, t),
     value: cat,
-  }));
-
-  const RECIPE_CATEGORIES = [
-    { label: t('coach:foodAdmin.recipeCategoryAll', { defaultValue: 'All Recipes' }), value: 'All' },
-    { label: t('athlete:recipeLibrary.categories.muscleBuilding'), value: RecipeCategory.MuscleBuilding.toString() },
-    { label: t('athlete:recipeLibrary.categories.fatLoss'), value: RecipeCategory.FatLoss.toString() },
-    { label: t('athlete:recipeLibrary.categories.custom'), value: RecipeCategory.Custom.toString() },
-  ];
-
-  const RECIPE_TAB_ITEMS = RECIPE_CATEGORIES.map((cat) => ({
-    key: cat.value,
-    label: cat.label,
   }));
 
   // Food CRUD handlers
@@ -371,16 +348,10 @@ const FoodRecipeAdmin: React.FC = () => {
           },
           {
             key: 'recipes',
-            label: t('coach:foodAdmin.tabRecipes'),
+            label: t('coach:foodAdmin.tabCoachRecipes'),
             children: (
               <div className="food-recipe-admin__tab-content">
                 <div className="food-recipe-admin__controls">
-                  <Tabs
-                    activeKey={recipeCategory}
-                    onChange={setRecipeCategory}
-                    items={RECIPE_TAB_ITEMS}
-                    className="food-recipe-admin__recipe-tabs"
-                  />
                   <Button
                     type="primary"
                     onClick={() => {
@@ -488,6 +459,7 @@ const FoodRecipeAdmin: React.FC = () => {
           setEditingRecipe(null);
         }}
         recipeToEdit={editingRecipe}
+        source="coach"
       />
     </div>
   );

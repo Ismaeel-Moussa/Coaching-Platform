@@ -111,8 +111,6 @@
     border-radius: 50%;
     flex-shrink: 0;
 
-    &--0 { background: var(--color-navy); }   // MuscleBuilding
-    &--1 { background: var(--color-success); } // FatLoss
     &--2 { background: var(--color-gold); }    // Custom
     &--coach { background: var(--color-gold); } // Published coach recipes
   }
