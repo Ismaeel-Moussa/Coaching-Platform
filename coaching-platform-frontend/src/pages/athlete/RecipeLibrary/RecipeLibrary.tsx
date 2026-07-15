@@ -7,6 +7,7 @@ import CreateRecipeModal from '../../../components/CreateRecipeModal/CreateRecip
 import { RecipeCategory, type RecipeDto } from '../../../types/Recipe';
 import { MealType, MEAL_TYPE_LABELS } from '../../../types/Diary';
 import { getTodayIso } from '../../../utils/date';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import './RecipeLibrary.scss';
 
 const MEAL_TYPE_OPTIONS = [
@@ -80,6 +81,7 @@ const RecipeGrid: React.FC<RecipeGridProps> = ({ category, isJokerRecipe, onQuic
 
 const RecipeLibrary: React.FC = () => {
   const { t } = useTranslation(['common', 'athlete']);
+  const { language } = useLanguage();
   const today = getTodayIso();
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeDto | null>(null);
@@ -196,7 +198,11 @@ const RecipeLibrary: React.FC = () => {
         destroyOnHidden
       >
         <p className="recipe-library__meal-modal-copy">
-          {t('athlete:recipeLibrary.chooseMealDescription', { name: selectedRecipe?.name })}
+          {t('athlete:recipeLibrary.chooseMealDescription', {
+            name: language === 'ar' && selectedRecipe?.nameAr
+              ? selectedRecipe.nameAr
+              : selectedRecipe?.name,
+          })}
         </p>
         <Radio.Group
           value={selectedMealType}
