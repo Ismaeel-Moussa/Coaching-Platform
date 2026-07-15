@@ -115,10 +115,31 @@ public class MealLogMapping : IEntityTypeConfiguration<MealLog>
         builder.Property(m => m.Protein).HasPrecision(8, 2);
         builder.Property(m => m.Carbs).HasPrecision(8, 2);
         builder.Property(m => m.Fat).HasPrecision(8, 2);
+        builder.Property(m => m.SnapshotName).HasMaxLength(300);
+        builder.Property(m => m.SnapshotNameAr).HasMaxLength(300);
         builder.HasOne(m => m.DailyDiary).WithMany(d => d.MealLogs).HasForeignKey(m => m.DailyDiaryId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(m => m.Food).WithMany().HasForeignKey(m => m.FoodId).OnDelete(DeleteBehavior.SetNull);
         builder.HasOne(m => m.Recipe).WithMany().HasForeignKey(m => m.RecipeId).OnDelete(DeleteBehavior.SetNull);
+        builder.HasOne(m => m.NutritionPlanDiaryEntry).WithMany(e => e.MealLogs)
+            .HasForeignKey(m => m.NutritionPlanDiaryEntryId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(m => m.DailyDiaryId);
+    }
+}
+
+public class NutritionPlanDiaryEntryMapping : IEntityTypeConfiguration<NutritionPlanDiaryEntry>
+{
+    public void Configure(EntityTypeBuilder<NutritionPlanDiaryEntry> builder)
+    {
+        builder.ToTable("NutritionPlanDiaryEntries");
+        builder.HasKey(e => e.Id);
+        builder.Property(e => e.Servings).HasPrecision(6, 2);
+        builder.Property(e => e.SelectionKey).HasMaxLength(1000).IsRequired();
+        builder.HasOne(e => e.DailyDiary).WithMany(d => d.NutritionPlanEntries)
+            .HasForeignKey(e => e.DailyDiaryId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(e => e.NutritionPlanAssignment).WithMany(a => a.DiaryEntries)
+            .HasForeignKey(e => e.NutritionPlanAssignmentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(e => new { e.DailyDiaryId, e.NutritionPlanAssignmentId, e.NutritionMealBlockId })
+            .IsUnique();
     }
 }
 

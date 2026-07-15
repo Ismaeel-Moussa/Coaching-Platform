@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Tabs, Skeleton, Empty, Tooltip, Popconfirm } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useGetDiary, useGetMacroSummary, useRemoveLogEntry } from '../../../hooks/useDiary/useDiary';
+import { useGetDiary, useGetMacroSummary, useRemoveLogEntry, useRemoveNutritionPlanEntry } from '../../../hooks/useDiary/useDiary';
 import MacroProgressBar from '../../../components/MacroProgressBar/MacroProgressBar';
 import AddFoodModal from '../../../components/AddFoodModal/AddFoodModal';
 import { MealType, MEAL_TYPE_LABELS, type MealLogDto } from '../../../types/Diary';
@@ -43,8 +43,15 @@ interface MealSectionProps {
 }
 
 const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType, date, onAddFood }) => {
-  const { t } = useTranslation(['common', 'athlete']);
+  const { t, i18n } = useTranslation(['common', 'athlete']);
   const removeMutation = useRemoveLogEntry(date);
+  const removePlanMealMutation = useRemoveNutritionPlanEntry(date);
+  const ar = i18n.resolvedLanguage === 'ar';
+  const firstLogByPlanEntry = new Map<number, number>();
+  entries.forEach(entry => {
+    if (entry.nutritionPlanDiaryEntryId != null && !firstLogByPlanEntry.has(entry.nutritionPlanDiaryEntryId))
+      firstLogByPlanEntry.set(entry.nutritionPlanDiaryEntryId, entry.id);
+  });
 
   const subtotals = entries.reduce(
     (acc, e) => ({ cal: acc.cal + e.calories, p: acc.p + e.protein, c: acc.c + e.carbs, f: acc.f + e.fat }),
@@ -77,8 +84,9 @@ const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType,
             <div key={entry.id} className="meal-section__row">
               <div className="meal-section__food-info">
                 <span className="meal-section__food-name">
-                  {entry.food?.name ?? entry.recipe?.name ?? t('common:status.unknown')}
+                  {(ar ? entry.nameAr || entry.name : entry.name) ?? entry.food?.name ?? entry.recipe?.name ?? t('common:status.unknown')}
                 </span>
+                {entry.nutritionPlanDiaryEntryId != null && <span className="meal-section__plan-badge">{t('athlete:mealLogger.planMeal')}</span>}
                 <span className="meal-section__food-qty mono">
                   {entry.quantityGrams}g
                 </span>
@@ -101,16 +109,25 @@ const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType,
                   <span className="meal-section__kcal-suffix"> {t('athlete:mealLogger.kcalHeader')}</span>
                 </span>
               </div>
-              <Popconfirm
-                title={t('athlete:mealLogger.removeConfirm')}
-                onConfirm={() => removeMutation.mutate(entry.id)}
-                okText={t('athlete:mealLogger.remove')}
-                okButtonProps={{ danger: true }}
-              >
-                <button className="meal-section__delete-btn" aria-label="Remove entry">
-                  <span className="material-symbols-outlined">delete</span>
-                </button>
-              </Popconfirm>
+              {entry.nutritionPlanDiaryEntryId == null ? <Popconfirm
+                  title={t('athlete:mealLogger.removeConfirm')}
+                  onConfirm={() => removeMutation.mutate(entry.id)}
+                  okText={t('athlete:mealLogger.remove')}
+                  okButtonProps={{ danger: true }}
+                >
+                  <button className="meal-section__delete-btn" aria-label={t('athlete:mealLogger.remove')}>
+                    <span className="material-symbols-outlined">delete</span>
+                  </button>
+                </Popconfirm> : firstLogByPlanEntry.get(entry.nutritionPlanDiaryEntryId) === entry.id ? <Popconfirm
+                  title={t('athlete:mealLogger.removePlanMealConfirm')}
+                  onConfirm={() => removePlanMealMutation.mutate(entry.nutritionPlanDiaryEntryId!)}
+                  okText={t('athlete:mealLogger.removePlanMeal')}
+                  okButtonProps={{ danger: true }}
+                >
+                  <button className="meal-section__delete-btn" aria-label={t('athlete:mealLogger.removePlanMeal')}>
+                    <span className="material-symbols-outlined">delete_sweep</span>
+                  </button>
+                </Popconfirm> : <span />}
             </div>
           ))}
 
@@ -168,7 +185,8 @@ const getMealTypeLabel = (type: MealType, t: any) => {
 };
 
 const MealLogger: React.FC = () => {
-  const { t } = useTranslation(['common', 'athlete']);
+  const { t, i18n } = useTranslation(['common', 'athlete']);
+  const ar = i18n.resolvedLanguage === 'ar';
   const today = getTodayIso();
   const [addFoodModal, setAddFoodModal] = useState<{ open: boolean; mealType: MealType }>({
     open: false,
@@ -266,7 +284,7 @@ const MealLogger: React.FC = () => {
           const percent = dailyTarget > 0 ? Math.min(100, Math.round((totalCalories / dailyTarget) * 100)) : 0;
           
           const isExpanded = expandedMeal === type;
-          const foodNames = entries.map(e => e.food?.name ?? e.recipe?.name ?? '').filter(Boolean).join(', ');
+          const foodNames = entries.map(e => (ar ? e.nameAr || e.name : e.name) ?? e.food?.name ?? e.recipe?.name ?? '').filter(Boolean).join(', ');
           
           return (
             <div key={type} className={`meal-logger__row-wrapper ${isExpanded ? 'is-expanded' : ''}`}>

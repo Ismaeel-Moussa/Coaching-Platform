@@ -269,7 +269,7 @@ const DailyLogHistoryView: React.FC<DailyLogHistoryViewProps> = ({ athleteId, da
                               {mealEntries.map((e: any) => (
                                 <div key={e.id} className="meal-entry-item">
                                   <div className="info">
-                                    <span className="name">{e.food?.name ?? e.recipe?.name ?? 'Food'}</span>
+                                    <span className="name">{(i18n.resolvedLanguage === 'ar' ? e.nameAr || e.name : e.name) ?? e.food?.name ?? e.recipe?.name ?? 'Food'}</span>
                                     <span className="qty mono">{e.quantityGrams}g</span>
                                   </div>
                                   <div className="macros mono">

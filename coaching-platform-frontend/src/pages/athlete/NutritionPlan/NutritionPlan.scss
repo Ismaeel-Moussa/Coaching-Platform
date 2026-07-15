@@ -24,6 +24,10 @@
   &__targets strong { display: block; font-size: 28px; color: var(--color-yellow, #fff200); }
   &__targets span { display: block; font-size: 12px; margin-top: 4px; }
   &__meta { color: #737b90; margin: 12px 4px 20px; }
+  &__toolbar { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 16px; margin: 12px 4px 20px; }
+  &__toolbar &__meta { margin: 0; }
+  &__toolbar &__meta { margin-inline-end: auto; }
+  &__toolbar label { display: flex; align-items: center; gap: 10px; color: #4f5870; font-weight: 600; }
   &__notes { margin-bottom: 20px; }
   &__meals { display: grid; gap: 18px; }
   &__meal { border-radius: 16px; overflow: hidden; }
@@ -34,14 +38,32 @@
   &__instructions { padding: 12px 14px; background: #f5f7fb; border-radius: 10px; margin-top: 14px; }
   &__options { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; margin-top: 10px; }
   &__option { border: 1px solid #e7eaf0; border-radius: 12px; overflow: hidden; }
+  &__option--completed { border-color: #52c41a; box-shadow: 0 0 0 1px rgba(82, 196, 26, .08); }
   &__option h4 { display: flex; gap: 8px; margin: 0; padding: 12px 14px; background: #f8f9fb; }
   &__option h4 span { color: #7c8497; font-weight: 500; }
   &__option ul { list-style: none; padding: 8px 14px; margin: 0; }
   &__option li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid #eef0f4; }
   &__option li:last-child { border-bottom: 0; }
   &__option li strong { white-space: nowrap; color: #243259; }
+  &__option-action { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 12px 14px 14px; }
+  &__option-action .ant-tag { display: inline-flex; align-items: center; gap: 4px; margin: 0 auto 0 0; }
+  [dir='rtl'] &__option-action .ant-tag { margin: 0 0 0 auto; }
+  &__option-action .material-symbols-outlined { font-size: 18px; }
   &__rules { margin-top: 20px; border-inline-start: 4px solid var(--color-yellow, #fff200); }
   &__rules li { margin-bottom: 10px; padding-inline-start: 5px; }
+}
+
+.athlete-plan-add {
+  display: grid;
+  gap: 16px;
+  padding-top: 6px;
+
+  &__option-name { padding: 13px 15px; border-radius: 10px; background: #f5f7fb; color: #182345; font-weight: 700; }
+  label { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 12px; font-weight: 600; }
+  label .ant-picker, label .ant-select, label .ant-input-number { width: 100%; }
+  fieldset { margin: 0; padding: 14px; border: 1px solid #e7eaf0; border-radius: 10px; }
+  legend { padding: 0 6px; color: #4f5870; font-weight: 600; }
+  .ant-radio-group { display: grid; gap: 10px; }
 }
 
 @media (max-width: 760px) {
@@ -51,5 +73,9 @@
     &__targets { width: 100%; }
     &__targets > div { flex: 1; min-width: 0; }
     &__meal-header { flex-direction: column; }
+    &__toolbar { align-items: stretch; flex-direction: column; }
+    &__toolbar label { justify-content: space-between; }
   }
+
+  .athlete-plan-add label { grid-template-columns: 1fr; gap: 6px; }
 }

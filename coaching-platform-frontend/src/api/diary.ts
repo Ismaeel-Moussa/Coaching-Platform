@@ -6,6 +6,8 @@ import type {
   MealLogDto,
   UpdateWaterForm,
   UpdateStepsForm,
+  LogNutritionPlanOptionForm,
+  NutritionPlanDiaryEntry,
 } from '../types/Diary';
 import type { MacroSummaryDto } from '../types/Athlete';
 import type { FoodDto } from '../types/Food';
@@ -31,6 +33,23 @@ export const bulkLogFood = async (form: BulkLogFoodForm): Promise<MealLogDto[]> 
   return response.data;
 };
 
+export const logNutritionPlanOption = async (
+  form: LogNutritionPlanOptionForm,
+): Promise<NutritionPlanDiaryEntry> => {
+  const response = await axiosInstance.post<NutritionPlanDiaryEntry>('/diary/log/nutrition-plan', form);
+  return response.data;
+};
+
+export const getNutritionPlanEntries = async (
+  assignmentId: number,
+  date: string,
+): Promise<NutritionPlanDiaryEntry[]> => {
+  const response = await axiosInstance.get<NutritionPlanDiaryEntry[]>(
+    `/diary/nutrition-plan/${assignmentId}/${date}`,
+  );
+  return response.data;
+};
+
 export const getFilteredItems = async (
   type: 'food' | 'recipe',
   source: 'recent' | 'frequent' | 'favorites',
@@ -51,6 +70,10 @@ export const toggleFavoriteRecipe = async (id: number): Promise<{ isFavorite: bo
 
 export const removeLogEntry = async (id: number): Promise<void> => {
   await axiosInstance.delete(`/diary/log/${id}`);
+};
+
+export const removeNutritionPlanEntry = async (id: number): Promise<void> => {
+  await axiosInstance.delete(`/diary/nutrition-plan/${id}`);
 };
 
 export const updateWater = async (date: string, body: UpdateWaterForm): Promise<void> => {

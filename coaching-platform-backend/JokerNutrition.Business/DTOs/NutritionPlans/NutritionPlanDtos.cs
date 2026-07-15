@@ -72,6 +72,16 @@ public class NutritionOptionItemDto
     public IngredientUnit Unit { get; set; }
     public FoodPreparationState MeasurementState { get; set; }
     public string? AlternativeGroupKey { get; set; }
+    public int? CatalogContentVersion { get; set; }
+    public decimal? CaloriesPer100Grams { get; set; }
+    public decimal? ProteinPer100Grams { get; set; }
+    public decimal? CarbsPer100Grams { get; set; }
+    public decimal? FatPer100Grams { get; set; }
+    public decimal? RecipeTotalWeightGrams { get; set; }
+    public decimal? RecipeTotalCalories { get; set; }
+    public decimal? RecipeTotalProtein { get; set; }
+    public decimal? RecipeTotalCarbs { get; set; }
+    public decimal? RecipeTotalFat { get; set; }
 }
 
 public class NutritionPlanRuleDto

@@ -53,6 +53,22 @@ public class DiaryController : ControllerBase
         return Created("", result);
     }
 
+    /// <summary>Log one selected option from the athlete's assigned nutrition plan.</summary>
+    [HttpPost("log/nutrition-plan")]
+    public async Task<IActionResult> LogNutritionPlanOption([FromBody] LogNutritionPlanOptionForm form)
+    {
+        var result = await _mealLogService.LogNutritionPlanOptionAsync(form);
+        return Created("", result);
+    }
+
+    /// <summary>Get assigned-plan meal options completed on a specific diary date.</summary>
+    [HttpGet("nutrition-plan/{assignmentId:int}/{date}")]
+    public async Task<IActionResult> GetNutritionPlanEntries(int assignmentId, DateOnly date)
+    {
+        var result = await _mealLogService.GetNutritionPlanEntriesAsync(assignmentId, date);
+        return Ok(result);
+    }
+
     /// <summary>Get recent, frequent, or favorite foods or recipes for the current athlete.</summary>
     [HttpGet("filters")]
     public async Task<IActionResult> GetFilteredItems([FromQuery] string type, [FromQuery] string source)
@@ -82,6 +98,14 @@ public class DiaryController : ControllerBase
     public async Task<IActionResult> RemoveEntry(int id)
     {
         await _mealLogService.RemoveLogEntryAsync(id);
+        return NoContent();
+    }
+
+    /// <summary>Remove a complete assigned-plan meal and all of its diary items.</summary>
+    [HttpDelete("nutrition-plan/{entryId:int}")]
+    public async Task<IActionResult> RemoveNutritionPlanEntry(int entryId)
+    {
+        await _mealLogService.RemoveNutritionPlanEntryAsync(entryId);
         return NoContent();
     }
 
