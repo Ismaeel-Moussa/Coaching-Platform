@@ -3,6 +3,7 @@ using System;
 using JokerNutrition.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JokerNutrition.Data.Migrations
 {
     [DbContext(typeof(JokerNutritionContext))]
-    partial class JokerNutritionContextModelSnapshot : ModelSnapshot
+    [Migration("20260715175427_AddAthleteOnboardingAssessment")]
+    partial class AddAthleteOnboardingAssessment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1517,37 +1520,6 @@ namespace JokerNutrition.Data.Migrations
                     b.ToTable("NutritionPlanTemplates", (string)null);
                 });
 
-            modelBuilder.Entity("JokerNutrition.Data.Entities.OnboardingPhoto", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Angle")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
-                    b.Property<string>("BlobUrl")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int>("OnboardingAssessmentId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OnboardingAssessmentId");
-
-                    b.ToTable("OnboardingPhotos", (string)null);
-                });
-
             modelBuilder.Entity("JokerNutrition.Data.Entities.Recipe", b =>
                 {
                     b.Property<int>("Id")
@@ -2607,17 +2579,6 @@ namespace JokerNutrition.Data.Migrations
                     b.Navigation("Template");
                 });
 
-            modelBuilder.Entity("JokerNutrition.Data.Entities.OnboardingPhoto", b =>
-                {
-                    b.HasOne("JokerNutrition.Data.Entities.AthleteOnboardingAssessment", "OnboardingAssessment")
-                        .WithMany("Photos")
-                        .HasForeignKey("OnboardingAssessmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("OnboardingAssessment");
-                });
-
             modelBuilder.Entity("JokerNutrition.Data.Entities.Recipe", b =>
                 {
                     b.HasOne("JokerNutrition.Data.Entities.Athlete", "CreatedByAthlete")
@@ -2762,11 +2723,6 @@ namespace JokerNutrition.Data.Migrations
                     b.Navigation("Programs");
 
                     b.Navigation("SupplementSchedules");
-                });
-
-            modelBuilder.Entity("JokerNutrition.Data.Entities.AthleteOnboardingAssessment", b =>
-                {
-                    b.Navigation("Photos");
                 });
 
             modelBuilder.Entity("JokerNutrition.Data.Entities.ClientCheckIn", b =>

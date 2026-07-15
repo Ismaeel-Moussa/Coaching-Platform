@@ -1,4 +1,4 @@
-export type NotificationType = 'CheckInSubmitted' | 'WorkoutCompleted' | 'CoachNote' | 'MacroAlert' | 'InvitationAccepted';
+export type NotificationType = 'CheckInSubmitted' | 'WorkoutCompleted' | 'CoachNote' | 'MacroAlert' | 'InvitationAccepted' | 'OnboardingSubmitted' | 'OnboardingReviewed';
 
 export interface NotificationDto {
   id: number;

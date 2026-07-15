@@ -142,6 +142,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         if (notif.type === 'InvitationAccepted') return i18n.t('common:toastTitles.rosterUpdate');
         if (notif.type === 'WorkoutCompleted') return i18n.t('common:toastTitles.workoutCompleted');
         if (notif.type === 'CheckInSubmitted') return i18n.t('common:toastTitles.checkInSubmitted');
+        if (notif.type === 'OnboardingSubmitted') return i18n.t('common:toastTitles.onboardingSubmitted');
+        if (notif.type === 'OnboardingReviewed') return i18n.t('common:toastTitles.onboardingReviewed');
         if (notif.type === 'CoachNote') {
           return notif.message.toLowerCase().includes('workout program template assigned') 
             ? i18n.t('common:toastTitles.workoutUpdate') 

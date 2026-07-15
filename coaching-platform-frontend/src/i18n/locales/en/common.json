@@ -21,6 +21,7 @@
     "supplements": "Supplements",
     "recipes": "Recipes",
     "checkIn": "Check-In",
+    "onboarding": "Initial Assessment",
     "feedback": "Coach Feedback",
     "signOut": "Sign Out",
     "more": "More",
@@ -61,6 +62,7 @@
       "workout": "Workout",
       "checkIn": "Check-In",
       "roster": "Roster",
+      "onboarding": "Onboarding",
       "general": "General"
     },
     "messages": {
@@ -74,7 +76,9 @@
       "checkInUpdated": "{{athleteName}} updated their weekly check-in.",
       "checkInReviewed": "Your coach reviewed your weekly check-in: \"{{notes}}\"",
       "invitationAccepted": "Athlete {{athleteName}} has accepted your invitation.",
-      "macroTargetsUpdated": "Coach {{coachName}} updated your daily macro targets."
+      "macroTargetsUpdated": "Coach {{coachName}} updated your daily macro targets.",
+      "onboardingSubmitted": "{{athleteName}} submitted their onboarding assessment.",
+      "onboardingReviewed": "Your coach reviewed your onboarding assessment."
     }
   },
   "notFound": {
@@ -175,6 +179,8 @@
     "rosterUpdate": "Roster Update",
     "workoutCompleted": "Workout Completed",
     "checkInSubmitted": "Check-In Submitted",
+    "onboardingSubmitted": "Onboarding Submitted",
+    "onboardingReviewed": "Onboarding Reviewed",
     "workoutUpdate": "Workout Update",
     "newFeedback": "New Feedback",
     "newNotification": "New Notification"

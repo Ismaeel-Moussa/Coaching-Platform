@@ -14,6 +14,7 @@ public class Athlete
     public decimal? HeightCm { get; set; }
     public string? TargetGoal { get; set; }
     public bool RamadanModeEnabled { get; set; } = false;
+    public AthleteOnboardingAssessment? OnboardingAssessment { get; set; }
 
     public int CurrentStreak { get; set; } = 0;
     public int LongestStreak { get; set; } = 0;

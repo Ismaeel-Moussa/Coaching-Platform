@@ -120,6 +120,22 @@ export const translateNotificationMessage = (message: string, t: TFunction): str
     });
   }
 
+  // 12. Onboarding submitted
+  const onboardingSubmittedMatch = message.match(/^(.*) submitted their onboarding assessment\.?$/i);
+  if (onboardingSubmittedMatch) {
+    return t('common:notifications.messages.onboardingSubmitted', {
+      athleteName: onboardingSubmittedMatch[1],
+      defaultValue: message
+    });
+  }
+
+  // 13. Onboarding reviewed
+  if (message.trim().replace(/\.$/, '').toLowerCase() === 'your coach reviewed your onboarding assessment') {
+    return t('common:notifications.messages.onboardingReviewed', {
+      defaultValue: message
+    });
+  }
+
   // Fallback to original message
   return message;
 };

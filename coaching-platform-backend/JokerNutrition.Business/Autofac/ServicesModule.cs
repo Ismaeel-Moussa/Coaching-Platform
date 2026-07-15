@@ -38,6 +38,7 @@ public class ServicesModule : Module
 
         // ─── Day 6: Check-In System & Notifications ───────────────────────
         builder.RegisterType<CheckInService>().As<ICheckInService>().InstancePerLifetimeScope();
+        builder.RegisterType<OnboardingAssessmentService>().As<IOnboardingAssessmentService>().InstancePerLifetimeScope();
 
         // ─── Day 7: Audit Logging ─────────────────────────────────────────
         builder.RegisterType<AuditLogService>().As<IAuditLogService>().InstancePerLifetimeScope();

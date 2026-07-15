@@ -106,5 +106,15 @@ public enum NotificationType
     WorkoutCompleted,
     CoachNote,
     MacroAlert,
-    InvitationAccepted
+    InvitationAccepted,
+    OnboardingSubmitted,
+    OnboardingReviewed
+}
+
+public enum OnboardingAssessmentStatus
+{
+    NotStarted,
+    Draft,
+    Submitted,
+    Reviewed
 }

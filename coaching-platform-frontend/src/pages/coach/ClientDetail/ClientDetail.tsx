@@ -22,6 +22,7 @@ import { formatDateDisplay } from '../../../utils/date';
 import type { CoachFeedbackNoteDto } from '../../../types/CoachHub';
 import DailyLogHistoryView from '../../../components/DailyLogHistoryView/DailyLogHistoryView';
 import CheckInCard from '../../../components/CheckInCard/CheckInCard';
+import OnboardingAssessmentReview from '../../../components/OnboardingAssessmentReview/OnboardingAssessmentReview';
 import './ClientDetail.scss';
 
 const { TextArea } = Input;
@@ -78,6 +79,16 @@ const ClientDetail: React.FC = () => {
       setNotesList(profile.feedbackNotes);
     }
   }, [profile]);
+
+  // Handle tab routing via URL hash
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash === '#onboarding-assessment') {
+      setActiveTab('onboarding-assessment');
+    } else if (hash === '#check-in-history') {
+      setActiveTab('check-in-history');
+    }
+  }, [window.location.hash]);
 
   // Hash scroll check for check-in history section
   useEffect(() => {
@@ -395,6 +406,20 @@ const ClientDetail: React.FC = () => {
                       </div>
                     </div>
                   </>
+                )
+              },
+              {
+                key: 'onboarding-assessment',
+                label: (
+                  <span className="client-detail__tab-label">
+                    <span className="material-symbols-outlined icon">assignment</span>
+                    {t('coach:onboarding.tab')}
+                  </span>
+                ),
+                children: (
+                  <div style={{ marginTop: '16px' }}>
+                    <OnboardingAssessmentReview athleteId={id} />
+                  </div>
                 )
               },
               {

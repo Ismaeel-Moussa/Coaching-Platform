@@ -1,4 +1,20 @@
 {
+  "onboarding": {
+    "tab": "Initial Assessment",
+    "title": "Athlete onboarding assessment",
+    "subtitle": "Review the athlete's goals, training background, safety information, and nutrition preferences before programming.",
+    "notStarted": "This athlete has not started the assessment yet.",
+    "draft": "The athlete is still completing this assessment.",
+    "safetyFlags": "Safety items requiring attention",
+    "noSafetyFlags": "No safety flags were reported.",
+    "reviewNotes": "Review notes for the athlete",
+    "reviewPlaceholder": "Confirm what you reviewed and add any next steps or questions...",
+    "markReviewed": "Mark as reviewed",
+    "submittedAt": "Submitted {{date}}",
+    "reviewedAt": "Reviewed {{date}}",
+    "groups": { "baseline": "Baseline", "training": "Training", "safety": "Safety & recovery", "nutrition": "Nutrition" },
+    "messages": { "reviewed": "Assessment marked as reviewed.", "reviewFailed": "Could not save the review." }
+  },
   "dashboard": {
     "title": "Coach Dashboard",
     "subtitle": "Monitor athlete progress and compliance in real-time",
