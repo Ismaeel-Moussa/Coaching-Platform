@@ -148,7 +148,10 @@ const NutritionPlan: React.FC = () => {
       <div className="athlete-plan__hero-content">
         <Text className="athlete-plan__eyebrow">{copy.subtitle}</Text>
         <Title>{ar ? plan.nameAr || plan.name : plan.name}</Title>
-        {(ar ? plan.descriptionAr || plan.description : plan.description) && <Paragraph>{ar ? plan.descriptionAr || plan.description : plan.description}</Paragraph>}
+        {(ar ? plan.descriptionAr || plan.description : plan.description) && <div className="athlete-plan__description">
+          <span className="material-symbols-outlined">format_quote</span>
+          <Paragraph>{ar ? plan.descriptionAr || plan.description : plan.description}</Paragraph>
+        </div>}
       </div>
       <div className="athlete-plan__targets">
         <div><span className="material-symbols-outlined">local_fire_department</span><strong>{plan.targetCalories}</strong><small>{copy.calories}</small></div>

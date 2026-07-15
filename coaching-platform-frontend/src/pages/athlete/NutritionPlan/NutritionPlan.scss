@@ -54,8 +54,7 @@
     max-width: 720px;
   }
 
-  &__hero h1,
-  &__hero p { color: #fff; }
+  &__hero h1 { color: #fff; }
 
   &__hero h1 {
     max-width: 720px;
@@ -65,12 +64,32 @@
     letter-spacing: -.025em;
   }
 
-  &__hero p {
+  &__description {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
     max-width: 690px;
-    margin: 0;
-    color: rgba(255, 255, 255, .72);
-    font-size: 14px;
-    line-height: 1.75;
+    margin-top: 4px;
+    padding: 10px 14px;
+    background: rgba(8, 18, 50, .2);
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-inline-start: 3px solid var(--plan-yellow);
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+
+    > .material-symbols-outlined {
+      flex: 0 0 auto;
+      margin-top: 1px;
+      color: var(--plan-yellow);
+      font-size: 18px;
+    }
+
+    .ant-typography {
+      margin: 0 !important;
+      color: rgba(255, 255, 255, .86) !important;
+      font-size: 13px;
+      line-height: 1.7;
+    }
   }
 
   &__eyebrow {
