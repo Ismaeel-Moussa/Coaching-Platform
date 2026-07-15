@@ -7,6 +7,7 @@ public class WorkoutTemplateSummaryDto
     public string? Description { get; set; }
     public string CoachName { get; set; } = string.Empty;
     public int DayCount { get; set; }
+    public string ContentStatus { get; set; } = string.Empty;
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
 }

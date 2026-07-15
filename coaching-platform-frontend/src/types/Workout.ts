@@ -102,6 +102,7 @@ export interface WorkoutTemplateSummaryDto {
   description: string | null;
   coachName: string;
   dayCount: number;
+  contentStatus: 'Draft' | 'InReview' | 'Published' | 'Archived';
   isActive: boolean;
   createdAt: string;
 }
@@ -133,6 +134,7 @@ export interface WorkoutTemplateDto {
   name: string;
   description: string | null;
   coachName: string;
+  contentStatus: 'Draft' | 'InReview' | 'Published' | 'Archived';
   isActive: boolean;
   createdAt: string;
   days: WorkoutTemplateDayDto[];

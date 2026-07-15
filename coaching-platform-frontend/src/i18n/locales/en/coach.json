@@ -189,6 +189,7 @@
     "videoLink": "Video Link"
   },
   "templateBuilder": {
+    "publishBeforeAssign": "Publish this template before assigning it to athletes.",
     "title": "Workout Program Template Builder",
     "titleEdit": "Edit Workout Program Template",
     "subtitle": "Drag-and-drop movements to curate personalized hypertrophic workout programs",

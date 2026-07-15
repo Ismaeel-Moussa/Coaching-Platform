@@ -431,6 +431,10 @@ const WorkoutTemplateBuilder: React.FC = () => {
                 <Button
                   type="link"
                   key="assign"
+                  disabled={tmpl.contentStatus !== 'Published'}
+                  title={tmpl.contentStatus !== 'Published'
+                    ? t('coach:templateBuilder.publishBeforeAssign')
+                    : undefined}
                   onClick={(e) => {
                     e.currentTarget.blur();
                     openAssignModal(tmpl.id);
@@ -546,6 +550,10 @@ const WorkoutTemplateBuilder: React.FC = () => {
                       {templateId && (
                         <Button
                           type="default"
+                          disabled={existingTemplate?.contentStatus !== 'Published'}
+                          title={existingTemplate?.contentStatus !== 'Published'
+                            ? t('coach:templateBuilder.publishBeforeAssign')
+                            : undefined}
                           onClick={() => openAssignModal(templateId)}
                           icon={<span className="material-symbols-outlined">person_add</span>}
                           className="workout-template-builder__action-btn"

@@ -14,6 +14,7 @@ public static class WorkoutTemplateMapper
             ? $"{t.CreatedByCoach.User.FirstName} {t.CreatedByCoach.User.LastName}"
             : string.Empty,
         DayCount = t.Days.Count,
+        ContentStatus = t.ContentStatus.ToString(),
         IsActive = t.IsActive,
         CreatedAt = t.CreatedAt
     };
@@ -26,6 +27,7 @@ public static class WorkoutTemplateMapper
         CoachName = t.CreatedByCoach != null
             ? $"{t.CreatedByCoach.User.FirstName} {t.CreatedByCoach.User.LastName}"
             : string.Empty,
+        ContentStatus = t.ContentStatus.ToString(),
         IsActive = t.IsActive,
         CreatedAt = t.CreatedAt,
         Days = t.Days

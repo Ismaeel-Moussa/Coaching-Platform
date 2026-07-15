@@ -566,7 +566,9 @@ const AthleteAssignmentHub: React.FC = () => {
             value={tempSelectedProgramId}
             onChange={(val) => setTempSelectedProgramId(val)}
             loading={isTemplatesLoading}
-            options={templatesData?.items?.map((tmpl: any) => ({
+            options={templatesData?.items
+              ?.filter((tmpl) => tmpl.contentStatus === 'Published')
+              .map((tmpl) => ({
               value: tmpl.id,
               label: `${tmpl.name} (${tmpl.dayCount} ${t('coach:templateBuilder.daysCount', { count: tmpl.dayCount })})`
             })) || []}
