@@ -54,12 +54,43 @@ export interface MacroTargetDto {
 }
 
 import type { TodaysWorkoutDto } from './Workout';
-import type { DailyDiaryDto } from './Diary';
+import type { DailyDiaryDto, MealType } from './Diary';
 import type { SupplementDto } from './Supplement';
+
+export type NutritionPlanDayType = 'Training' | 'Rest' | 'AllDays' | 'Unspecified';
+export type NutritionPlanBlockStatus = 'Completed' | 'Missed' | 'Pending' | 'NotTracked';
+
+export interface NutritionPlanBlockAdherenceDto {
+  mealBlockId: number;
+  orderIndex: number;
+  label: string;
+  labelAr: string | null;
+  targetCalories: number | null;
+  status: NutritionPlanBlockStatus;
+  mealOptionId: number | null;
+  optionLabel: string | null;
+  optionLabelAr: string | null;
+  loggedMealType: MealType | null;
+  servings: number | null;
+  loggedAt: string | null;
+}
+
+export interface NutritionPlanAdherenceDto {
+  assignmentId: number;
+  planName: string;
+  planNameAr: string | null;
+  dayType: NutritionPlanDayType;
+  isPartialDay: boolean;
+  completedBlocks: number;
+  totalBlocks: number;
+  completionPercent: number;
+  blocks: NutritionPlanBlockAdherenceDto[];
+}
 
 export interface DailyLogHistoryDto {
   date: string;
   workout: TodaysWorkoutDto | null;
   nutrition: DailyDiaryDto | null;
+  nutritionPlanAdherences: NutritionPlanAdherenceDto[];
   supplements: SupplementDto[];
 }

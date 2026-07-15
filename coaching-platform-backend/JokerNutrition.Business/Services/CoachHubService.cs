@@ -242,7 +242,7 @@ public class CoachHubService : _BaseService, ICoachHubService
             double compliance = 0;
             if (targetCalories > 0)
             {
-                compliance = Math.Min(100.0, (double)(consumed / targetCalories) * 100.0);
+                compliance = (double)(consumed / targetCalories) * 100.0;
             }
 
             return CoachHubMapper.MapRosterItem(athlete, program, lastCheckIn, compliance);

@@ -73,7 +73,27 @@
     "reviewedAt": "تمت المراجعة: {{date}}",
     "saveReview": "حفظ المراجعة",
     "editTargets": "تعديل الخطط والأهداف",
-    "dailyHistoryTab": "سجل المتابعة اليومي"
+    "dailyHistoryTab": "سجل المتابعة اليومي",
+    "planAdherence": {
+      "title": "الالتزام بالخطة المعيّنة",
+      "progress": "أقسام الوجبات المكتملة",
+      "selectedOption": "الخيار المختار",
+      "fromPlan": "من الخطة",
+      "partialDay": "تعيين لجزء من اليوم",
+      "dayTypeUnknown": "تعذّر تحديد نوع يوم التغذية لعدم تسجيل وجبة مشروطة من الخطة أو يوم تمرين.",
+      "dayTypes": {
+        "training": "يوم تمرين",
+        "rest": "يوم راحة",
+        "allDays": "خطة يومية",
+        "unspecified": "نوع اليوم غير محدد"
+      },
+      "status": {
+        "completed": "مكتمل",
+        "missed": "فائت",
+        "pending": "قيد الانتظار",
+        "notTracked": "غير محسوب"
+      }
+    }
   },
   "assignmentHub": {
     "nutritionPlan": "خطة التغذية",

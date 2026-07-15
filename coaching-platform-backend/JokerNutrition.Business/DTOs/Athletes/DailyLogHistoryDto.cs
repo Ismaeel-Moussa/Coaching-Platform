@@ -9,5 +9,6 @@ public class DailyLogHistoryDto
     public DateOnly Date { get; set; }
     public TodaysWorkoutDto? Workout { get; set; }
     public DailyDiaryDto? Nutrition { get; set; }
+    public List<NutritionPlanAdherenceDto> NutritionPlanAdherences { get; set; } = new();
     public List<SupplementDto> Supplements { get; set; } = new();
 }
