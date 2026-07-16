@@ -15,7 +15,6 @@ const History: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
   const [activeTab, setActiveTab] = useState<string>('daily-logs');
   const [selectedCheckInId, setSelectedCheckInId] = useState<number | null>(null);
-  const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
 
   const { data: dashboardData, isLoading: isDashboardLoading } = useGetDashboard();
   const queryClient = useQueryClient();
@@ -136,11 +135,10 @@ const History: React.FC = () => {
                         />
                       </div>
                       {selectedCheckIn ? (
-                        <CheckInCard
+                         <CheckInCard
                           key={selectedCheckIn.id}
                           checkIn={selectedCheckIn}
                           isCoach={false}
-                          onPhotoClick={(url) => setLightboxPhoto(url)}
                         />
                       ) : (
                         <Empty description={t('coach:clientDetail.noCheckins', 'No check-ins submitted yet.')} style={{ padding: '40px 0' }} />
@@ -156,23 +154,6 @@ const History: React.FC = () => {
         ]}
       />
 
-      {/* Lightbox Modal */}
-      <Modal
-        open={!!lightboxPhoto}
-        onCancel={() => setLightboxPhoto(null)}
-        footer={null}
-        width={800}
-        centered
-        styles={{ body: { padding: 0 } }}
-      >
-        {lightboxPhoto && (
-          <img
-            src={lightboxPhoto}
-            alt="Enlarged progress preview"
-            style={{ width: '100%', height: 'auto', display: 'block' }}
-          />
-        )}
-      </Modal>
     </div>
   );
 };

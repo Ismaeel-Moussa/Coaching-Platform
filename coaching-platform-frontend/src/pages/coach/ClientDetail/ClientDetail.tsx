@@ -50,10 +50,9 @@ const ClientDetail: React.FC = () => {
   const [noteText, setNoteText] = useState<string>('');
   const [notesList, setNotesList] = useState<CoachFeedbackNoteDto[]>([]);
 
-  // Check-In History Week Dropdown & Lightbox Photo State
+  // Check-In History Week Dropdown
   const [selectedCheckInId, setSelectedCheckInId] = useState<number | null>(null);
   const { data: checkInHistory, isLoading: isHistoryLoading } = useGetCheckInHistory(1, 100, id);
-  const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
 
   const selectedCheckIn = checkInHistory?.items.find(item => item.id === selectedCheckInId) || checkInHistory?.items[0];
 
@@ -68,10 +67,6 @@ const ClientDetail: React.FC = () => {
       setSelectedCheckInId(null);
     }
   }, [checkInHistory, selectedCheckInId]);
-
-  const handlePhotoClick = React.useCallback((url: string) => {
-    setLightboxPhoto(url);
-  }, []);
 
   // Keep notes synchronized when profile loads
   useEffect(() => {
@@ -456,7 +451,6 @@ const ClientDetail: React.FC = () => {
                               key={selectedCheckIn.id}
                               checkIn={selectedCheckIn}
                               isCoach={true}
-                              onPhotoClick={handlePhotoClick}
                             />
                           ) : (
                             <Empty description={t('coach:clientDetail.noCheckins')} style={{ padding: '40px 0' }} />
@@ -506,23 +500,6 @@ const ClientDetail: React.FC = () => {
         </div>
       ) : null}
 
-      {/* Lightbox Modal */}
-      <Modal
-        open={!!lightboxPhoto}
-        onCancel={() => setLightboxPhoto(null)}
-        footer={null}
-        width={800}
-        centered
-        styles={{ body: { padding: 0 } }}
-      >
-        {lightboxPhoto && (
-          <img
-            src={lightboxPhoto}
-            alt="Enlarged progress preview"
-            style={{ width: '100%', height: 'auto', display: 'block' }}
-          />
-        )}
-      </Modal>
     </div>
   );
 };

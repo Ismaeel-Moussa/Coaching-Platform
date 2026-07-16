@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Card, Tag, Empty, Button, Skeleton, Result, Modal, Divider, Descriptions, Col, Row, Image, Progress } from 'antd';
+import { Card, Tag, Empty, Button, Skeleton, Result, Modal, Divider, Descriptions, Col, Row, Progress } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGetFeedbackHistory } from '../../../hooks/useAthlete/useAthlete';
-import { useGetCheckInById } from '../../../hooks/useCheckIn/useCheckIn';
+import { useGetCheckInHistory, useGetCheckInById } from '../../../hooks/useCheckIn/useCheckIn';
 import { formatDateDisplay } from '../../../utils/date';
+import ProgressPhotoViewer from '../../../components/ProgressPhotoViewer/ProgressPhotoViewer';
 import './Feedback.scss';
 
 const Feedback: React.FC = () => {
@@ -271,31 +272,13 @@ const Feedback: React.FC = () => {
                 <span className="material-symbols-outlined">photo_camera</span>
                 {t('athlete:checkIn.photosSummary', 'Submitted Progress Photos')}
               </h3>
-              <Image.PreviewGroup>
-                <div className="check-in-preview__photos-grid">
-                  {['Front', 'Side', 'Back'].map((angle) => {
-                    const photo = checkInDetails.photos?.find((p: any) => p.angle === angle);
-                    return (
-                      <div key={angle} className="check-in-preview__photo-item">
-                        <span className="mono check-in-preview__photo-label">
-                          {angle === 'Front' ? t('athlete:checkIn.frontView') : angle === 'Side' ? t('athlete:checkIn.sideView') : t('athlete:checkIn.backView')}
-                        </span>
-                        {photo?.signedDownloadUrl ? (
-                          <Image 
-                            src={photo.signedDownloadUrl} 
-                            alt={`${angle} View`} 
-                            className="check-in-preview__photo-img"
-                          />
-                        ) : (
-                          <div className="check-in-preview__photo-empty">
-                            {t('athlete:checkIn.noPhotoSelected', 'No photo')}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </Image.PreviewGroup>
+              <ProgressPhotoViewer
+                photos={['Front', 'Side', 'Back'].map((angle) => ({
+                  angle,
+                  url: checkInDetails.photos?.find((p: any) => p.angle === angle)?.signedDownloadUrl
+                }))}
+                variant="grid"
+              />
             </div>
           </div>
         ) : null}
