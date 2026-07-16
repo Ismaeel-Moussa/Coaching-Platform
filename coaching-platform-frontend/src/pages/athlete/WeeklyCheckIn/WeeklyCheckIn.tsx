@@ -8,34 +8,8 @@ import PhotoUploadZone from '../../../components/PhotoUploadZone/PhotoUploadZone
 import { useSubmitCheckIn, useUploadPhotos, useGetCheckInHistory } from '../../../hooks/useCheckIn/useCheckIn';
 import { deletePhoto } from '../../../api/checkIn';
 import { formatDateDisplay } from '../../../utils/date';
+import ProgressPhotoViewer from '../../../components/ProgressPhotoViewer/ProgressPhotoViewer';
 import './WeeklyCheckIn.scss';
-
-const PhotoPreview: React.FC<{ file: File | null; existingUrl?: string | null; label: string }> = ({ file, existingUrl, label }) => {
-  const { t } = useTranslation();
-  const [url, setUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (file) {
-      const objectUrl = URL.createObjectURL(file);
-      setUrl(objectUrl);
-      return () => URL.revokeObjectURL(objectUrl);
-    }
-    setUrl(null);
-  }, [file]);
-
-  const displayUrl = url || existingUrl;
-
-  return (
-    <div className="weekly-check-in__review-photo-item">
-      <h4>{label}</h4>
-      {displayUrl ? (
-        <img src={displayUrl} alt={`${label} Preview`} className="weekly-check-in__review-photo-img" />
-      ) : (
-        <div className="weekly-check-in__review-photo-empty">{t('athlete:checkIn.noPhotoSelected')}</div>
-      )}
-    </div>
-  );
-};
 
 const WeeklyCheckIn: React.FC = () => {
   const { t } = useTranslation();
@@ -591,23 +565,14 @@ const WeeklyCheckIn: React.FC = () => {
                   <h3 className="weekly-check-in__subsection-title">
                     <span className="material-symbols-outlined text-gold">photo_camera</span> {t('athlete:checkIn.photosSummary')}
                   </h3>
-                  <div className="weekly-check-in__review-photos">
-                    <PhotoPreview 
-                      file={frontFile} 
-                      existingUrl={!deletedAngles.includes('Front') ? existingFrontPhoto?.signedDownloadUrl : null} 
-                      label={t('athlete:checkIn.frontView')} 
-                    />
-                    <PhotoPreview 
-                      file={sideFile} 
-                      existingUrl={!deletedAngles.includes('Side') ? existingSidePhoto?.signedDownloadUrl : null} 
-                      label={t('athlete:checkIn.sideView')} 
-                    />
-                    <PhotoPreview 
-                      file={backFile} 
-                      existingUrl={!deletedAngles.includes('Back') ? existingBackPhoto?.signedDownloadUrl : null} 
-                      label={t('athlete:checkIn.backView')} 
-                    />
-                  </div>
+                  <ProgressPhotoViewer
+                    photos={[
+                      { angle: 'Front', file: frontFile, url: !deletedAngles.includes('Front') ? existingFrontPhoto?.signedDownloadUrl : null },
+                      { angle: 'Side', file: sideFile, url: !deletedAngles.includes('Side') ? existingSidePhoto?.signedDownloadUrl : null },
+                      { angle: 'Back', file: backFile, url: !deletedAngles.includes('Back') ? existingBackPhoto?.signedDownloadUrl : null }
+                    ]}
+                    variant="grid"
+                  />
                 </div>
               </div>
 

@@ -1,6 +1,7 @@
 import { Alert, Button, Empty, Input, Skeleton, Tag } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import ProgressPhotoViewer from '../ProgressPhotoViewer/ProgressPhotoViewer';
 import {
   useAthleteOnboardingAssessment,
   useReviewOnboardingAssessment,
@@ -135,18 +136,13 @@ const OnboardingAssessmentReview = ({ athleteId }: Props) => {
       {data.photos && data.photos.length > 0 && (
         <section className="onboarding-review__photos-section">
           <h3><span className="material-symbols-outlined">add_a_photo</span>{t('athlete:onboarding.fields.photos')}</h3>
-          <div className="onboarding-review__photos-grid">
-            {data.photos.map((photo) => (
-              <div className="onboarding-review__photo-card" key={photo.id}>
-                <img
-                  src={photo.signedDownloadUrl}
-                  alt={photo.angle}
-                  onClick={() => window.open(photo.signedDownloadUrl, '_blank')}
-                />
-                <span>{t(`common:photoUpload.angles.${photo.angle.toLowerCase()}`, { defaultValue: photo.angle })}</span>
-              </div>
-            ))}
-          </div>
+          <ProgressPhotoViewer
+            photos={data.photos.map((photo) => ({
+              angle: photo.angle,
+              url: photo.signedDownloadUrl
+            }))}
+            variant="grid"
+          />
         </section>
       )}
 

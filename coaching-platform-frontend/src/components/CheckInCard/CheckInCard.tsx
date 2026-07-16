@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAddCoachNotes } from '../../hooks/useCheckIn/useCheckIn';
 import { formatDateDisplay } from '../../utils/date';
 import type { CheckInDto } from '../../types/CheckIn';
+import ProgressPhotoViewer from '../ProgressPhotoViewer/ProgressPhotoViewer';
 import './CheckInCard.scss';
 
 const { TextArea } = Input;
@@ -11,7 +12,7 @@ const { TextArea } = Input;
 interface CheckInCardProps {
   checkIn: CheckInDto;
   isCoach?: boolean;
-  onPhotoClick: (url: string) => void;
+  onPhotoClick?: (url: string) => void;
 }
 
 const getSubjectiveLabel = (label: string, t: any) => {
@@ -107,25 +108,13 @@ const CheckInCard: React.FC<CheckInCardProps> = React.memo(({
         {/* Photos */}
         <div className="checkin-card-item__section checkin-card-item__section--photos">
           <h4 className="checkin-card-item__section-title">{t('coach:clientDetail.photos')}</h4>
-          <div className="checkin-card-item__photos-row">
-            {checkIn.photos && checkIn.photos.length > 0 ? (
-              checkIn.photos.map((photo: any) => (
-                <div
-                  className="checkin-card-item__photo-thumb"
-                  key={photo.id}
-                  onClick={() => onPhotoClick(photo.signedDownloadUrl)}
-                >
-                  <img src={photo.signedDownloadUrl} alt={`${photo.angle} view`} />
-                  <span className="angle-label">{photo.angle}</span>
-                </div>
-              ))
-            ) : (
-              <div className="checkin-card-item__no-photos">
-                <span className="material-symbols-outlined">hide_image</span>
-                <span>{t('coach:clientDetail.noPhotos')}</span>
-              </div>
-            )}
-          </div>
+          <ProgressPhotoViewer
+            photos={checkIn.photos?.map((photo: any) => ({
+              angle: photo.angle,
+              url: photo.signedDownloadUrl
+            })) || []}
+            variant="thumb"
+          />
         </div>
       </div>
 
