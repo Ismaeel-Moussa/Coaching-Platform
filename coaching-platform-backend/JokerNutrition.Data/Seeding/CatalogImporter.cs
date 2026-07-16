@@ -187,7 +187,7 @@ public sealed class CatalogImporter(JokerNutritionContext context)
                 warnings.Add($"Nutrition template '{nutrition.SeedKey}' meal blocks total {blockCalories} kcal but headline target is {nutrition.TargetCalories} kcal.");
             foreach (var item in nutrition.MealBlocks.SelectMany(b => b.Options).SelectMany(o => o.Items))
             {
-                var referenceCount = new[] { item.FoodSeedKey, item.RecipeSeedKey, item.ItemName, item.ItemNameAr }
+                var referenceCount = new[] { item.FoodSeedKey, item.RecipeSeedKey, item.ItemName }
                     .Count(value => !string.IsNullOrWhiteSpace(value));
                 if (referenceCount == 0)
                     errors.Add($"Nutrition template '{nutrition.SeedKey}' contains an option item without a food, recipe, or display name.");
@@ -531,9 +531,7 @@ public sealed class CatalogImporter(JokerNutritionContext context)
             }
 
             entity.Name = record.Name;
-            entity.NameAr = record.NameAr;
             entity.Description = record.Description;
-            entity.DescriptionAr = record.DescriptionAr;
             entity.TargetCalories = record.TargetCalories;
             entity.MinimumProteinGrams = record.MinimumProteinGrams;
             entity.ContentStatus = record.ContentStatus;
@@ -545,25 +543,21 @@ public sealed class CatalogImporter(JokerNutritionContext context)
             {
                 OrderIndex = rule.OrderIndex,
                 RuleType = rule.RuleType,
-                Text = rule.Text,
-                TextAr = rule.TextAr
+                Text = rule.Text
             }).ToList();
             entity.MealBlocks = record.MealBlocks.OrderBy(b => b.OrderIndex).Select(block => new NutritionMealBlock
             {
                 OrderIndex = block.OrderIndex,
                 MealType = block.MealType,
                 Label = block.Label,
-                LabelAr = block.LabelAr,
                 TargetCalories = block.TargetCalories,
                 TrainingDayOnly = block.TrainingDayOnly,
                 RestDayOnly = block.RestDayOnly,
                 Instructions = block.Instructions,
-                InstructionsAr = block.InstructionsAr,
                 Options = block.Options.OrderBy(o => o.OrderIndex).Select(option => new NutritionMealOption
                 {
                     OrderIndex = option.OrderIndex,
                     Label = option.Label,
-                    LabelAr = option.LabelAr,
                     IsCompleteOption = option.IsCompleteOption,
                     Items = option.Items.OrderBy(i => i.OrderIndex).Select(item => new NutritionOptionItem
                     {
@@ -573,7 +567,6 @@ public sealed class CatalogImporter(JokerNutritionContext context)
                         RecipeId = item.RecipeSeedKey is null ? null : recipes[item.RecipeSeedKey].Id,
                         Recipe = item.RecipeSeedKey is null ? null : recipes[item.RecipeSeedKey],
                         ItemName = item.ItemName,
-                        ItemNameAr = item.ItemNameAr,
                         Quantity = item.Quantity,
                         Unit = item.Unit,
                         MeasurementState = item.MeasurementState,

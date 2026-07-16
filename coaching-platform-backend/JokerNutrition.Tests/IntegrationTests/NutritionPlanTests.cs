@@ -416,9 +416,7 @@ public class NutritionPlanTests : IClassFixture<TestWebAppFactory>
     private static object BuildPlan(string name, decimal targetCalories, decimal mealCalories, int? expectedContentVersion = null) => new
     {
         name,
-        nameAr = "خطة التغذية التجريبية",
         description = "Integration test plan",
-        descriptionAr = "خطة لاختبار التكامل",
         targetCalories,
         minimumProteinGrams = 150,
         expectedContentVersion,
@@ -428,25 +426,21 @@ public class NutritionPlanTests : IClassFixture<TestWebAppFactory>
             {
                 mealType = 0,
                 label = "Daily meals",
-                labelAr = "الوجبات اليومية",
                 targetCalories = mealCalories,
                 trainingDayOnly = false,
                 restDayOnly = false,
                 instructions = "Choose one option.",
-                instructionsAr = "اختر خياراً واحداً.",
                 options = new[]
                 {
                     new
                     {
                         label = "Option one",
-                        labelAr = "الخيار الأول",
                         isCompleteOption = true,
                         items = new[]
                         {
                             new
                             {
                                 itemName = "Balanced meal",
-                                itemNameAr = "وجبة متوازنة",
                                 quantity = 1,
                                 unit = 2,
                                 measurementState = 0
@@ -458,21 +452,20 @@ public class NutritionPlanTests : IClassFixture<TestWebAppFactory>
         },
         rules = new[]
         {
-            new { ruleType = "general", text = "Drink water.", textAr = "اشرب الماء." }
+            new { ruleType = "general", text = "Drink water." }
         }
     };
 
     private static object BuildConditionalPlan() => new
     {
         name = "Conditional plan",
-        nameAr = "خطة مشروطة",
         targetCalories = 1900,
         minimumProteinGrams = 150,
         mealBlocks = new[]
         {
-            BuildMealBlock("Shared meals", "الوجبات المشتركة", 1000, false, false),
-            BuildMealBlock("Training meal", "وجبة التدريب", 900, true, false),
-            BuildMealBlock("Rest meal", "وجبة الراحة", 900, false, true),
+            BuildMealBlock("Shared meals", 1000, false, false),
+            BuildMealBlock("Training meal", 900, true, false),
+            BuildMealBlock("Rest meal", 900, false, true),
         },
         rules = Array.Empty<object>()
     };
@@ -480,7 +473,6 @@ public class NutritionPlanTests : IClassFixture<TestWebAppFactory>
     private static object BuildLoggablePlan(int foodId) => new
     {
         name = $"Loggable plan {Guid.NewGuid():N}",
-        nameAr = "خطة قابلة للتسجيل",
         targetCalories = 300,
         minimumProteinGrams = 60,
         mealBlocks = new[]
@@ -489,7 +481,6 @@ public class NutritionPlanTests : IClassFixture<TestWebAppFactory>
             {
                 mealType = 0,
                 label = "Breakfast",
-                labelAr = "الفطور",
                 targetCalories = 300,
                 trainingDayOnly = false,
                 restDayOnly = false,
@@ -498,7 +489,6 @@ public class NutritionPlanTests : IClassFixture<TestWebAppFactory>
                     new
                     {
                         label = "Oats option",
-                        labelAr = "خيار الشوفان",
                         isCompleteOption = true,
                         items = new[]
                         {
@@ -517,11 +507,10 @@ public class NutritionPlanTests : IClassFixture<TestWebAppFactory>
         rules = Array.Empty<object>()
     };
 
-    private static object BuildMealBlock(string label, string labelAr, decimal calories, bool trainingOnly, bool restOnly) => new
+    private static object BuildMealBlock(string label, decimal calories, bool trainingOnly, bool restOnly) => new
     {
         mealType = 0,
         label,
-        labelAr,
         targetCalories = calories,
         trainingDayOnly = trainingOnly,
         restDayOnly = restOnly,
@@ -530,11 +519,10 @@ public class NutritionPlanTests : IClassFixture<TestWebAppFactory>
             new
             {
                 label = "Option",
-                labelAr = "خيار",
                 isCompleteOption = true,
                 items = new[]
                 {
-                    new { itemName = "Meal", itemNameAr = "وجبة", quantity = 1, unit = 2, measurementState = 0 }
+                    new { itemName = "Meal", quantity = 1, unit = 2, measurementState = 0 }
                 }
             }
         }

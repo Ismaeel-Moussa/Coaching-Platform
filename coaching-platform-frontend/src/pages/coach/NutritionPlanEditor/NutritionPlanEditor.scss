@@ -1,0 +1,262 @@
+.nutrition-editor {
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+
+    h2 {
+      margin-bottom: 4px;
+    }
+  }
+
+  &__tabs {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+  }
+
+  &__card {
+    border: none;
+    background: #ffffff;
+  }
+
+  &__general-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 24px;
+  }
+
+  &__full-width {
+    grid-column: span 2;
+  }
+
+  &__meals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__collapse {
+    background: transparent;
+    border: none;
+
+    .ant-collapse-item {
+      margin-bottom: 16px;
+      background: #fafafa;
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+      overflow: hidden;
+      border-inline-start: 4px solid var(--color-yellow, #ffec00);
+    }
+
+    .ant-collapse-header {
+      align-items: center;
+      padding: 12px 24px;
+    }
+  }
+
+  &__panel-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  &__meal-fields-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 24px;
+    margin-bottom: 24px;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+  }
+
+  &__span-2 {
+    grid-column: span 2;
+  }
+
+  &__checkboxes {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    height: 32px;
+  }
+
+  &__options-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__options-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #d9d9d9;
+    padding-bottom: 8px;
+  }
+
+  &__option-card {
+    background: #ffffff !important;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+
+    .ant-card-head {
+      background: #fdfdfd;
+      border-bottom: 1px solid #f0f0f0;
+    }
+  }
+
+  &__option-header-fields {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 12px;
+  }
+
+  &__items-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__source-hint {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  &__rules-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__rules-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  &__rule-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    background: #fafafa;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+  }
+}
+
+// Option item row optimized styles
+.nutrition-editor-item-row {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #d9d9d9;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+
+  &__source-selector {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 16px;
+    align-items: center;
+  }
+
+  &__radio-group {
+    display: flex;
+    width: 100%;
+    
+    .ant-radio-button-wrapper {
+      flex: 1;
+      text-align: center;
+    }
+  }
+
+  &__input-container {
+    width: 100%;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr) auto;
+    gap: 16px;
+    align-items: flex-end;
+  }
+
+  &__field {
+    margin-bottom: 0 !important;
+
+    .ant-form-item-label {
+      padding-bottom: 4px;
+    }
+  }
+
+  &__remove-btn {
+    align-self: flex-end;
+    margin-bottom: 4px;
+  }
+}
+
+@media (max-width: 900px) {
+  .nutrition-editor {
+    padding: 20px 16px;
+    
+    &__general-grid,
+    &__meal-fields-grid {
+      grid-template-columns: 1fr;
+    }
+
+    &__full-width,
+    &__span-2 {
+      grid-column: span 1;
+    }
+
+    .nutrition-editor-item-row {
+      &__source-selector {
+        grid-template-columns: 1fr;
+      }
+      &__grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      &__remove-btn {
+        grid-column: span 2;
+        width: 100%;
+        text-align: center;
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .nutrition-editor-item-row {
+    &__grid {
+      grid-template-columns: 1fr;
+    }
+    &__remove-btn {
+      grid-column: span 1;
+    }
+  }
+}

@@ -536,7 +536,7 @@ public class MealLogService : _BaseService, IMealLogService
     {
         var quantityGrams = await ResolveQuantityGramsAsync(item, servings);
         var snapshotName = item.FoodName ?? item.RecipeName ?? item.ItemName;
-        var snapshotNameAr = item.FoodNameAr ?? item.RecipeNameAr ?? item.ItemNameAr;
+        var snapshotNameAr = item.FoodNameAr ?? item.RecipeNameAr;
 
         if (item.FoodId.HasValue &&
             item.CaloriesPer100Grams.HasValue && item.ProteinPer100Grams.HasValue &&

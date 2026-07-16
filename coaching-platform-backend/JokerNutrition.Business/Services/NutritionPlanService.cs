@@ -66,8 +66,7 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
         {
             var term = search.Trim().ToLower();
             query = query.Where(template =>
-                template.Name.ToLower().Contains(term) ||
-                (template.NameAr != null && template.NameAr.ToLower().Contains(term)));
+                template.Name.ToLower().Contains(term));
         }
 
         var totalCount = await query.CountAsync();
@@ -361,9 +360,7 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
         if (recipes.Count != recipeIds.Count) throw new ArgumentException("One or more selected recipes no longer exist.");
 
         template.Name = form.Name.Trim();
-        template.NameAr = form.NameAr.Trim();
         template.Description = form.Description?.Trim();
-        template.DescriptionAr = form.DescriptionAr?.Trim();
         template.TargetCalories = form.TargetCalories;
         template.MinimumProteinGrams = form.MinimumProteinGrams;
         template.MealBlocks = form.MealBlocks.Select((block, blockIndex) => new NutritionMealBlock
@@ -371,17 +368,14 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
             OrderIndex = blockIndex + 1,
             MealType = block.MealType,
             Label = block.Label.Trim(),
-            LabelAr = block.LabelAr.Trim(),
             TargetCalories = block.TargetCalories,
             TrainingDayOnly = block.TrainingDayOnly,
             RestDayOnly = block.RestDayOnly,
             Instructions = block.Instructions?.Trim(),
-            InstructionsAr = block.InstructionsAr?.Trim(),
             Options = block.Options.Select((option, optionIndex) => new NutritionMealOption
             {
                 OrderIndex = optionIndex + 1,
                 Label = option.Label.Trim(),
-                LabelAr = option.LabelAr.Trim(),
                 IsCompleteOption = option.IsCompleteOption,
                 Items = option.Items.Select((item, itemIndex) => new NutritionOptionItem
                 {
@@ -391,7 +385,6 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
                     RecipeId = item.RecipeId,
                     Recipe = item.RecipeId.HasValue ? recipes[item.RecipeId.Value] : null,
                     ItemName = item.ItemName?.Trim(),
-                    ItemNameAr = item.ItemNameAr?.Trim(),
                     Quantity = item.Quantity,
                     Unit = item.Unit,
                     MeasurementState = item.MeasurementState,
@@ -403,8 +396,7 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
         {
             OrderIndex = ruleIndex + 1,
             RuleType = rule.RuleType.Trim(),
-            Text = rule.Text?.Trim(),
-            TextAr = rule.TextAr.Trim()
+            Text = rule.Text?.Trim()
         }).ToList();
     }
 
@@ -443,8 +435,8 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
             Path = path
         });
 
-        if (string.IsNullOrWhiteSpace(template.Name) || string.IsNullOrWhiteSpace(template.NameAr))
-            Error("bilingual_name_required", "English and Arabic plan names are required.", "name");
+        if (string.IsNullOrWhiteSpace(template.Name))
+            Error("name_required", "Plan name is required.", "name");
         if (template.MealBlocks.Count == 0)
             Error("meal_block_required", "At least one meal block is required.", "mealBlocks");
         if (!hasConditionalBlocks && Math.Abs(result.TargetCalories - sharedCalories) > 0.01m)
@@ -459,8 +451,8 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
             var blockPath = $"mealBlocks[{block.OrderIndex - 1}]";
             if (!Enum.IsDefined(typeof(MealType), block.MealType))
                 Error("invalid_meal_type", "Every meal block must use a supported meal type.", $"{blockPath}.mealType");
-            if (string.IsNullOrWhiteSpace(block.Label) || string.IsNullOrWhiteSpace(block.LabelAr))
-                Error("bilingual_meal_label_required", "Every meal block needs English and Arabic labels.", blockPath);
+            if (string.IsNullOrWhiteSpace(block.Label))
+                Error("meal_label_required", "Every meal block needs a label.", blockPath);
             if (block.TrainingDayOnly && block.RestDayOnly)
                 Error("conflicting_day_filter", "A meal block cannot be both training-day-only and rest-day-only.", blockPath);
             if (block.Options.Count == 0)
@@ -469,8 +461,8 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
             foreach (var option in block.Options.OrderBy(item => item.OrderIndex))
             {
                 var optionPath = $"{blockPath}.options[{option.OrderIndex - 1}]";
-                if (string.IsNullOrWhiteSpace(option.Label) || string.IsNullOrWhiteSpace(option.LabelAr))
-                    Error("bilingual_option_label_required", "Every option needs English and Arabic labels.", optionPath);
+                if (string.IsNullOrWhiteSpace(option.Label))
+                    Error("option_label_required", "Every option needs a label.", optionPath);
                 if (option.Items.Count == 0)
                     Error("option_item_required", $"{option.Label} needs at least one item.", $"{optionPath}.items");
 
@@ -481,14 +473,14 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
                     if (!Enum.IsDefined(typeof(FoodPreparationState), item.MeasurementState))
                         Error("invalid_measurement_state", "Every item must use a supported preparation state.", $"{optionPath}.items");
                     var sources = (item.FoodId.HasValue ? 1 : 0) + (item.RecipeId.HasValue ? 1 : 0) +
-                                  (!string.IsNullOrWhiteSpace(item.ItemName) || !string.IsNullOrWhiteSpace(item.ItemNameAr) ? 1 : 0);
+                                  (!string.IsNullOrWhiteSpace(item.ItemName) ? 1 : 0);
                     if (sources != 1)
                         Error("single_item_source_required", "Each item must reference exactly one food, recipe, or custom item.", optionPath);
                     if (item.Recipe is not null && item.Recipe.ContentStatus != ContentStatus.Published)
                         Error("published_recipe_required", $"Recipe '{item.Recipe.Name}' must be published before this plan can be published.", optionPath);
                     if (item.FoodId is null && item.RecipeId is null &&
-                        (string.IsNullOrWhiteSpace(item.ItemName) || string.IsNullOrWhiteSpace(item.ItemNameAr)))
-                        Error("bilingual_custom_item_required", "Custom items need English and Arabic names.", optionPath);
+                        string.IsNullOrWhiteSpace(item.ItemName))
+                        Error("custom_item_required", "Custom items need a name.", optionPath);
                     if (item.FoodId is null && item.RecipeId is null)
                         Warning("diary_logging_unavailable",
                             "Custom text items cannot be added automatically to the athlete diary. Link this item to a food or recipe.",

@@ -21,9 +21,7 @@ public class NutritionPlanTemplate
     public int Id { get; set; }
     public string SeedKey { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public string? NameAr { get; set; }
     public string? Description { get; set; }
-    public string? DescriptionAr { get; set; }
     public decimal TargetCalories { get; set; }
     public decimal MinimumProteinGrams { get; set; }
     public ContentStatus ContentStatus { get; set; } = ContentStatus.Draft;
@@ -49,12 +47,10 @@ public class NutritionMealBlock
     public int OrderIndex { get; set; }
     public MealType MealType { get; set; }
     public string Label { get; set; } = string.Empty;
-    public string? LabelAr { get; set; }
     public decimal? TargetCalories { get; set; }
     public bool TrainingDayOnly { get; set; }
     public bool RestDayOnly { get; set; }
     public string? Instructions { get; set; }
-    public string? InstructionsAr { get; set; }
 
     public ICollection<NutritionMealOption> Options { get; set; } = new List<NutritionMealOption>();
 }
@@ -66,7 +62,6 @@ public class NutritionMealOption
     public NutritionMealBlock MealBlock { get; set; } = null!;
     public int OrderIndex { get; set; }
     public string Label { get; set; } = string.Empty;
-    public string? LabelAr { get; set; }
     public bool IsCompleteOption { get; set; } = true;
 
     public ICollection<NutritionOptionItem> Items { get; set; } = new List<NutritionOptionItem>();
@@ -83,7 +78,6 @@ public class NutritionOptionItem
     public int? RecipeId { get; set; }
     public Recipe? Recipe { get; set; }
     public string? ItemName { get; set; }
-    public string? ItemNameAr { get; set; }
     public decimal Quantity { get; set; }
     public IngredientUnit Unit { get; set; } = IngredientUnit.Gram;
     public FoodPreparationState MeasurementState { get; set; } = FoodPreparationState.Unspecified;
@@ -98,7 +92,6 @@ public class NutritionPlanRule
     public int OrderIndex { get; set; }
     public string RuleType { get; set; } = string.Empty;
     public string? Text { get; set; }
-    public string TextAr { get; set; } = string.Empty;
 }
 
 public class NutritionPlanAssignment

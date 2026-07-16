@@ -13,7 +13,6 @@ export interface NutritionOptionItem {
   recipeName?: string | null;
   recipeNameAr?: string | null;
   itemName?: string | null;
-  itemNameAr?: string | null;
   quantity: number;
   unit: IngredientUnit;
   measurementState: FoodPreparationState;
@@ -24,7 +23,6 @@ export interface NutritionMealOption {
   id?: number;
   orderIndex?: number;
   label: string;
-  labelAr: string;
   isCompleteOption: boolean;
   items: NutritionOptionItem[];
 }
@@ -34,12 +32,10 @@ export interface NutritionMealBlock {
   orderIndex?: number;
   mealType: MealType;
   label: string;
-  labelAr: string;
   targetCalories: number | null;
   trainingDayOnly: boolean;
   restDayOnly: boolean;
   instructions?: string | null;
-  instructionsAr?: string | null;
   options: NutritionMealOption[];
 }
 
@@ -48,14 +44,12 @@ export interface NutritionPlanRule {
   orderIndex?: number;
   ruleType: string;
   text?: string | null;
-  textAr: string;
 }
 
 export interface NutritionPlanSummary {
   id: number;
   seedKey: string;
   name: string;
-  nameAr?: string | null;
   targetCalories: number;
   minimumProteinGrams: number;
   contentStatus: ContentStatus;
@@ -71,7 +65,6 @@ export interface NutritionPlanSummary {
 
 export interface NutritionPlan extends NutritionPlanSummary {
   description?: string | null;
-  descriptionAr?: string | null;
   sourceDocument?: string | null;
   sourcePage?: number | null;
   mealBlocks: NutritionMealBlock[];
@@ -80,7 +73,7 @@ export interface NutritionPlan extends NutritionPlanSummary {
 
 export type NutritionPlanForm = Pick<
   NutritionPlan,
-  'name' | 'nameAr' | 'description' | 'descriptionAr' | 'targetCalories' | 'minimumProteinGrams' | 'mealBlocks' | 'rules'
+  'name' | 'description' | 'targetCalories' | 'minimumProteinGrams' | 'mealBlocks' | 'rules'
 > & { expectedContentVersion?: number };
 
 export interface NutritionPlanValidationIssue {
@@ -104,7 +97,6 @@ export interface NutritionPlanAssignment {
   athleteId: number;
   templateId: number;
   templateName: string;
-  templateNameAr?: string | null;
   startDate: string;
   endDate?: string | null;
   isActive: boolean;

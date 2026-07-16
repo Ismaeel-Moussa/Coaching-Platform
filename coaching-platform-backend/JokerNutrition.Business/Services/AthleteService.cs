@@ -536,12 +536,10 @@ public class AthleteService : _BaseService, IAthleteService
                 MealBlockId = block.Id,
                 OrderIndex = block.OrderIndex,
                 Label = block.Label,
-                LabelAr = block.LabelAr,
                 TargetCalories = block.TargetCalories,
                 Status = status,
                 MealOptionId = entry?.NutritionMealOptionId,
                 OptionLabel = option?.Label,
-                OptionLabelAr = option?.LabelAr,
                 LoggedMealType = entry?.MealType,
                 Servings = entry?.Servings,
                 LoggedAt = entry?.LoggedAt
@@ -554,7 +552,6 @@ public class AthleteService : _BaseService, IAthleteService
         {
             AssignmentId = assignment.Id,
             PlanName = plan.Name,
-            PlanNameAr = plan.NameAr,
             DayType = dayType,
             IsPartialDay = isPartialDay,
             CompletedBlocks = completedBlocks,

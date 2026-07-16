@@ -6,9 +6,7 @@ namespace JokerNutrition.Business.Forms.NutritionPlans;
 public class UpsertNutritionPlanForm
 {
     [Required, MaxLength(200)] public string Name { get; set; } = string.Empty;
-    [Required, MaxLength(200)] public string NameAr { get; set; } = string.Empty;
     [MaxLength(2000)] public string? Description { get; set; }
-    [MaxLength(4000)] public string? DescriptionAr { get; set; }
     [Range(1, 20000)] public decimal TargetCalories { get; set; }
     [Range(1, 1000)] public decimal MinimumProteinGrams { get; set; }
     public int? ExpectedContentVersion { get; set; }
@@ -21,19 +19,16 @@ public class NutritionMealBlockForm
     [EnumDataType(typeof(MealType))]
     public MealType MealType { get; set; }
     [Required, MaxLength(200)] public string Label { get; set; } = string.Empty;
-    [Required, MaxLength(200)] public string LabelAr { get; set; } = string.Empty;
     [Range(0, 20000)] public decimal? TargetCalories { get; set; }
     public bool TrainingDayOnly { get; set; }
     public bool RestDayOnly { get; set; }
     [MaxLength(2000)] public string? Instructions { get; set; }
-    [MaxLength(4000)] public string? InstructionsAr { get; set; }
     public List<NutritionMealOptionForm> Options { get; set; } = new();
 }
 
 public class NutritionMealOptionForm
 {
     [Required, MaxLength(200)] public string Label { get; set; } = string.Empty;
-    [Required, MaxLength(200)] public string LabelAr { get; set; } = string.Empty;
     public bool IsCompleteOption { get; set; } = true;
     public List<NutritionOptionItemForm> Items { get; set; } = new();
 }
@@ -43,7 +38,6 @@ public class NutritionOptionItemForm
     public int? FoodId { get; set; }
     public int? RecipeId { get; set; }
     [MaxLength(300)] public string? ItemName { get; set; }
-    [MaxLength(300)] public string? ItemNameAr { get; set; }
     [Range(0.01, 100000)] public decimal Quantity { get; set; }
     [EnumDataType(typeof(IngredientUnit))]
     public IngredientUnit Unit { get; set; } = IngredientUnit.Gram;
@@ -56,7 +50,6 @@ public class NutritionPlanRuleForm
 {
     [Required, MaxLength(100)] public string RuleType { get; set; } = string.Empty;
     [MaxLength(2000)] public string? Text { get; set; }
-    [Required, MaxLength(4000)] public string TextAr { get; set; } = string.Empty;
 }
 
 public class ChangeNutritionPlanStatusForm

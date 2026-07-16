@@ -7,7 +7,6 @@ public class NutritionPlanSummaryDto
     public int Id { get; set; }
     public string SeedKey { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public string? NameAr { get; set; }
     public decimal TargetCalories { get; set; }
     public decimal MinimumProteinGrams { get; set; }
     public ContentStatus ContentStatus { get; set; }
@@ -24,7 +23,6 @@ public class NutritionPlanSummaryDto
 public class NutritionPlanDto : NutritionPlanSummaryDto
 {
     public string? Description { get; set; }
-    public string? DescriptionAr { get; set; }
     public string? SourceDocument { get; set; }
     public int? SourcePage { get; set; }
     public List<NutritionMealBlockDto> MealBlocks { get; set; } = new();
@@ -37,12 +35,10 @@ public class NutritionMealBlockDto
     public int OrderIndex { get; set; }
     public MealType MealType { get; set; }
     public string Label { get; set; } = string.Empty;
-    public string? LabelAr { get; set; }
     public decimal? TargetCalories { get; set; }
     public bool TrainingDayOnly { get; set; }
     public bool RestDayOnly { get; set; }
     public string? Instructions { get; set; }
-    public string? InstructionsAr { get; set; }
     public List<NutritionMealOptionDto> Options { get; set; } = new();
 }
 
@@ -51,7 +47,6 @@ public class NutritionMealOptionDto
     public int Id { get; set; }
     public int OrderIndex { get; set; }
     public string Label { get; set; } = string.Empty;
-    public string? LabelAr { get; set; }
     public bool IsCompleteOption { get; set; }
     public List<NutritionOptionItemDto> Items { get; set; } = new();
 }
@@ -67,7 +62,6 @@ public class NutritionOptionItemDto
     public string? RecipeName { get; set; }
     public string? RecipeNameAr { get; set; }
     public string? ItemName { get; set; }
-    public string? ItemNameAr { get; set; }
     public decimal Quantity { get; set; }
     public IngredientUnit Unit { get; set; }
     public FoodPreparationState MeasurementState { get; set; }
@@ -90,7 +84,6 @@ public class NutritionPlanRuleDto
     public int OrderIndex { get; set; }
     public string RuleType { get; set; } = string.Empty;
     public string? Text { get; set; }
-    public string TextAr { get; set; } = string.Empty;
 }
 
 public class NutritionPlanValidationDto
@@ -117,7 +110,6 @@ public class NutritionPlanAssignmentDto
     public int AthleteId { get; set; }
     public int TemplateId { get; set; }
     public string TemplateName { get; set; } = string.Empty;
-    public string? TemplateNameAr { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public bool IsActive { get; set; }
