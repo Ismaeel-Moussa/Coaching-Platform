@@ -378,7 +378,7 @@ const AthleteAssignmentHub: React.FC = () => {
                 <div className="athlete-assignment-hub__current-program">
                   <div className="athlete-assignment-hub__program-info">
                     <span className="program-label">{t('coach:assignmentHub.activeNutritionPlan', { defaultValue: 'Active nutrition plan' })}</span>
-                    <span className="program-name">{i18n.resolvedLanguage === 'ar' ? currentNutritionPlan.plan.nameAr || currentNutritionPlan.plan.name : currentNutritionPlan.plan.name}</span>
+                    <span className="program-name">{currentNutritionPlan.plan.name}</span>
                     <span className="program-label">{currentNutritionPlan.plan.targetCalories} kcal · {currentNutritionPlan.plan.mealBlockCount} {t('coach:assignmentHub.meals', { defaultValue: 'meals' })}</span>
                   </div>
                   <Button type="primary" onClick={() => setIsNutritionPlanModalVisible(true)} icon={<span className="material-symbols-outlined" style={{ fontSize: 15 }}>sync</span>}>

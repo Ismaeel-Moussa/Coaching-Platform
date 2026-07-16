@@ -206,7 +206,7 @@ const DailyLogHistoryView: React.FC<DailyLogHistoryViewProps> = ({ athleteId, da
                       <span className="daily-history-view__plan-kicker">
                         {t('coach:clientDetail.planAdherence.title')}
                       </span>
-                      <h4>{isArabic ? nutritionPlanAdherence.planNameAr || nutritionPlanAdherence.planName : nutritionPlanAdherence.planName}</h4>
+                      <h4>{nutritionPlanAdherence.planName}</h4>
                     </div>
                   </div>
                   <div className="daily-history-view__plan-tags">

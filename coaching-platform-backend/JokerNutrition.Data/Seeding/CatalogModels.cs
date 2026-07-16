@@ -246,9 +246,7 @@ public sealed class TemplateExerciseSeedRecord
 public sealed class NutritionPlanSeedRecord : CatalogSeedRecord
 {
     public string Name { get; set; } = string.Empty;
-    public string? NameAr { get; set; }
     public string? Description { get; set; }
-    public string? DescriptionAr { get; set; }
     public decimal TargetCalories { get; set; }
     public decimal MinimumProteinGrams { get; set; }
     public List<NutritionMealBlockSeedRecord> MealBlocks { get; set; } = new();
@@ -260,12 +258,10 @@ public sealed class NutritionMealBlockSeedRecord
     public int OrderIndex { get; set; }
     public MealType MealType { get; set; }
     public string Label { get; set; } = string.Empty;
-    public string? LabelAr { get; set; }
     public decimal? TargetCalories { get; set; }
     public bool TrainingDayOnly { get; set; }
     public bool RestDayOnly { get; set; }
     public string? Instructions { get; set; }
-    public string? InstructionsAr { get; set; }
     public List<NutritionMealOptionSeedRecord> Options { get; set; } = new();
 }
 
@@ -273,7 +269,6 @@ public sealed class NutritionMealOptionSeedRecord
 {
     public int OrderIndex { get; set; }
     public string Label { get; set; } = string.Empty;
-    public string? LabelAr { get; set; }
     public bool IsCompleteOption { get; set; } = true;
     public List<NutritionOptionItemSeedRecord> Items { get; set; } = new();
 }
@@ -284,7 +279,6 @@ public sealed class NutritionOptionItemSeedRecord
     public string? FoodSeedKey { get; set; }
     public string? RecipeSeedKey { get; set; }
     public string? ItemName { get; set; }
-    public string? ItemNameAr { get; set; }
     public decimal Quantity { get; set; }
     public IngredientUnit Unit { get; set; } = IngredientUnit.Gram;
     public FoodPreparationState MeasurementState { get; set; }
@@ -296,7 +290,6 @@ public sealed class NutritionPlanRuleSeedRecord
     public int OrderIndex { get; set; }
     public string RuleType { get; set; } = string.Empty;
     public string? Text { get; set; }
-    public string TextAr { get; set; } = string.Empty;
 }
 
 public sealed class SupplementCatalogSeedRecord : CatalogSeedRecord

@@ -29,9 +29,7 @@ public class NutritionPlanTemplateMapping : IEntityTypeConfiguration<NutritionPl
         builder.Property(t => t.SeedKey).HasMaxLength(200).IsRequired();
         builder.HasIndex(t => t.SeedKey).IsUnique();
         builder.Property(t => t.Name).HasMaxLength(200).IsRequired();
-        builder.Property(t => t.NameAr).HasMaxLength(200);
         builder.Property(t => t.Description).HasMaxLength(2000);
-        builder.Property(t => t.DescriptionAr).HasMaxLength(4000);
         builder.Property(t => t.TargetCalories).HasPrecision(10, 2);
         builder.Property(t => t.MinimumProteinGrams).HasPrecision(8, 2);
         builder.Property(t => t.SourceDocument).HasMaxLength(300);
@@ -47,10 +45,8 @@ public class NutritionMealBlockMapping : IEntityTypeConfiguration<NutritionMealB
         builder.ToTable("NutritionMealBlocks");
         builder.HasKey(b => b.Id);
         builder.Property(b => b.Label).HasMaxLength(200).IsRequired();
-        builder.Property(b => b.LabelAr).HasMaxLength(200);
         builder.Property(b => b.TargetCalories).HasPrecision(10, 2);
         builder.Property(b => b.Instructions).HasMaxLength(2000);
-        builder.Property(b => b.InstructionsAr).HasMaxLength(4000);
         builder.HasOne(b => b.Template).WithMany(t => t.MealBlocks).HasForeignKey(b => b.NutritionPlanTemplateId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(b => new { b.NutritionPlanTemplateId, b.OrderIndex }).IsUnique();
     }
@@ -63,7 +59,6 @@ public class NutritionMealOptionMapping : IEntityTypeConfiguration<NutritionMeal
         builder.ToTable("NutritionMealOptions");
         builder.HasKey(o => o.Id);
         builder.Property(o => o.Label).HasMaxLength(200).IsRequired();
-        builder.Property(o => o.LabelAr).HasMaxLength(200);
         builder.HasOne(o => o.MealBlock).WithMany(b => b.Options).HasForeignKey(o => o.NutritionMealBlockId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(o => new { o.NutritionMealBlockId, o.OrderIndex }).IsUnique();
     }
@@ -76,7 +71,6 @@ public class NutritionOptionItemMapping : IEntityTypeConfiguration<NutritionOpti
         builder.ToTable("NutritionOptionItems");
         builder.HasKey(i => i.Id);
         builder.Property(i => i.ItemName).HasMaxLength(300);
-        builder.Property(i => i.ItemNameAr).HasMaxLength(300);
         builder.Property(i => i.Quantity).HasPrecision(8, 2);
         builder.Property(i => i.AlternativeGroupKey).HasMaxLength(100);
         builder.HasOne(i => i.Option).WithMany(o => o.Items).HasForeignKey(i => i.NutritionMealOptionId).OnDelete(DeleteBehavior.Cascade);
@@ -94,7 +88,6 @@ public class NutritionPlanRuleMapping : IEntityTypeConfiguration<NutritionPlanRu
         builder.HasKey(r => r.Id);
         builder.Property(r => r.RuleType).HasMaxLength(100).IsRequired();
         builder.Property(r => r.Text).HasMaxLength(2000);
-        builder.Property(r => r.TextAr).HasMaxLength(4000).IsRequired();
         builder.HasOne(r => r.Template).WithMany(t => t.Rules).HasForeignKey(r => r.NutritionPlanTemplateId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(r => new { r.NutritionPlanTemplateId, r.OrderIndex }).IsUnique();
     }

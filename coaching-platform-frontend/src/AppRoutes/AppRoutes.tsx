@@ -42,6 +42,7 @@ const ExerciseLibraryAdmin = lazy(() => import('../pages/coach/ExerciseLibraryAd
 const FoodRecipeAdmin = lazy(() => import('../pages/coach/FoodRecipeAdmin/FoodRecipeAdmin'));
 const InvitationManagement = lazy(() => import('../pages/coach/InvitationManagement/InvitationManagement'));
 const NutritionPlanAdmin = lazy(() => import('../pages/coach/NutritionPlanAdmin/NutritionPlanAdmin'));
+const NutritionPlanEditor = lazy(() => import('../pages/coach/NutritionPlanEditor/NutritionPlanEditor'));
 const Profile = lazy(() => import('../pages/shared/Profile/Profile'));
 const Notifications = lazy(() => import('../pages/shared/Notifications/Notifications'));
 
@@ -250,6 +251,22 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <NutritionPlanAdmin />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'nutrition-plans/new',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <NutritionPlanEditor />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'nutrition-plans/edit/:id',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <NutritionPlanEditor />
           </Suspense>
         ),
       },

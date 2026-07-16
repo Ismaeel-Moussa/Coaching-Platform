@@ -44,7 +44,7 @@ const NutritionPlan: React.FC = () => {
   const itemName = (item: NutritionOptionItem) => {
     if (item.foodName) return ar ? item.foodNameAr || item.foodName : item.foodName;
     if (item.recipeName) return ar ? item.recipeNameAr || item.recipeName : item.recipeName;
-    return ar ? item.itemNameAr || item.itemName : item.itemName || item.itemNameAr;
+    return item.itemName;
   };
   const unitLabel = (unit: NutritionOptionItem['unit']) => {
     if (!ar) return unit;
@@ -147,10 +147,10 @@ const NutritionPlan: React.FC = () => {
     <header className="athlete-plan__hero">
       <div className="athlete-plan__hero-content">
         <Text className="athlete-plan__eyebrow">{copy.subtitle}</Text>
-        <Title>{ar ? plan.nameAr || plan.name : plan.name}</Title>
-        {(ar ? plan.descriptionAr || plan.description : plan.description) && <div className="athlete-plan__description">
+        <Title>{plan.name}</Title>
+        {plan.description && <div className="athlete-plan__description">
           <span className="material-symbols-outlined">format_quote</span>
-          <Paragraph>{ar ? plan.descriptionAr || plan.description : plan.description}</Paragraph>
+          <Paragraph>{plan.description}</Paragraph>
         </div>}
       </div>
       <div className="athlete-plan__targets">
@@ -180,7 +180,7 @@ const NutritionPlan: React.FC = () => {
         <div className="athlete-plan__meal-header">
           <div className="athlete-plan__meal-title">
             <span className="athlete-plan__meal-number">{String(blockIndex + 1).padStart(2, '0')}</span>
-            <div><Text>{t('athlete:nutritionPlan.mealBlock')}</Text><Title level={3}>{ar ? block.labelAr || block.label : block.label}</Title></div>
+            <div><Text>{t('athlete:nutritionPlan.mealBlock')}</Text><Title level={3}>{block.label}</Title></div>
           </div>
           <div className="athlete-plan__meal-tags">
             {block.targetCalories != null && <Tag color="gold" icon={<span className="material-symbols-outlined">bolt</span>}>{block.targetCalories} {copy.calories}</Tag>}
@@ -188,7 +188,7 @@ const NutritionPlan: React.FC = () => {
             {block.restDayOnly && <Tag color="purple">{copy.rest}</Tag>}
           </div>
         </div>
-        {(ar ? block.instructionsAr || block.instructions : block.instructions) && <Paragraph className="athlete-plan__instructions">{ar ? block.instructionsAr || block.instructions : block.instructions}</Paragraph>}
+        {block.instructions && <Paragraph className="athlete-plan__instructions">{block.instructions}</Paragraph>}
         <div className="athlete-plan__choose-label"><span className="material-symbols-outlined">touch_app</span><Text>{copy.choose}</Text></div>
         <div className="athlete-plan__options">
           {block.options.map((option, index) => {
@@ -196,7 +196,7 @@ const NutritionPlan: React.FC = () => {
             const isSelectedCompletion = completed?.mealOptionId === option.id;
             const canLog = optionIsLoggable(option);
             return <section key={option.id ?? option.orderIndex} className={`athlete-plan__option ${isSelectedCompletion ? 'athlete-plan__option--completed' : ''}`}>
-            <h4><span className="athlete-plan__option-number">{index + 1}</span><span className="athlete-plan__option-title"><small>{copy.option} {index + 1}</small>{ar ? option.labelAr || option.label : option.label}</span></h4>
+            <h4><span className="athlete-plan__option-number">{index + 1}</span><span className="athlete-plan__option-title"><small>{copy.option} {index + 1}</small>{option.label}</span></h4>
             <ul>{option.items.map((item) => <li key={item.id ?? item.orderIndex}>
               <span><i /><span>{itemName(item)}</span></span>
               <strong>{item.quantity} <small>{unitLabel(item.unit)}</small></strong>
@@ -216,7 +216,7 @@ const NutritionPlan: React.FC = () => {
     </main>
 
     {!!plan.rules.length && <Card className="athlete-plan__rules" title={copy.rules}>
-      <ol>{plan.rules.map(rule => <li key={rule.id ?? rule.orderIndex}>{ar ? rule.textAr || rule.text : rule.text || rule.textAr}</li>)}</ol>
+      <ol>{plan.rules.map(rule => <li key={rule.id ?? rule.orderIndex}>{rule.text}</li>)}</ol>
     </Card>}
 
     <Modal
@@ -232,7 +232,7 @@ const NutritionPlan: React.FC = () => {
     >
       {selected && <div className="athlete-plan-add">
         <Paragraph>{t('athlete:nutritionPlan.addDescription')}</Paragraph>
-        <div className="athlete-plan-add__option-name">{ar ? selected.option.labelAr || selected.option.label : selected.option.label}</div>
+        <div className="athlete-plan-add__option-name">{selected.option.label}</div>
         <label><span>{t('athlete:nutritionPlan.logDate')}</span><DatePicker value={logDate} onChange={date => date && setLogDate(date)} disabledDate={disabledDate} allowClear={false} /></label>
         <label><span>{t('athlete:nutritionPlan.meal')}</span><Select value={mealType} onChange={setMealType} options={mealChoices} /></label>
         <label><span>{t('athlete:nutritionPlan.servings')}</span><InputNumber min={0.25} max={10} step={0.25} value={servings} onChange={value => setServings(value ?? 1)} /></label>

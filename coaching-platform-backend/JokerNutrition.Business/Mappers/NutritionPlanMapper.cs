@@ -21,7 +21,6 @@ public static class NutritionPlanMapper
         Id = template.Id,
         SeedKey = template.SeedKey,
         Name = template.Name,
-        NameAr = template.NameAr,
         TargetCalories = template.TargetCalories,
         MinimumProteinGrams = template.MinimumProteinGrams,
         ContentStatus = template.ContentStatus,
@@ -44,9 +43,7 @@ public static class NutritionPlanMapper
             Id = summary.Id,
             SeedKey = summary.SeedKey,
             Name = summary.Name,
-            NameAr = summary.NameAr,
             Description = template.Description,
-            DescriptionAr = template.DescriptionAr,
             TargetCalories = summary.TargetCalories,
             MinimumProteinGrams = summary.MinimumProteinGrams,
             ContentStatus = summary.ContentStatus,
@@ -66,18 +63,15 @@ public static class NutritionPlanMapper
                 OrderIndex = block.OrderIndex,
                 MealType = block.MealType,
                 Label = block.Label,
-                LabelAr = block.LabelAr,
                 TargetCalories = block.TargetCalories,
                 TrainingDayOnly = block.TrainingDayOnly,
                 RestDayOnly = block.RestDayOnly,
                 Instructions = block.Instructions,
-                InstructionsAr = block.InstructionsAr,
                 Options = block.Options.OrderBy(option => option.OrderIndex).Select(option => new NutritionMealOptionDto
                 {
                     Id = option.Id,
                     OrderIndex = option.OrderIndex,
                     Label = option.Label,
-                    LabelAr = option.LabelAr,
                     IsCompleteOption = option.IsCompleteOption,
                     Items = option.Items.OrderBy(item => item.OrderIndex).Select(item => new NutritionOptionItemDto
                     {
@@ -90,7 +84,6 @@ public static class NutritionPlanMapper
                         RecipeName = item.Recipe?.Name,
                         RecipeNameAr = item.Recipe?.NameAr,
                         ItemName = item.ItemName,
-                        ItemNameAr = item.ItemNameAr,
                         Quantity = item.Quantity,
                         Unit = item.Unit,
                         MeasurementState = item.MeasurementState,
@@ -113,8 +106,7 @@ public static class NutritionPlanMapper
                 Id = rule.Id,
                 OrderIndex = rule.OrderIndex,
                 RuleType = rule.RuleType,
-                Text = rule.Text,
-                TextAr = rule.TextAr
+                Text = rule.Text
             }).ToList()
         };
     }
@@ -125,7 +117,6 @@ public static class NutritionPlanMapper
         AthleteId = assignment.AthleteId,
         TemplateId = assignment.NutritionPlanTemplateId,
         TemplateName = plan.Name,
-        TemplateNameAr = plan.NameAr,
         StartDate = assignment.StartDate,
         EndDate = assignment.EndDate,
         IsActive = assignment.IsActive,
