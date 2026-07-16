@@ -49,16 +49,60 @@
 
     .ant-collapse-item {
       margin-bottom: 16px;
-      background: #fafafa;
+      background: #ffffff;
       border: 1px solid #f0f0f0;
       border-radius: 8px;
       overflow: hidden;
-      border-inline-start: 4px solid var(--color-yellow, #ffec00);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+      transition: all 0.3s ease;
+
+      &:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+        border-color: #d9d9d9;
+      }
+    }
+
+    // Dynamic color coding for collapse item side borders
+    &-item--breakfast {
+      border-inline-start: 4px solid #ffa940 !important; // Warm orange
+      .meal-header-icon { color: #ffa940; }
+    }
+    &-item--lunch {
+      border-inline-start: 4px solid #52c41a !important; // Balanced green
+      .meal-header-icon { color: #52c41a; }
+    }
+    &-item--dinner {
+      border-inline-start: 4px solid #722ed1 !important; // Royal purple
+      .meal-header-icon { color: #722ed1; }
+    }
+    &-item--snack {
+      border-inline-start: 4px solid #eb2f96 !important; // Tasty pink
+      .meal-header-icon { color: #eb2f96; }
+    }
+    &-item--suhoor {
+      border-inline-start: 4px solid #13c2c2 !important; // Soft cyan
+      .meal-header-icon { color: #13c2c2; }
+    }
+    &-item--iftar {
+      border-inline-start: 4px solid #fa8c16 !important; // Deep sunset orange
+      .meal-header-icon { color: #fa8c16; }
+    }
+    &-item--preworkout {
+      border-inline-start: 4px solid #2f54eb !important; // Indigo energy
+      .meal-header-icon { color: #2f54eb; }
+    }
+    &-item--postworkout {
+      border-inline-start: 4px solid #1890ff !important; // Recovery blue
+      .meal-header-icon { color: #1890ff; }
+    }
+    &-item--default {
+      border-inline-start: 4px solid #bfbfbf !important; // Muted gray
+      .meal-header-icon { color: #8c8c8c; }
     }
 
     .ant-collapse-header {
       align-items: center;
-      padding: 12px 24px;
+      padding: 14px 24px;
     }
   }
 
@@ -67,6 +111,11 @@
     align-items: center;
     width: 100%;
     justify-content: space-between;
+
+    .meal-header-icon {
+      font-size: 20px;
+      vertical-align: middle;
+    }
   }
 
   &__meal-fields-grid {
@@ -74,10 +123,10 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 16px 24px;
     margin-bottom: 24px;
-    background: #ffffff;
+    background: #fafbff;
     padding: 20px;
     border-radius: 8px;
-    border: 1px solid #f0f0f0;
+    border: 1px solid #ebedf3;
   }
 
   &__span-2 {
@@ -107,12 +156,21 @@
 
   &__option-card {
     background: #ffffff !important;
-    border: 1px solid #e8e8e8;
-    border-radius: 8px;
+    border: 1px solid #ebedf3;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    transition: all 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+      border-color: #d9d9d9;
+    }
 
     .ant-card-head {
-      background: #fdfdfd;
+      background: #fafbfd;
       border-bottom: 1px solid #f0f0f0;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
     }
   }
 
@@ -135,6 +193,8 @@
   &__source-hint {
     display: block;
     margin-bottom: 8px;
+    color: #8c8c8c;
+    font-size: 13px;
   }
 
   &__rules-section {
@@ -161,47 +221,97 @@
   }
 }
 
-// Option item row optimized styles
+// Option item row premium styling
 .nutrition-editor-item-row {
-  background: #fafafa;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  padding: 16px 20px;
-  margin-bottom: 12px;
+  background: #ffffff;
+  border: 1px solid #ebedf3;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
+  border-inline-start: 4px solid var(--color-primary, #3b82f6);
+  transition: all 0.3s ease;
 
   &:hover {
-    border-color: #d9d9d9;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    border-color: #d0d5dd;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+    transform: translateY(-1px);
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 12px;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #262626;
+
+    .material-symbols-outlined {
+      color: #8c8c8c;
+      font-size: 18px;
+    }
+  }
+
+  &__remove-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff4d4f;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #fff2f0 !important;
+      color: #ff7875;
+    }
   }
 
   &__source-selector {
     display: grid;
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: 320px 1fr;
     gap: 16px;
     align-items: center;
+    background: #fafbff;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px dashed #e4e7ec;
   }
 
-  &__radio-group {
-    display: flex;
-    width: 100%;
+  &__segmented {
+    background: #f2f4f7;
+    border-radius: 6px;
+    padding: 2px;
     
-    .ant-radio-button-wrapper {
-      flex: 1;
-      text-align: center;
+    .ant-segmented-item {
+      font-size: 13px;
+      
+      .material-symbols-outlined {
+        font-size: 15px;
+        vertical-align: middle;
+      }
     }
   }
 
   &__input-container {
     width: 100%;
+
+    .ant-select, .ant-input {
+      width: 100%;
+    }
   }
 
   &__grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr) auto;
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     align-items: flex-end;
   }
@@ -210,13 +320,20 @@
     margin-bottom: 0 !important;
 
     .ant-form-item-label {
-      padding-bottom: 4px;
-    }
-  }
+      padding-bottom: 6px;
 
-  &__remove-btn {
-    align-self: flex-end;
-    margin-bottom: 4px;
+      span {
+        font-size: 13px;
+        color: #595959;
+        font-weight: 500;
+      }
+
+      .material-symbols-outlined {
+        font-size: 14px;
+        color: #8c8c8c;
+        vertical-align: middle;
+      }
+    }
   }
 }
 
@@ -241,11 +358,6 @@
       &__grid {
         grid-template-columns: 1fr 1fr;
       }
-      &__remove-btn {
-        grid-column: span 2;
-        width: 100%;
-        text-align: center;
-      }
     }
   }
 }
@@ -254,9 +366,6 @@
   .nutrition-editor-item-row {
     &__grid {
       grid-template-columns: 1fr;
-    }
-    &__remove-btn {
-      grid-column: span 1;
     }
   }
 }
