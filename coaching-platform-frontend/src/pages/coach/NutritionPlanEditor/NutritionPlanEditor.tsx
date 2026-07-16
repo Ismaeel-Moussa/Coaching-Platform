@@ -12,7 +12,8 @@ import {
   Space,
   Tabs,
   Typography,
-  Radio,
+  Segmented,
+  Modal,
 } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -24,7 +25,6 @@ import {
   useSaveNutritionPlan,
 } from '../../../hooks/useNutritionPlans/useNutritionPlans';
 import type {
-  ContentStatus,
   NutritionPlanForm,
   MealType,
   IngredientUnit,
@@ -70,9 +70,9 @@ const units: IngredientUnit[] = ['Gram', 'Milliliter', 'Piece', 'Tablespoon', 'T
 const preparationStates: FoodPreparationState[] = ['Unspecified', 'Raw', 'Cooked', 'Drained'];
 
 interface OptionItemRowProps {
-  blockIndex: number;
-  optionIndex: number;
-  itemIndex: number;
+  blockName: number;
+  optionName: number;
+  itemName: number;
   onRemove: () => void;
   showRemove: boolean;
   form: any;
@@ -88,9 +88,9 @@ interface OptionItemRowProps {
 }
 
 const OptionItemRow: React.FC<OptionItemRowProps> = ({
-  blockIndex,
-  optionIndex,
-  itemIndex,
+  blockName,
+  optionName,
+  itemName,
   onRemove,
   showRemove,
   form,
@@ -104,7 +104,7 @@ const OptionItemRow: React.FC<OptionItemRowProps> = ({
   loadMoreRecipes,
   copy,
 }) => {
-  const itemPath = ['mealBlocks', blockIndex, 'options', optionIndex, 'items', itemIndex];
+  const itemPath = ['mealBlocks', blockName, 'options', optionName, 'items', itemName];
 
   // Derive initial source type
   const [sourceType, setSourceType] = useState<'food' | 'recipe' | 'custom'>(() => {
@@ -117,34 +117,77 @@ const OptionItemRow: React.FC<OptionItemRowProps> = ({
 
   const handleSourceTypeChange = (type: 'food' | 'recipe' | 'custom') => {
     setSourceType(type);
-    if (type === 'food') {
-      form.setFieldValue([...itemPath, 'recipeId'], null);
-      form.setFieldValue([...itemPath, 'itemName'], null);
-    } else if (type === 'recipe') {
-      form.setFieldValue([...itemPath, 'foodId'], null);
-      form.setFieldValue([...itemPath, 'itemName'], null);
-    } else {
-      form.setFieldValue([...itemPath, 'foodId'], null);
-      form.setFieldValue([...itemPath, 'recipeId'], null);
-    }
+    setTimeout(() => {
+      if (type === 'food') {
+        form.setFieldValue([...itemPath, 'recipeId'], null);
+        form.setFieldValue([...itemPath, 'itemName'], null);
+      } else if (type === 'recipe') {
+        form.setFieldValue([...itemPath, 'foodId'], null);
+        form.setFieldValue([...itemPath, 'itemName'], null);
+      } else {
+        form.setFieldValue([...itemPath, 'foodId'], null);
+        form.setFieldValue([...itemPath, 'recipeId'], null);
+      }
+    }, 0);
   };
 
   return (
     <div className="nutrition-editor-item-row">
+      <div className="nutrition-editor-item-row__header">
+        <span className="nutrition-editor-item-row__title">
+          <span className="material-symbols-outlined">restaurant_menu</span>
+          {copy.item} {itemName + 1}
+        </span>
+        {showRemove && (
+          <Button
+            danger
+            type="text"
+            icon={<span className="material-symbols-outlined" style={{ fontSize: 18 }}>delete</span>}
+            onClick={onRemove}
+            className="nutrition-editor-item-row__remove-btn"
+          />
+        )}
+      </div>
+
       <div className="nutrition-editor-item-row__source-selector">
-        <Radio.Group
+        <Segmented
           value={sourceType}
-          onChange={(e) => handleSourceTypeChange(e.target.value)}
-          className="nutrition-editor-item-row__radio-group"
-        >
-          <Radio.Button value="food">{copy.food}</Radio.Button>
-          <Radio.Button value="recipe">{copy.recipe}</Radio.Button>
-          <Radio.Button value="custom">{copy.customText}</Radio.Button>
-        </Radio.Group>
+          onChange={(val) => handleSourceTypeChange(val as any)}
+          options={[
+            {
+              label: (
+                <Space size={4}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: 'middle' }}>restaurant</span>
+                  <span>{copy.food}</span>
+                </Space>
+              ),
+              value: 'food',
+            },
+            {
+              label: (
+                <Space size={4}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: 'middle' }}>menu_book</span>
+                  <span>{copy.recipe}</span>
+                </Space>
+              ),
+              value: 'recipe',
+            },
+            {
+              label: (
+                <Space size={4}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: 'middle' }}>edit_note</span>
+                  <span>{copy.customText}</span>
+                </Space>
+              ),
+              value: 'custom',
+            },
+          ]}
+          className="nutrition-editor-item-row__segmented"
+        />
 
         <div className="nutrition-editor-item-row__input-container">
           {sourceType === 'food' && (
-            <Form.Item name={[itemIndex, 'foodId']} noStyle>
+            <Form.Item name={[itemName, 'foodId']} isListField={true} noStyle>
               <Select
                 showSearch
                 allowClear
@@ -160,7 +203,7 @@ const OptionItemRow: React.FC<OptionItemRowProps> = ({
           )}
 
           {sourceType === 'recipe' && (
-            <Form.Item name={[itemIndex, 'recipeId']} noStyle>
+            <Form.Item name={[itemName, 'recipeId']} isListField={true} noStyle>
               <Select
                 showSearch
                 allowClear
@@ -176,7 +219,7 @@ const OptionItemRow: React.FC<OptionItemRowProps> = ({
           )}
 
           {sourceType === 'custom' && (
-            <Form.Item name={[itemIndex, 'itemName']} noStyle rules={[{ required: true, message: copy.required }]}>
+            <Form.Item name={[itemName, 'itemName']} isListField={true} noStyle rules={[{ required: true, message: copy.required }]}>
               <Input placeholder={copy.customPlaceholder} />
             </Form.Item>
           )}
@@ -184,27 +227,62 @@ const OptionItemRow: React.FC<OptionItemRowProps> = ({
       </div>
 
       <div className="nutrition-editor-item-row__grid">
-        <Form.Item label={copy.quantity} name={[itemIndex, 'quantity']} rules={[{ required: true }]} className="nutrition-editor-item-row__field">
+        <Form.Item
+          label={
+            <Space size={4}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>scale</span>
+              <span>{copy.quantity}</span>
+            </Space>
+          }
+          name={[itemName, 'quantity']}
+          isListField={true}
+          rules={[{ required: true }]}
+          className="nutrition-editor-item-row__field"
+        >
           <InputNumber min={0.01} style={{ width: '100%' }} />
         </Form.Item>
 
-        <Form.Item label={copy.unit} name={[itemIndex, 'unit']} className="nutrition-editor-item-row__field">
+        <Form.Item
+          label={
+            <Space size={4}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>opacity</span>
+              <span>{copy.unit}</span>
+            </Space>
+          }
+          name={[itemName, 'unit']}
+          isListField={true}
+          className="nutrition-editor-item-row__field"
+        >
           <Select options={units.map(value => ({ value, label: value }))} />
         </Form.Item>
 
-        <Form.Item label={copy.preparation} name={[itemIndex, 'measurementState']} className="nutrition-editor-item-row__field">
+        <Form.Item
+          label={
+            <Space size={4}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>soup_kitchen</span>
+              <span>{copy.preparation}</span>
+            </Space>
+          }
+          name={[itemName, 'measurementState']}
+          isListField={true}
+          className="nutrition-editor-item-row__field"
+        >
           <Select options={preparationStates.map(value => ({ value, label: value }))} />
         </Form.Item>
 
-        <Form.Item label={copy.alternativeGroup} name={[itemIndex, 'alternativeGroupKey']} className="nutrition-editor-item-row__field">
+        <Form.Item
+          label={
+            <Space size={4}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>layers</span>
+              <span>{copy.alternativeGroup}</span>
+            </Space>
+          }
+          name={[itemName, 'alternativeGroupKey']}
+          isListField={true}
+          className="nutrition-editor-item-row__field"
+        >
           <Input placeholder="e.g. Group A" />
         </Form.Item>
-
-        {showRemove && (
-          <Button danger type="text" onClick={onRemove} className="nutrition-editor-item-row__remove-btn">
-            {copy.remove}
-          </Button>
-        )}
       </div>
     </div>
   );
@@ -217,6 +295,13 @@ const NutritionPlanEditor: React.FC = () => {
   const ar = i18n.resolvedLanguage === 'ar';
   const [form] = Form.useForm<NutritionPlanForm>();
   const editingId = id ? parseInt(id, 10) : undefined;
+
+  const draftKey = useMemo(() => {
+    return editingId ? `nutrition-plan-draft-edit-${editingId}` : 'nutrition-plan-draft-new';
+  }, [editingId]);
+
+  const [hasDraft, setHasDraft] = useState(false);
+  const [draftData, setDraftData] = useState<NutritionPlanForm | null>(null);
 
   const [foodSearchInput, setFoodSearchInput] = useState('');
   const [recipeSearchInput, setRecipeSearchInput] = useState('');
@@ -231,7 +316,7 @@ const NutritionPlanEditor: React.FC = () => {
     mealCalories: 'سعرات الوجبة', trainingOnly: 'يوم التدريب فقط', restOnly: 'يوم الراحة فقط',
     instructions: 'التعليمات والإرشادات', options: 'الخيارات البديلة', addOption: 'إضافة خيار بديل',
     completeOption: 'خيار متكامل', items: 'المكونات والأطعمة', addItem: 'إضافة صنف',
-    food: 'طعام من الدليل', recipe: 'وصفة صحية', customText: 'عنصر يدوي مخصص', selectFood: 'اختر طعاماً...',
+    food: 'طعام', recipe: 'وصفة', customText: 'مخصص', item: 'صنف', selectFood: 'اختر طعاماً...',
     selectRecipe: 'اختر وصفة...', customPlaceholder: 'اكتب الصنف والاسم يدوياً...', required: 'حقل مطلوب',
     quantity: 'الكمية', unit: 'الوحدة', preparation: 'التحضير', alternativeGroup: 'مجموعة البدائل',
     rules: 'القواعد العامة للخطة', addRule: 'إضافة قاعدة', ruleType: 'نوع القاعدة', ruleText: 'نص القاعدة',
@@ -245,7 +330,7 @@ const NutritionPlanEditor: React.FC = () => {
     mealCalories: 'Meal Calories', trainingOnly: 'Training day only', restOnly: 'Rest day only',
     instructions: 'Instructions & Notes', options: 'Options', addOption: 'Add option',
     completeOption: 'Complete option', items: 'Items', addItem: 'Add item',
-    food: 'Food Catalog', recipe: 'Recipe Library', customText: 'Custom Text', selectFood: 'Select food...',
+    food: 'Food', recipe: 'Recipe', customText: 'Custom', item: 'Item', selectFood: 'Select food...',
     selectRecipe: 'Select recipe...', customPlaceholder: 'Enter custom item name...', required: 'Required',
     quantity: 'Quantity', unit: 'Unit', preparation: 'Preparation', alternativeGroup: 'Alternative Group',
     rules: 'Rules', addRule: 'Add rule', ruleType: 'Rule Type', ruleText: 'Rule Text',
@@ -280,6 +365,21 @@ const NutritionPlanEditor: React.FC = () => {
       form.setFieldsValue(copyPlanForForm(initialPlan));
     }
   }, [editedPlan, form]);
+
+  useEffect(() => {
+    if (!editorLoading) {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setDraftData(parsed);
+          setHasDraft(true);
+        } catch (e) {
+          localStorage.removeItem(draftKey);
+        }
+      }
+    }
+  }, [editorLoading, draftKey]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setFoodSearch(foodSearchInput.trim()), 300);
@@ -326,6 +426,12 @@ const NutritionPlanEditor: React.FC = () => {
   const handleSave = async () => {
     const values = await form.validateFields();
     await saveMutation.mutateAsync({ id: editingId, form: values });
+    localStorage.removeItem(draftKey);
+    navigate('/coach/nutrition-plans');
+  };
+
+  const handleCancel = () => {
+    localStorage.removeItem(draftKey);
     navigate('/coach/nutrition-plans');
   };
 
@@ -339,210 +445,275 @@ const NutritionPlanEditor: React.FC = () => {
 
   return (
     <div className="nutrition-editor">
+      <Modal
+        title={ar ? 'استعادة المسودة' : 'Restore Unsaved Draft'}
+        open={hasDraft}
+        onOk={() => {
+          if (draftData) {
+            form.setFieldsValue(draftData);
+          }
+          setHasDraft(false);
+        }}
+        onCancel={() => {
+          localStorage.removeItem(draftKey);
+          setHasDraft(false);
+        }}
+        okText={ar ? 'استعادة' : 'Restore'}
+        cancelText={ar ? 'تجاهل' : 'Discard'}
+      >
+        <p>
+          {ar
+            ? 'تم العثور على مسودة غير محفوظة لهذه الخطة. هل تريد استعادة عملك السابق؟'
+            : 'We found an unsaved draft of this plan. Would you like to restore your progress?'}
+        </p>
+      </Modal>
+
       <header className="nutrition-editor__header">
         <div>
           <Title level={2}>{editingId ? copy.titleEdit : copy.titleCreate}</Title>
           <Text type="secondary">{copy.details}</Text>
         </div>
         <Space>
-          <Button onClick={() => navigate('/coach/nutrition-plans')}>{copy.cancel}</Button>
+          <Button onClick={handleCancel}>{copy.cancel}</Button>
           <Button type="primary" loading={saveMutation.isPending} onClick={handleSave}>
             {copy.save}
           </Button>
         </Space>
       </header>
 
-      <Form form={form} layout="vertical" initialValues={initialPlan}>
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={initialPlan}
+        onValuesChange={(_, allValues) => {
+          localStorage.setItem(draftKey, JSON.stringify(allValues));
+        }}
+      >
         <Form.Item name="expectedContentVersion" hidden><Input /></Form.Item>
 
-        <Tabs defaultActiveKey="general" type="card" className="nutrition-editor__tabs">
-          <Tabs.TabPane tab={copy.generalTab} key="general">
-            <Card className="nutrition-editor__card">
-              <div className="nutrition-editor__general-grid">
-                <Form.Item name="name" label={copy.name} rules={[{ required: true }]} className="nutrition-editor__full-width">
-                  <Input size="large" />
-                </Form.Item>
+        <Tabs
+          defaultActiveKey="general"
+          type="card"
+          className="nutrition-editor__tabs"
+          items={[
+            {
+              key: 'general',
+              label: copy.generalTab,
+              children: (
+                <Card className="nutrition-editor__card">
+                  <div className="nutrition-editor__general-grid">
+                    <Form.Item name="name" label={copy.name} rules={[{ required: true }]} className="nutrition-editor__full-width">
+                      <Input size="large" />
+                    </Form.Item>
 
-                <Form.Item name="description" label={copy.desc} className="nutrition-editor__full-width">
-                  <TextArea rows={3} />
-                </Form.Item>
+                    <Form.Item name="description" label={copy.desc} className="nutrition-editor__full-width">
+                      <TextArea rows={3} />
+                    </Form.Item>
 
-                <Form.Item name="targetCalories" label={copy.targetCalories} rules={[{ required: true }]}>
-                  <InputNumber min={1} style={{ width: '100%' }} size="large" />
-                </Form.Item>
+                    <Form.Item name="targetCalories" label={copy.targetCalories} rules={[{ required: true }]}>
+                      <InputNumber min={1} style={{ width: '100%' }} size="large" />
+                    </Form.Item>
 
-                <Form.Item name="minimumProteinGrams" label={copy.minProtein} rules={[{ required: true }]}>
-                  <InputNumber min={1} style={{ width: '100%' }} size="large" />
-                </Form.Item>
-              </div>
-            </Card>
-          </Tabs.TabPane>
+                    <Form.Item name="minimumProteinGrams" label={copy.minProtein} rules={[{ required: true }]}>
+                      <InputNumber min={1} style={{ width: '100%' }} size="large" />
+                    </Form.Item>
+                  </div>
+                </Card>
+              ),
+            },
+            {
+              key: 'meals',
+              label: copy.mealsTab,
+              children: (
+                <Form.List name="mealBlocks">
+                  {(blocks, { add: addBlock, remove: removeBlock }) => (
+                    <div className="nutrition-editor__meals-list">
+                      <Collapse
+                        defaultActiveKey={['0']}
+                        className="nutrition-editor__collapse"
+                        expandIconPosition="end"
+                        items={blocks.map((block, blockIndex) => {
+                          const mealTypeVal = form.getFieldValue(['mealBlocks', block.name, 'mealType']) || 'default';
+                          const mealIcon = {
+                            Breakfast: 'wb_sunny',
+                            Lunch: 'light_mode',
+                            Dinner: 'dark_mode',
+                            Snack: 'cookie',
+                            Suhoor: 'brightness_3',
+                            Iftar: 'restaurant',
+                            PreWorkout: 'bolt',
+                            PostWorkout: 'sports_gymnastics',
+                          }[mealTypeVal as string] || 'restaurant_menu';
 
-          <Tabs.TabPane tab={copy.mealsTab} key="meals">
-            <Form.List name="mealBlocks">
-              {(blocks, { add: addBlock, remove: removeBlock }) => (
-                <div className="nutrition-editor__meals-list">
-                  <Collapse defaultActiveKey={['0']} className="nutrition-editor__collapse" expandIconPosition="end">
-                    {blocks.map((block, blockIndex) => (
-                      <Collapse.Panel
-                        header={
-                          <div className="nutrition-editor__panel-header">
-                            <Text strong>{`${copy.mealBlocks} ${blockIndex + 1}: `}</Text>
-                            <Form.Item name={[block.name, 'label']} noStyle>
-                              <Input style={{ width: 200, display: 'inline-block', margin: '0 8px' }} onClick={(e) => e.stopPropagation()} />
-                            </Form.Item>
-                            {blocks.length > 1 && (
-                              <Button
-                                danger
-                                type="text"
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeBlock(block.name);
-                                }}
-                              >
-                                {copy.remove}
-                              </Button>
-                            )}
-                          </div>
-                        }
-                        key={block.key.toString()}
-                      >
-                        <div className="nutrition-editor__meal-fields-grid">
-                          <Form.Item name={[block.name, 'mealType']} label={copy.mealType}>
-                            <Select options={mealTypes.map(value => ({ value, label: value }))} />
-                          </Form.Item>
-                          <Form.Item name={[block.name, 'targetCalories']} label={copy.mealCalories}>
-                            <InputNumber min={0} style={{ width: '100%' }} />
-                          </Form.Item>
-                          <Form.Item name={[block.name, 'instructions']} label={copy.instructions} className="nutrition-editor__span-2">
-                            <Input />
-                          </Form.Item>
-                          <div className="nutrition-editor__span-2 nutrition-editor__checkboxes">
-                            <Form.Item name={[block.name, 'trainingDayOnly']} valuePropName="checked" noStyle>
-                              <Checkbox>{copy.trainingOnly}</Checkbox>
-                            </Form.Item>
-                            <Form.Item name={[block.name, 'restDayOnly']} valuePropName="checked" noStyle>
-                              <Checkbox>{copy.restOnly}</Checkbox>
-                            </Form.Item>
-                          </div>
-                        </div>
-
-                        {/* Options List */}
-                        <Form.List name={[block.name, 'options']}>
-                          {(options, { add: addOption, remove: removeOption }) => (
-                            <div className="nutrition-editor__options-section">
-                              <div className="nutrition-editor__options-header">
-                                <Text strong>{copy.options}</Text>
-                                <Button size="small" onClick={() => addOption(copyPlanForForm(initialPlan).mealBlocks[0].options[0])}>
-                                  {copy.addOption}
-                                </Button>
+                          return {
+                            key: block.key.toString(),
+                            className: `nutrition-editor__collapse-item--${mealTypeVal.toLowerCase()}`,
+                            label: (
+                              <div className="nutrition-editor__panel-header">
+                                <Space size={8}>
+                                  <span className="material-symbols-outlined meal-header-icon">{mealIcon}</span>
+                                  <Text strong>{`${copy.mealBlocks} ${blockIndex + 1}: `}</Text>
+                                </Space>
+                                <Form.Item name={[block.name, 'label']} noStyle>
+                                  <Input style={{ width: 200, display: 'inline-block', margin: '0 8px' }} onClick={(e) => e.stopPropagation()} />
+                                </Form.Item>
+                                {blocks.length > 1 && (
+                                  <Button
+                                    danger
+                                    type="text"
+                                    size="small"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      removeBlock(block.name);
+                                    }}
+                                  >
+                                    {copy.remove}
+                                  </Button>
+                                )}
                               </div>
-
-                              {options.map((option, optionIndex) => (
-                                <Card
-                                  size="small"
-                                  key={option.key}
-                                  className="nutrition-editor__option-card"
-                                  title={`${copy.options} ${optionIndex + 1}`}
-                                  extra={
-                                    options.length > 1 && (
-                                      <Button danger type="text" size="small" onClick={() => removeOption(option.name)}>
-                                        {copy.remove}
-                                      </Button>
-                                    )
-                                  }
-                                >
-                                  <div className="nutrition-editor__option-header-fields">
-                                    <Form.Item name={[option.name, 'label']} label={copy.label} rules={[{ required: true }]} style={{ marginBottom: 12 }}>
-                                      <Input style={{ maxWidth: 300 }} />
+                            ),
+                            children: (
+                              <>
+                                <div className="nutrition-editor__meal-fields-grid">
+                                  <Form.Item name={[block.name, 'mealType']} label={copy.mealType}>
+                                    <Select options={mealTypes.map(value => ({ value, label: value }))} />
+                                  </Form.Item>
+                                  <Form.Item name={[block.name, 'targetCalories']} label={copy.mealCalories}>
+                                    <InputNumber min={0} style={{ width: '100%' }} />
+                                  </Form.Item>
+                                  <Form.Item name={[block.name, 'instructions']} label={copy.instructions} className="nutrition-editor__span-2">
+                                    <Input />
+                                  </Form.Item>
+                                  <div className="nutrition-editor__span-2 nutrition-editor__checkboxes">
+                                    <Form.Item name={[block.name, 'trainingDayOnly']} valuePropName="checked" noStyle>
+                                      <Checkbox>{copy.trainingOnly}</Checkbox>
                                     </Form.Item>
-                                    <Form.Item name={[option.name, 'isCompleteOption']} valuePropName="checked" style={{ marginBottom: 12 }}>
-                                      <Checkbox>{copy.completeOption}</Checkbox>
+                                    <Form.Item name={[block.name, 'restDayOnly']} valuePropName="checked" noStyle>
+                                      <Checkbox>{copy.restOnly}</Checkbox>
                                     </Form.Item>
                                   </div>
+                                </div>
 
-                                  {/* Items List */}
-                                  <Form.List name={[option.name, 'items']}>
-                                    {(items, { add: addItem, remove: removeItem }) => (
-                                      <div className="nutrition-editor__items-section">
-                                        <Text type="secondary" className="nutrition-editor__source-hint">{copy.sourceHint}</Text>
-                                        {items.map((item, itemIndex) => (
-                                          <OptionItemRow
-                                            key={item.key}
-                                            blockIndex={blockIndex}
-                                            optionIndex={optionIndex}
-                                            itemIndex={item.name}
-                                            onRemove={() => removeItem(item.name)}
-                                            showRemove={items.length > 1}
-                                            form={form}
-                                            foodOptions={foodOptions}
-                                            recipeOptions={recipeOptions}
-                                            onSearchFood={setFoodSearchInput}
-                                            onSearchRecipe={setRecipeSearchInput}
-                                            foodsLoading={foodsQuery.isFetching}
-                                            recipesLoading={recipesQuery.isFetching}
-                                            loadMoreFoods={(e) => loadMoreOptions(e, foodsQuery.hasNextPage, foodsQuery.isFetchingNextPage, foodsQuery.fetchNextPage)}
-                                            loadMoreRecipes={(e) => loadMoreOptions(e, recipesQuery.hasNextPage, recipesQuery.isFetchingNextPage, recipesQuery.fetchNextPage)}
-                                            copy={copy}
-                                          />
-                                        ))}
-                                        <Button
-                                          size="small"
-                                          type="dashed"
-                                          onClick={() => addItem(copyPlanForForm(initialPlan).mealBlocks[0].options[0].items[0])}
-                                          style={{ marginTop: 8 }}
-                                        >
-                                          {copy.addItem}
+                                <Form.List name={[block.name, 'options']}>
+                                  {(options, { add: addOption, remove: removeOption }) => (
+                                    <div className="nutrition-editor__options-section">
+                                      <div className="nutrition-editor__options-header">
+                                        <Text strong>{copy.options}</Text>
+                                        <Button size="small" onClick={() => addOption(copyPlanForForm(initialPlan).mealBlocks[0].options[0])}>
+                                          {copy.addOption}
                                         </Button>
                                       </div>
-                                    )}
-                                  </Form.List>
-                                </Card>
-                              ))}
-                            </div>
-                          )}
-                        </Form.List>
-                      </Collapse.Panel>
-                    ))}
-                  </Collapse>
-                  <Button type="primary" onClick={() => addBlock(copyPlanForForm(initialPlan).mealBlocks[0])}>
-                    {copy.addMeal}
-                  </Button>
-                </div>
-              )}
-            </Form.List>
-          </Tabs.TabPane>
 
-          <Tabs.TabPane tab={copy.rulesTab} key="rules">
-            <Card className="nutrition-editor__card">
-              <Form.List name="rules">
-                {(rules, { add: addRule, remove: removeRule }) => (
-                  <div className="nutrition-editor__rules-section">
-                    <div className="nutrition-editor__rules-header">
-                      <Title level={4} style={{ margin: 0 }}>{copy.rules}</Title>
-                      <Button onClick={() => addRule({ ruleType: 'general', text: '' })}>{copy.addRule}</Button>
+                                      {options.map((option, optionIndex) => (
+                                        <Card
+                                          size="small"
+                                          key={option.key}
+                                          className="nutrition-editor__option-card"
+                                          title={`${copy.options} ${optionIndex + 1}`}
+                                          extra={
+                                            options.length > 1 && (
+                                              <Button danger type="text" size="small" onClick={() => removeOption(option.name)}>
+                                                {copy.remove}
+                                              </Button>
+                                            )
+                                          }
+                                        >
+                                          <div className="nutrition-editor__option-header-fields">
+                                            <Form.Item name={[option.name, 'label']} label={copy.label} rules={[{ required: true }]} style={{ marginBottom: 12 }}>
+                                              <Input style={{ maxWidth: 300 }} />
+                                            </Form.Item>
+                                            <Form.Item name={[option.name, 'isCompleteOption']} valuePropName="checked" style={{ marginBottom: 12 }}>
+                                              <Checkbox>{copy.completeOption}</Checkbox>
+                                            </Form.Item>
+                                          </div>
+
+                                          <Form.List name={[option.name, 'items']}>
+                                            {(items, { add: addItem, remove: removeItem }) => (
+                                              <div className="nutrition-editor__items-section">
+                                                <Text type="secondary" className="nutrition-editor__source-hint">{copy.sourceHint}</Text>
+                                                {items.map((item, itemIndex) => (
+                                                  <OptionItemRow
+                                                    key={item.key}
+                                                    blockName={block.name}
+                                                    optionName={option.name}
+                                                    itemName={item.name}
+                                                    onRemove={() => removeItem(item.name)}
+                                                    showRemove={items.length > 1}
+                                                    form={form}
+                                                    foodOptions={foodOptions}
+                                                    recipeOptions={recipeOptions}
+                                                    onSearchFood={setFoodSearchInput}
+                                                    onSearchRecipe={setRecipeSearchInput}
+                                                    foodsLoading={foodsQuery.isFetching}
+                                                    recipesLoading={recipesQuery.isFetching}
+                                                    loadMoreFoods={(e) => loadMoreOptions(e, foodsQuery.hasNextPage, foodsQuery.isFetchingNextPage, foodsQuery.fetchNextPage)}
+                                                    loadMoreRecipes={(e) => loadMoreOptions(e, recipesQuery.hasNextPage, recipesQuery.isFetchingNextPage, recipesQuery.fetchNextPage)}
+                                                    copy={copy}
+                                                  />
+                                                ))}
+                                                <Button
+                                                  size="small"
+                                                  type="dashed"
+                                                  onClick={() => addItem(copyPlanForForm(initialPlan).mealBlocks[0].options[0].items[0])}
+                                                  style={{ marginTop: 8 }}
+                                                >
+                                                  {copy.addItem}
+                                                </Button>
+                                              </div>
+                                            )}
+                                          </Form.List>
+                                        </Card>
+                                      ))}
+                                    </div>
+                                  )}
+                                </Form.List>
+                              </>
+                            ),
+                          };
+                        })}
+                      />
+                      <Button type="primary" onClick={() => addBlock(copyPlanForForm(initialPlan).mealBlocks[0])}>
+                        {copy.addMeal}
+                      </Button>
                     </div>
+                  )}
+                </Form.List>
+              ),
+            },
+            {
+              key: 'rules',
+              label: copy.rulesTab,
+              children: (
+                <Card className="nutrition-editor__card">
+                  <Form.List name="rules">
+                    {(rules, { add: addRule, remove: removeRule }) => (
+                      <div className="nutrition-editor__rules-section">
+                        <div className="nutrition-editor__rules-header">
+                          <Title level={4} style={{ margin: 0 }}>{copy.rules}</Title>
+                          <Button onClick={() => addRule({ ruleType: 'general', text: '' })}>{copy.addRule}</Button>
+                        </div>
 
-                    {rules.map((rule) => (
-                      <div className="nutrition-editor__rule-row" key={rule.key}>
-                        <Form.Item name={[rule.name, 'ruleType']} label={copy.ruleType} style={{ flex: 1, marginBottom: 0 }}>
-                          <Input />
-                        </Form.Item>
-                        <Form.Item name={[rule.name, 'text']} label={copy.ruleText} rules={[{ required: true }]} style={{ flex: 3, marginBottom: 0 }}>
-                          <Input />
-                        </Form.Item>
-                        <Button danger type="text" onClick={() => removeRule(rule.name)} style={{ alignSelf: 'flex-end' }}>
-                          {copy.remove}
-                        </Button>
+                        {rules.map((rule) => (
+                          <div className="nutrition-editor__rule-row" key={rule.key}>
+                            <Form.Item name={[rule.name, 'ruleType']} label={copy.ruleType} style={{ flex: 1, marginBottom: 0 }}>
+                              <Input />
+                            </Form.Item>
+                            <Form.Item name={[rule.name, 'text']} label={copy.ruleText} rules={[{ required: true }]} style={{ flex: 3, marginBottom: 0 }}>
+                              <Input />
+                            </Form.Item>
+                            <Button danger type="text" onClick={() => removeRule(rule.name)} style={{ alignSelf: 'flex-end' }}>
+                              {copy.remove}
+                            </Button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </Form.List>
-            </Card>
-          </Tabs.TabPane>
-        </Tabs>
+                    )}
+                  </Form.List>
+                </Card>
+              ),
+            },
+          ]}
+        />
       </Form>
     </div>
   );
