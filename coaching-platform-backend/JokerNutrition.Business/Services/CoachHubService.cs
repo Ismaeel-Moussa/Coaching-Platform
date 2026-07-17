@@ -68,13 +68,19 @@ public class CoachHubService : _BaseService, ICoachHubService
 
     public async Task<CoachDashboardDto> GetDashboardAsync()
     {
-        var coach = await GetCoachAsync();
-        string cacheKey = $"coach-dashboard:{coach.Id}";
+        var isAdmin = LoggedInUser.Role == "Admin";
+        var coach = isAdmin ? null : await GetCoachAsync();
+        string cacheKey = isAdmin
+            ? $"coach-dashboard:admin:{LoggedInUser.Id}"
+            : $"coach-dashboard:{coach!.Id}";
         return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
         {
-            var athletes = LoggedInUser.Role == "Admin"
-                ? await _athleteRepo.QueryAll().Include(a => a.User).ToListAsync()
-                : await GetCoachAthletesAsync(coach.Id);
+            var athletes = isAdmin
+                ? await _athleteRepo.QueryAll()
+                    .Include(a => a.User)
+                    .Include(a => a.OnboardingAssessment)
+                    .ToListAsync()
+                : await GetCoachAthletesAsync(coach!.Id);
             var athleteIds = athletes.Select(a => a.Id).ToList();
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -104,6 +110,8 @@ public class CoachHubService : _BaseService, ICoachHubService
                 .ToListAsync();
 
             var pendingCount = athleteIds.Count - recentCheckInAthleteIds.Count;
+            var pendingOnboardingAssessmentsCount = athletes.Count(a =>
+                a.OnboardingAssessment?.Status == OnboardingAssessmentStatus.Submitted);
 
             // Last 10 live feed items
             var recentFeed = await _workoutLogRepo.QueryAll()
@@ -120,6 +128,7 @@ public class CoachHubService : _BaseService, ICoachHubService
                 ActiveAthleteCount = activeCount,
                 AvgWorkoutCompletionPercent = Math.Round(avgCompletion, 1),
                 PendingCheckInsCount = Math.Max(0, pendingCount),
+                PendingOnboardingAssessmentsCount = pendingOnboardingAssessmentsCount,
                 RecentFeed = recentFeed.Select(CoachHubMapper.MapLiveFeedItem).ToList()
             };
         }, TimeSpan.FromSeconds(60));
@@ -197,10 +206,38 @@ public class CoachHubService : _BaseService, ICoachHubService
 
     public async Task<PagedResult<RosterItemDto>> GetRosterAsync(int page, int pageSize, string? filter)
     {
-        var coach = await GetCoachAsync();
-        var athletes = LoggedInUser.Role == "Admin"
-            ? await _athleteRepo.QueryAll().Include(a => a.User).ToListAsync()
-            : await GetCoachAthletesAsync(coach.Id);
+        var isAdmin = LoggedInUser.Role == "Admin";
+        var coach = isAdmin ? null : await GetCoachAsync();
+        IQueryable<Athlete> athleteQuery = _athleteRepo.QueryAll()
+            .Include(a => a.User)
+            .Include(a => a.OnboardingAssessment);
+
+        if (!isAdmin)
+        {
+            athleteQuery = athleteQuery.Where(a => a.AssignedCoachId == coach!.Id);
+        }
+
+        var isAssessmentReviewFilter = filter == "AwaitingAssessmentReview";
+        int? assessmentReviewTotalCount = null;
+        List<Athlete> athletes;
+
+        if (isAssessmentReviewFilter)
+        {
+            var pendingAssessmentQuery = athleteQuery
+                .Where(a => a.OnboardingAssessment != null &&
+                            a.OnboardingAssessment.Status == OnboardingAssessmentStatus.Submitted)
+                .OrderBy(a => a.OnboardingAssessment!.SubmittedAt);
+
+            assessmentReviewTotalCount = await pendingAssessmentQuery.CountAsync();
+            athletes = await pendingAssessmentQuery
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+        else
+        {
+            athletes = await athleteQuery.ToListAsync();
+        }
         var athleteIds = athletes.Select(a => a.Id).ToList();
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -253,14 +290,14 @@ public class CoachHubService : _BaseService, ICoachHubService
         {
             "ComplianceAlert" => rosterItems.Where(r => r.Status == "ComplianceAlert").ToList(),
             "NoRecentCheckIn" => rosterItems.Where(r => r.Status == "NoRecentCheckIn").ToList(),
+            "AwaitingAssessmentReview" => rosterItems,
             _ => rosterItems
         };
 
-        var totalCount = filtered.Count;
-        var paged = filtered
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
+        var totalCount = assessmentReviewTotalCount ?? filtered.Count;
+        var paged = isAssessmentReviewFilter
+            ? filtered
+            : filtered.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
         return new PagedResult<RosterItemDto>
         {
@@ -492,6 +529,7 @@ public class CoachHubService : _BaseService, ICoachHubService
     private async Task<List<Athlete>> GetCoachAthletesAsync(int coachId) =>
         await _athleteRepo.QueryAll()
             .Include(a => a.User)
+            .Include(a => a.OnboardingAssessment)
             .Where(a => a.AssignedCoachId == coachId)
             .ToListAsync();
 

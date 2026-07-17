@@ -21,8 +21,8 @@ public class CoachHubController : ControllerBase
 
     /// <summary>
     /// Returns KPI summary for the coach dashboard:
-    /// active athlete count, average workout completion %, pending check-in count,
-    /// and the 10 most recent workout feed events across all roster athletes.
+    /// active athlete count, average workout completion %, pending check-in and
+    /// onboarding-review counts, and the 10 most recent workout feed events.
     /// </summary>
     [HttpGet("dashboard")]
     public async Task<IActionResult> GetDashboard()
@@ -58,8 +58,9 @@ public class CoachHubController : ControllerBase
 
     /// <summary>
     /// Returns a paginated roster of all athletes assigned to the coach,
-    /// with their active program, compliance %, last check-in date, and status badge.
-    /// Optional filter: "ComplianceAlert" | "NoRecentCheckIn" (default: All).
+    /// with their active program, compliance %, last check-in date, onboarding status,
+    /// and status badge. Optional filter: "ComplianceAlert" | "NoRecentCheckIn" |
+    /// "AwaitingAssessmentReview" (default: All).
     /// </summary>
     [HttpGet("roster")]
     public async Task<IActionResult> GetRoster(

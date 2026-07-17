@@ -2,6 +2,7 @@
 
 export type WorkoutStatus = 'InProgress' | 'Completed' | 'Missed';
 export type RosterStatus = 'Active' | 'ComplianceAlert' | 'NoRecentCheckIn';
+export type OnboardingDisplayStatus = 'NotStarted' | 'Draft' | 'Submitted' | 'Reviewed' | 'ChangesRequested';
 
 export interface LiveFeedItemDto {
   athleteId: number;
@@ -17,6 +18,7 @@ export interface CoachDashboardDto {
   activeAthleteCount: number;
   avgWorkoutCompletionPercent: number;
   pendingCheckInsCount: number;
+  pendingOnboardingAssessmentsCount: number;
   recentFeed: LiveFeedItemDto[];
 }
 
@@ -43,6 +45,8 @@ export interface RosterItemDto {
   activeProgramName: string | null;
   macroCompliancePercent: number;
   lastCheckInDate: string | null;
+  onboardingStatus: OnboardingDisplayStatus;
+  onboardingSubmittedAt: string | null;
   status: RosterStatus;
 }
 

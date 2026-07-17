@@ -133,6 +133,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (newNotif.type === 'OnboardingReopened') {
         queryClient.invalidateQueries({ queryKey: ['onboarding', 'me'] });
       }
+      if (isCoach && newNotif.type === 'OnboardingSubmitted') {
+        queryClient.invalidateQueries({ queryKey: ['coach-dashboard'] });
+        queryClient.invalidateQueries({ queryKey: ['coach-roster'] });
+      }
 
       // Show browser/app toast notification
       const getToastTitle = (notif: NotificationDto) => {

@@ -17,6 +17,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
     private readonly INotificationService _notificationService;
     private readonly IBlobStorageService _blobService;
     private readonly IAuditLogService _auditLogService;
+    private readonly ICacheService _cacheService;
 
     private const long MaxPhotoSizeBytes = 10 * 1024 * 1024; // 10 MB
     private static readonly string[] AllowedContentTypes = ["image/jpeg", "image/png", "image/jpg"];
@@ -27,13 +28,15 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
         JokerNutritionContext context,
         INotificationService notificationService,
         IBlobStorageService blobService,
-        IAuditLogService auditLogService)
+        IAuditLogService auditLogService,
+        ICacheService cacheService)
         : base(principal, logger)
     {
         _context = context;
         _notificationService = notificationService;
         _blobService = blobService;
         _auditLogService = auditLogService;
+        _cacheService = cacheService;
     }
 
     public async Task<OnboardingAssessmentDto> GetMineAsync(CancellationToken cancellationToken = default)
@@ -73,6 +76,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
         assessment.CoachReviewNotes = null;
         SyncAthleteProfile(athlete, assessment);
         await _context.SaveChangesAsync(cancellationToken);
+        _cacheService.EvictByPrefix("coach-dashboard:");
 
         var recipientUserIds = new HashSet<int>();
 
@@ -165,6 +169,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
         assessment.ReviewedByCoachId = coachId;
         assessment.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(cancellationToken);
+        _cacheService.EvictByPrefix("coach-dashboard:");
 
         await TrySendNotificationAsync(
             athlete.UserId,
@@ -220,6 +225,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
         assessment.ReopenedByCoachId = coachId;
         assessment.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(cancellationToken);
+        _cacheService.EvictByPrefix("coach-dashboard:");
 
         await _auditLogService.LogAsync(
             LoggedInUser.Id,
