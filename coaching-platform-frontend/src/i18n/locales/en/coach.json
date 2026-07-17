@@ -33,6 +33,8 @@
     "workoutCompletion": "Workout Completion",
     "weeklyAvg": "Weekly average",
     "pendingCheckIns": "Pending Check-ins",
+    "pendingAssessments": "Assessments awaiting review",
+    "reviewRequired": "Review required",
     "actionRequired": "Action Required",
     "liveFeed": "Real-Time Live Feed",
     "monitoringLogs": "Monitoring active logs",
@@ -54,16 +56,27 @@
     "all": "All Clients",
     "compliant": "Compliance Alerts",
     "nonCompliant": "No Recent Check-in",
+    "awaitingReview": "Awaiting Assessment Review",
+    "reviewAssessment": "Review Assessment",
+    "onboardingStatus": {
+      "NotStarted": "Not started",
+      "Draft": "Draft",
+      "Submitted": "Awaiting review",
+      "Reviewed": "Reviewed",
+      "ChangesRequested": "Changes requested"
+    },
     "table": {
       "name": "Athlete",
       "goal": "Goal",
       "compliance": "Macro Compliance",
       "status": "Active Program",
+      "assessment": "Initial Assessment",
       "lastCheckin": "Last Check-In",
       "actions": "Action",
       "lastCheckinLabel": "Last Check-in",
       "complianceLabel": "Compliance",
-      "programLabel": "Program"
+      "programLabel": "Program",
+      "assessmentLabel": "Initial Assessment"
     },
     "viewProfile": "View Profile",
     "empty": "Failed to load client roster. Please refresh the page."

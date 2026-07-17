@@ -80,6 +80,16 @@ public static class CoachHubMapper
             : isCompliantAlert ? "ComplianceAlert"
             : "Active";
 
+        var onboardingStatus = athlete.OnboardingAssessment switch
+        {
+            null => "NotStarted",
+            { Status: OnboardingAssessmentStatus.Draft, ReopenedAt: not null } => "ChangesRequested",
+            { Status: OnboardingAssessmentStatus.Draft } => "Draft",
+            { Status: OnboardingAssessmentStatus.Submitted } => "Submitted",
+            { Status: OnboardingAssessmentStatus.Reviewed } => "Reviewed",
+            _ => "NotStarted"
+        };
+
         return new RosterItemDto
         {
             AthleteId = athlete.Id,
@@ -88,6 +98,8 @@ public static class CoachHubMapper
             ActiveProgramName = activeProgram?.WorkoutTemplate?.Name,
             MacroCompliancePercent = Math.Round(compliancePct, 1),
             LastCheckInDate = lastCheckIn?.SubmittedAt,
+            OnboardingStatus = onboardingStatus,
+            OnboardingSubmittedAt = athlete.OnboardingAssessment?.SubmittedAt,
             Status = status
         };
     }

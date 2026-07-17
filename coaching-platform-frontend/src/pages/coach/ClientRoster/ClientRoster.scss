@@ -59,10 +59,25 @@
 
   &__tabs {
     display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
     background-color: var(--surface-container-low);
     padding: 4px;
     border-radius: var(--radius-card);
     border: 1px solid var(--color-border-light);
+  }
+
+  .roster-tag--onboarding {
+    margin-inline-end: 0;
+    white-space: nowrap;
+  }
+
+  &__action-chevron {
+    font-size: 16px;
+
+    [dir='rtl'] & {
+      transform: rotate(180deg);
+    }
   }
 
   &__tab {

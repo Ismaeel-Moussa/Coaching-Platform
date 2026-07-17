@@ -15,6 +15,7 @@ export const useGetCoachDashboard = () =>
   useQuery({
     queryKey: ['coach-dashboard'],
     queryFn: getCoachDashboard,
+    refetchInterval: 30_000,
     staleTime: 30_000,
   });
 

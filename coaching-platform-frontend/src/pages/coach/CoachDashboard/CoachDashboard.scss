@@ -94,14 +94,14 @@
   // KPI cards
   &__kpis {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: var(--space-sm);
 
-    @media (max-width: 768px) and (min-width: 481px) {
+    @media (max-width: 1100px) and (min-width: 601px) {
       grid-template-columns: repeat(2, 1fr);
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 600px) {
       grid-template-columns: 1fr;
     }
   }
@@ -121,6 +121,11 @@
     &--alert {
       border-color: rgba(186, 26, 26, 0.3);
       background-color: rgba(186, 26, 26, 0.01);
+    }
+
+    &--attention {
+      border-color: rgba(var(--color-gold-rgb), 0.5);
+      background-color: rgba(var(--color-gold-rgb), 0.025);
     }
 
     &--clickable {
@@ -156,6 +161,11 @@
     &--red {
       background-color: var(--color-red-bg);
       color: var(--color-red);
+    }
+
+    &--gold {
+      background-color: var(--color-gold-bg);
+      color: var(--color-gold-text);
     }
   }
 
@@ -211,6 +221,11 @@
     border-radius: var(--radius-full);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+
+    &--gold {
+      color: var(--color-navy);
+      background-color: var(--color-gold);
+    }
   }
 
   &__kpi-sub {

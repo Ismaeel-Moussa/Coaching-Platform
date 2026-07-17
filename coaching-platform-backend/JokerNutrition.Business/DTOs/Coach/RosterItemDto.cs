@@ -8,6 +8,8 @@ public class RosterItemDto
     public string? ActiveProgramName { get; set; }
     public double MacroCompliancePercent { get; set; }
     public DateTime? LastCheckInDate { get; set; }
+    public string OnboardingStatus { get; set; } = "NotStarted";
+    public DateTime? OnboardingSubmittedAt { get; set; }
 
     /// <summary>"Active" | "ComplianceAlert" | "NoRecentCheckIn"</summary>
     public string Status { get; set; } = string.Empty;

@@ -33,6 +33,8 @@
     "workoutCompletion": "معدل إكمال التمارين",
     "weeklyAvg": "المعدل الأسبوعي",
     "pendingCheckIns": "تقارير متابعة معلقة",
+    "pendingAssessments": "تقييمات بانتظار المراجعة",
+    "reviewRequired": "تحتاج مراجعة",
     "actionRequired": "مطلوب اتخاذ إجراء",
     "liveFeed": "البث المباشر للأنشطة",
     "monitoringLogs": "مراقبة الأنشطة الجارية",
@@ -54,16 +56,27 @@
     "all": "جميع اللاعبين",
     "compliant": "تنبيهات الالتزام",
     "nonCompliant": "لا يوجد تقرير متابعة حديث",
+    "awaitingReview": "بانتظار مراجعة التقييم",
+    "reviewAssessment": "مراجعة التقييم",
+    "onboardingStatus": {
+      "NotStarted": "لم يبدأ",
+      "Draft": "مسودة",
+      "Submitted": "بانتظار المراجعة",
+      "Reviewed": "تمت المراجعة",
+      "ChangesRequested": "طُلبت تعديلات"
+    },
     "table": {
       "name": "الرياضي",
       "goal": "الهدف",
       "compliance": "الالتزام بالماكروز",
       "status": "البرنامج النشط",
+      "assessment": "التقييم الأولي",
       "lastCheckin": "آخر تقرير متابعة",
       "actions": "الإجراء",
       "lastCheckinLabel": "آخر متابعة",
       "complianceLabel": "الالتزام",
-      "programLabel": "البرنامج"
+      "programLabel": "البرنامج",
+      "assessmentLabel": "التقييم الأولي"
     },
     "viewProfile": "عرض الملف الشخصي",
     "empty": "فشل تحميل قائمة العملاء. يرجى إعادة تحميل الصفحة."

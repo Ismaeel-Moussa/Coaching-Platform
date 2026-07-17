@@ -4,9 +4,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGetRoster } from '../../../hooks/useCoachHub/useCoachHub';
 import { formatRelativeTime } from '../../../utils/date';
+import type { OnboardingDisplayStatus } from '../../../types/CoachHub';
 import './ClientRoster.scss';
 
-type ActiveTab = 'All' | 'ComplianceAlert' | 'NoRecentCheckIn';
+type ActiveTab = 'All' | 'ComplianceAlert' | 'NoRecentCheckIn' | 'AwaitingAssessmentReview';
 
 const ClientRoster: React.FC = () => {
   const { t } = useTranslation(['common', 'coach']);
@@ -15,7 +16,7 @@ const ClientRoster: React.FC = () => {
   
   const initialFilter = searchParams.get('filter') as ActiveTab || 'All';
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
-    if (initialFilter === 'ComplianceAlert' || initialFilter === 'NoRecentCheckIn') {
+    if (initialFilter === 'ComplianceAlert' || initialFilter === 'NoRecentCheckIn' || initialFilter === 'AwaitingAssessmentReview') {
       return initialFilter;
     }
     return 'All';
@@ -30,8 +31,24 @@ const ClientRoster: React.FC = () => {
 
   const { data, isLoading, error } = useGetRoster(currentPage, PAGE_SIZE, apiFilter);
 
-  const handleRowClick = (athleteId: number) => {
-    navigate(`/coach/roster/${athleteId}`);
+  const handleRowClick = (athleteId: number, reviewAssessment = false) => {
+    navigate(`/coach/roster/${athleteId}${reviewAssessment ? '#onboarding-assessment' : ''}`);
+  };
+
+  const getOnboardingStatusTag = (status: OnboardingDisplayStatus) => {
+    const colors: Record<OnboardingDisplayStatus, string> = {
+      NotStarted: 'default',
+      Draft: 'blue',
+      Submitted: 'gold',
+      Reviewed: 'green',
+      ChangesRequested: 'orange',
+    };
+
+    return (
+      <Tag color={colors[status]} className="roster-tag roster-tag--onboarding">
+        {t(`coach:roster.onboardingStatus.${status}`)}
+      </Tag>
+    );
   };
 
   const getInitials = (name: string) => {
@@ -91,6 +108,12 @@ const ClientRoster: React.FC = () => {
       ),
     },
     {
+      title: t('coach:roster.table.assessment'),
+      dataIndex: 'onboardingStatus',
+      key: 'onboardingStatus',
+      render: (status: OnboardingDisplayStatus) => getOnboardingStatusTag(status),
+    },
+    {
       title: t('coach:roster.table.compliance'),
       dataIndex: 'macroCompliancePercent',
       key: 'macroCompliancePercent',
@@ -139,11 +162,13 @@ const ClientRoster: React.FC = () => {
           type="link" 
           onClick={(e) => {
             e.stopPropagation();
-            handleRowClick(record.athleteId);
+            handleRowClick(record.athleteId, record.onboardingStatus === 'Submitted');
           }}
           className="roster-table__action-btn"
         >
-          {t('coach:roster.viewProfile')}
+          {record.onboardingStatus === 'Submitted'
+            ? t('coach:roster.reviewAssessment')
+            : t('coach:roster.viewProfile')}
         </Button>
       ),
     },
@@ -203,6 +228,16 @@ const ClientRoster: React.FC = () => {
           >
             {t('coach:roster.nonCompliant')}
           </button>
+          <button
+            className={`client-roster__tab ${activeTab === 'AwaitingAssessmentReview' ? 'client-roster__tab--active' : ''}`}
+            onClick={() => {
+              setActiveTab('AwaitingAssessmentReview');
+              setCurrentPage(1);
+              setSearchParams({ filter: 'AwaitingAssessmentReview' });
+            }}
+          >
+            {t('coach:roster.awaitingReview')}
+          </button>
         </div>
       </div>
 
@@ -222,7 +257,7 @@ const ClientRoster: React.FC = () => {
               loading={isLoading}
               pagination={false}
               onRow={(record) => ({
-                onClick: () => handleRowClick(record.athleteId),
+                onClick: () => handleRowClick(record.athleteId, record.onboardingStatus === 'Submitted'),
               })}
               className="roster-table client-roster__desktop-table"
             />
@@ -231,7 +266,7 @@ const ClientRoster: React.FC = () => {
                 <div
                   key={item.athleteId}
                   className="client-roster__card-item"
-                  onClick={() => handleRowClick(item.athleteId)}
+                  onClick={() => handleRowClick(item.athleteId, item.onboardingStatus === 'Submitted')}
                 >
                   <div className="client-roster__card-header">
                     <div className="client-roster__card-athlete">
@@ -247,6 +282,10 @@ const ClientRoster: React.FC = () => {
                     {getStatusTag(item.status)}
                   </div>
                   <div className="client-roster__card-body">
+                    <div className="client-roster__card-row">
+                      <span className="label">{t('coach:roster.table.assessmentLabel')}</span>
+                      <span className="value">{getOnboardingStatusTag(item.onboardingStatus)}</span>
+                    </div>
                     <div className="client-roster__card-row">
                       <span className="label">{t('coach:roster.table.programLabel')}</span>
                       <span className="value">
@@ -278,8 +317,10 @@ const ClientRoster: React.FC = () => {
                   </div>
                   <div className="client-roster__card-footer">
                     <Button type="link" className="view-profile-link">
-                      {t('coach:roster.viewProfile')}
-                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chevron_right</span>
+                      {item.onboardingStatus === 'Submitted'
+                        ? t('coach:roster.reviewAssessment')
+                        : t('coach:roster.viewProfile')}
+                      <span className="material-symbols-outlined client-roster__action-chevron">chevron_right</span>
                     </Button>
                   </div>
                 </div>

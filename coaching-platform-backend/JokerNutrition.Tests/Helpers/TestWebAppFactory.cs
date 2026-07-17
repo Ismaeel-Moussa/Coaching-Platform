@@ -165,6 +165,128 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
             db.Athletes.Add(new Athlete { Id = 1, UserId = 2, AssignedCoachId = 1 });
         }
 
+        // Admin intentionally has no Coach row, covering role-only admin access.
+        if (!db.Users.Any(u => u.Email == "admin@test.com"))
+        {
+            var admin = new User
+            {
+                Id = 3,
+                UserName = "admin@test.com",
+                NormalizedUserName = "ADMIN@TEST.COM",
+                Email = "admin@test.com",
+                NormalizedEmail = "ADMIN@TEST.COM",
+                EmailConfirmed = true,
+                FirstName = "Test",
+                LastName = "Admin",
+                IsActive = true,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                CreatedAt = DateTime.UtcNow
+            };
+            admin.PasswordHash = hasher.HashPassword(admin, "Admin@Test123!");
+            db.Users.Add(admin);
+            db.UserRoles.Add(new UserRole { UserId = 3, RoleId = 1 });
+        }
+
+        if (!db.Users.Any(u => u.Email == "reviewed-athlete@test.com"))
+        {
+            var reviewedAthlete = new User
+            {
+                Id = 4,
+                UserName = "reviewed-athlete@test.com",
+                NormalizedUserName = "REVIEWED-ATHLETE@TEST.COM",
+                Email = "reviewed-athlete@test.com",
+                NormalizedEmail = "REVIEWED-ATHLETE@TEST.COM",
+                EmailConfirmed = true,
+                FirstName = "Reviewed",
+                LastName = "Athlete",
+                IsActive = true,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                CreatedAt = DateTime.UtcNow
+            };
+            reviewedAthlete.PasswordHash = hasher.HashPassword(reviewedAthlete, "Athlete@Test123!");
+            db.Users.Add(reviewedAthlete);
+            db.UserRoles.Add(new UserRole { UserId = 4, RoleId = 3 });
+            db.Athletes.Add(new Athlete { Id = 2, UserId = 4, AssignedCoachId = 1 });
+        }
+
+        if (!db.Users.Any(u => u.Email == "other-coach@test.com"))
+        {
+            var otherCoach = new User
+            {
+                Id = 5,
+                UserName = "other-coach@test.com",
+                NormalizedUserName = "OTHER-COACH@TEST.COM",
+                Email = "other-coach@test.com",
+                NormalizedEmail = "OTHER-COACH@TEST.COM",
+                EmailConfirmed = true,
+                FirstName = "Other",
+                LastName = "Coach",
+                IsActive = true,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                CreatedAt = DateTime.UtcNow
+            };
+            otherCoach.PasswordHash = hasher.HashPassword(otherCoach, "Coach@Test123!");
+            db.Users.Add(otherCoach);
+            db.UserRoles.Add(new UserRole { UserId = 5, RoleId = 2 });
+            db.Coaches.Add(new Coach { Id = 2, UserId = 5, IsActive = true });
+        }
+
+        if (!db.Users.Any(u => u.Email == "other-athlete@test.com"))
+        {
+            var otherAthlete = new User
+            {
+                Id = 6,
+                UserName = "other-athlete@test.com",
+                NormalizedUserName = "OTHER-ATHLETE@TEST.COM",
+                Email = "other-athlete@test.com",
+                NormalizedEmail = "OTHER-ATHLETE@TEST.COM",
+                EmailConfirmed = true,
+                FirstName = "Other",
+                LastName = "Athlete",
+                IsActive = true,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                CreatedAt = DateTime.UtcNow
+            };
+            otherAthlete.PasswordHash = hasher.HashPassword(otherAthlete, "Athlete@Test123!");
+            db.Users.Add(otherAthlete);
+            db.UserRoles.Add(new UserRole { UserId = 6, RoleId = 3 });
+            db.Athletes.Add(new Athlete { Id = 3, UserId = 6, AssignedCoachId = 2 });
+        }
+
+        if (!db.AthleteOnboardingAssessments.Any())
+        {
+            var submittedAt = DateTime.UtcNow.AddHours(-2);
+            db.AthleteOnboardingAssessments.AddRange(
+                new AthleteOnboardingAssessment
+                {
+                    Id = 1,
+                    AthleteId = 1,
+                    Status = JokerNutrition.Data.Enums.OnboardingAssessmentStatus.Submitted,
+                    SubmittedAt = submittedAt,
+                    CreatedAt = submittedAt,
+                    UpdatedAt = submittedAt
+                },
+                new AthleteOnboardingAssessment
+                {
+                    Id = 2,
+                    AthleteId = 2,
+                    Status = JokerNutrition.Data.Enums.OnboardingAssessmentStatus.Reviewed,
+                    SubmittedAt = submittedAt.AddMinutes(10),
+                    ReviewedAt = submittedAt.AddHours(1),
+                    CreatedAt = submittedAt,
+                    UpdatedAt = submittedAt.AddHours(1)
+                },
+                new AthleteOnboardingAssessment
+                {
+                    Id = 3,
+                    AthleteId = 3,
+                    Status = JokerNutrition.Data.Enums.OnboardingAssessmentStatus.Submitted,
+                    SubmittedAt = submittedAt.AddMinutes(20),
+                    CreatedAt = submittedAt,
+                    UpdatedAt = submittedAt.AddMinutes(20)
+                });
+        }
+
         db.SaveChanges();
     }
 }

@@ -62,6 +62,8 @@ export const useReviewOnboardingAssessment = (athleteId: number) => {
     mutationFn: (form: ReviewOnboardingAssessmentForm) => reviewAthleteOnboardingAssessment(athleteId, form),
     onSuccess: (data) => {
       queryClient.setQueryData(['onboarding', 'athlete', athleteId], data);
+      queryClient.invalidateQueries({ queryKey: ['coach-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['coach-roster'] });
       message.success(i18n.t('coach:onboarding.messages.reviewed'));
     },
     onError: (error) => message.error(getErrorMessage(error, i18n.t('coach:onboarding.messages.reviewFailed'))),
@@ -74,6 +76,8 @@ export const useReopenOnboardingAssessment = (athleteId: number) => {
     mutationFn: (form: ReopenOnboardingAssessmentForm) => reopenAthleteOnboardingAssessment(athleteId, form),
     onSuccess: (data) => {
       queryClient.setQueryData(['onboarding', 'athlete', athleteId], data);
+      queryClient.invalidateQueries({ queryKey: ['coach-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['coach-roster'] });
       message.success(i18n.t('coach:onboarding.messages.reopened'));
     },
     onError: (error) => message.error(getErrorMessage(error, i18n.t('coach:onboarding.messages.reopenFailed'))),

@@ -172,6 +172,41 @@ const CoachDashboard: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* KPI 4: Assessments awaiting review */}
+        <div
+          className={`coach-dashboard__kpi-card coach-dashboard__kpi-card--clickable ${
+            (dashboardData?.pendingOnboardingAssessmentsCount ?? 0) > 0
+              ? 'coach-dashboard__kpi-card--attention'
+              : ''
+          }`}
+          onClick={() => navigate('/coach/roster?filter=AwaitingAssessmentReview')}
+        >
+          <div className={`coach-dashboard__kpi-icon ${
+            (dashboardData?.pendingOnboardingAssessmentsCount ?? 0) > 0
+              ? 'coach-dashboard__kpi-icon--gold'
+              : 'coach-dashboard__kpi-icon--navy'
+          }`}>
+            <span className="material-symbols-outlined">assignment_late</span>
+          </div>
+          <div className="coach-dashboard__kpi-info">
+            <span className="coach-dashboard__kpi-label">{t('coach:dashboard.pendingAssessments')}</span>
+            {isDashboardLoading ? (
+              <Skeleton.Input active size="small" style={{ width: 80 }} />
+            ) : (
+              <div className="coach-dashboard__kpi-value-wrapper">
+                <span className="coach-dashboard__kpi-value mono">
+                  {dashboardData?.pendingOnboardingAssessmentsCount ?? 0}
+                </span>
+                {(dashboardData?.pendingOnboardingAssessmentsCount ?? 0) > 0 && (
+                  <span className="coach-dashboard__kpi-alert-badge coach-dashboard__kpi-alert-badge--gold">
+                    {t('coach:dashboard.reviewRequired')}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Main Panels Grid */}
