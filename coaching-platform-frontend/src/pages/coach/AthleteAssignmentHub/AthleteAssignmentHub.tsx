@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Select, Card, Button, InputNumber, Input, 
   Modal, Skeleton, Avatar, Tooltip 
@@ -26,6 +26,7 @@ const { Option } = Select;
 
 const AthleteAssignmentHub: React.FC = () => {
   const { t, i18n } = useTranslation(['common', 'athlete', 'coach']);
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [selectedAthleteId, setSelectedAthleteId] = useState<number | null>(() => {
@@ -114,6 +115,44 @@ const AthleteAssignmentHub: React.FC = () => {
 
   // Find roster info for active program display
   const selectedRosterItem = rosterData?.items?.find((item: any) => item.athleteId === selectedAthleteId);
+  const setupReadiness = profile?.setupReadiness ?? {
+    isComplete: false,
+    completedRequiredSteps: 0,
+    totalRequiredSteps: 5,
+    assessmentReviewed: false,
+    workoutAssigned: false,
+    nutritionPlanAssigned: false,
+    nutritionTargetsConfigured: false,
+    activityTargetsConfigured: false,
+  };
+
+  const readinessSteps = profile ? [
+    {
+      key: 'assessmentReviewed',
+      complete: setupReadiness.assessmentReviewed,
+      action: () => navigate(`/coach/roster/${profile.id}#onboarding-assessment`),
+    },
+    {
+      key: 'workoutAssigned',
+      complete: setupReadiness.workoutAssigned,
+      action: () => setIsProgramModalVisible(true),
+    },
+    {
+      key: 'nutritionPlanAssigned',
+      complete: setupReadiness.nutritionPlanAssigned,
+      action: () => setIsNutritionPlanModalVisible(true),
+    },
+    {
+      key: 'nutritionTargetsConfigured',
+      complete: setupReadiness.nutritionTargetsConfigured,
+      action: () => document.getElementById('nutrition-targets-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
+    },
+    {
+      key: 'activityTargetsConfigured',
+      complete: setupReadiness.activityTargetsConfigured,
+      action: () => document.getElementById('activity-targets-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
+    },
+  ] : [];
 
   // Save Nutrition Targets
   const handleSaveNutrition = () => {
@@ -314,13 +353,53 @@ const AthleteAssignmentHub: React.FC = () => {
           <Skeleton active paragraph={{ rows: 8 }} />
         </div>
       ) : (
+        <>
+        {profile && (
+          <section
+            className={`athlete-assignment-hub__readiness ${setupReadiness.isComplete ? 'athlete-assignment-hub__readiness--complete' : ''}`}
+            aria-labelledby="setup-readiness-title"
+          >
+            <div className="athlete-assignment-hub__readiness-summary">
+              <div>
+                <span className="athlete-assignment-hub__readiness-eyebrow">
+                  {t('coach:setupReadiness.eyebrow')}
+                </span>
+                <h2 id="setup-readiness-title">{t('coach:setupReadiness.title')}</h2>
+                <p>{setupReadiness.isComplete
+                  ? t('coach:setupReadiness.completeDesc')
+                  : t('coach:setupReadiness.requiredDesc')}</p>
+              </div>
+              <div className="athlete-assignment-hub__readiness-score mono">
+                <strong>{setupReadiness.completedRequiredSteps}/{setupReadiness.totalRequiredSteps}</strong>
+                <span>{t('coach:setupReadiness.requiredSteps')}</span>
+              </div>
+            </div>
+            <div className="athlete-assignment-hub__readiness-steps">
+              {readinessSteps.map((step) => (
+                <button
+                  key={step.key}
+                  type="button"
+                  className={`athlete-assignment-hub__readiness-step ${step.complete ? 'athlete-assignment-hub__readiness-step--complete' : ''}`}
+                  onClick={step.complete ? undefined : step.action}
+                  disabled={step.complete}
+                >
+                  <span className="material-symbols-outlined">
+                    {step.complete ? 'check_circle' : 'radio_button_unchecked'}
+                  </span>
+                  <span>{t(`coach:setupReadiness.steps.${step.key}`)}</span>
+                  {!step.complete && <span className="material-symbols-outlined readiness-arrow">arrow_forward</span>}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
         <div className="athlete-assignment-hub__grid animate-fade-in">
           
           {/* Left Column: Program Template & Nutrition Targets */}
           <div className="athlete-assignment-hub__column">
             
             {/* Workout Program Template Card */}
-            <Card 
+            <Card
               className="athlete-assignment-hub__card"
               title={
                 <div className="athlete-assignment-hub__card-header">
@@ -397,6 +476,7 @@ const AthleteAssignmentHub: React.FC = () => {
 
             {/* Daily Nutrition Targets Card */}
             <Card 
+              id="nutrition-targets-card"
               className="athlete-assignment-hub__card"
               title={
                 <div className="athlete-assignment-hub__card-header">
@@ -477,6 +557,7 @@ const AthleteAssignmentHub: React.FC = () => {
             
             {/* Daily Water & Steps Targets Card */}
             <Card 
+              id="activity-targets-card"
               className="athlete-assignment-hub__card"
               title={
                 <div className="athlete-assignment-hub__card-header">
@@ -605,6 +686,7 @@ const AthleteAssignmentHub: React.FC = () => {
           </div>
 
         </div>
+        </>
       )}
 
       {/* Program Template Assignment Modal */}

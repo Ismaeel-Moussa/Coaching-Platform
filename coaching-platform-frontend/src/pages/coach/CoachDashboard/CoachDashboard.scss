@@ -94,7 +94,7 @@
   // KPI cards
   &__kpis {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: var(--space-sm);
 
     @media (max-width: 1100px) and (min-width: 601px) {

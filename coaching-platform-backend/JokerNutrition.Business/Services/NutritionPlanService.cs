@@ -30,18 +30,21 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
     private readonly JokerNutritionContext _context;
     private readonly INotificationService _notificationService;
     private readonly IAuditLogService _auditLogService;
+    private readonly ICacheService _cacheService;
 
     public NutritionPlanService(
         IPrincipal principal,
         ILogger<NutritionPlanService> logger,
         JokerNutritionContext context,
         INotificationService notificationService,
-        IAuditLogService auditLogService)
+        IAuditLogService auditLogService,
+        ICacheService cacheService)
         : base(principal, logger)
     {
         _context = context;
         _notificationService = notificationService;
         _auditLogService = auditLogService;
+        _cacheService = cacheService;
     }
 
     public async Task<PagedResult<NutritionPlanSummaryDto>> GetTemplatesAsync(
@@ -293,6 +296,7 @@ public class NutritionPlanService : _BaseService, INutritionPlanService
         }
 
         await LogAsync("NutritionPlanAssigned", template.Id, new { AthleteIds = athleteIds });
+        _cacheService.EvictByPrefix("coach-dashboard:");
         return athletes.Count;
     }
 

@@ -6,5 +6,6 @@ public class CoachDashboardDto
     public double AvgWorkoutCompletionPercent { get; set; }
     public int PendingCheckInsCount { get; set; }
     public int PendingOnboardingAssessmentsCount { get; set; }
+    public int AthletesNeedingSetupCount { get; set; }
     public List<LiveFeedItemDto> RecentFeed { get; set; } = new();
 }

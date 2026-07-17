@@ -19,7 +19,19 @@ export interface CoachDashboardDto {
   avgWorkoutCompletionPercent: number;
   pendingCheckInsCount: number;
   pendingOnboardingAssessmentsCount: number;
+  athletesNeedingSetupCount: number;
   recentFeed: LiveFeedItemDto[];
+}
+
+export interface AthleteSetupReadinessDto {
+  isComplete: boolean;
+  completedRequiredSteps: number;
+  totalRequiredSteps: number;
+  assessmentReviewed: boolean;
+  workoutAssigned: boolean;
+  nutritionPlanAssigned: boolean;
+  nutritionTargetsConfigured: boolean;
+  activityTargetsConfigured: boolean;
 }
 
 export interface ComplianceItemDto {
@@ -47,6 +59,7 @@ export interface RosterItemDto {
   lastCheckInDate: string | null;
   onboardingStatus: OnboardingDisplayStatus;
   onboardingSubmittedAt: string | null;
+  setupReadiness?: AthleteSetupReadinessDto;
   status: RosterStatus;
 }
 
@@ -86,6 +99,7 @@ export interface AthleteDeepProfileDto {
   currentStreak: number;
   longestStreak: number;
   currentTargets: MacroTargetDto | null;
+  setupReadiness?: AthleteSetupReadinessDto;
   weightHistory: WeightHistoryPointDto[];
   feedbackNotes: CoachFeedbackNoteDto[];
 }

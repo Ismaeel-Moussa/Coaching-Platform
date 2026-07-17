@@ -43,6 +43,41 @@ public class CoachHubMapperTests
         Assert.Equal("NotStarted", result.OnboardingStatus);
     }
 
+    [Fact]
+    public void MapSetupReadiness_ReturnsZeroOfFive_WhenNothingIsConfigured()
+    {
+        var result = CoachHubMapper.MapSetupReadiness(CreateAthlete(null), false, false, null);
+
+        Assert.False(result.IsComplete);
+        Assert.Equal(0, result.CompletedRequiredSteps);
+        Assert.Equal(5, result.TotalRequiredSteps);
+    }
+
+    [Fact]
+    public void MapSetupReadiness_ReturnsFiveOfFive_WhenAllRequiredSetupExists()
+    {
+        var athlete = CreateAthlete(new AthleteOnboardingAssessment
+        {
+            Status = OnboardingAssessmentStatus.Reviewed
+        });
+        var target = new MacroTarget
+        {
+            IsActive = true,
+            TargetCalories = 2200,
+            TargetProtein = 180,
+            TargetCarbs = 220,
+            TargetFat = 70,
+            WaterLitersTarget = 4,
+            StepsTarget = 8000
+        };
+
+        var result = CoachHubMapper.MapSetupReadiness(athlete, true, true, target);
+
+        Assert.True(result.IsComplete);
+        Assert.Equal(5, result.CompletedRequiredSteps);
+        Assert.Equal(5, result.TotalRequiredSteps);
+    }
+
     private static Athlete CreateAthlete(AthleteOnboardingAssessment? assessment) => new()
     {
         Id = 10,

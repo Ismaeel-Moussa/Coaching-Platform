@@ -19,6 +19,8 @@ export const useSetMacroTargets = (athleteId: number) => {
     onSuccess: () => {
       antMessage.success(i18n.t('common:alerts.targetsUpdated'));
       queryClient.invalidateQueries({ queryKey: ['coach-athlete-profile', athleteId] });
+      queryClient.invalidateQueries({ queryKey: ['coach-roster'] });
+      queryClient.invalidateQueries({ queryKey: ['coach-dashboard'] });
     },
     onError: (error: any) => {
       const msg = error.response?.data?.message || i18n.t('common:alerts.targetsUpdateFailed');

@@ -4,10 +4,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGetRoster } from '../../../hooks/useCoachHub/useCoachHub';
 import { formatRelativeTime } from '../../../utils/date';
-import type { OnboardingDisplayStatus } from '../../../types/CoachHub';
+import type { AthleteSetupReadinessDto, OnboardingDisplayStatus } from '../../../types/CoachHub';
 import './ClientRoster.scss';
 
-type ActiveTab = 'All' | 'ComplianceAlert' | 'NoRecentCheckIn' | 'AwaitingAssessmentReview';
+type ActiveTab = 'All' | 'ComplianceAlert' | 'NoRecentCheckIn' | 'AwaitingAssessmentReview' | 'SetupRequired';
 
 const ClientRoster: React.FC = () => {
   const { t } = useTranslation(['common', 'coach']);
@@ -16,7 +16,7 @@ const ClientRoster: React.FC = () => {
   
   const initialFilter = searchParams.get('filter') as ActiveTab || 'All';
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
-    if (initialFilter === 'ComplianceAlert' || initialFilter === 'NoRecentCheckIn' || initialFilter === 'AwaitingAssessmentReview') {
+    if (initialFilter === 'ComplianceAlert' || initialFilter === 'NoRecentCheckIn' || initialFilter === 'AwaitingAssessmentReview' || initialFilter === 'SetupRequired') {
       return initialFilter;
     }
     return 'All';
@@ -48,6 +48,20 @@ const ClientRoster: React.FC = () => {
       <Tag color={colors[status]} className="roster-tag roster-tag--onboarding">
         {t(`coach:roster.onboardingStatus.${status}`)}
       </Tag>
+    );
+  };
+
+  const getSetupStatusTag = (readiness?: AthleteSetupReadinessDto) => {
+    const safeReadiness = readiness ?? { isComplete: false, completedRequiredSteps: 0, totalRequiredSteps: 5 };
+    return (
+    <Tag color={safeReadiness.isComplete ? 'green' : 'gold'} className="roster-tag roster-tag--setup">
+      {safeReadiness.isComplete
+        ? t('coach:roster.setupComplete')
+        : t('coach:roster.setupProgress', {
+            completed: safeReadiness.completedRequiredSteps,
+            total: safeReadiness.totalRequiredSteps,
+          })}
+    </Tag>
     );
   };
 
@@ -112,6 +126,12 @@ const ClientRoster: React.FC = () => {
       dataIndex: 'onboardingStatus',
       key: 'onboardingStatus',
       render: (status: OnboardingDisplayStatus) => getOnboardingStatusTag(status),
+    },
+    {
+      title: t('coach:roster.table.setup'),
+      dataIndex: 'setupReadiness',
+      key: 'setupReadiness',
+      render: (readiness?: AthleteSetupReadinessDto) => getSetupStatusTag(readiness),
     },
     {
       title: t('coach:roster.table.compliance'),
@@ -238,6 +258,16 @@ const ClientRoster: React.FC = () => {
           >
             {t('coach:roster.awaitingReview')}
           </button>
+          <button
+            className={`client-roster__tab ${activeTab === 'SetupRequired' ? 'client-roster__tab--active' : ''}`}
+            onClick={() => {
+              setActiveTab('SetupRequired');
+              setCurrentPage(1);
+              setSearchParams({ filter: 'SetupRequired' });
+            }}
+          >
+            {t('coach:roster.setupRequired')}
+          </button>
         </div>
       </div>
 
@@ -285,6 +315,10 @@ const ClientRoster: React.FC = () => {
                     <div className="client-roster__card-row">
                       <span className="label">{t('coach:roster.table.assessmentLabel')}</span>
                       <span className="value">{getOnboardingStatusTag(item.onboardingStatus)}</span>
+                    </div>
+                    <div className="client-roster__card-row">
+                      <span className="label">{t('coach:roster.table.setup')}</span>
+                      <span className="value">{getSetupStatusTag(item.setupReadiness)}</span>
                     </div>
                     <div className="client-roster__card-row">
                       <span className="label">{t('coach:roster.table.programLabel')}</span>

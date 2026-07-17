@@ -15,6 +15,7 @@ public class AthleteDeepProfileDto
 
     /// <summary>The athlete's current active macro targets set by the coach.</summary>
     public MacroTargetDto? CurrentTargets { get; set; }
+    public AthleteSetupReadinessDto SetupReadiness { get; set; } = new();
 
     /// <summary>Weight measurements from weekly check-ins, ordered oldest → newest.</summary>
     public List<WeightHistoryPointDto> WeightHistory { get; set; } = new();

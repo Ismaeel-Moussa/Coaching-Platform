@@ -143,7 +143,7 @@ const CoachDashboard: React.FC = () => {
         </div>
 
         {/* KPI 3: Pending Check-ins */}
-        <div 
+        <div
           className={`coach-dashboard__kpi-card coach-dashboard__kpi-card--clickable ${
             (dashboardData?.pendingCheckInsCount ?? 0) > 0 ? 'coach-dashboard__kpi-card--alert' : ''
           }`}
@@ -201,6 +201,49 @@ const CoachDashboard: React.FC = () => {
                 {(dashboardData?.pendingOnboardingAssessmentsCount ?? 0) > 0 && (
                   <span className="coach-dashboard__kpi-alert-badge coach-dashboard__kpi-alert-badge--gold">
                     {t('coach:dashboard.reviewRequired')}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* KPI 5: Athletes needing setup */}
+        <div
+          className={`coach-dashboard__kpi-card coach-dashboard__kpi-card--clickable ${
+            (dashboardData?.athletesNeedingSetupCount ?? 0) > 0
+              ? 'coach-dashboard__kpi-card--attention'
+              : ''
+          }`}
+          onClick={() => navigate('/coach/roster?filter=SetupRequired')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              navigate('/coach/roster?filter=SetupRequired');
+            }
+          }}
+        >
+          <div className={`coach-dashboard__kpi-icon ${
+            (dashboardData?.athletesNeedingSetupCount ?? 0) > 0
+              ? 'coach-dashboard__kpi-icon--gold'
+              : 'coach-dashboard__kpi-icon--navy'
+          }`}>
+            <span className="material-symbols-outlined">rule</span>
+          </div>
+          <div className="coach-dashboard__kpi-info">
+            <span className="coach-dashboard__kpi-label">{t('coach:dashboard.needingSetup')}</span>
+            {isDashboardLoading ? (
+              <Skeleton.Input active size="small" style={{ width: 80 }} />
+            ) : (
+              <div className="coach-dashboard__kpi-value-wrapper">
+                <span className="coach-dashboard__kpi-value mono">
+                  {dashboardData?.athletesNeedingSetupCount ?? 0}
+                </span>
+                {(dashboardData?.athletesNeedingSetupCount ?? 0) > 0 && (
+                  <span className="coach-dashboard__kpi-alert-badge coach-dashboard__kpi-alert-badge--gold">
+                    {t('coach:dashboard.setupRequired')}
                   </span>
                 )}
               </div>
