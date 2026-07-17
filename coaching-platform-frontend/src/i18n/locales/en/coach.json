@@ -10,10 +10,17 @@
     "reviewNotes": "Review notes for the athlete",
     "reviewPlaceholder": "Confirm what you reviewed and add any next steps or questions...",
     "markReviewed": "Mark as reviewed",
+    "reopenAction": "Request changes",
+    "reopenTitle": "Reopen this assessment?",
+    "reopenDescription": "The athlete will be notified and can edit their answers again. The previous review is preserved in the audit log.",
+    "reopenPlaceholder": "Explain clearly what the athlete needs to update...",
+    "reopenMinimum": "Enter at least 10 characters.",
+    "confirmReopen": "Reopen assessment",
+    "reopenedReason": "Reopened for changes: {{reason}}",
     "submittedAt": "Submitted {{date}}",
     "reviewedAt": "Reviewed {{date}}",
     "groups": { "baseline": "Baseline", "training": "Training", "safety": "Safety & recovery", "nutrition": "Nutrition" },
-    "messages": { "reviewed": "Assessment marked as reviewed.", "reviewFailed": "Could not save the review." }
+    "messages": { "reviewed": "Assessment marked as reviewed.", "reviewFailed": "Could not save the review.", "reopened": "Assessment reopened for the athlete.", "reopenFailed": "Could not reopen the assessment." }
   },
   "dashboard": {
     "title": "Coach Dashboard",

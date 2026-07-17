@@ -78,7 +78,8 @@
       "invitationAccepted": "Athlete {{athleteName}} has accepted your invitation.",
       "macroTargetsUpdated": "Coach {{coachName}} updated your daily macro targets.",
       "onboardingSubmitted": "{{athleteName}} submitted their onboarding assessment.",
-      "onboardingReviewed": "Your coach reviewed your onboarding assessment."
+      "onboardingReviewed": "Your coach reviewed your onboarding assessment.",
+      "onboardingReopened": "Your coach reopened your assessment: {{reason}}"
     }
   },
   "notFound": {
@@ -181,6 +182,7 @@
     "checkInSubmitted": "Check-In Submitted",
     "onboardingSubmitted": "Onboarding Submitted",
     "onboardingReviewed": "Onboarding Reviewed",
+    "onboardingReopened": "Assessment Changes Requested",
     "workoutUpdate": "Workout Update",
     "newFeedback": "New Feedback",
     "newNotification": "New Notification"

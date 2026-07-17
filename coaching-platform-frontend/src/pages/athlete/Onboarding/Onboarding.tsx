@@ -231,6 +231,16 @@ const Onboarding = () => {
         />
       )}
 
+      {data?.status === 'Draft' && data.reopenReason && (
+        <Alert
+          className="onboarding-page__coach-note"
+          type="warning"
+          showIcon
+          message={t('athlete:onboarding.messages.reopened')}
+          description={data.reopenReason}
+        />
+      )}
+
       {isReadOnly && (
         <Alert
           className="onboarding-page__coach-note"

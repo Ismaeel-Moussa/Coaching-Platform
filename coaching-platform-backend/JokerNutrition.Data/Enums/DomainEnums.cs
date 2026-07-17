@@ -108,7 +108,8 @@ public enum NotificationType
     MacroAlert,
     InvitationAccepted,
     OnboardingSubmitted,
-    OnboardingReviewed
+    OnboardingReviewed,
+    OnboardingReopened
 }
 
 public enum OnboardingAssessmentStatus

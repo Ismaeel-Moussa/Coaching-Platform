@@ -10,10 +10,17 @@
     "reviewNotes": "ملاحظات المراجعة للمتدرب",
     "reviewPlaceholder": "أكد ما راجعته وأضف الخطوات التالية أو أي أسئلة...",
     "markReviewed": "تحديد كمُراجع",
+    "reopenAction": "طلب تعديلات",
+    "reopenTitle": "إعادة فتح هذا التقييم؟",
+    "reopenDescription": "سيتم إشعار المتدرب وسيتمكن من تعديل إجاباته مجددًا، مع الاحتفاظ بالمراجعة السابقة في سجل التدقيق.",
+    "reopenPlaceholder": "اشرح بوضوح ما الذي يحتاج المتدرب إلى تعديله...",
+    "reopenMinimum": "اكتب 10 أحرف على الأقل.",
+    "confirmReopen": "إعادة فتح التقييم",
+    "reopenedReason": "تمت إعادة فتحه للتعديل: {{reason}}",
     "submittedAt": "تم الإرسال {{date}}",
     "reviewedAt": "تمت المراجعة {{date}}",
     "groups": { "baseline": "البيانات الأساسية", "training": "التدريب", "safety": "السلامة والاستشفاء", "nutrition": "التغذية" },
-    "messages": { "reviewed": "تم تحديد التقييم كمُراجع.", "reviewFailed": "تعذر حفظ المراجعة." }
+    "messages": { "reviewed": "تم تحديد التقييم كمُراجع.", "reviewFailed": "تعذر حفظ المراجعة.", "reopened": "تمت إعادة فتح التقييم للمتدرب.", "reopenFailed": "تعذر إعادة فتح التقييم." }
   },
   "dashboard": {
     "title": "لوحة تحكم المدرب",

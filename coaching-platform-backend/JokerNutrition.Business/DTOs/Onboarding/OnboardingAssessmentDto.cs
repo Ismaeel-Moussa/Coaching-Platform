@@ -31,6 +31,8 @@ public class OnboardingAssessmentDto
     public string? CoachReviewNotes { get; set; }
     public DateTime? SubmittedAt { get; set; }
     public DateTime? ReviewedAt { get; set; }
+    public string? ReopenReason { get; set; }
+    public DateTime? ReopenedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public bool HasInjuryFlag { get; set; }
     public bool HasPainFlag { get; set; }

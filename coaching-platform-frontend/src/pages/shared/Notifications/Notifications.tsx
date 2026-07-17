@@ -48,6 +48,8 @@ const Notifications: React.FC = () => {
         return 'assignment_ind';
       case 'OnboardingReviewed':
         return 'rate_review';
+      case 'OnboardingReopened':
+        return 'restart_alt';
       case 'InvitationAccepted':
         return 'person_add';
       default:
@@ -73,6 +75,7 @@ const Notifications: React.FC = () => {
         return <Tag color="cyan">{t('common:notifications.tags.checkIn')}</Tag>;
       case 'OnboardingSubmitted':
       case 'OnboardingReviewed':
+      case 'OnboardingReopened':
         return <Tag color="purple">{t('common:notifications.tags.onboarding')}</Tag>;
       case 'InvitationAccepted':
         return <Tag color="purple">{t('common:notifications.tags.roster')}</Tag>;
@@ -215,6 +218,11 @@ const Notifications: React.FC = () => {
                   }
                 } else if (notif.type === 'OnboardingReviewed') {
                   if (!isCoachPath) {
+                    navigate('/athlete/onboarding');
+                  }
+                } else if (notif.type === 'OnboardingReopened') {
+                  if (!isCoachPath) {
+                    queryClient.invalidateQueries({ queryKey: ['onboarding', 'me'] });
                     navigate('/athlete/onboarding');
                   }
                 } else if (notif.type === 'WorkoutCompleted') {

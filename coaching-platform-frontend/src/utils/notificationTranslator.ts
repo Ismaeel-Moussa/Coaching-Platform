@@ -136,6 +136,15 @@ export const translateNotificationMessage = (message: string, t: TFunction): str
     });
   }
 
+  // 14. Onboarding reopened for athlete changes
+  const onboardingReopenedMatch = message.match(/^Your onboarding assessment was reopened: "([\s\S]*)"$/i);
+  if (onboardingReopenedMatch) {
+    return t('common:notifications.messages.onboardingReopened', {
+      reason: onboardingReopenedMatch[1],
+      defaultValue: message
+    });
+  }
+
   // Fallback to original message
   return message;
 };

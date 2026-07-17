@@ -1,9 +1,10 @@
-import { Alert, Button, Empty, Input, Skeleton, Tag } from 'antd';
+import { Alert, Button, Empty, Input, Modal, Skeleton, Tag } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ProgressPhotoViewer from '../ProgressPhotoViewer/ProgressPhotoViewer';
 import {
   useAthleteOnboardingAssessment,
+  useReopenOnboardingAssessment,
   useReviewOnboardingAssessment,
 } from '../../hooks/useOnboarding/useOnboarding';
 import './OnboardingAssessmentReview.scss';
@@ -18,14 +19,26 @@ const OnboardingAssessmentReview = ({ athleteId }: Props) => {
   const { t, i18n } = useTranslation(['coach', 'athlete', 'common']);
   const { data, isLoading, isError } = useAthleteOnboardingAssessment(athleteId);
   const review = useReviewOnboardingAssessment(athleteId);
+  const reopen = useReopenOnboardingAssessment(athleteId);
   const [notes, setNotes] = useState('');
+  const [reopenModalOpen, setReopenModalOpen] = useState(false);
+  const [reopenReason, setReopenReason] = useState('');
 
   useEffect(() => setNotes(data?.coachReviewNotes ?? ''), [data?.coachReviewNotes]);
 
   if (isLoading) return <div className="onboarding-review"><Skeleton active paragraph={{ rows: 10 }} /></div>;
   if (isError) return <Alert type="error" showIcon message={t('coach:clientDetail.errorDesc')} />;
   if (!data || data.status === 'NotStarted') return <div className="onboarding-review"><Empty description={t('coach:onboarding.notStarted')} /></div>;
-  if (data.status === 'Draft') return <div className="onboarding-review"><Alert type="warning" showIcon message={t('coach:onboarding.draft')} /></div>;
+  if (data.status === 'Draft') return (
+    <div className="onboarding-review">
+      <Alert
+        type="warning"
+        showIcon
+        message={t('coach:onboarding.draft')}
+        description={data.reopenReason ? t('coach:onboarding.reopenedReason', { reason: data.reopenReason }) : undefined}
+      />
+    </div>
+  );
 
   const translateOption = (group: string, value: string | null) => value
     ? t(`athlete:onboarding.options.${group}.${value}`, { defaultValue: value })
@@ -152,16 +165,45 @@ const OnboardingAssessmentReview = ({ athleteId }: Props) => {
           <p>{t('coach:onboarding.reviewPlaceholder')}</p>
         </div>
         <TextArea value={notes} onChange={event => setNotes(event.target.value)} rows={4} maxLength={3000} showCount />
-        <Button
-          type="primary"
-          size="large"
-          loading={review.isPending}
-          disabled={isSubmitDisabled}
-          onClick={() => review.mutate({ coachReviewNotes: notes.trim() || null })}
-        >
-          <span className="material-symbols-outlined">task_alt</span>{t('coach:onboarding.markReviewed')}
-        </Button>
+        <div className="onboarding-review__decision-actions">
+          <Button danger size="large" onClick={() => setReopenModalOpen(true)}>
+            <span className="material-symbols-outlined">restart_alt</span>{t('coach:onboarding.reopenAction')}
+          </Button>
+          <Button
+            type="primary"
+            size="large"
+            loading={review.isPending}
+            disabled={isSubmitDisabled}
+            onClick={() => review.mutate({ coachReviewNotes: notes.trim() || null })}
+          >
+            <span className="material-symbols-outlined">task_alt</span>{t('coach:onboarding.markReviewed')}
+          </Button>
+        </div>
       </section>
+
+      <Modal
+        open={reopenModalOpen}
+        title={t('coach:onboarding.reopenTitle')}
+        okText={t('coach:onboarding.confirmReopen')}
+        cancelText={t('common:actions.cancel')}
+        okButtonProps={{ danger: true, disabled: reopenReason.trim().length < 10, loading: reopen.isPending }}
+        onCancel={() => { setReopenModalOpen(false); setReopenReason(''); }}
+        onOk={() => reopen.mutate(
+          { reason: reopenReason.trim() },
+          { onSuccess: () => { setReopenModalOpen(false); setReopenReason(''); } },
+        )}
+      >
+        <p>{t('coach:onboarding.reopenDescription')}</p>
+        <TextArea
+          value={reopenReason}
+          onChange={(event) => setReopenReason(event.target.value)}
+          placeholder={t('coach:onboarding.reopenPlaceholder')}
+          rows={4}
+          maxLength={1000}
+          showCount
+        />
+        <small className="onboarding-review__reopen-help">{t('coach:onboarding.reopenMinimum')}</small>
+      </Modal>
     </div>
   );
 };

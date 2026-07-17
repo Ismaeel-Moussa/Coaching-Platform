@@ -6,12 +6,13 @@ import {
   getAthleteOnboardingAssessment,
   getMyOnboardingAssessment,
   reviewAthleteOnboardingAssessment,
+  reopenAthleteOnboardingAssessment,
   saveMyOnboardingDraft,
   submitMyOnboardingAssessment,
   uploadOnboardingPhotos,
   deleteOnboardingPhoto,
 } from '../../api/onboarding';
-import type { OnboardingAssessmentForm, ReviewOnboardingAssessmentForm } from '../../types/Onboarding';
+import type { OnboardingAssessmentForm, ReopenOnboardingAssessmentForm, ReviewOnboardingAssessmentForm } from '../../types/Onboarding';
 
 interface ApiErrorBody { message?: string }
 
@@ -64,6 +65,18 @@ export const useReviewOnboardingAssessment = (athleteId: number) => {
       message.success(i18n.t('coach:onboarding.messages.reviewed'));
     },
     onError: (error) => message.error(getErrorMessage(error, i18n.t('coach:onboarding.messages.reviewFailed'))),
+  });
+};
+
+export const useReopenOnboardingAssessment = (athleteId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (form: ReopenOnboardingAssessmentForm) => reopenAthleteOnboardingAssessment(athleteId, form),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['onboarding', 'athlete', athleteId], data);
+      message.success(i18n.t('coach:onboarding.messages.reopened'));
+    },
+    onError: (error) => message.error(getErrorMessage(error, i18n.t('coach:onboarding.messages.reopenFailed'))),
   });
 };
 

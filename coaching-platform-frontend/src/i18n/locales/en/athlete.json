@@ -33,7 +33,7 @@
       "days": { "Monday": "Monday", "Tuesday": "Tuesday", "Wednesday": "Wednesday", "Thursday": "Thursday", "Friday": "Friday", "Saturday": "Saturday", "Sunday": "Sunday" },
       "equipment": { "Gym": "Full gym", "Dumbbells": "Dumbbells", "Bands": "Resistance bands", "Bodyweight": "Bodyweight only", "HomeMachines": "Home machines", "Other": "Other" }
     },
-    "messages": { "draftSaved": "Assessment draft saved.", "saveFailed": "Could not save the draft.", "submitted": "Assessment sent to your coach.", "submitFailed": "Could not submit the assessment.", "loadFailed": "Could not load your assessment.", "readOnly": "This assessment has been submitted and is now read-only. Contact your coach if an answer must be changed.", "photosUploaded": "Progress photos uploaded successfully.", "uploadFailed": "Could not upload photos.", "photoDeleted": "Photo deleted successfully.", "deleteFailed": "Could not delete photo." }
+    "messages": { "draftSaved": "Assessment draft saved.", "saveFailed": "Could not save the draft.", "submitted": "Assessment sent to your coach.", "submitFailed": "Could not submit the assessment.", "loadFailed": "Could not load your assessment.", "readOnly": "This assessment has been submitted and is now read-only. Contact your coach if an answer must be changed.", "reopened": "Your coach requested changes to this assessment", "photosUploaded": "Progress photos uploaded successfully.", "uploadFailed": "Could not upload photos.", "photoDeleted": "Photo deleted successfully.", "deleteFailed": "Could not delete photo." }
   },
   "dashboard": {
     "greeting": "Good morning, <span>{{name}}</span> 👋",

@@ -79,7 +79,8 @@
       "invitationAccepted": "قبل اللاعب {{athleteName}} دعوتك.",
       "macroTargetsUpdated": "قام المدرب {{coachName}} بتحديث أهداف الماكروز اليومية الخاصة بك.",
       "onboardingSubmitted": "قام {{athleteName}} بتقديم تقييم البداية الخاص به.",
-      "onboardingReviewed": "قام مدربك بمراجعة تقييم البداية الخاص بك."
+      "onboardingReviewed": "قام مدربك بمراجعة تقييم البداية الخاص بك.",
+      "onboardingReopened": "أعاد مدربك فتح تقييمك: {{reason}}"
     }
   },
   "notFound": {
@@ -184,7 +185,8 @@
     "newFeedback": "ملاحظات جديدة",
     "newNotification": "إشعار جديد",
     "onboardingSubmitted": "تم تقديم تقييم البداية",
-    "onboardingReviewed": "تمت مراجعة تقييم البداية"
+    "onboardingReviewed": "تمت مراجعة تقييم البداية",
+    "onboardingReopened": "طُلبت تعديلات على التقييم"
   },
   "alerts": {
     "genericError": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",

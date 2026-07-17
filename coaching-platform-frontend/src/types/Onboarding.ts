@@ -31,6 +31,8 @@ export interface OnboardingAssessmentDto extends OnboardingAssessmentForm {
   coachReviewNotes: string | null;
   submittedAt: string | null;
   reviewedAt: string | null;
+  reopenReason: string | null;
+  reopenedAt: string | null;
   updatedAt: string | null;
   hasInjuryFlag: boolean;
   hasPainFlag: boolean;
@@ -49,5 +51,9 @@ export interface OnboardingPhotoDto {
 
 export interface ReviewOnboardingAssessmentForm {
   coachReviewNotes: string | null;
+}
+
+export interface ReopenOnboardingAssessmentForm {
+  reason: string;
 }
 

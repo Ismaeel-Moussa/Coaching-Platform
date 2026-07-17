@@ -32,6 +32,7 @@ public class AthleteOnboardingAssessmentMapping : IEntityTypeConfiguration<Athle
         builder.Property(x => x.CurrentSupplements).HasMaxLength(2000);
         builder.Property(x => x.AdditionalNotes).HasMaxLength(3000);
         builder.Property(x => x.CoachReviewNotes).HasMaxLength(3000);
+        builder.Property(x => x.ReopenReason).HasMaxLength(1000);
 
         builder.HasOne(x => x.Athlete)
             .WithOne(x => x.OnboardingAssessment)
@@ -41,6 +42,11 @@ public class AthleteOnboardingAssessmentMapping : IEntityTypeConfiguration<Athle
         builder.HasOne(x => x.ReviewedByCoach)
             .WithMany()
             .HasForeignKey(x => x.ReviewedByCoachId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(x => x.ReopenedByCoach)
+            .WithMany()
+            .HasForeignKey(x => x.ReopenedByCoachId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(x => x.Photos)

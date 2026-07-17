@@ -3,6 +3,7 @@ import type {
   OnboardingAssessmentDto,
   OnboardingAssessmentForm,
   ReviewOnboardingAssessmentForm,
+  ReopenOnboardingAssessmentForm,
 } from '../types/Onboarding';
 
 export const getMyOnboardingAssessment = async (): Promise<OnboardingAssessmentDto> => {
@@ -37,6 +38,17 @@ export const reviewAthleteOnboardingAssessment = async (
 ): Promise<OnboardingAssessmentDto> => {
   const response = await axiosInstance.put<OnboardingAssessmentDto>(
     `/onboarding/athletes/${athleteId}/review`,
+    form,
+  );
+  return response.data;
+};
+
+export const reopenAthleteOnboardingAssessment = async (
+  athleteId: number,
+  form: ReopenOnboardingAssessmentForm,
+): Promise<OnboardingAssessmentDto> => {
+  const response = await axiosInstance.put<OnboardingAssessmentDto>(
+    `/onboarding/athletes/${athleteId}/reopen`,
     form,
   );
   return response.data;

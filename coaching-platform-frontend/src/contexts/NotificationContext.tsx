@@ -130,6 +130,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       // Invalidate queries so athlete views update in real-time
       queryClient.invalidateQueries({ queryKey: ['athlete-feedback-history'] });
       queryClient.invalidateQueries({ queryKey: ['athlete-dashboard'] });
+      if (newNotif.type === 'OnboardingReopened') {
+        queryClient.invalidateQueries({ queryKey: ['onboarding', 'me'] });
+      }
 
       // Show browser/app toast notification
       const getToastTitle = (notif: NotificationDto) => {
@@ -144,6 +147,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         if (notif.type === 'CheckInSubmitted') return i18n.t('common:toastTitles.checkInSubmitted');
         if (notif.type === 'OnboardingSubmitted') return i18n.t('common:toastTitles.onboardingSubmitted');
         if (notif.type === 'OnboardingReviewed') return i18n.t('common:toastTitles.onboardingReviewed');
+        if (notif.type === 'OnboardingReopened') return i18n.t('common:toastTitles.onboardingReopened');
         if (notif.type === 'CoachNote') {
           return notif.message.toLowerCase().includes('workout program template assigned') 
             ? i18n.t('common:toastTitles.workoutUpdate') 
