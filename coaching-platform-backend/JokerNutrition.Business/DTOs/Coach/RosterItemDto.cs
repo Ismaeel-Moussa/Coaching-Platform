@@ -10,6 +10,7 @@ public class RosterItemDto
     public DateTime? LastCheckInDate { get; set; }
     public string OnboardingStatus { get; set; } = "NotStarted";
     public DateTime? OnboardingSubmittedAt { get; set; }
+    public AthleteSetupReadinessDto SetupReadiness { get; set; } = new();
 
     /// <summary>"Active" | "ComplianceAlert" | "NoRecentCheckIn"</summary>
     public string Status { get; set; } = string.Empty;

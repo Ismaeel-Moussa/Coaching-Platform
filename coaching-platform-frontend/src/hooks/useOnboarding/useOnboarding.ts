@@ -64,6 +64,7 @@ export const useReviewOnboardingAssessment = (athleteId: number) => {
       queryClient.setQueryData(['onboarding', 'athlete', athleteId], data);
       queryClient.invalidateQueries({ queryKey: ['coach-dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['coach-roster'] });
+      queryClient.invalidateQueries({ queryKey: ['coach-athlete-profile', athleteId] });
       message.success(i18n.t('coach:onboarding.messages.reviewed'));
     },
     onError: (error) => message.error(getErrorMessage(error, i18n.t('coach:onboarding.messages.reviewFailed'))),
@@ -78,6 +79,7 @@ export const useReopenOnboardingAssessment = (athleteId: number) => {
       queryClient.setQueryData(['onboarding', 'athlete', athleteId], data);
       queryClient.invalidateQueries({ queryKey: ['coach-dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['coach-roster'] });
+      queryClient.invalidateQueries({ queryKey: ['coach-athlete-profile', athleteId] });
       message.success(i18n.t('coach:onboarding.messages.reopened'));
     },
     onError: (error) => message.error(getErrorMessage(error, i18n.t('coach:onboarding.messages.reopenFailed'))),

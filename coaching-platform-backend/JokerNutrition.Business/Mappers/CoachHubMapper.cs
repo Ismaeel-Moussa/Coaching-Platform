@@ -69,7 +69,9 @@ public static class CoachHubMapper
         Athlete athlete,
         ClientProgram? activeProgram,
         ClientCheckIn? lastCheckIn,
-        double compliancePct)
+        double compliancePct,
+        bool hasActiveNutritionPlan = false,
+        MacroTarget? activeTarget = null)
     {
         var hasRecentCheckIn = lastCheckIn != null &&
                                lastCheckIn.SubmittedAt >= DateTime.UtcNow.AddDays(-7);
@@ -100,7 +102,40 @@ public static class CoachHubMapper
             LastCheckInDate = lastCheckIn?.SubmittedAt,
             OnboardingStatus = onboardingStatus,
             OnboardingSubmittedAt = athlete.OnboardingAssessment?.SubmittedAt,
+            SetupReadiness = MapSetupReadiness(
+                athlete,
+                activeProgram != null,
+                hasActiveNutritionPlan,
+                activeTarget),
             Status = status
+        };
+    }
+
+    public static AthleteSetupReadinessDto MapSetupReadiness(
+        Athlete athlete,
+        bool hasActiveWorkoutProgram,
+        bool hasActiveNutritionPlan,
+        MacroTarget? activeTarget)
+    {
+        return new AthleteSetupReadinessDto
+        {
+            AssessmentReviewed = athlete.OnboardingAssessment?.Status == OnboardingAssessmentStatus.Reviewed,
+            WorkoutAssigned = hasActiveWorkoutProgram,
+            NutritionPlanAssigned = hasActiveNutritionPlan,
+            NutritionTargetsConfigured = activeTarget is
+            {
+                IsActive: true,
+                TargetCalories: > 0,
+                TargetProtein: > 0,
+                TargetCarbs: > 0,
+                TargetFat: > 0
+            },
+            ActivityTargetsConfigured = activeTarget is
+            {
+                IsActive: true,
+                WaterLitersTarget: > 0,
+                StepsTarget: > 0
+            }
         };
     }
 

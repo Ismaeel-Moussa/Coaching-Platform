@@ -72,10 +72,14 @@ export const useAssignTemplate = () => {
   const queryClient = useQueryClient();
   return useMutation<{ assignedCount: number; message: string }, AxiosError, { id: number; form: AssignTemplateForm }>({
     mutationFn: ({ id, form }) => assignWorkoutTemplate(id, form),
-    onSuccess: (data) => {
+    onSuccess: (_data, variables) => {
       antMessage.success(i18n.t('common:alerts.templateAssigned'));
       queryClient.invalidateQueries({ queryKey: ['workout-templates'] });
       queryClient.invalidateQueries({ queryKey: ['coach-roster'] });
+      queryClient.invalidateQueries({ queryKey: ['coach-dashboard'] });
+      variables.form.athleteIds.forEach((athleteId) => {
+        queryClient.invalidateQueries({ queryKey: ['coach-athlete-profile', athleteId] });
+      });
     },
     onError: (error) => {
       const msg =

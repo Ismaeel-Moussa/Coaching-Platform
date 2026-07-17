@@ -61,10 +61,15 @@ export const useAssignNutritionPlan = () => {
   return useMutation({
     mutationFn: ({ id, athleteIds, notes }: { id: number; athleteIds: number[]; notes?: string }) =>
       assignNutritionPlan(id, athleteIds, notes),
-    onSuccess: ({ assignedCount }) => {
+    onSuccess: ({ assignedCount }, variables) => {
       message.success(`Plan assigned to ${assignedCount} athlete${assignedCount === 1 ? '' : 's'}.`);
       queryClient.invalidateQueries({ queryKey: ['nutrition-plans'] });
       queryClient.invalidateQueries({ queryKey: ['athlete-nutrition-plan'] });
+      queryClient.invalidateQueries({ queryKey: ['coach-roster'] });
+      queryClient.invalidateQueries({ queryKey: ['coach-dashboard'] });
+      variables.athleteIds.forEach((athleteId) => {
+        queryClient.invalidateQueries({ queryKey: ['coach-athlete-profile', athleteId] });
+      });
     },
     onError: (error: AxiosError) => message.error(errorMessage(error)),
   });

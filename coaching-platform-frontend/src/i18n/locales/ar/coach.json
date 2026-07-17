@@ -34,6 +34,8 @@
     "weeklyAvg": "المعدل الأسبوعي",
     "pendingCheckIns": "تقارير متابعة معلقة",
     "pendingAssessments": "تقييمات بانتظار المراجعة",
+    "needingSetup": "متدربون يحتاجون إلى التجهيز",
+    "setupRequired": "التجهيز مطلوب",
     "reviewRequired": "تحتاج مراجعة",
     "actionRequired": "مطلوب اتخاذ إجراء",
     "liveFeed": "البث المباشر للأنشطة",
@@ -57,6 +59,9 @@
     "compliant": "تنبيهات الالتزام",
     "nonCompliant": "لا يوجد تقرير متابعة حديث",
     "awaitingReview": "بانتظار مراجعة التقييم",
+    "setupRequired": "يحتاج إلى التجهيز",
+    "setupComplete": "التجهيز مكتمل",
+    "setupProgress": "التجهيز {{completed}}/{{total}}",
     "reviewAssessment": "مراجعة التقييم",
     "onboardingStatus": {
       "NotStarted": "لم يبدأ",
@@ -71,6 +76,7 @@
       "compliance": "الالتزام بالماكروز",
       "status": "البرنامج النشط",
       "assessment": "التقييم الأولي",
+      "setup": "جاهزية التجهيز",
       "lastCheckin": "آخر تقرير متابعة",
       "actions": "الإجراء",
       "lastCheckinLabel": "آخر متابعة",
@@ -283,6 +289,20 @@
     "assignDesc": "اختر لاعباً واحداً أو أكثر لتعيين هذا البرنامج التدريبي لهم. سيقوم هذا بإلغاء تفعيل برنامجهم الحالي.",
     "currentProgram": "البرنامج الحالي: {{program}}",
     "noAthletes": "لا يوجد لاعبون نشطون في قائمتك."
+  },
+  "setupReadiness": {
+    "eyebrow": "الإعداد المطلوب",
+    "title": "جاهزية إعداد المتدرب",
+    "completeDesc": "تم إكمال جميع خطوات الإعداد المطلوبة.",
+    "requiredDesc": "أكمل الخطوات الناقصة قبل أن يبدأ المتدرب خطته الكاملة.",
+    "requiredSteps": "خطوات مطلوبة",
+    "steps": {
+      "assessmentReviewed": "تمت مراجعة التقييم الأولي",
+      "workoutAssigned": "تم تعيين برنامج التمارين",
+      "nutritionPlanAssigned": "تم تعيين خطة التغذية",
+      "nutritionTargetsConfigured": "تم إعداد السعرات والماكروز",
+      "activityTargetsConfigured": "تم إعداد الماء والخطوات"
+    }
   },
   "invitations": {
     "title": "إدارة الدعوات",

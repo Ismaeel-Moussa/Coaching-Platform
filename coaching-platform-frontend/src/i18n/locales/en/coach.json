@@ -34,6 +34,8 @@
     "weeklyAvg": "Weekly average",
     "pendingCheckIns": "Pending Check-ins",
     "pendingAssessments": "Assessments awaiting review",
+    "needingSetup": "Athletes needing setup",
+    "setupRequired": "Setup required",
     "reviewRequired": "Review required",
     "actionRequired": "Action Required",
     "liveFeed": "Real-Time Live Feed",
@@ -57,6 +59,9 @@
     "compliant": "Compliance Alerts",
     "nonCompliant": "No Recent Check-in",
     "awaitingReview": "Awaiting Assessment Review",
+    "setupRequired": "Setup Required",
+    "setupComplete": "Setup complete",
+    "setupProgress": "Setup {{completed}}/{{total}}",
     "reviewAssessment": "Review Assessment",
     "onboardingStatus": {
       "NotStarted": "Not started",
@@ -71,6 +76,7 @@
       "compliance": "Macro Compliance",
       "status": "Active Program",
       "assessment": "Initial Assessment",
+      "setup": "Setup readiness",
       "lastCheckin": "Last Check-In",
       "actions": "Action",
       "lastCheckinLabel": "Last Check-in",
@@ -147,6 +153,18 @@
     "searchPlaceholder": "Search roster...",
     "noAthleteSelected": "No Client Selected",
     "noAthleteSelectedDesc": "Select a client from the dropdown above to configure their workout program, nutrition targets, and supplement schedule.",
+    "readinessEyebrow": "Required setup",
+    "readinessTitle": "Athlete setup readiness",
+    "readinessCompleteDesc": "All required setup steps are complete.",
+    "readinessRequiredDesc": "Complete the missing steps before the athlete starts their full plan.",
+    "requiredSteps": "required steps",
+    "readinessSteps": {
+      "assessmentReviewed": "Initial assessment reviewed",
+      "workoutAssigned": "Workout program assigned",
+      "nutritionPlanAssigned": "Nutrition plan assigned",
+      "nutritionTargetsConfigured": "Calories and macros configured",
+      "activityTargetsConfigured": "Water and steps configured"
+    },
     "workoutProgram": "Workout Program",
     "activeTemplate": "Active Workout Template",
     "changeBtn": "Change",
@@ -283,6 +301,20 @@
     "assignDesc": "Select one or more athletes to assign this workout routine. This deactivates their current routine.",
     "currentProgram": "Current Program: {{program}}",
     "noAthletes": "No active athletes on your roster."
+  },
+  "setupReadiness": {
+    "eyebrow": "Required setup",
+    "title": "Athlete setup readiness",
+    "completeDesc": "All required setup steps are complete.",
+    "requiredDesc": "Complete the missing steps before the athlete starts their full plan.",
+    "requiredSteps": "required steps",
+    "steps": {
+      "assessmentReviewed": "Initial assessment reviewed",
+      "workoutAssigned": "Workout program assigned",
+      "nutritionPlanAssigned": "Nutrition plan assigned",
+      "nutritionTargetsConfigured": "Calories and macros configured",
+      "activityTargetsConfigured": "Water and steps configured"
+    }
   },
   "invitations": {
     "title": "Invitation Management",

@@ -4,6 +4,7 @@ using JokerNutrition.Business.DTOs.Athletes;
 using JokerNutrition.Business.DTOs.Coach;
 using JokerNutrition.Business.Forms.Coach;
 using JokerNutrition.Business.Mappers;
+using JokerNutrition.Data.Contexts;
 using JokerNutrition.Data.Entities;
 using JokerNutrition.Data.Enums;
 using JokerNutrition.Data.Repositories;
@@ -36,6 +37,7 @@ public class CoachHubService : _BaseService, ICoachHubService
     private readonly ICoachFeedbackNoteRepository _feedbackNoteRepo;
     private readonly INotificationService _notificationService;
     private readonly ICacheService _cacheService;
+    private readonly JokerNutritionContext _context;
 
     public CoachHubService(
         IPrincipal principal,
@@ -49,7 +51,8 @@ public class CoachHubService : _BaseService, ICoachHubService
         IClientProgramRepository clientProgramRepo,
         ICoachFeedbackNoteRepository feedbackNoteRepo,
         INotificationService notificationService,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        JokerNutritionContext context)
         : base(principal, logger)
     {
         _coachRepo = coachRepo;
@@ -62,6 +65,7 @@ public class CoachHubService : _BaseService, ICoachHubService
         _feedbackNoteRepo = feedbackNoteRepo;
         _notificationService = notificationService;
         _cacheService = cacheService;
+        _context = context;
     }
 
     // ─── Dashboard ────────────────────────────────────────────────────
@@ -113,6 +117,37 @@ public class CoachHubService : _BaseService, ICoachHubService
             var pendingOnboardingAssessmentsCount = athletes.Count(a =>
                 a.OnboardingAssessment?.Status == OnboardingAssessmentStatus.Submitted);
 
+            var activeProgramAthleteIds = await _context.ClientPrograms.AsNoTracking()
+                .Where(p => athleteIds.Contains(p.AthleteId) && p.IsActive)
+                .Select(p => p.AthleteId)
+                .Distinct()
+                .ToListAsync();
+            var now = DateTime.UtcNow;
+            var activeNutritionPlanAthleteIds = await _context.NutritionPlanAssignments.AsNoTracking()
+                .Where(a => athleteIds.Contains(a.AthleteId) && a.IsActive &&
+                            a.StartDate <= now && (a.EndDate == null || a.EndDate > now))
+                .Select(a => a.AthleteId)
+                .Distinct()
+                .ToListAsync();
+            var activeTargets = await _context.MacroTargets.AsNoTracking()
+                .Where(t => athleteIds.Contains(t.AthleteId) && t.IsActive)
+                .ToListAsync();
+
+            var programSet = activeProgramAthleteIds.ToHashSet();
+            var nutritionPlanSet = activeNutritionPlanAthleteIds.ToHashSet();
+            var targetByAthlete = activeTargets
+                .GroupBy(t => t.AthleteId)
+                .ToDictionary(group => group.Key, group => group.OrderByDescending(t => t.SetAt).First());
+            var athletesNeedingSetupCount = athletes.Count(athlete =>
+            {
+                targetByAthlete.TryGetValue(athlete.Id, out var activeTarget);
+                return !CoachHubMapper.MapSetupReadiness(
+                    athlete,
+                    programSet.Contains(athlete.Id),
+                    nutritionPlanSet.Contains(athlete.Id),
+                    activeTarget).IsComplete;
+            });
+
             // Last 10 live feed items
             var recentFeed = await _workoutLogRepo.QueryAll()
                 .Include(w => w.Athlete).ThenInclude(a => a.User)
@@ -129,6 +164,7 @@ public class CoachHubService : _BaseService, ICoachHubService
                 AvgWorkoutCompletionPercent = Math.Round(avgCompletion, 1),
                 PendingCheckInsCount = Math.Max(0, pendingCount),
                 PendingOnboardingAssessmentsCount = pendingOnboardingAssessmentsCount,
+                AthletesNeedingSetupCount = athletesNeedingSetupCount,
                 RecentFeed = recentFeed.Select(CoachHubMapper.MapLiveFeedItem).ToList()
             };
         }, TimeSpan.FromSeconds(60));
@@ -218,6 +254,7 @@ public class CoachHubService : _BaseService, ICoachHubService
         }
 
         var isAssessmentReviewFilter = filter == "AwaitingAssessmentReview";
+        var isSetupRequiredFilter = filter == "SetupRequired";
         int? assessmentReviewTotalCount = null;
         List<Athlete> athletes;
 
@@ -230,6 +267,28 @@ public class CoachHubService : _BaseService, ICoachHubService
 
             assessmentReviewTotalCount = await pendingAssessmentQuery.CountAsync();
             athletes = await pendingAssessmentQuery
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+        else if (isSetupRequiredFilter)
+        {
+            var now = DateTime.UtcNow;
+            var setupRequiredQuery = athleteQuery
+                .Where(a => a.OnboardingAssessment == null ||
+                            a.OnboardingAssessment.Status != OnboardingAssessmentStatus.Reviewed ||
+                            !_context.ClientPrograms.Any(p => p.AthleteId == a.Id && p.IsActive) ||
+                            !_context.NutritionPlanAssignments.Any(n => n.AthleteId == a.Id && n.IsActive &&
+                                n.StartDate <= now && (n.EndDate == null || n.EndDate > now)) ||
+                            !_context.MacroTargets.Any(t => t.AthleteId == a.Id && t.IsActive &&
+                                t.TargetCalories > 0 && t.TargetProtein > 0 && t.TargetCarbs > 0 && t.TargetFat > 0) ||
+                            !_context.MacroTargets.Any(t => t.AthleteId == a.Id && t.IsActive &&
+                                t.WaterLitersTarget > 0 && t.StepsTarget > 0))
+                .OrderBy(a => a.User.FirstName)
+                .ThenBy(a => a.User.LastName);
+
+            assessmentReviewTotalCount = await setupRequiredQuery.CountAsync();
+            athletes = await setupRequiredQuery
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -261,7 +320,16 @@ public class CoachHubService : _BaseService, ICoachHubService
 
         var targets = await _macroTargetRepo.QueryAll()
             .Where(t => athleteIds.Contains(t.AthleteId) && t.IsActive)
+            .OrderByDescending(t => t.SetAt)
             .ToListAsync();
+
+        var nowUtc = DateTime.UtcNow;
+        var nutritionPlanAthleteIds = (await _context.NutritionPlanAssignments.AsNoTracking()
+            .Where(a => athleteIds.Contains(a.AthleteId) && a.IsActive &&
+                        a.StartDate <= nowUtc && (a.EndDate == null || a.EndDate > nowUtc))
+            .Select(a => a.AthleteId)
+            .Distinct()
+            .ToListAsync()).ToHashSet();
 
         // Build roster items
         var rosterItems = athletes.Select(athlete =>
@@ -282,7 +350,13 @@ public class CoachHubService : _BaseService, ICoachHubService
                 compliance = (double)(consumed / targetCalories) * 100.0;
             }
 
-            return CoachHubMapper.MapRosterItem(athlete, program, lastCheckIn, compliance);
+            return CoachHubMapper.MapRosterItem(
+                athlete,
+                program,
+                lastCheckIn,
+                compliance,
+                nutritionPlanAthleteIds.Contains(athlete.Id),
+                target);
         }).ToList();
 
         // Apply filter
@@ -291,11 +365,12 @@ public class CoachHubService : _BaseService, ICoachHubService
             "ComplianceAlert" => rosterItems.Where(r => r.Status == "ComplianceAlert").ToList(),
             "NoRecentCheckIn" => rosterItems.Where(r => r.Status == "NoRecentCheckIn").ToList(),
             "AwaitingAssessmentReview" => rosterItems,
+            "SetupRequired" => rosterItems,
             _ => rosterItems
         };
 
         var totalCount = assessmentReviewTotalCount ?? filtered.Count;
-        var paged = isAssessmentReviewFilter
+        var paged = isAssessmentReviewFilter || isSetupRequiredFilter
             ? filtered
             : filtered.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
@@ -317,6 +392,7 @@ public class CoachHubService : _BaseService, ICoachHubService
 
         var athlete = await _athleteRepo.QueryAll()
             .Include(a => a.User)
+            .Include(a => a.OnboardingAssessment)
             .FirstAsync(a => a.Id == athleteId);
 
         // Current macro targets
@@ -332,6 +408,13 @@ public class CoachHubService : _BaseService, ICoachHubService
             var coachName = $"{target.SetByCoach.User.FirstName} {target.SetByCoach.User.LastName}";
             targetDto = MacroTargetMapper.Map(target, coachName);
         }
+
+        var hasActiveProgram = await _context.ClientPrograms.AsNoTracking()
+            .AnyAsync(p => p.AthleteId == athleteId && p.IsActive);
+        var now = DateTime.UtcNow;
+        var hasActiveNutritionPlan = await _context.NutritionPlanAssignments.AsNoTracking()
+            .AnyAsync(a => a.AthleteId == athleteId && a.IsActive &&
+                           a.StartDate <= now && (a.EndDate == null || a.EndDate > now));
 
         // Weight history from check-ins
         var checkIns = await _checkInRepo.QueryAll()
@@ -357,6 +440,11 @@ public class CoachHubService : _BaseService, ICoachHubService
             CurrentStreak = athlete.CurrentStreak,
             LongestStreak = athlete.LongestStreak,
             CurrentTargets = targetDto,
+            SetupReadiness = CoachHubMapper.MapSetupReadiness(
+                athlete,
+                hasActiveProgram,
+                hasActiveNutritionPlan,
+                target),
             WeightHistory = checkIns.Select(CoachHubMapper.MapWeightPoint).ToList(),
             FeedbackNotes = notes.Select(CoachHubMapper.MapFeedbackNote).ToList()
         };
@@ -481,7 +569,7 @@ public class CoachHubService : _BaseService, ICoachHubService
         await _macroTargetRepo.SaveChangesAsync();
 
         // Evict cached dashboard and compliance for this coach
-        _cacheService.Evict($"coach-dashboard:{coach.Id}");
+        _cacheService.EvictByPrefix("coach-dashboard:");
         _cacheService.Evict($"coach-compliance:{coach.Id}");
 
         // Notify Athlete

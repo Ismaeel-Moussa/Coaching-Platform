@@ -29,6 +29,7 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
     private readonly ICoachRepository _coachRepo;
     private readonly IClientProgramRepository _clientProgramRepo;
     private readonly INotificationService _notificationService;
+    private readonly ICacheService _cacheService;
 
     public WorkoutTemplateService(
         IPrincipal principal,
@@ -37,7 +38,8 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
         IWorkoutTemplateRepository templateRepo,
         ICoachRepository coachRepo,
         IClientProgramRepository clientProgramRepo,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        ICacheService cacheService)
         : base(principal, logger)
     {
         _context = context;
@@ -45,6 +47,7 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
         _coachRepo = coachRepo;
         _clientProgramRepo = clientProgramRepo;
         _notificationService = notificationService;
+        _cacheService = cacheService;
     }
 
     // ─── List (summary, paged) ────────────────────────────────────────
@@ -166,13 +169,19 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
     public async Task<(int assignedCount, string message)> AssignTemplateAsync(int templateId, AssignTemplateForm form)
     {
         var coachId = await GetCoachIdAsync();
+        var athleteIds = form.AthleteIds.Distinct().ToList();
+        var accessibleAthleteCount = await _context.Athletes.AsNoTracking()
+            .CountAsync(a => athleteIds.Contains(a.Id) &&
+                             (LoggedInUser.Role == "Admin" || a.AssignedCoachId == coachId));
+        if (accessibleAthleteCount != athleteIds.Count)
+            throw new UnauthorizedAccessException("One or more athletes are outside your roster.");
 
         var template = await _templateRepo.Query()
             .FirstOrDefaultAsync(t => t.Id == templateId && t.IsActive && t.ContentStatus == ContentStatus.Published)
             ?? throw new KeyNotFoundException($"Workout template {templateId} not found.");
 
         int count = 0;
-        foreach (var athleteId in form.AthleteIds)
+        foreach (var athleteId in athleteIds)
         {
             // Deactivate existing active program(s) for this athlete
             var existing = await _clientProgramRepo.Query()
@@ -199,8 +208,9 @@ public class WorkoutTemplateService : _BaseService, IWorkoutTemplateService
         }
 
         await _clientProgramRepo.SaveChangesAsync();
+        _cacheService.EvictByPrefix("coach-dashboard:");
 
-        foreach (var athleteId in form.AthleteIds)
+        foreach (var athleteId in athleteIds)
         {
             try
             {
