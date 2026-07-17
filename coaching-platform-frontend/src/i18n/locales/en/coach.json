@@ -19,6 +19,9 @@
     "reopenedReason": "Reopened for changes: {{reason}}",
     "submittedAt": "Submitted {{date}}",
     "reviewedAt": "Reviewed {{date}}",
+    "nextStepTitle": "Ready to build the athlete's plan?",
+    "nextStepDescription": "Continue to the Assignment Hub to set workout, nutrition, targets, and supplements for this athlete.",
+    "continueToAssignment": "Continue to plan assignment",
     "groups": { "baseline": "Baseline", "training": "Training", "safety": "Safety & recovery", "nutrition": "Nutrition" },
     "messages": { "reviewed": "Assessment marked as reviewed.", "reviewFailed": "Could not save the review.", "reopened": "Assessment reopened for the athlete.", "reopenFailed": "Could not reopen the assessment." }
   },

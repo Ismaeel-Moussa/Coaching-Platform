@@ -1,6 +1,7 @@
 import { Alert, Button, Empty, Input, Modal, Skeleton, Tag } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import ProgressPhotoViewer from '../ProgressPhotoViewer/ProgressPhotoViewer';
 import {
   useAthleteOnboardingAssessment,
@@ -17,6 +18,7 @@ interface DetailItem { label: string; value: string | number | null | undefined 
 
 const OnboardingAssessmentReview = ({ athleteId }: Props) => {
   const { t, i18n } = useTranslation(['coach', 'athlete', 'common']);
+  const navigate = useNavigate();
   const { data, isLoading, isError } = useAthleteOnboardingAssessment(athleteId);
   const review = useReviewOnboardingAssessment(athleteId);
   const reopen = useReopenOnboardingAssessment(athleteId);
@@ -180,6 +182,26 @@ const OnboardingAssessmentReview = ({ athleteId }: Props) => {
           </Button>
         </div>
       </section>
+
+      {isReviewed && (
+        <section className="onboarding-review__next-step">
+          <div className="onboarding-review__next-step-copy">
+            <span className="material-symbols-outlined">assignment_turned_in</span>
+            <div>
+              <h3>{t('coach:onboarding.nextStepTitle')}</h3>
+              <p>{t('coach:onboarding.nextStepDescription')}</p>
+            </div>
+          </div>
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => navigate(`/coach/athlete-hub?athleteId=${athleteId}`)}
+          >
+            {t('coach:onboarding.continueToAssignment')}
+            <span className="material-symbols-outlined onboarding-review__next-step-arrow">arrow_forward</span>
+          </Button>
+        </section>
+      )}
 
       <Modal
         open={reopenModalOpen}
