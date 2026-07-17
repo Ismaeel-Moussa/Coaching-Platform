@@ -9,6 +9,7 @@ import {
 } from '../../../hooks/useCoachHub/useCoachHub';
 import LiveFeedItem from '../../../components/LiveFeedItem/LiveFeedItem';
 import ComplianceBar from '../../../components/ComplianceBar/ComplianceBar';
+import CoachActionCenter from '../../../components/CoachActionCenter/CoachActionCenter';
 import './CoachDashboard.scss';
 
 const CoachDashboard: React.FC = () => {
@@ -251,6 +252,11 @@ const CoachDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <CoachActionCenter
+        items={dashboardData?.actionItems ?? []}
+        isLoading={isDashboardLoading}
+      />
 
       {/* Main Panels Grid */}
       <div className="coach-dashboard__grid">

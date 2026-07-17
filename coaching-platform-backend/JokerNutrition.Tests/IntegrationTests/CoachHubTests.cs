@@ -32,6 +32,12 @@ public class CoachHubTests : IClassFixture<TestWebAppFactory>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         Assert.Equal(1, body.RootElement.GetProperty("pendingOnboardingAssessmentsCount").GetInt32());
+        var actionItems = body.RootElement.GetProperty("actionItems");
+        Assert.Equal(2, actionItems.GetArrayLength());
+        Assert.Equal("AssessmentReview", actionItems[0].GetProperty("type").GetString());
+        Assert.Equal(1, actionItems[0].GetProperty("athleteId").GetInt32());
+        Assert.Equal("SetupRequired", actionItems[1].GetProperty("type").GetString());
+        Assert.Equal(2, actionItems[1].GetProperty("athleteId").GetInt32());
     }
 
     [Fact]

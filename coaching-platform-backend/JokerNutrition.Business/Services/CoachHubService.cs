@@ -105,15 +105,16 @@ public class CoachHubService : _BaseService, ICoachHubService
                                 / (double)recentLogs.Count * 100.0;
             }
 
-            // Pending check-ins: athletes with no check-in in the past 7 days
-            var weekStart = DateTime.UtcNow.AddDays(-7);
-            var recentCheckInAthleteIds = await _checkInRepo.QueryAll()
-                .Where(c => athleteIds.Contains(c.AthleteId) && c.SubmittedAt >= weekStart)
+            // Pending check-ins: athletes with no submission for the current ISO week.
+            var daysSinceMonday = ((int)today.DayOfWeek + 6) % 7;
+            var currentWeekMonday = today.AddDays(-daysSinceMonday);
+            var submittedThisWeekAthleteIds = await _checkInRepo.QueryAll()
+                .Where(c => athleteIds.Contains(c.AthleteId) && c.WeekOf == currentWeekMonday)
                 .Select(c => c.AthleteId)
                 .Distinct()
                 .ToListAsync();
 
-            var pendingCount = athleteIds.Count - recentCheckInAthleteIds.Count;
+            var pendingCount = athleteIds.Count - submittedThisWeekAthleteIds.Count;
             var pendingOnboardingAssessmentsCount = athletes.Count(a =>
                 a.OnboardingAssessment?.Status == OnboardingAssessmentStatus.Submitted);
 
@@ -148,6 +149,93 @@ public class CoachHubService : _BaseService, ICoachHubService
                     activeTarget).IsComplete;
             });
 
+            var todayCalorieTotals = await _diaryRepo.QueryAll()
+                .AsNoTracking()
+                .Where(d => athleteIds.Contains(d.AthleteId) && d.Date == today)
+                .Select(d => new
+                {
+                    d.AthleteId,
+                    ConsumedCalories = d.MealLogs.Sum(m => (decimal?)m.Calories) ?? 0m
+                })
+                .ToListAsync();
+            var caloriesByAthlete = todayCalorieTotals.ToDictionary(d => d.AthleteId, d => d.ConsumedCalories);
+            var submittedThisWeekSet = submittedThisWeekAthleteIds.ToHashSet();
+            var actionItems = new List<(int Rank, CoachActionItemDto Item)>();
+
+            foreach (var athlete in athletes)
+            {
+                var athleteName = $"{athlete.User.FirstName} {athlete.User.LastName}";
+                targetByAthlete.TryGetValue(athlete.Id, out var activeTarget);
+                var readiness = CoachHubMapper.MapSetupReadiness(
+                    athlete,
+                    programSet.Contains(athlete.Id),
+                    nutritionPlanSet.Contains(athlete.Id),
+                    activeTarget);
+
+                CoachActionItemDto? action = null;
+                var rank = 0;
+
+                if (athlete.OnboardingAssessment?.Status == OnboardingAssessmentStatus.Submitted)
+                {
+                    action = new CoachActionItemDto
+                    {
+                        Type = "AssessmentReview",
+                        Priority = "High"
+                    };
+                    rank = 1;
+                }
+                else if (!readiness.IsComplete)
+                {
+                    action = new CoachActionItemDto
+                    {
+                        Type = "SetupRequired",
+                        Priority = "High",
+                        ProgressCurrent = readiness.CompletedRequiredSteps,
+                        ProgressTotal = readiness.TotalRequiredSteps
+                    };
+                    rank = 2;
+                }
+                else if (!submittedThisWeekSet.Contains(athlete.Id))
+                {
+                    action = new CoachActionItemDto
+                    {
+                        Type = "CheckInPending",
+                        Priority = "Medium"
+                    };
+                    rank = 3;
+                }
+                else if (activeTarget is { TargetCalories: > 0 } &&
+                         caloriesByAthlete.TryGetValue(athlete.Id, out var consumedCalories))
+                {
+                    var compliancePercent = (double)(consumedCalories / activeTarget.TargetCalories) * 100.0;
+                    if (compliancePercent > 105.0)
+                    {
+                        action = new CoachActionItemDto
+                        {
+                            Type = "ComplianceAlert",
+                            Priority = "Medium",
+                            MetricValue = Math.Round(compliancePercent, 1)
+                        };
+                        rank = 4;
+                    }
+                }
+
+                if (action == null)
+                    continue;
+
+                action.AthleteId = athlete.Id;
+                action.AthleteName = athleteName;
+                action.AthleteAvatarUrl = athlete.User.ProfilePictureUrl;
+                actionItems.Add((rank, action));
+            }
+
+            var prioritizedActions = actionItems
+                .OrderBy(item => item.Rank)
+                .ThenBy(item => item.Item.AthleteName)
+                .Take(10)
+                .Select(item => item.Item)
+                .ToList();
+
             // Last 10 live feed items
             var recentFeed = await _workoutLogRepo.QueryAll()
                 .Include(w => w.Athlete).ThenInclude(a => a.User)
@@ -165,6 +253,7 @@ public class CoachHubService : _BaseService, ICoachHubService
                 PendingCheckInsCount = Math.Max(0, pendingCount),
                 PendingOnboardingAssessmentsCount = pendingOnboardingAssessmentsCount,
                 AthletesNeedingSetupCount = athletesNeedingSetupCount,
+                ActionItems = prioritizedActions,
                 RecentFeed = recentFeed.Select(CoachHubMapper.MapLiveFeedItem).ToList()
             };
         }, TimeSpan.FromSeconds(60));

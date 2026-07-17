@@ -290,6 +290,28 @@
     "currentProgram": "البرنامج الحالي: {{program}}",
     "noAthletes": "لا يوجد لاعبون نشطون في قائمتك."
   },
+  "actionCenter": {
+    "title": "مركز مهام المدرب",
+    "subtitle": "أهم إجراء تالٍ مطلوب لكل متدرب",
+    "count": "{{count}} مهام",
+    "empty": "كل شيء مكتمل حاليًا، ولا يوجد متدرب يحتاج إلى إجراء فوري.",
+    "priorities": {
+      "High": "عالية",
+      "Medium": "متوسطة"
+    },
+    "descriptions": {
+      "AssessmentReview": "تم إرسال التقييم الأولي وهو بانتظار مراجعتك.",
+      "SetupRequired": "اكتملت {{current}} من {{total}} خطوات الإعداد المطلوبة.",
+      "CheckInPending": "لم يتم إرسال المتابعة الأسبوعية للأسبوع الحالي بعد.",
+      "ComplianceAlert": "وصل استهلاك السعرات اليوم إلى {{value}}٪ من الهدف المحدد."
+    },
+    "actions": {
+      "AssessmentReview": "مراجعة التقييم",
+      "SetupRequired": "إكمال الإعداد",
+      "CheckInPending": "عرض المتدرب",
+      "ComplianceAlert": "مراجعة السجل"
+    }
+  },
   "setupReadiness": {
     "eyebrow": "الإعداد المطلوب",
     "title": "جاهزية إعداد المتدرب",
