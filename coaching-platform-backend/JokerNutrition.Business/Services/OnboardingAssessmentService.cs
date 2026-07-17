@@ -16,6 +16,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
     private readonly JokerNutritionContext _context;
     private readonly INotificationService _notificationService;
     private readonly IBlobStorageService _blobService;
+    private readonly IAuditLogService _auditLogService;
 
     private const long MaxPhotoSizeBytes = 10 * 1024 * 1024; // 10 MB
     private static readonly string[] AllowedContentTypes = ["image/jpeg", "image/png", "image/jpg"];
@@ -25,12 +26,14 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
         ILogger<OnboardingAssessmentService> logger,
         JokerNutritionContext context,
         INotificationService notificationService,
-        IBlobStorageService blobService)
+        IBlobStorageService blobService,
+        IAuditLogService auditLogService)
         : base(principal, logger)
     {
         _context = context;
         _notificationService = notificationService;
         _blobService = blobService;
+        _auditLogService = auditLogService;
     }
 
     public async Task<OnboardingAssessmentDto> GetMineAsync(CancellationToken cancellationToken = default)
@@ -128,6 +131,8 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
                 AthleteId = athlete.Id,
                 AthleteName = $"{athlete.User.FirstName} {athlete.User.LastName}".Trim(),
                 Status = OnboardingAssessmentStatus.Draft,
+                ReopenReason = athlete.OnboardingAssessment.ReopenReason,
+                ReopenedAt = athlete.OnboardingAssessment.ReopenedAt,
                 UpdatedAt = athlete.OnboardingAssessment.UpdatedAt
             };
         }
@@ -169,6 +174,76 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
         // Reload to ensure navigation properties/collections are updated
         var updatedAthlete = await GetAuthorizedAthleteAsync(athleteId, cancellationToken);
         return Map(updatedAthlete, updatedAthlete.OnboardingAssessment);
+    }
+
+    public async Task<OnboardingAssessmentDto> ReopenAsync(
+        int athleteId,
+        ReopenOnboardingAssessmentForm form,
+        CancellationToken cancellationToken = default)
+    {
+        var athlete = await GetAuthorizedAthleteAsync(athleteId, cancellationToken);
+        var assessment = athlete.OnboardingAssessment
+            ?? throw new InvalidOperationException("The athlete has not started their onboarding assessment.");
+
+        if (assessment.Status is not (OnboardingAssessmentStatus.Submitted or OnboardingAssessmentStatus.Reviewed))
+            throw new InvalidOperationException("Only a submitted or reviewed assessment can be reopened.");
+
+        var reason = Normalize(form.Reason)
+            ?? throw new ArgumentException("A reason is required to reopen the assessment.");
+
+        if (reason.Length < 10)
+            throw new ArgumentException("The reopen reason must be at least 10 characters.");
+
+        int? coachId = null;
+        if (LoggedInUser.Role.Equals("Coach", StringComparison.OrdinalIgnoreCase))
+        {
+            coachId = await _context.Coaches
+                .Where(x => x.UserId == LoggedInUser.Id)
+                .Select(x => (int?)x.Id)
+                .FirstOrDefaultAsync(cancellationToken)
+                ?? throw new UnauthorizedAccessException("Coach profile not found.");
+        }
+
+        var previousState = JsonSerializer.Serialize(new
+        {
+            PreviousStatus = assessment.Status.ToString(),
+            assessment.SubmittedAt,
+            assessment.ReviewedAt,
+            assessment.ReviewedByCoachId,
+            assessment.CoachReviewNotes,
+            ReopenReason = reason
+        });
+
+        assessment.Status = OnboardingAssessmentStatus.Draft;
+        assessment.ReopenReason = reason;
+        assessment.ReopenedAt = DateTime.UtcNow;
+        assessment.ReopenedByCoachId = coachId;
+        assessment.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        await _auditLogService.LogAsync(
+            LoggedInUser.Id,
+            LoggedInUser.FirstName,
+            "OnboardingAssessmentReopened",
+            nameof(AthleteOnboardingAssessment),
+            assessment.Id.ToString(),
+            details: previousState);
+
+        await TrySendNotificationAsync(
+            athlete.UserId,
+            NotificationType.OnboardingReopened,
+            $"Your onboarding assessment was reopened: \"{reason}\"");
+
+        return new OnboardingAssessmentDto
+        {
+            Id = assessment.Id,
+            AthleteId = athlete.Id,
+            AthleteName = $"{athlete.User.FirstName} {athlete.User.LastName}".Trim(),
+            Status = OnboardingAssessmentStatus.Draft,
+            ReopenReason = reason,
+            ReopenedAt = assessment.ReopenedAt,
+            UpdatedAt = assessment.UpdatedAt
+        };
     }
 
     public async Task<OnboardingAssessmentDto> UploadPhotosAsync(List<(PhotoAngle Angle, IFormFile File)> photos, CancellationToken cancellationToken = default)
@@ -412,6 +487,8 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
             CoachReviewNotes = assessment.CoachReviewNotes,
             SubmittedAt = assessment.SubmittedAt,
             ReviewedAt = assessment.ReviewedAt,
+            ReopenReason = assessment.ReopenReason,
+            ReopenedAt = assessment.ReopenedAt,
             UpdatedAt = assessment.UpdatedAt,
             HasInjuryFlag = HasSafetyValue(assessment.InjuriesOrLimitations),
             HasPainFlag = HasSafetyValue(assessment.CurrentPain),

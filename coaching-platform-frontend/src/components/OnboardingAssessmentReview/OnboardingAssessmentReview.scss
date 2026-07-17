@@ -167,7 +167,24 @@
   }
 }
 
+.onboarding-review__decision-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 
+  .ant-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+}
+
+.onboarding-review__reopen-help {
+  display: block;
+  margin-top: 8px;
+  color: var(--color-text-secondary);
+}
 
 @media (max-width: 900px) {
   .onboarding-review__sections,

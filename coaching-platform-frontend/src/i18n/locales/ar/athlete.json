@@ -33,7 +33,7 @@
       "days": { "Monday": "الاثنين", "Tuesday": "الثلاثاء", "Wednesday": "الأربعاء", "Thursday": "الخميس", "Friday": "الجمعة", "Saturday": "السبت", "Sunday": "الأحد" },
       "equipment": { "Gym": "نادي متكامل", "Dumbbells": "دامبلز", "Bands": "أشرطة مقاومة", "Bodyweight": "وزن الجسم فقط", "HomeMachines": "أجهزة منزلية", "Other": "أخرى" }
     },
-    "messages": { "draftSaved": "تم حفظ مسودة التقييم.", "saveFailed": "تعذر حفظ المسودة.", "submitted": "تم إرسال التقييم إلى مدربك.", "submitFailed": "تعذر إرسال التقييم.", "loadFailed": "تعذر تحميل التقييم.", "readOnly": "تم إرسال هذا التقييم وأصبح للقراءة فقط. تواصل مع مدربك إذا احتجت إلى تعديل إجابة.", "photosUploaded": "تم تحميل صور التقدم بنجاح.", "uploadFailed": "تعذر تحميل صور التقدم.", "photoDeleted": "تم حذف الصورة بنجاح.", "deleteFailed": "تعذر حذف الصورة." }
+    "messages": { "draftSaved": "تم حفظ مسودة التقييم.", "saveFailed": "تعذر حفظ المسودة.", "submitted": "تم إرسال التقييم إلى مدربك.", "submitFailed": "تعذر إرسال التقييم.", "loadFailed": "تعذر تحميل التقييم.", "readOnly": "تم إرسال هذا التقييم وأصبح للقراءة فقط. تواصل مع مدربك إذا احتجت إلى تعديل إجابة.", "reopened": "طلب مدربك تعديلات على هذا التقييم", "photosUploaded": "تم تحميل صور التقدم بنجاح.", "uploadFailed": "تعذر تحميل صور التقدم.", "photoDeleted": "تم حذف الصورة بنجاح.", "deleteFailed": "تعذر حذف الصورة." }
   },
   "dashboard": {
     "greeting": "صباح الخير، <span>{{name}}</span> 👋",

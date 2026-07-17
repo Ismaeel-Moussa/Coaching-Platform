@@ -30,3 +30,11 @@ public class ReviewOnboardingAssessmentForm
 {
     [MaxLength(3000)] public string? CoachReviewNotes { get; set; }
 }
+
+public class ReopenOnboardingAssessmentForm
+{
+    [Required]
+    [MinLength(10)]
+    [MaxLength(1000)]
+    public string Reason { get; set; } = string.Empty;
+}

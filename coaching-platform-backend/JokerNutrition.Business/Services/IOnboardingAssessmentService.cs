@@ -12,6 +12,7 @@ public interface IOnboardingAssessmentService
     Task<OnboardingAssessmentDto> SubmitAsync(SaveOnboardingAssessmentForm form, CancellationToken cancellationToken = default);
     Task<OnboardingAssessmentDto> GetForAthleteAsync(int athleteId, CancellationToken cancellationToken = default);
     Task<OnboardingAssessmentDto> ReviewAsync(int athleteId, ReviewOnboardingAssessmentForm form, CancellationToken cancellationToken = default);
+    Task<OnboardingAssessmentDto> ReopenAsync(int athleteId, ReopenOnboardingAssessmentForm form, CancellationToken cancellationToken = default);
     Task<OnboardingAssessmentDto> UploadPhotosAsync(List<(PhotoAngle Angle, IFormFile File)> photos, CancellationToken cancellationToken = default);
     Task DeletePhotoAsync(PhotoAngle angle, CancellationToken cancellationToken = default);
 }

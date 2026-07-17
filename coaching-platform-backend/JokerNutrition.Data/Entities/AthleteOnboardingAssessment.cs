@@ -37,6 +37,10 @@ public class AthleteOnboardingAssessment
     public Coach? ReviewedByCoach { get; set; }
     public DateTime? SubmittedAt { get; set; }
     public DateTime? ReviewedAt { get; set; }
+    public string? ReopenReason { get; set; }
+    public DateTime? ReopenedAt { get; set; }
+    public int? ReopenedByCoachId { get; set; }
+    public Coach? ReopenedByCoach { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

@@ -51,6 +51,12 @@ public class OnboardingController : ControllerBase
     public async Task<IActionResult> Review(int athleteId, [FromBody] ReviewOnboardingAssessmentForm form, CancellationToken cancellationToken) =>
         Ok(await _service.ReviewAsync(athleteId, form, cancellationToken));
 
+    /// <summary>Reopens a submitted or reviewed assessment so the athlete can correct their answers.</summary>
+    [HttpPut("athletes/{athleteId:int}/reopen")]
+    [Authorize(Roles = "Coach,Admin")]
+    public async Task<IActionResult> Reopen(int athleteId, [FromBody] ReopenOnboardingAssessmentForm form, CancellationToken cancellationToken) =>
+        Ok(await _service.ReopenAsync(athleteId, form, cancellationToken));
+
     /// <summary>Upload 1-3 progress photos for the athlete onboarding assessment.</summary>
     [HttpPost("me/photos")]
     [Authorize(Roles = "Athlete")]
