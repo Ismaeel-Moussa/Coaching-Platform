@@ -34,6 +34,7 @@ const AthleteOnboarding = lazy(() => import('../pages/athlete/Onboarding/Onboard
 
 // Coach pages (lazy — loaded only when coach logs in)
 const CoachDashboard = lazy(() => import('../pages/coach/CoachDashboard/CoachDashboard'));
+const CoachTasks = lazy(() => import('../pages/coach/CoachTasks/CoachTasks'));
 const ClientRoster = lazy(() => import('../pages/coach/ClientRoster/ClientRoster'));
 const ClientDetail = lazy(() => import('../pages/coach/ClientDetail/ClientDetail'));
 const WorkoutTemplateBuilder = lazy(() => import('../pages/coach/WorkoutTemplateBuilder/WorkoutTemplateBuilder'));
@@ -203,6 +204,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <CoachDashboard />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tasks',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <CoachTasks />
           </Suspense>
         ),
       },

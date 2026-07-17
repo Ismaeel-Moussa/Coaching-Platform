@@ -16,6 +16,12 @@ namespace JokerNutrition.Business.Services;
 public interface ICoachHubService
 {
     Task<CoachDashboardDto> GetDashboardAsync();
+    Task<PagedResult<CoachActionItemDto>> GetActionItemsAsync(
+        int page,
+        int pageSize,
+        string? type,
+        string? priority,
+        string? search);
     Task<PagedResult<LiveFeedItemDto>> GetLiveFeedAsync(int page, int pageSize);
     Task<List<ComplianceItemDto>> GetComplianceRosterAsync();
     Task<PagedResult<RosterItemDto>> GetRosterAsync(int page, int pageSize, string? filter);
@@ -159,77 +165,16 @@ public class CoachHubService : _BaseService, ICoachHubService
                 })
                 .ToListAsync();
             var caloriesByAthlete = todayCalorieTotals.ToDictionary(d => d.AthleteId, d => d.ConsumedCalories);
-            var submittedThisWeekSet = submittedThisWeekAthleteIds.ToHashSet();
-            var actionItems = new List<(int Rank, CoachActionItemDto Item)>();
-
-            foreach (var athlete in athletes)
-            {
-                var athleteName = $"{athlete.User.FirstName} {athlete.User.LastName}";
-                targetByAthlete.TryGetValue(athlete.Id, out var activeTarget);
-                var readiness = CoachHubMapper.MapSetupReadiness(
-                    athlete,
-                    programSet.Contains(athlete.Id),
-                    nutritionPlanSet.Contains(athlete.Id),
-                    activeTarget);
-
-                CoachActionItemDto? action = null;
-                var rank = 0;
-
-                if (athlete.OnboardingAssessment?.Status == OnboardingAssessmentStatus.Submitted)
-                {
-                    action = new CoachActionItemDto
-                    {
-                        Type = "AssessmentReview",
-                        Priority = "High"
-                    };
-                    rank = 1;
-                }
-                else if (!readiness.IsComplete)
-                {
-                    action = new CoachActionItemDto
-                    {
-                        Type = "SetupRequired",
-                        Priority = "High",
-                        ProgressCurrent = readiness.CompletedRequiredSteps,
-                        ProgressTotal = readiness.TotalRequiredSteps
-                    };
-                    rank = 2;
-                }
-                else if (!submittedThisWeekSet.Contains(athlete.Id))
-                {
-                    action = new CoachActionItemDto
-                    {
-                        Type = "CheckInPending",
-                        Priority = "Medium"
-                    };
-                    rank = 3;
-                }
-                else if (activeTarget is { TargetCalories: > 0 } &&
-                         caloriesByAthlete.TryGetValue(athlete.Id, out var consumedCalories))
-                {
-                    var compliancePercent = (double)(consumedCalories / activeTarget.TargetCalories) * 100.0;
-                    if (compliancePercent > 105.0)
-                    {
-                        action = new CoachActionItemDto
-                        {
-                            Type = "ComplianceAlert",
-                            Priority = "Medium",
-                            MetricValue = Math.Round(compliancePercent, 1)
-                        };
-                        rank = 4;
-                    }
-                }
-
-                if (action == null)
-                    continue;
-
-                action.AthleteId = athlete.Id;
-                action.AthleteName = athleteName;
-                action.AthleteAvatarUrl = athlete.User.ProfilePictureUrl;
-                actionItems.Add((rank, action));
-            }
-
-            var prioritizedActions = actionItems
+            var allActions = BuildActionItems(
+                athletes,
+                programSet,
+                nutritionPlanSet,
+                targetByAthlete,
+                submittedThisWeekAthleteIds.ToHashSet(),
+                caloriesByAthlete);
+            var prioritizedActions = allActions
+                .GroupBy(item => item.Item.AthleteId)
+                .Select(group => group.OrderBy(item => item.Rank).First())
                 .OrderBy(item => item.Rank)
                 .ThenBy(item => item.Item.AthleteName)
                 .Take(10)
@@ -257,6 +202,97 @@ public class CoachHubService : _BaseService, ICoachHubService
                 RecentFeed = recentFeed.Select(CoachHubMapper.MapLiveFeedItem).ToList()
             };
         }, TimeSpan.FromSeconds(60));
+    }
+
+    // ─── Coach Tasks ────────────────────────────────────────────────────────
+
+    public async Task<PagedResult<CoachActionItemDto>> GetActionItemsAsync(
+        int page,
+        int pageSize,
+        string? type,
+        string? priority,
+        string? search)
+    {
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 50);
+
+        var isAdmin = LoggedInUser.Role == "Admin";
+        var coach = isAdmin ? null : await GetCoachAsync();
+        var athletes = isAdmin
+            ? await _athleteRepo.QueryAll()
+                .AsNoTracking()
+                .Include(a => a.User)
+                .Include(a => a.OnboardingAssessment)
+                .ToListAsync()
+            : await GetCoachAthletesAsync(coach!.Id);
+        var athleteIds = athletes.Select(a => a.Id).ToList();
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var daysSinceMonday = ((int)today.DayOfWeek + 6) % 7;
+        var currentWeekMonday = today.AddDays(-daysSinceMonday);
+        var now = DateTime.UtcNow;
+
+        var submittedThisWeek = (await _checkInRepo.QueryAll()
+            .AsNoTracking()
+            .Where(c => athleteIds.Contains(c.AthleteId) && c.WeekOf == currentWeekMonday)
+            .Select(c => c.AthleteId)
+            .Distinct()
+            .ToListAsync()).ToHashSet();
+        var programSet = (await _context.ClientPrograms.AsNoTracking()
+            .Where(p => athleteIds.Contains(p.AthleteId) && p.IsActive)
+            .Select(p => p.AthleteId)
+            .Distinct()
+            .ToListAsync()).ToHashSet();
+        var nutritionPlanSet = (await _context.NutritionPlanAssignments.AsNoTracking()
+            .Where(a => athleteIds.Contains(a.AthleteId) && a.IsActive &&
+                        a.StartDate <= now && (a.EndDate == null || a.EndDate > now))
+            .Select(a => a.AthleteId)
+            .Distinct()
+            .ToListAsync()).ToHashSet();
+        var activeTargets = await _context.MacroTargets.AsNoTracking()
+            .Where(t => athleteIds.Contains(t.AthleteId) && t.IsActive)
+            .ToListAsync();
+        var targetByAthlete = activeTargets
+            .GroupBy(t => t.AthleteId)
+            .ToDictionary(group => group.Key, group => group.OrderByDescending(t => t.SetAt).First());
+        var calorieTotals = await _diaryRepo.QueryAll()
+            .AsNoTracking()
+            .Where(d => athleteIds.Contains(d.AthleteId) && d.Date == today)
+            .Select(d => new
+            {
+                d.AthleteId,
+                ConsumedCalories = d.MealLogs.Sum(m => (decimal?)m.Calories) ?? 0m
+            })
+            .ToListAsync();
+        var caloriesByAthlete = calorieTotals.ToDictionary(d => d.AthleteId, d => d.ConsumedCalories);
+
+        var actions = BuildActionItems(
+                athletes,
+                programSet,
+                nutritionPlanSet,
+                targetByAthlete,
+                submittedThisWeek,
+                caloriesByAthlete)
+            .Where(item => string.IsNullOrWhiteSpace(type) ||
+                           item.Item.Type.Equals(type, StringComparison.OrdinalIgnoreCase))
+            .Where(item => string.IsNullOrWhiteSpace(priority) ||
+                           item.Item.Priority.Equals(priority, StringComparison.OrdinalIgnoreCase))
+            .Where(item => string.IsNullOrWhiteSpace(search) ||
+                           item.Item.AthleteName.Contains(search.Trim(), StringComparison.OrdinalIgnoreCase))
+            .OrderBy(item => item.Rank)
+            .ThenBy(item => item.Item.AthleteName)
+            .ToList();
+
+        return new PagedResult<CoachActionItemDto>
+        {
+            Items = actions
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(item => item.Item),
+            TotalCount = actions.Count,
+            Page = page,
+            PageSize = pageSize
+        };
     }
 
     // ─── Live Feed ────────────────────────────────────────────────────
@@ -693,6 +729,82 @@ public class CoachHubService : _BaseService, ICoachHubService
     }
 
     // ─── Private helpers ──────────────────────────────────────────────
+
+    private static List<(int Rank, CoachActionItemDto Item)> BuildActionItems(
+        IEnumerable<Athlete> athletes,
+        IReadOnlySet<int> programSet,
+        IReadOnlySet<int> nutritionPlanSet,
+        IReadOnlyDictionary<int, MacroTarget> targetByAthlete,
+        IReadOnlySet<int> submittedThisWeek,
+        IReadOnlyDictionary<int, decimal> caloriesByAthlete)
+    {
+        var actions = new List<(int Rank, CoachActionItemDto Item)>();
+
+        foreach (var athlete in athletes)
+        {
+            var athleteName = $"{athlete.User.FirstName} {athlete.User.LastName}".Trim();
+            targetByAthlete.TryGetValue(athlete.Id, out var activeTarget);
+            var readiness = CoachHubMapper.MapSetupReadiness(
+                athlete,
+                programSet.Contains(athlete.Id),
+                nutritionPlanSet.Contains(athlete.Id),
+                activeTarget);
+
+            void AddAction(int rank, CoachActionItemDto action)
+            {
+                action.AthleteId = athlete.Id;
+                action.AthleteName = athleteName;
+                action.AthleteAvatarUrl = athlete.User.ProfilePictureUrl;
+                actions.Add((rank, action));
+            }
+
+            if (athlete.OnboardingAssessment?.Status == OnboardingAssessmentStatus.Submitted)
+            {
+                AddAction(1, new CoachActionItemDto
+                {
+                    Type = "AssessmentReview",
+                    Priority = "High"
+                });
+            }
+
+            if (!readiness.IsComplete)
+            {
+                AddAction(2, new CoachActionItemDto
+                {
+                    Type = "SetupRequired",
+                    Priority = "High",
+                    ProgressCurrent = readiness.CompletedRequiredSteps,
+                    ProgressTotal = readiness.TotalRequiredSteps
+                });
+            }
+
+            if (readiness.IsComplete && !submittedThisWeek.Contains(athlete.Id))
+            {
+                AddAction(3, new CoachActionItemDto
+                {
+                    Type = "CheckInPending",
+                    Priority = "Medium"
+                });
+            }
+
+            if (readiness.IsComplete && activeTarget is { TargetCalories: > 0 } &&
+                caloriesByAthlete.TryGetValue(athlete.Id, out var consumedCalories))
+            {
+                var compliancePercent = (double)(consumedCalories / activeTarget.TargetCalories) * 100.0;
+                if (compliancePercent > 105.0)
+                {
+                    AddAction(4, new CoachActionItemDto
+                    {
+                        Type = "ComplianceAlert",
+                        Priority = "Medium",
+                        MetricValue = Math.Round(compliancePercent, 1)
+                    });
+                }
+            }
+        }
+
+        return actions;
+    }
 
     private async Task<Coach> GetCoachAsync()
     {

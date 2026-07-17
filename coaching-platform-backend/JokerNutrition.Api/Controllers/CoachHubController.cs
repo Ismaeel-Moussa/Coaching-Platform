@@ -32,6 +32,22 @@ public class CoachHubController : ControllerBase
     }
 
     /// <summary>
+    /// Returns all pending coach tasks across the requesting coach's roster.
+    /// Supports filtering by task type, priority, athlete name, and pagination.
+    /// </summary>
+    [HttpGet("action-items")]
+    public async Task<IActionResult> GetActionItems(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 12,
+        [FromQuery] string? type = null,
+        [FromQuery] string? priority = null,
+        [FromQuery] string? search = null)
+    {
+        var result = await _coachHubService.GetActionItemsAsync(page, pageSize, type, priority, search);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Returns a paginated list of recent workout events (InProgress / Completed / Missed)
     /// across all athletes assigned to the logged-in coach, ordered newest first.
     /// Auto-refreshes every 30 seconds on the frontend.

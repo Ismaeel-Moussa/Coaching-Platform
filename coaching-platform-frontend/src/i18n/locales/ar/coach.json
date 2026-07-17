@@ -293,6 +293,7 @@
   "actionCenter": {
     "title": "مركز مهام المدرب",
     "subtitle": "أهم إجراء تالٍ مطلوب لكل متدرب",
+    "viewAll": "عرض جميع المهام",
     "count": "{{count}} مهام",
     "empty": "كل شيء مكتمل حاليًا، ولا يوجد متدرب يحتاج إلى إجراء فوري.",
     "priorities": {
@@ -310,6 +311,27 @@
       "SetupRequired": "إكمال الإعداد",
       "CheckInPending": "عرض المتدرب",
       "ComplianceAlert": "مراجعة السجل"
+    }
+  },
+  "tasks": {
+    "eyebrow": "قائمة العمل",
+    "title": "مهام المدرب",
+    "subtitle": "راجع جميع الإجراءات المعلقة للمتدربين من مكان واحد.",
+    "totalLabel": "مهمة مطابقة",
+    "filtersLabel": "عوامل تصفية المهام",
+    "searchPlaceholder": "البحث باسم المتدرب...",
+    "typeFilter": "جميع أنواع المهام",
+    "priorityFilter": "جميع الأولويات",
+    "clearFilters": "مسح عوامل التصفية",
+    "empty": "كل المهام مكتملة. لا توجد إجراءات معلقة للمتدربين.",
+    "emptyFiltered": "لا توجد مهام تطابق عوامل التصفية المحددة.",
+    "errorTitle": "تعذر تحميل مهام المدرب",
+    "errorDescription": "تحقق من الاتصال وحاول مرة أخرى.",
+    "types": {
+      "AssessmentReview": "مراجعة التقييم",
+      "SetupRequired": "الإعداد مطلوب",
+      "CheckInPending": "متابعة أسبوعية مفقودة",
+      "ComplianceAlert": "تنبيه غذائي"
     }
   },
   "setupReadiness": {

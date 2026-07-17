@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
 import {
   getCoachDashboard,
+  getCoachActionItems,
   getLiveFeed,
   getCompliance,
   getRoster,
@@ -9,6 +10,7 @@ import {
   saveFeedbackNote,
   getWeightHistory,
 } from '../../api/coachHub';
+import type { CoachActionItemsQuery } from '../../api/coachHub';
 import type { SaveFeedbackNoteForm } from '../../types/CoachHub';
 
 export const useGetCoachDashboard = () =>
@@ -17,6 +19,14 @@ export const useGetCoachDashboard = () =>
     queryFn: getCoachDashboard,
     refetchInterval: 30_000,
     staleTime: 30_000,
+  });
+
+export const useGetCoachActionItems = (query: CoachActionItemsQuery) =>
+  useQuery({
+    queryKey: ['coach-action-items', query],
+    queryFn: () => getCoachActionItems(query),
+    staleTime: 30_000,
+    refetchInterval: 30_000,
   });
 
 export const useGetLiveFeed = (page: number, pageSize: number) =>

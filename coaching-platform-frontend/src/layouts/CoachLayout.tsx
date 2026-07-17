@@ -12,6 +12,7 @@ import './CoachLayout.scss';
 
 const coachNavItems = [
   { path: '/coach/dashboard', icon: 'analytics', labelKey: 'nav.dashboard' },
+  { path: '/coach/tasks', icon: 'task_alt', labelKey: 'nav.tasks' },
   { path: '/coach/roster', icon: 'group', labelKey: 'nav.clientRoster' },
   { path: '/coach/athlete-hub', icon: 'assignment_ind', labelKey: 'nav.athleteHub' },
   { path: '/coach/exercise-library', icon: 'fitness_center', labelKey: 'nav.exerciseLibrary' },
