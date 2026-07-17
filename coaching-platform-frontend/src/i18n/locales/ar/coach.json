@@ -19,6 +19,9 @@
     "reopenedReason": "تمت إعادة فتحه للتعديل: {{reason}}",
     "submittedAt": "تم الإرسال {{date}}",
     "reviewedAt": "تمت المراجعة {{date}}",
+    "nextStepTitle": "جاهز لتجهيز خطة المتدرب؟",
+    "nextStepDescription": "انتقل إلى مركز التعيين لإعداد التمارين والتغذية والأهداف والمكملات لهذا المتدرب.",
+    "continueToAssignment": "المتابعة إلى تعيين الخطة",
     "groups": { "baseline": "البيانات الأساسية", "training": "التدريب", "safety": "السلامة والاستشفاء", "nutrition": "التغذية" },
     "messages": { "reviewed": "تم تحديد التقييم كمُراجع.", "reviewFailed": "تعذر حفظ المراجعة.", "reopened": "تمت إعادة فتح التقييم للمتدرب.", "reopenFailed": "تعذر إعادة فتح التقييم." }
   },
