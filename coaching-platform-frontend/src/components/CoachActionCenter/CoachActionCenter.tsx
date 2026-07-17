@@ -65,11 +65,17 @@ const CoachActionCenter: React.FC<CoachActionCenterProps> = ({ items, isLoading 
             <p>{t('coach:actionCenter.subtitle')}</p>
           </div>
         </div>
-        {!isLoading && items.length > 0 && (
-          <span className="coach-action-center__count mono">
-            {t('coach:actionCenter.count', { count: items.length })}
-          </span>
-        )}
+        <div className="coach-action-center__header-actions">
+          {!isLoading && items.length > 0 && (
+            <span className="coach-action-center__count mono">
+              {t('coach:actionCenter.count', { count: items.length })}
+            </span>
+          )}
+          <button type="button" className="coach-action-center__view-all" onClick={() => navigate('/coach/tasks')}>
+            {t('coach:actionCenter.viewAll')}
+            <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </button>
+        </div>
       </header>
 
       {isLoading ? (

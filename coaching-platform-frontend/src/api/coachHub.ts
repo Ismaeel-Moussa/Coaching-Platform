@@ -9,10 +9,30 @@ import type {
   WeightHistoryPointDto,
   SaveFeedbackNoteForm,
   PagedResult,
+  CoachActionItemDto,
+  CoachActionPriority,
+  CoachActionType,
 } from '../types/CoachHub';
 
 export const getCoachDashboard = async (): Promise<CoachDashboardDto> => {
   const response = await axiosInstance.get<CoachDashboardDto>('/coach-hub/dashboard');
+  return response.data;
+};
+
+export interface CoachActionItemsQuery {
+  page?: number;
+  pageSize?: number;
+  type?: CoachActionType;
+  priority?: CoachActionPriority;
+  search?: string;
+}
+
+export const getCoachActionItems = async (
+  query: CoachActionItemsQuery,
+): Promise<PagedResult<CoachActionItemDto>> => {
+  const response = await axiosInstance.get<PagedResult<CoachActionItemDto>>('/coach-hub/action-items', {
+    params: query,
+  });
   return response.data;
 };
 

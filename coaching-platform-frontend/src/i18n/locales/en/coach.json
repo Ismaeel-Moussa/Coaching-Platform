@@ -305,6 +305,7 @@
   "actionCenter": {
     "title": "Coach Action Center",
     "subtitle": "The most important next action for each athlete",
+    "viewAll": "View all tasks",
     "count": "{{count}} actions",
     "empty": "You're all caught up. No athlete needs immediate attention.",
     "priorities": {
@@ -322,6 +323,27 @@
       "SetupRequired": "Complete setup",
       "CheckInPending": "View athlete",
       "ComplianceAlert": "Review diary"
+    }
+  },
+  "tasks": {
+    "eyebrow": "Work queue",
+    "title": "Coach Tasks",
+    "subtitle": "Review every pending athlete action from one focused workspace.",
+    "totalLabel": "matching tasks",
+    "filtersLabel": "Task filters",
+    "searchPlaceholder": "Search by athlete name...",
+    "typeFilter": "All task types",
+    "priorityFilter": "All priorities",
+    "clearFilters": "Clear filters",
+    "empty": "You're all caught up. There are no pending athlete tasks.",
+    "emptyFiltered": "No tasks match the selected filters.",
+    "errorTitle": "Could not load coach tasks",
+    "errorDescription": "Please check your connection and try again.",
+    "types": {
+      "AssessmentReview": "Assessment review",
+      "SetupRequired": "Setup required",
+      "CheckInPending": "Missing check-in",
+      "ComplianceAlert": "Nutrition alert"
     }
   },
   "setupReadiness": {
