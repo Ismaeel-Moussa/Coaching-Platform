@@ -20,7 +20,22 @@ export interface CoachDashboardDto {
   pendingCheckInsCount: number;
   pendingOnboardingAssessmentsCount: number;
   athletesNeedingSetupCount: number;
+  actionItems: CoachActionItemDto[];
   recentFeed: LiveFeedItemDto[];
+}
+
+export type CoachActionType = 'AssessmentReview' | 'SetupRequired' | 'CheckInPending' | 'ComplianceAlert';
+export type CoachActionPriority = 'High' | 'Medium';
+
+export interface CoachActionItemDto {
+  athleteId: number;
+  athleteName: string;
+  athleteAvatarUrl: string | null;
+  type: CoachActionType;
+  priority: CoachActionPriority;
+  progressCurrent: number | null;
+  progressTotal: number | null;
+  metricValue: number | null;
 }
 
 export interface AthleteSetupReadinessDto {

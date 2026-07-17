@@ -7,5 +7,6 @@ public class CoachDashboardDto
     public int PendingCheckInsCount { get; set; }
     public int PendingOnboardingAssessmentsCount { get; set; }
     public int AthletesNeedingSetupCount { get; set; }
+    public List<CoachActionItemDto> ActionItems { get; set; } = new();
     public List<LiveFeedItemDto> RecentFeed { get; set; } = new();
 }

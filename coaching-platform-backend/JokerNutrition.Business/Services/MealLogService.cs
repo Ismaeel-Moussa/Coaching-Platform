@@ -40,6 +40,7 @@ public class MealLogService : _BaseService, IMealLogService
     private readonly IDiaryService _diaryService;
     private readonly INotificationService _notificationService;
     private readonly JokerNutritionContext _context;
+    private readonly ICacheService _cacheService;
 
     public MealLogService(
         IPrincipal principal,
@@ -52,7 +53,8 @@ public class MealLogService : _BaseService, IMealLogService
         IAthleteRepository athleteRepo,
         IDiaryService diaryService,
         INotificationService notificationService,
-        JokerNutritionContext context)
+        JokerNutritionContext context,
+        ICacheService cacheService)
         : base(principal, logger)
     {
         _mealLogRepo = mealLogRepo;
@@ -64,6 +66,7 @@ public class MealLogService : _BaseService, IMealLogService
         _diaryService = diaryService;
         _notificationService = notificationService;
         _context = context;
+        _cacheService = cacheService;
     }
 
     public async Task<MealLogDto> LogFoodAsync(LogFoodForm form)
@@ -77,6 +80,7 @@ public class MealLogService : _BaseService, IMealLogService
 
         await _mealLogRepo.CreateAsync(log);
         await _mealLogRepo.SaveChangesAsync();
+        _cacheService.EvictByPrefix("coach-dashboard:");
         await NotifyCoachAsync(athlete, "MealLogged");
 
         return DiaryMapper.Map(log);
@@ -104,6 +108,7 @@ public class MealLogService : _BaseService, IMealLogService
 
         await _mealLogRepo.CreateRangeAsync(logs);
         await _mealLogRepo.SaveChangesAsync();
+        _cacheService.EvictByPrefix("coach-dashboard:");
         await NotifyCoachAsync(athlete, "MealsLogged");
 
         return logs.Select(DiaryMapper.Map).ToList();
@@ -237,6 +242,7 @@ public class MealLogService : _BaseService, IMealLogService
                 entry.NutritionMealBlockId == block.Id);
 
         await NotifyCoachAsync(athlete, "PlanMealLogged");
+        _cacheService.EvictByPrefix("coach-dashboard:");
         return DiaryMapper.Map(savedEntry);
     }
 
@@ -344,6 +350,7 @@ public class MealLogService : _BaseService, IMealLogService
 
         _mealLogRepo.Delete(log);
         await _mealLogRepo.SaveChangesAsync();
+        _cacheService.EvictByPrefix("coach-dashboard:");
 
         await NotifyCoachAsync(athlete, "MealRemoved");
     }
@@ -358,6 +365,7 @@ public class MealLogService : _BaseService, IMealLogService
 
         _context.NutritionPlanDiaryEntries.Remove(entry);
         await _context.SaveChangesAsync();
+        _cacheService.EvictByPrefix("coach-dashboard:");
         await NotifyCoachAsync(athlete, "PlanMealRemoved");
     }
 

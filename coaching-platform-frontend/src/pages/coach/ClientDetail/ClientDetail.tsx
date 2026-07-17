@@ -82,6 +82,8 @@ const ClientDetail: React.FC = () => {
       setActiveTab('onboarding-assessment');
     } else if (hash === '#check-in-history') {
       setActiveTab('check-in-history');
+    } else if (hash === '#daily-history') {
+      setActiveTab('history');
     }
   }, [window.location.hash]);
 

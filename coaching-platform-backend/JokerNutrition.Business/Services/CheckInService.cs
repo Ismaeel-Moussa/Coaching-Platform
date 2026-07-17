@@ -50,6 +50,7 @@ public class CheckInService : _BaseService, ICheckInService
     private readonly ICoachRepository _coachRepo;
     private readonly IBlobStorageService _blobService;
     private readonly INotificationService _notificationService;
+    private readonly ICacheService _cacheService;
 
     private const long MaxPhotoSizeBytes = 10 * 1024 * 1024; // 10 MB
     private static readonly string[] AllowedContentTypes = ["image/jpeg", "image/png", "image/jpg"];
@@ -62,7 +63,8 @@ public class CheckInService : _BaseService, ICheckInService
         IAthleteRepository athleteRepo,
         ICoachRepository coachRepo,
         IBlobStorageService blobService,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        ICacheService cacheService)
         : base(principal, logger)
     {
         _checkInRepo = checkInRepo;
@@ -71,6 +73,7 @@ public class CheckInService : _BaseService, ICheckInService
         _coachRepo = coachRepo;
         _blobService = blobService;
         _notificationService = notificationService;
+        _cacheService = cacheService;
     }
 
     // ─── Submit / Upsert ──────────────────────────────────────────────
@@ -130,6 +133,7 @@ public class CheckInService : _BaseService, ICheckInService
         }
 
         await _checkInRepo.SaveChangesAsync();
+        _cacheService.EvictByPrefix("coach-dashboard:");
 
         // Notify the coach on submission or update
         if (athlete.AssignedCoachId.HasValue)

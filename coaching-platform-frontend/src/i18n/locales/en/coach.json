@@ -302,6 +302,28 @@
     "currentProgram": "Current Program: {{program}}",
     "noAthletes": "No active athletes on your roster."
   },
+  "actionCenter": {
+    "title": "Coach Action Center",
+    "subtitle": "The most important next action for each athlete",
+    "count": "{{count}} actions",
+    "empty": "You're all caught up. No athlete needs immediate attention.",
+    "priorities": {
+      "High": "High",
+      "Medium": "Medium"
+    },
+    "descriptions": {
+      "AssessmentReview": "The initial assessment was submitted and is waiting for your review.",
+      "SetupRequired": "{{current}} of {{total}} required setup steps are complete.",
+      "CheckInPending": "No weekly check-in has been submitted for the current week.",
+      "ComplianceAlert": "Today's calorie intake reached {{value}}% of the assigned target."
+    },
+    "actions": {
+      "AssessmentReview": "Review assessment",
+      "SetupRequired": "Complete setup",
+      "CheckInPending": "View athlete",
+      "ComplianceAlert": "Review diary"
+    }
+  },
   "setupReadiness": {
     "eyebrow": "Required setup",
     "title": "Athlete setup readiness",
