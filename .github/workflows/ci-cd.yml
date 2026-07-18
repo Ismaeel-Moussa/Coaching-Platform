@@ -1,0 +1,374 @@
+name: CI/CD
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  backend:
+    name: Backend / Test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: coaching-platform-backend
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore JokerNutrition.slnx
+
+      - name: Build solution
+        run: dotnet build JokerNutrition.slnx --configuration Release --no-restore
+
+      - name: Run backend tests
+        run: >-
+          dotnet test JokerNutrition.Tests/JokerNutrition.Tests.csproj
+          --configuration Release
+          --no-build
+          --logger "trx;LogFileName=backend-tests.trx"
+          --results-directory TestResults
+
+      - name: Verify production Docker image
+        run: docker build --tag coaching-platform-backend:${GITHUB_SHA} .
+
+      - name: Upload backend test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: backend-test-results
+          path: coaching-platform-backend/TestResults
+          if-no-files-found: warn
+          retention-days: 14
+
+  frontend:
+    name: Frontend / Test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: coaching-platform-frontend
+    env:
+      CI: true
+      VITE_API_URL: https://coaching-platform-pp4n.onrender.com/api
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: coaching-platform-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run frontend tests
+        run: npm run test:ci
+
+      - name: Build frontend
+        run: npm run build
+
+  production:
+    name: Production / Render
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs:
+      - backend
+      - frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    concurrency:
+      group: render-production
+      cancel-in-progress: false
+    environment:
+      name: production
+      url: https://coaching-platform-pp4n.onrender.com
+    env:
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID || vars.RENDER_SERVICE_ID }}
+      HEALTH_URL: https://coaching-platform-pp4n.onrender.com/api/health
+
+    steps:
+      - name: Check out release scripts
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Validate deployment configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${RENDER_API_KEY}" ]]; then
+            echo "Missing GitHub Actions secret: RENDER_API_KEY" >&2
+            exit 1
+          fi
+
+          if [[ -z "${RENDER_SERVICE_ID}" ]]; then
+            echo "Missing GitHub Actions secret or repository variable: RENDER_SERVICE_ID" >&2
+            exit 1
+          fi
+
+          service="$(curl \
+            --fail \
+            --silent \
+            --show-error \
+            --retry 3 \
+            --retry-all-errors \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --header "Accept: application/json" \
+            --header "Authorization: Bearer ${RENDER_API_KEY}" \
+            "https://api.render.com/v1/services/${RENDER_SERVICE_ID}")"
+          auto_deploy="$(jq --raw-output '.autoDeploy' <<<"${service}")"
+
+          case "${auto_deploy}" in
+            false|no|off)
+              echo "Render automatic deployments are disabled; GitHub Actions owns production releases."
+              ;;
+            *)
+              echo "Render Auto-Deploy must be Off before this workflow can deploy safely." >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Capture current production deploy
+        id: previous
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          response="$(curl \
+            --fail \
+            --silent \
+            --show-error \
+            --retry 3 \
+            --retry-all-errors \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --header "Accept: application/json" \
+            --header "Authorization: Bearer ${RENDER_API_KEY}" \
+            "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys?limit=20")"
+          previous_deploy_id="$(jq \
+            --raw-output \
+            '[.[] | (.deploy // .) | select(.status == "live")] | sort_by(.finishedAt // .updatedAt // .createdAt) | last | .id // empty' \
+            <<<"${response}")"
+
+          if [[ -z "${previous_deploy_id}" ]]; then
+            echo "No previous live Render deploy is available for rollback." >&2
+            exit 1
+          fi
+
+          echo "previous_deploy_id=${previous_deploy_id}" >> "${GITHUB_OUTPUT}"
+          echo "Rollback target: ${previous_deploy_id}"
+
+      - name: Trigger deployment of tested commit
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          response="$(curl \
+            --fail-with-body \
+            --silent \
+            --show-error \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --request POST \
+            --header "Accept: application/json" \
+            --header "Content-Type: application/json" \
+            --header "Authorization: Bearer ${RENDER_API_KEY}" \
+            --data "$(jq --null-input --arg commitId "${GITHUB_SHA}" '{clearCache: "do_not_clear", commitId: $commitId}')" \
+            "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys")"
+          deploy_id="$(jq --raw-output '.id // .deploy.id // empty' <<<"${response}")"
+
+          if [[ -z "${deploy_id}" ]]; then
+            echo "Render did not return a deployment ID." >&2
+            exit 1
+          fi
+
+          echo "deploy_id=${deploy_id}" >> "${GITHUB_OUTPUT}"
+          echo "Triggered Render deploy ${deploy_id} for ${GITHUB_SHA}."
+
+      - name: Wait for Render deployment
+        id: wait
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          deploy_id="${{ steps.deploy.outputs.deploy_id }}"
+          deadline=$((SECONDS + 1500))
+
+          while (( SECONDS < deadline )); do
+            deploy="$(curl \
+              --fail \
+              --silent \
+              --show-error \
+              --retry 3 \
+              --retry-all-errors \
+              --connect-timeout 10 \
+              --max-time 30 \
+              --header "Accept: application/json" \
+              --header "Authorization: Bearer ${RENDER_API_KEY}" \
+              "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys/${deploy_id}")"
+
+            status="$(jq --raw-output '.status // .deploy.status // empty' <<<"${deploy}")"
+            echo "Render deploy ${deploy_id}: ${status}"
+
+            case "${status}" in
+              live)
+                exit 0
+                ;;
+              build_failed|update_failed|pre_deploy_failed|canceled|deactivated)
+                echo "The new deploy failed before becoming live. The previous production instance remains active." >&2
+                exit 1
+                ;;
+              *)
+                sleep 15
+                ;;
+            esac
+          done
+
+          echo "Timed out waiting for Render deploy ${deploy_id}." >&2
+          exit 1
+
+      - name: Recover an unverified deployment
+        if: steps.wait.outcome == 'failure'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          deploy_id="${{ steps.deploy.outputs.deploy_id }}"
+          previous_deploy_id="${{ steps.previous.outputs.previous_deploy_id }}"
+          deploy="$(curl \
+            --fail \
+            --silent \
+            --show-error \
+            --retry 3 \
+            --retry-all-errors \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --header "Accept: application/json" \
+            --header "Authorization: Bearer ${RENDER_API_KEY}" \
+            "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys/${deploy_id}")"
+          status="$(jq --raw-output '.status // .deploy.status // empty' <<<"${deploy}")"
+
+          case "${status}" in
+            live)
+              echo "The unverified deploy is already live; rolling back immediately."
+              bash .github/scripts/render-rollback.sh "${previous_deploy_id}"
+              ;;
+            build_failed|update_failed|pre_deploy_failed|canceled|deactivated)
+              echo "Deploy ended with '${status}'; the previous production instance remains active."
+              ;;
+            *)
+              echo "Canceling unverified deploy ${deploy_id} in status '${status:-unknown}'."
+              if ! curl \
+                --fail-with-body \
+                --silent \
+                --show-error \
+                --connect-timeout 10 \
+                --max-time 30 \
+                --request POST \
+                --header "Accept: application/json" \
+                --header "Authorization: Bearer ${RENDER_API_KEY}" \
+                "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys/${deploy_id}/cancel"; then
+                deploy="$(curl \
+                  --fail \
+                  --silent \
+                  --show-error \
+                  --connect-timeout 10 \
+                  --max-time 30 \
+                  --header "Accept: application/json" \
+                  --header "Authorization: Bearer ${RENDER_API_KEY}" \
+                  "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys/${deploy_id}")"
+                status="$(jq --raw-output '.status // .deploy.status // empty' <<<"${deploy}")"
+                if [[ "${status}" == "live" ]]; then
+                  echo "Deploy became live before cancellation; rolling back immediately."
+                  bash .github/scripts/render-rollback.sh "${previous_deploy_id}"
+                elif [[ "${status}" != "build_failed" && "${status}" != "update_failed" && \
+                        "${status}" != "pre_deploy_failed" && "${status}" != "canceled" && \
+                        "${status}" != "deactivated" ]]; then
+                  echo "Could not cancel or reconcile deploy ${deploy_id}; manual intervention is required." >&2
+                  exit 1
+                fi
+              fi
+              ;;
+          esac
+
+      - name: Verify production health
+        if: steps.wait.outcome == 'success'
+        id: health
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for attempt in {1..12}; do
+            if response="$(curl \
+              --fail \
+              --silent \
+              --show-error \
+              --connect-timeout 10 \
+              --max-time 30 \
+              "${HEALTH_URL}")" \
+              && jq --exit-status \
+                '.status == "healthy" and .database == "connected"' \
+                <<<"${response}" >/dev/null; then
+              echo "Production health check passed."
+              exit 0
+            fi
+
+            echo "Health check attempt ${attempt}/12 failed; retrying in 10 seconds."
+            sleep 10
+          done
+
+          echo "The new deploy is live, but production health checks failed." >&2
+          exit 1
+
+      - name: Roll back unhealthy production deploy
+        if: steps.wait.outcome == 'success' && steps.health.outcome == 'failure'
+        shell: bash
+        run: |
+          previous_deploy_id="${{ steps.previous.outputs.previous_deploy_id }}"
+          bash .github/scripts/render-rollback.sh "${previous_deploy_id}"
+
+      - name: Publish deployment summary
+        if: steps.wait.outcome == 'success' && steps.health.outcome == 'success'
+        shell: bash
+        run: |
+          {
+            echo "### Production release"
+            echo ""
+            echo "- Commit: \`${GITHUB_SHA}\`"
+            echo "- Render deploy: \`${{ steps.deploy.outputs.deploy_id }}\`"
+            echo "- Backend tests and build: **Passed**"
+            echo "- Frontend tests and build: **Passed**"
+            echo "- Production health: **Healthy**"
+            echo "- Backend: ${HEALTH_URL%/api/health}"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Fail release after rollback
+        if: always() && (steps.wait.outcome == 'failure' || steps.health.outcome == 'failure')
+        shell: bash
+        run: |
+          echo "The release failed health checks and rollback was requested. Review this run before retrying." >&2
+          exit 1
