@@ -18,9 +18,6 @@ export const uploadPhotos = async (
   if (files.Back) formData.append('Back', files.Back);
 
   const response = await axiosInstance.post<CheckInDto>(`/checkins/${id}/photos`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
     onUploadProgress: (progressEvent) => {
       if (progressEvent.total && onProgress) {
         const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
