@@ -14,6 +14,46 @@ permissions:
   deployments: write
 
 jobs:
+  changes:
+    name: Changes / Detect backend changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.detect.outputs.backend }}
+
+    steps:
+      - name: Check out repository history
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect backend changes
+        id: detect
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+
+          backend_changed=false
+          if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+            if [[ -z "${BEFORE_SHA}" || "${BEFORE_SHA}" =~ ^0+$ ]]; then
+              changed_files="$(git show --pretty='' --name-only "${GITHUB_SHA}")"
+            else
+              changed_files="$(git diff --name-only "${BEFORE_SHA}" "${GITHUB_SHA}")"
+            fi
+
+            if grep --quiet '^coaching-platform-backend/' <<<"${changed_files}"; then
+              backend_changed=true
+            fi
+          fi
+
+          echo "backend=${backend_changed}" >> "${GITHUB_OUTPUT}"
+          if [[ "${backend_changed}" == "true" ]]; then
+            echo "Backend files changed; Render deployment will run after CI passes."
+          else
+            echo "No backend files changed; Render deployment will be skipped."
+          fi
+
   backend:
     name: Backend / Test and build
     runs-on: ubuntu-latest
@@ -90,8 +130,12 @@ jobs:
 
   production:
     name: Production / Render
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.changes.outputs.backend == 'true'
     needs:
+      - changes
       - backend
       - frontend
     runs-on: ubuntu-latest
