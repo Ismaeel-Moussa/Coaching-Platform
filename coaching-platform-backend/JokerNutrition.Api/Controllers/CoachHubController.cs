@@ -108,17 +108,18 @@ public class CoachHubController : ControllerBase
     /// <summary>
     /// Returns an athlete progress report for the selected 4, 8, or 12 week period.
     /// Coach notes are opt-in because they may contain sensitive data.
-    /// The on-screen preview excludes progress photos; PDF photo inclusion is opt-in.
+    /// Coach notes and progress photos are opt-in at the API boundary.
     /// </summary>
     [HttpGet("athletes/{id:int}/progress-report")]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> GetAthleteProgressReport(
         int id,
         [FromQuery] int weeks = 8,
-        [FromQuery] bool includeCoachNotes = false)
+        [FromQuery] bool includeCoachNotes = false,
+        [FromQuery] bool includePhotos = false)
     {
         var result = await _progressReportService.GetReportAsync(
-            id, weeks, includeCoachNotes, includePhotos: false, cancellationToken: HttpContext.RequestAborted);
+            id, weeks, includeCoachNotes, includePhotos, cancellationToken: HttpContext.RequestAborted);
         return Ok(result);
     }
 

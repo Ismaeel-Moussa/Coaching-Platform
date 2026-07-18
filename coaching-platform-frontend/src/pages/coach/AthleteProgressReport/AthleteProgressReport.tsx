@@ -26,6 +26,7 @@ import {
   useDownloadAthleteProgressReport,
   useGetAthleteProgressReport,
 } from '../../../hooks/useCoachHub/useCoachHub';
+import ProgressPhotoViewer from '../../../components/ProgressPhotoViewer/ProgressPhotoViewer';
 import type { ProgressReportOptions } from '../../../types/CoachHub';
 import './AthleteProgressReport.scss';
 
@@ -37,12 +38,16 @@ const AthleteProgressReport = () => {
   const [options, setOptions] = useState<ProgressReportOptions>({
     weeks: 8,
     includeCoachNotes: false,
-    includePhotos: false,
+    includePhotos: true,
     language: i18n.language.startsWith('ar') ? 'ar' : 'en',
   });
   const previewOptions = useMemo(
-    () => ({ weeks: options.weeks, includeCoachNotes: options.includeCoachNotes }),
-    [options.weeks, options.includeCoachNotes],
+    () => ({
+      weeks: options.weeks,
+      includeCoachNotes: options.includeCoachNotes,
+      includePhotos: options.includePhotos,
+    }),
+    [options.weeks, options.includeCoachNotes, options.includePhotos],
   );
   const { data: report, isLoading, isFetching, error } = useGetAthleteProgressReport(id, previewOptions);
   const downloadReport = useDownloadAthleteProgressReport(id);
@@ -55,6 +60,15 @@ const AthleteProgressReport = () => {
   const formatDate = (value: string) => dateFormatter.format(new Date(`${value}T00:00:00`));
   const formatPercent = (value: number | null) => value == null ? '—' : `${Math.round(value)}%`;
   const initials = (name: string) => name.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase();
+  const photoGroups = useMemo(() => {
+    const groups = new Map<string, NonNullable<typeof report>['progressPhotos']>();
+    for (const photo of report?.progressPhotos ?? []) {
+      const group = groups.get(photo.weekOf) ?? [];
+      group.push(photo);
+      groups.set(photo.weekOf, group);
+    }
+    return [...groups.entries()].sort(([left], [right]) => right.localeCompare(left));
+  }, [report?.progressPhotos]);
 
   const handleDownload = async () => {
     if (!report) return;
@@ -200,7 +214,13 @@ const AthleteProgressReport = () => {
             <SectionHeading icon="show_chart" title={t('coach:progressReport.weightTrend')} description={t('coach:progressReport.weightTrendHint')} />
             {report.weeklyProgress.some(point => point.weightKg != null) ? (
               <div className="progress-report__chart" dir="ltr">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={240}>
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                  minWidth={0}
+                  minHeight={240}
+                  initialDimension={{ width: 800, height: 300 }}
+                >
                   <LineChart data={report.weeklyProgress} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="4 4" stroke="#e4e7ef" />
                     <XAxis dataKey="weekOf" tickFormatter={(value) => formatDate(value)} tick={{ fontSize: 11 }} />
@@ -276,6 +296,30 @@ const AthleteProgressReport = () => {
                 <div className="progress-report__notes">
                   {report.coachNotes.map(note => (
                     <blockquote key={note.id}><p>{note.text}</p><footer>{note.coachName} · {formatDate(note.createdAt.slice(0, 10))}</footer></blockquote>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          {options.includePhotos && (
+            <section className="progress-report__panel">
+              <SectionHeading
+                icon="photo_library"
+                title={t('coach:progressReport.progressPhotos')}
+                description={t('coach:progressReport.progressPhotosHint')}
+              />
+              {photoGroups.length === 0 ? (
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('coach:progressReport.noPhotos')} />
+              ) : (
+                <div className="progress-report__photo-groups">
+                  {photoGroups.map(([weekOf, photos]) => (
+                    <article className="progress-report__photo-group" key={weekOf}>
+                      <h3>{formatDate(weekOf)}</h3>
+                      <ProgressPhotoViewer
+                        photos={photos.map(photo => ({ angle: photo.angle, url: photo.url }))}
+                      />
+                    </article>
                   ))}
                 </div>
               )}

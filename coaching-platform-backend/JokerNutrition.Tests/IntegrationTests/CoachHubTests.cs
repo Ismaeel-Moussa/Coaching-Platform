@@ -148,12 +148,15 @@ public class CoachHubTests : IClassFixture<TestWebAppFactory>
         Assert.Equal(JsonValueKind.Null, body.RootElement.GetProperty("summary").GetProperty("weightChangeKg").ValueKind);
 
         var optedInResponse = await _client.GetAsync(
-            "/api/coach-hub/athletes/1/progress-report?weeks=4&includeCoachNotes=true");
+            "/api/coach-hub/athletes/1/progress-report?weeks=4&includeCoachNotes=true&includePhotos=true");
         Assert.Equal(HttpStatusCode.OK, optedInResponse.StatusCode);
         using var optedInBody = JsonDocument.Parse(await optedInResponse.Content.ReadAsStringAsync());
         var optedInCheckIn = optedInBody.RootElement.GetProperty("checkIns")[0];
         Assert.Equal("Private review note", optedInCheckIn.GetProperty("reviewNotes").GetString());
         Assert.NotEqual(JsonValueKind.Null, optedInCheckIn.GetProperty("reviewedAt").ValueKind);
+        var photos = optedInBody.RootElement.GetProperty("progressPhotos");
+        Assert.Equal(1, photos.GetArrayLength());
+        Assert.Contains("/uploads/sample-progress.png", photos[0].GetProperty("url").GetString());
     }
 
     [Fact]
