@@ -223,6 +223,7 @@
     "welcomeNew": "Welcome to Joker Nutrition, {{name}}!",
     "imageTooLarge": "Image must be smaller than 10MB!",
     "imageTypeInvalid": "You can only upload JPG or PNG files!",
+    "imageReadFailed": "This photo could not be read. Download it to your device and select it again.",
     "invitationSent": "Invitation sent to {{email}}",
     "invitationResent": "Invitation resent to {{email}}",
     "invitationRevoked": "Invitation revoked.",

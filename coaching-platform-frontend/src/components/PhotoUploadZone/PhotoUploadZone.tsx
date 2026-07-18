@@ -25,6 +25,7 @@ const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
   const { t } = useTranslation(['common']);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState<boolean>(false);
+  const [isPreparing, setIsPreparing] = useState<boolean>(false);
 
   // local URL preview for newly selected file
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -39,7 +40,7 @@ const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
     }
   }, [file]);
 
-  const handleFileChange = (selectedFile: File) => {
+  const handleFileChange = async (selectedFile: File) => {
     // Validate size (max 10MB)
     const isLessThan10MB = selectedFile.size / 1024 / 1024 < 10;
     if (!isLessThan10MB) {
@@ -54,13 +55,27 @@ const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
       return;
     }
 
-    onFileSelect(selectedFile);
+    setIsPreparing(true);
+    try {
+      // Keep an in-memory copy. Files selected from cloud-backed/mobile providers can
+      // lose their original OS handle while the athlete completes the remaining steps.
+      const bytes = await selectedFile.arrayBuffer();
+      const durableFile = new File([bytes], selectedFile.name, {
+        type: selectedFile.type,
+        lastModified: selectedFile.lastModified,
+      });
+      onFileSelect(durableFile);
+    } catch {
+      antMessage.error(t('common:alerts.imageReadFailed'));
+    } finally {
+      setIsPreparing(false);
+    }
   };
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFileChange(e.target.files[0]);
-    }
+    const selectedFile = e.currentTarget.files?.[0];
+    e.currentTarget.value = '';
+    if (selectedFile) void handleFileChange(selectedFile);
   };
 
   const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -77,7 +92,7 @@ const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
     e.preventDefault();
     setIsDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileChange(e.dataTransfer.files[0]);
+      void handleFileChange(e.dataTransfer.files[0]);
     }
   };
 
@@ -102,10 +117,10 @@ const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
         onChange={onInputChange}
         accept="image/jpeg,image/png"
         style={{ display: 'none' }}
-        disabled={uploading}
+        disabled={uploading || isPreparing}
       />
 
-      {uploading ? (
+      {uploading || isPreparing ? (
         <div className="upload-zone__progress-container">
           {uploadProgress > 0 ? (
             <Progress
