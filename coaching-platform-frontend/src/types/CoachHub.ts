@@ -202,7 +202,7 @@ export interface ProgressReportOptions {
   language: 'ar' | 'en';
 }
 
-export type ProgressReportPreviewOptions = Pick<ProgressReportOptions, 'weeks' | 'includeCoachNotes'>;
+export type ProgressReportPreviewOptions = Pick<ProgressReportOptions, 'weeks' | 'includeCoachNotes' | 'includePhotos'>;
 
 export interface PagedResult<T> {
   items: T[];

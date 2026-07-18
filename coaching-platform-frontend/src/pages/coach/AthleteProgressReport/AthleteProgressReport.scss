@@ -304,6 +304,21 @@
     figcaption { padding: 9px 11px; color: var(--color-text-secondary); font-size: 12px; }
   }
 
+  &__photo-groups { display: grid; gap: 16px; }
+
+  &__photo-group {
+    padding: 16px;
+    border: 1px solid #e2e6ef;
+    border-radius: 14px;
+    background: #fbfcfe;
+
+    h3 {
+      margin: 0 0 14px;
+      color: var(--color-navy);
+      font: 800 15px var(--font-heading);
+    }
+  }
+
   @media (max-width: 900px) {
     &__hero { align-items: stretch; flex-direction: column; }
     &__hero .ant-btn { align-self: flex-start; }
