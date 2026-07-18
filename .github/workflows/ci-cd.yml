@@ -31,20 +31,33 @@ jobs:
         shell: bash
         env:
           BEFORE_SHA: ${{ github.event.before }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
 
-          backend_changed=false
-          if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
-            if [[ -z "${BEFORE_SHA}" || "${BEFORE_SHA}" =~ ^0+$ ]]; then
-              changed_files="$(git show --pretty='' --name-only "${GITHUB_SHA}")"
-            else
-              changed_files="$(git diff --name-only "${BEFORE_SHA}" "${GITHUB_SHA}")"
-            fi
+          case "${GITHUB_EVENT_NAME}" in
+            pull_request)
+              changed_files="$(git diff --name-only "${BASE_SHA}" "${HEAD_SHA}")"
+              ;;
+            push)
+              if [[ -z "${BEFORE_SHA}" || "${BEFORE_SHA}" =~ ^0+$ ]]; then
+                changed_files="$(git show --pretty='' --name-only "${GITHUB_SHA}")"
+              else
+                changed_files="$(git diff --name-only "${BEFORE_SHA}" "${GITHUB_SHA}")"
+              fi
+              ;;
+            workflow_dispatch)
+              changed_files="coaching-platform-backend/manual-verification"
+              ;;
+            *)
+              changed_files=""
+              ;;
+          esac
 
-            if grep --quiet '^coaching-platform-backend/' <<<"${changed_files}"; then
-              backend_changed=true
-            fi
+          backend_changed=false
+          if grep --quiet '^coaching-platform-backend/' <<<"${changed_files}"; then
+            backend_changed=true
           fi
 
           echo "backend=${backend_changed}" >> "${GITHUB_OUTPUT}"
@@ -56,6 +69,9 @@ jobs:
 
   backend:
     name: Backend / Test and build
+    needs:
+      - changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
