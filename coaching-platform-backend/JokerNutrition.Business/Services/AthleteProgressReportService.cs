@@ -21,6 +21,7 @@ public interface IAthleteProgressReportService
         AthleteProgressReportDto report,
         bool includeCoachNotes,
         bool includePhotos,
+        string language,
         CancellationToken cancellationToken = default);
 }
 
@@ -29,16 +30,19 @@ public class AthleteProgressReportService : _BaseService, IAthleteProgressReport
     private static readonly int[] AllowedWeekRanges = [4, 8, 12];
     private readonly JokerNutritionContext _context;
     private readonly IProgressReportPdfGenerator _pdfGenerator;
+    private readonly IBlobStorageService _blobStorage;
 
     public AthleteProgressReportService(
         IPrincipal principal,
         ILogger<AthleteProgressReportService> logger,
         JokerNutritionContext context,
-        IProgressReportPdfGenerator pdfGenerator)
+        IProgressReportPdfGenerator pdfGenerator,
+        IBlobStorageService blobStorage)
         : base(principal, logger)
     {
         _context = context;
         _pdfGenerator = pdfGenerator;
+        _blobStorage = blobStorage;
     }
 
     public async Task<AthleteProgressReportDto> GetReportAsync(
@@ -218,6 +222,9 @@ public class AthleteProgressReportService : _BaseService, IAthleteProgressReport
                 }))
                 .Take(6)
                 .ToList();
+
+            foreach (var photo in report.ProgressPhotos)
+                photo.Url = await _blobStorage.GetReadUrlAsync(photo.Url, TimeSpan.FromMinutes(10));
         }
 
         return report;
@@ -227,9 +234,10 @@ public class AthleteProgressReportService : _BaseService, IAthleteProgressReport
         AthleteProgressReportDto report,
         bool includeCoachNotes,
         bool includePhotos,
+        string language,
         CancellationToken cancellationToken = default)
     {
-        return await _pdfGenerator.GenerateAsync(report, includeCoachNotes, includePhotos, cancellationToken);
+        return await _pdfGenerator.GenerateAsync(report, includeCoachNotes, includePhotos, language, cancellationToken);
     }
 
     private static void ValidateWeeks(int weeks)

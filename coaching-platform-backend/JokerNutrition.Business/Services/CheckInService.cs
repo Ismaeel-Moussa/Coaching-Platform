@@ -192,7 +192,7 @@ public class CheckInService : _BaseService, ICheckInService
             string blobUrl;
             using (var stream = file.OpenReadStream())
             {
-                blobUrl = await _blobService.UploadFileAsync(stream, blobName, file.ContentType);
+                blobUrl = await _blobService.UploadPrivatePhotoAsync(stream, blobName, file.ContentType);
             }
 
             // Insert new DB row
@@ -250,6 +250,8 @@ public class CheckInService : _BaseService, ICheckInService
 
     public async Task<PagedResult<CheckInDto>> GetCheckInHistoryAsync(int athleteId, BasePaginationForm pagination)
     {
+        await EnsureAthleteAccessAsync(athleteId);
+
         var query = _checkInRepo.QueryAll()
             .Include(ci => ci.Athlete).ThenInclude(a => a.User)
             .Where(ci => ci.AthleteId == athleteId)
@@ -347,6 +349,8 @@ public class CheckInService : _BaseService, ICheckInService
             .FirstOrDefaultAsync(ci => ci.Id == checkInId)
             ?? throw new KeyNotFoundException("Check-in not found.");
 
+        await EnsureAthleteAccessAsync(checkIn.AthleteId, requireCoachOrAdmin: true);
+
         checkIn.CoachNotes = form.Notes;
         checkIn.CoachReviewedAt = DateTime.UtcNow;
         _checkInRepo.Update(checkIn);
@@ -374,6 +378,13 @@ public class CheckInService : _BaseService, ICheckInService
 
     public async Task<List<CheckInPhotoDto>> GetCheckInPhotosAsync(int checkInId)
     {
+        var athleteId = await _checkInRepo.QueryAll()
+            .Where(checkIn => checkIn.Id == checkInId)
+            .Select(checkIn => (int?)checkIn.AthleteId)
+            .FirstOrDefaultAsync()
+            ?? throw new KeyNotFoundException("Check-in not found.");
+        await EnsureAthleteAccessAsync(athleteId);
+
         var photos = await _photoRepo.QueryAll()
             .Where(p => p.ClientCheckInId == checkInId)
             .ToListAsync();
@@ -388,11 +399,7 @@ public class CheckInService : _BaseService, ICheckInService
             .FirstOrDefaultAsync(ci => ci.Id == checkInId)
             ?? throw new KeyNotFoundException("Check-in not found.");
 
-        // Permission check
-        if (LoggedInUser.Role == "Athlete" && checkIn.Athlete.UserId != LoggedInUser.Id)
-        {
-            throw new UnauthorizedAccessException("You can only access your own check-ins.");
-        }
+        await EnsureAthleteAccessAsync(checkIn.AthleteId);
 
         var photoDtos = await BuildPhotoDtosAsync(checkInId);
         return CheckInMapper.Map(checkIn, photoDtos);
@@ -415,7 +422,43 @@ public class CheckInService : _BaseService, ICheckInService
 
         return await _checkInRepo.QueryAll()
             .FirstOrDefaultAsync(ci => ci.Id == checkInId && ci.AthleteId == athlete.Id)
-            ?? throw new UnauthorizedAccessException("Check-in not found or does not belong to the current athlete.");
+            ?? throw new ForbiddenException("Check-in not found or does not belong to the current athlete.");
+    }
+
+    private async Task EnsureAthleteAccessAsync(int athleteId, bool requireCoachOrAdmin = false)
+    {
+        if (LoggedInUser.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        if (LoggedInUser.Role.Equals("Athlete", StringComparison.OrdinalIgnoreCase))
+        {
+            if (requireCoachOrAdmin)
+                throw new ForbiddenException("Only coaches and admins can perform this action.");
+
+            var ownsProfile = await _athleteRepo.QueryAll()
+                .AnyAsync(athlete => athlete.Id == athleteId && athlete.UserId == LoggedInUser.Id);
+            if (ownsProfile)
+                return;
+
+            throw new ForbiddenException("You can only access your own check-ins.");
+        }
+
+        if (LoggedInUser.Role.Equals("Coach", StringComparison.OrdinalIgnoreCase))
+        {
+            var coachId = await _coachRepo.QueryAll()
+                .Where(coach => coach.UserId == LoggedInUser.Id && coach.IsActive)
+                .Select(coach => (int?)coach.Id)
+                .FirstOrDefaultAsync()
+                ?? throw new ForbiddenException("Coach profile not found.");
+            var belongsToRoster = await _athleteRepo.QueryAll()
+                .AnyAsync(athlete => athlete.Id == athleteId && athlete.AssignedCoachId == coachId);
+            if (belongsToRoster)
+                return;
+
+            throw new ForbiddenException("This athlete is outside your roster.");
+        }
+
+        throw new ForbiddenException("You are not allowed to access this athlete's check-ins.");
     }
 
     private async Task<List<CheckInPhotoDto>> BuildPhotoDtosAsync(int checkInId)
@@ -432,11 +475,8 @@ public class CheckInService : _BaseService, ICheckInService
         var dtos = new List<CheckInPhotoDto>();
         foreach (var photo in photos)
         {
-            // BlobStorageService.DeleteFileAsync works with full URL, 
-            // UploadFileAsync returns full URL — we serve the URL directly 
-            // since local dev uses wwwroot/uploads and Azure uses blob URLs.
-            // For production, swap this with a SAS token generator.
-            dtos.Add(CheckInMapper.MapPhoto(photo, photo.BlobUrl));
+            var signedUrl = await _blobService.GetReadUrlAsync(photo.BlobUrl);
+            dtos.Add(CheckInMapper.MapPhoto(photo, signedUrl));
         }
         return dtos;
     }

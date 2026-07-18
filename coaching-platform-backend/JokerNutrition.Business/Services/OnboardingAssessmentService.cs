@@ -1,5 +1,6 @@
 using System.Security.Principal;
 using System.Text.Json;
+using JokerNutrition.Business.Common;
 using JokerNutrition.Business.DTOs.Onboarding;
 using JokerNutrition.Business.Forms.Onboarding;
 using JokerNutrition.Data.Contexts;
@@ -42,7 +43,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
     public async Task<OnboardingAssessmentDto> GetMineAsync(CancellationToken cancellationToken = default)
     {
         var athlete = await GetCurrentAthleteAsync(cancellationToken);
-        return Map(athlete, athlete.OnboardingAssessment);
+        return await MapAsync(athlete, athlete.OnboardingAssessment);
     }
 
     public async Task<OnboardingAssessmentDto> SaveDraftAsync(SaveOnboardingAssessmentForm form, CancellationToken cancellationToken = default)
@@ -57,7 +58,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
         
         // Reload to ensure navigation properties/collections are updated
         var updatedAthlete = await GetCurrentAthleteAsync(cancellationToken);
-        return Map(updatedAthlete, updatedAthlete.OnboardingAssessment);
+        return await MapAsync(updatedAthlete, updatedAthlete.OnboardingAssessment);
     }
 
     public async Task<OnboardingAssessmentDto> SubmitAsync(SaveOnboardingAssessmentForm form, CancellationToken cancellationToken = default)
@@ -121,7 +122,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
 
         // Reload to ensure navigation properties/collections are updated
         var updatedAthlete = await GetCurrentAthleteAsync(cancellationToken);
-        return Map(updatedAthlete, updatedAthlete.OnboardingAssessment);
+        return await MapAsync(updatedAthlete, updatedAthlete.OnboardingAssessment);
     }
 
     public async Task<OnboardingAssessmentDto> GetForAthleteAsync(int athleteId, CancellationToken cancellationToken = default)
@@ -141,7 +142,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
             };
         }
 
-        return Map(athlete, athlete.OnboardingAssessment);
+        return await MapAsync(athlete, athlete.OnboardingAssessment);
     }
 
     public async Task<OnboardingAssessmentDto> ReviewAsync(int athleteId, ReviewOnboardingAssessmentForm form, CancellationToken cancellationToken = default)
@@ -157,7 +158,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
         if (LoggedInUser.Role.Equals("Coach", StringComparison.OrdinalIgnoreCase))
         {
             coachId = await _context.Coaches
-                .Where(x => x.UserId == LoggedInUser.Id)
+                .Where(x => x.UserId == LoggedInUser.Id && x.IsActive)
                 .Select(x => (int?)x.Id)
                 .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new UnauthorizedAccessException("Coach profile not found.");
@@ -178,7 +179,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
 
         // Reload to ensure navigation properties/collections are updated
         var updatedAthlete = await GetAuthorizedAthleteAsync(athleteId, cancellationToken);
-        return Map(updatedAthlete, updatedAthlete.OnboardingAssessment);
+        return await MapAsync(updatedAthlete, updatedAthlete.OnboardingAssessment);
     }
 
     public async Task<OnboardingAssessmentDto> ReopenAsync(
@@ -203,7 +204,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
         if (LoggedInUser.Role.Equals("Coach", StringComparison.OrdinalIgnoreCase))
         {
             coachId = await _context.Coaches
-                .Where(x => x.UserId == LoggedInUser.Id)
+                .Where(x => x.UserId == LoggedInUser.Id && x.IsActive)
                 .Select(x => (int?)x.Id)
                 .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new UnauthorizedAccessException("Coach profile not found.");
@@ -294,7 +295,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
             string blobUrl;
             using (var stream = file.OpenReadStream())
             {
-                blobUrl = await _blobService.UploadFileAsync(stream, blobName, file.ContentType);
+                blobUrl = await _blobService.UploadPrivatePhotoAsync(stream, blobName, file.ContentType);
             }
 
             // Insert new photo
@@ -313,7 +314,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
 
         // Reload to get Photos populated
         var updatedAthlete = await GetCurrentAthleteAsync(cancellationToken);
-        return Map(updatedAthlete, updatedAthlete.OnboardingAssessment);
+        return await MapAsync(updatedAthlete, updatedAthlete.OnboardingAssessment);
     }
 
     public async Task DeletePhotoAsync(PhotoAngle angle, CancellationToken cancellationToken = default)
@@ -357,16 +358,16 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
             return athlete;
 
         if (!LoggedInUser.Role.Equals("Coach", StringComparison.OrdinalIgnoreCase))
-            throw new UnauthorizedAccessException("Only coaches and admins can review athlete assessments.");
+            throw new ForbiddenException("Only coaches and admins can review athlete assessments.");
 
         var coachId = await _context.Coaches
-            .Where(x => x.UserId == LoggedInUser.Id)
+            .Where(x => x.UserId == LoggedInUser.Id && x.IsActive)
             .Select(x => (int?)x.Id)
             .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new UnauthorizedAccessException("Coach profile not found.");
+            ?? throw new ForbiddenException("Coach profile not found.");
 
         if (athlete.AssignedCoachId != coachId)
-            throw new UnauthorizedAccessException("This athlete is outside your roster.");
+            throw new ForbiddenException("This athlete is outside your roster.");
 
         return athlete;
     }
@@ -449,7 +450,9 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
         }
     }
 
-    private static OnboardingAssessmentDto Map(Athlete athlete, AthleteOnboardingAssessment? assessment)
+    private async Task<OnboardingAssessmentDto> MapAsync(
+        Athlete athlete,
+        AthleteOnboardingAssessment? assessment)
     {
         if (assessment is null)
         {
@@ -464,7 +467,7 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
             };
         }
 
-        return new OnboardingAssessmentDto
+        var dto = new OnboardingAssessmentDto
         {
             Id = assessment.Id,
             AthleteId = athlete.Id,
@@ -499,15 +502,21 @@ public class OnboardingAssessmentService : _BaseService, IOnboardingAssessmentSe
             HasInjuryFlag = HasSafetyValue(assessment.InjuriesOrLimitations),
             HasPainFlag = HasSafetyValue(assessment.CurrentPain),
             HasAllergyFlag = HasSafetyValue(assessment.FoodAllergies),
-            HasFoodRestrictionFlag = HasSafetyValue(assessment.FoodIntolerances) || HasSafetyValue(assessment.FoodsToAvoid),
-            Photos = assessment.Photos?.Select(p => new OnboardingPhotoDto
-            {
-                Id = p.Id,
-                Angle = p.Angle.ToString(),
-                SignedDownloadUrl = p.BlobUrl,
-                UploadedAt = p.UploadedAt
-            }).ToList() ?? []
+            HasFoodRestrictionFlag = HasSafetyValue(assessment.FoodIntolerances) || HasSafetyValue(assessment.FoodsToAvoid)
         };
+
+        foreach (var photo in assessment.Photos ?? [])
+        {
+            dto.Photos.Add(new OnboardingPhotoDto
+            {
+                Id = photo.Id,
+                Angle = photo.Angle.ToString(),
+                SignedDownloadUrl = await _blobService.GetReadUrlAsync(photo.BlobUrl),
+                UploadedAt = photo.UploadedAt
+            });
+        }
+
+        return dto;
     }
 
     private static string? Normalize(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();

@@ -12,6 +12,7 @@ namespace JokerNutrition.Api.Controllers;
 [ApiController]
 [Route("api/checkins")]
 [Authorize]
+[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 [ServiceFilter(typeof(ApiExceptionFilter))]
 public class CheckInsController : ControllerBase
 {
@@ -164,7 +165,7 @@ public class CheckInsController : ControllerBase
     }
 
     /// <summary>
-    /// Returns signed 24-hour download URLs for all progress photos on a check-in.
+    /// Returns short-lived signed download URLs for all progress photos on a check-in.
     /// </summary>
     [HttpGet("{id:int}/photos")]
     [Authorize(Roles = "Coach,Admin,Athlete")]

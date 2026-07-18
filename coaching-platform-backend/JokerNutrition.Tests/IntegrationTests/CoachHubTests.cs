@@ -172,6 +172,28 @@ public class CoachHubTests : IClassFixture<TestWebAppFactory>
     }
 
     [Fact]
+    public async Task DownloadProgressReport_InArabic_WithPhotoOption_ReturnsPdf()
+    {
+        var token = await AuthHelpers.GetAccessTokenAsync(_client, "coach@test.com", "Coach@Test123!");
+        AuthHelpers.SetBearerToken(_client, token);
+
+        var response = await _client.GetAsync(
+            "/api/coach-hub/athletes/1/progress-report/pdf?weeks=4&language=ar&includePhotos=true&includeCoachNotes=true");
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("application/pdf", response.Content.Headers.ContentType?.MediaType);
+        Assert.True(bytes.Length > 4);
+        Assert.Equal("%PDF", System.Text.Encoding.ASCII.GetString(bytes, 0, 4));
+
+        if (Environment.GetEnvironmentVariable("PDF_SAMPLE_OUTPUT") is { Length: > 0 } outputPath)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+            await File.WriteAllBytesAsync(outputPath, bytes);
+        }
+    }
+
+    [Fact]
     public async Task GetProgressReport_WithAdminWithoutCoachProfile_Returns200()
     {
         var token = await AuthHelpers.GetAccessTokenAsync(_client, "admin@test.com", "Admin@Test123!");

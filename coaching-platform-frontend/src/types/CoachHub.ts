@@ -198,7 +198,11 @@ export interface AthleteProgressReportDto {
 export interface ProgressReportOptions {
   weeks: 4 | 8 | 12;
   includeCoachNotes: boolean;
+  includePhotos: boolean;
+  language: 'ar' | 'en';
 }
+
+export type ProgressReportPreviewOptions = Pick<ProgressReportOptions, 'weeks' | 'includeCoachNotes'>;
 
 export interface PagedResult<T> {
   items: T[];

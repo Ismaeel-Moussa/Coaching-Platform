@@ -13,7 +13,7 @@ import {
   downloadAthleteProgressReportPdf,
 } from '../../api/coachHub';
 import type { CoachActionItemsQuery } from '../../api/coachHub';
-import type { ProgressReportOptions, SaveFeedbackNoteForm } from '../../types/CoachHub';
+import type { ProgressReportOptions, ProgressReportPreviewOptions, SaveFeedbackNoteForm } from '../../types/CoachHub';
 
 export const useGetCoachDashboard = () =>
   useQuery({
@@ -107,7 +107,7 @@ export const useGetWeightHistory = (id: number) =>
     staleTime: 300_000,
   });
 
-export const useGetAthleteProgressReport = (id: number, options: ProgressReportOptions) =>
+export const useGetAthleteProgressReport = (id: number, options: ProgressReportPreviewOptions) =>
   useQuery({
     queryKey: ['coach-athlete-progress-report', id, options],
     queryFn: () => getAthleteProgressReport(id, options),

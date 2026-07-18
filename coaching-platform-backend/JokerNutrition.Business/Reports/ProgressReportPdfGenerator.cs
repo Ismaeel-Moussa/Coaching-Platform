@@ -1,12 +1,14 @@
+using System.Globalization;
 using Azure.Storage.Blobs;
 using JokerNutrition.Business.Configurations;
 using JokerNutrition.Business.DTOs.Coach;
-using MigraDoc.DocumentObjectModel;
-using MigraDoc.DocumentObjectModel.Tables;
-using MigraDoc.Rendering;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using PdfSharp.Drawing;
+using QuestPDF.Fluent;
+using QuestPDF.Drawing;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using SkiaSharp;
 
 namespace JokerNutrition.Business.Reports;
 
@@ -16,6 +18,7 @@ public interface IProgressReportPdfGenerator
         AthleteProgressReportDto report,
         bool includeCoachNotes,
         bool includePhotos,
+        string language,
         CancellationToken cancellationToken = default);
 }
 
@@ -24,6 +27,16 @@ public class ProgressReportPdfGenerator : IProgressReportPdfGenerator
     private const int MaximumPhotoBytes = 8 * 1024 * 1024;
     private const int MaximumPhotoDimension = 6000;
     private const long MaximumPhotoPixels = 24_000_000;
+    private const int MaximumPreparedPhotoDimension = 1400;
+    private const int MaximumPreparedPhotoBytes = 2 * 1024 * 1024;
+    private const string FontFamily = "Joker Report Sans";
+    private const string Navy = "#0B132B";
+    private const string Gold = "#FDC003";
+    private const string Border = "#D8DCE7";
+    private const string Muted = "#667085";
+    private const string Soft = "#F7F8FC";
+    private static readonly object FontLock = new();
+    private static bool _fontsRegistered;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ProgressReportPdfGenerator> _logger;
     private readonly HashSet<string> _allowedPhotoHosts = new(StringComparer.OrdinalIgnoreCase);
@@ -44,6 +57,7 @@ public class ProgressReportPdfGenerator : IProgressReportPdfGenerator
         {
             _logger.LogDebug(exception, "Blob storage host could not be derived for PDF photo validation.");
         }
+
         if (Uri.TryCreate(settings.LocalFallbackBaseUrl, UriKind.Absolute, out var fallbackUri))
             _allowedPhotoHosts.Add(fallbackUri.Host);
     }
@@ -52,365 +66,347 @@ public class ProgressReportPdfGenerator : IProgressReportPdfGenerator
         AthleteProgressReportDto report,
         bool includeCoachNotes,
         bool includePhotos,
+        string language,
         CancellationToken cancellationToken = default)
     {
-        ProgressReportFontResolver.EnsureConfigured();
+        ConfigureQuestPdf();
         var photoSources = includePhotos
             ? await DownloadPhotosAsync(report.ProgressPhotos, cancellationToken)
-            : new Dictionary<int, string>();
+            : new Dictionary<int, byte[]>();
         cancellationToken.ThrowIfCancellationRequested();
-        var document = BuildDocument(report, includeCoachNotes, photoSources);
-        var renderer = new PdfDocumentRenderer { Document = document };
-        renderer.RenderDocument();
-        using var stream = new MemoryStream();
-        renderer.PdfDocument.Save(stream, false);
-        return stream.ToArray();
+
+        var isArabic = language.Equals("ar", StringComparison.OrdinalIgnoreCase);
+        var culture = CultureInfo.GetCultureInfo(isArabic ? "ar" : "en");
+        var document = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.MarginHorizontal(32);
+                page.MarginVertical(24);
+                page.DefaultTextStyle(style => style.FontFamily(FontFamily).FontSize(9).FontColor(Navy));
+                if (isArabic)
+                    page.ContentFromRightToLeft();
+
+                page.Header().Element(header => ComposeHeader(header, isArabic));
+                page.Content().PaddingVertical(10).Column(column =>
+                {
+                    column.Spacing(12);
+                    ComposeIdentity(column, report, isArabic, culture);
+                    ComposeOverview(column, report, isArabic);
+                    ComposeSummary(column, report.Summary, isArabic);
+                    ComposeWeeklyProgress(column, report.WeeklyProgress, isArabic, culture);
+                    ComposeCheckIns(column, report.CheckIns, includeCoachNotes, isArabic, culture);
+
+                    if (includeCoachNotes && report.CoachNotes.Count > 0)
+                        ComposeCoachNotes(column, report.CoachNotes, isArabic, culture);
+
+                    if (photoSources.Count > 0)
+                        ComposeProgressPhotos(column, report.ProgressPhotos, photoSources, isArabic, culture);
+
+                    column.Item().PaddingTop(6).Text(
+                            $"{L(isArabic, "تم الإنشاء", "Generated")} {FormatDateTime(report.GeneratedAt, culture)}")
+                        .FontSize(7).FontColor(Muted);
+                });
+                page.Footer().AlignCenter().Text(text =>
+                {
+                    text.DefaultTextStyle(style => style.FontFamily(FontFamily).FontSize(7).FontColor(Muted));
+                    text.Span(L(isArabic, "تقرير تدريب خاص - صفحة ", "Sensitive coaching report - Page "));
+                    text.CurrentPageNumber();
+                    text.Span(L(isArabic, " من ", " of "));
+                    text.TotalPages();
+                });
+            });
+        });
+
+        return document.GeneratePdf();
     }
 
-    private static Document BuildDocument(
+    private static void ConfigureQuestPdf()
+    {
+        QuestPDF.Settings.License = LicenseType.Community;
+        if (_fontsRegistered)
+            return;
+
+        lock (FontLock)
+        {
+            if (_fontsRegistered)
+                return;
+
+            var assembly = typeof(ProgressReportPdfGenerator).Assembly;
+            using var regular = assembly.GetManifestResourceStream("JokerNutrition.Business.Assets.Fonts.DejaVuSans.ttf")
+                ?? throw new InvalidOperationException("Embedded regular PDF font was not found.");
+            using var bold = assembly.GetManifestResourceStream("JokerNutrition.Business.Assets.Fonts.DejaVuSans-Bold.ttf")
+                ?? throw new InvalidOperationException("Embedded bold PDF font was not found.");
+            FontManager.RegisterFontWithCustomName(FontFamily, regular);
+            FontManager.RegisterFontWithCustomName(FontFamily, bold);
+            _fontsRegistered = true;
+        }
+    }
+
+    private static void ComposeHeader(IContainer container, bool isArabic)
+    {
+        container.BorderBottom(1).BorderColor(Gold).PaddingBottom(6).Row(row =>
+        {
+            row.RelativeItem().Text(L(isArabic, "جوكر نيوترشن", "JOKER NUTRITION")).Bold();
+            row.RelativeItem().AlignRight().Text(L(isArabic, "منصة التدريب", "COACHING PLATFORM"))
+                .FontSize(7).FontColor(Muted);
+        });
+    }
+
+    private static void ComposeIdentity(
+        ColumnDescriptor column,
         AthleteProgressReportDto report,
-        bool includeCoachNotes,
-        IReadOnlyDictionary<int, string> photoSources)
+        bool isArabic,
+        CultureInfo culture)
     {
-        var document = new Document();
-        var athleteDisplayName = FormatPdfUserText(report.AthleteName, $"Athlete {report.AthleteId}");
-        document.Info.Title = $"{athleteDisplayName} Progress Report";
-        document.Info.Author = "Joker Nutrition";
-        document.Info.Subject = $"{report.Weeks}-week athlete progress report";
+        column.Item().Text(L(isArabic, "تقرير تقدم المتدرب", "ATHLETE PROGRESS REPORT"))
+            .Bold().FontSize(8).FontColor("#8A6800");
+        column.Item().Text(string.IsNullOrWhiteSpace(report.AthleteName)
+                ? $"{L(isArabic, "المتدرب", "Athlete")} {report.AthleteId}"
+                : report.AthleteName.Trim())
+            .Bold().FontSize(22);
+        column.Item().Text(
+                $"{report.Weeks} {L(isArabic, "أسابيع", "weeks")} | {FormatDate(report.PeriodStart, culture)} - {FormatDate(report.PeriodEnd, culture)}")
+            .FontColor(Muted);
+    }
 
-        var normal = document.Styles[StyleNames.Normal]
-            ?? throw new InvalidOperationException("The PDF normal style is unavailable.");
-        normal.Font.Name = ProgressReportFontResolver.FamilyName;
-        normal.Font.Size = 9;
-        normal.Font.Color = Color.Parse("#141B2B");
-
-        var heading1 = document.Styles[StyleNames.Heading1]
-            ?? throw new InvalidOperationException("The PDF heading 1 style is unavailable.");
-        heading1.Font.Name = ProgressReportFontResolver.FamilyName;
-        heading1.Font.Bold = true;
-        heading1.Font.Size = 22;
-        heading1.Font.Color = Color.Parse("#0B132B");
-        heading1.ParagraphFormat.SpaceAfter = Unit.FromMillimeter(2);
-
-        var heading2 = document.Styles[StyleNames.Heading2]
-            ?? throw new InvalidOperationException("The PDF heading 2 style is unavailable.");
-        heading2.Font.Name = ProgressReportFontResolver.FamilyName;
-        heading2.Font.Bold = true;
-        heading2.Font.Size = 13;
-        heading2.Font.Color = Color.Parse("#0B132B");
-        heading2.ParagraphFormat.SpaceBefore = Unit.FromMillimeter(6);
-        heading2.ParagraphFormat.SpaceAfter = Unit.FromMillimeter(3);
-        heading2.ParagraphFormat.KeepWithNext = true;
-
-        var section = document.AddSection();
-        section.PageSetup.PageFormat = PageFormat.A4;
-        section.PageSetup.TopMargin = Unit.FromMillimeter(22);
-        section.PageSetup.BottomMargin = Unit.FromMillimeter(16);
-        section.PageSetup.LeftMargin = Unit.FromMillimeter(18);
-        section.PageSetup.RightMargin = Unit.FromMillimeter(18);
-
-        AddHeader(section);
-        AddFooter(section);
-
-        var eyebrow = section.AddParagraph("ATHLETE PROGRESS REPORT");
-        eyebrow.Format.SpaceAfter = Unit.FromMillimeter(1);
-        eyebrow.Format.Font.Size = 8;
-        eyebrow.Format.Font.Bold = true;
-        eyebrow.Format.Font.Color = Color.Parse("#8A6800");
-
-        section.AddParagraph(athleteDisplayName, StyleNames.Heading1);
-        var period = section.AddParagraph(
-            $"{report.Weeks} weeks  |  {FormatDate(report.PeriodStart)} - {FormatDate(report.PeriodEnd)}");
-        period.Format.Font.Color = Color.Parse("#5E6472");
-        period.Format.SpaceAfter = Unit.FromMillimeter(HasArabicContent(report) ? 1 : 5);
-
-        if (HasArabicContent(report))
+    private static void ComposeOverview(ColumnDescriptor column, AthleteProgressReportDto report, bool isArabic)
+    {
+        column.Item().Table(table =>
         {
-            var languageNotice = section.AddParagraph(
-                "Some Arabic source text is available only in the coaching platform and is omitted from this English PDF.");
-            languageNotice.Format.Font.Size = 7;
-            languageNotice.Format.Font.Color = Color.Parse("#8A6800");
-            languageNotice.Format.SpaceAfter = Unit.FromMillimeter(5);
-        }
-
-        AddAthleteOverview(section, report);
-        AddSummary(section, report.Summary);
-        AddWeeklyProgress(section, report.WeeklyProgress);
-        AddCheckIns(section, report.CheckIns, includeCoachNotes);
-
-        if (includeCoachNotes && report.CoachNotes.Count > 0)
-            AddCoachNotes(section, report.CoachNotes);
-
-        if (photoSources.Count > 0)
-            AddProgressPhotos(section, report.ProgressPhotos, photoSources);
-
-        var generated = section.AddParagraph(
-            $"Generated {DateTime.Parse(report.GeneratedAt).ToUniversalTime():dd MMM yyyy, HH:mm} UTC");
-        generated.Format.SpaceBefore = Unit.FromMillimeter(6);
-        generated.Format.Font.Size = 7;
-        generated.Format.Font.Color = Color.Parse("#76767E");
-
-        return document;
+            table.ColumnsDefinition(columns =>
+            {
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+            });
+            OverviewCell(table.Cell(), L(isArabic, "الهدف", "Goal"),
+                string.IsNullOrWhiteSpace(report.TargetGoal) ? L(isArabic, "غير محدد", "Not specified") : report.TargetGoal);
+            OverviewCell(table.Cell(), L(isArabic, "الطول", "Height"),
+                report.HeightCm.HasValue ? $"{report.HeightCm:0.#} cm" : L(isArabic, "لا توجد بيانات", "No data"));
+            OverviewCell(table.Cell(), L(isArabic, "الوزن الحالي", "Current weight"),
+                FormatWeight(report.Summary.CurrentWeightKg, isArabic));
+        });
     }
 
-    private static void AddHeader(Section section)
+    private static void OverviewCell(IContainer container, string label, string value)
     {
-        var header = section.Headers.Primary.AddTable();
-        header.Borders.Bottom.Width = 0.75;
-        header.Borders.Bottom.Color = Color.Parse("#FDC003");
-        header.AddColumn(Unit.FromCentimeter(11.5));
-        header.AddColumn(Unit.FromCentimeter(5));
-        var row = header.AddRow();
-        row.Cells[0].AddParagraph("JOKER NUTRITION").Format.Font.Bold = true;
-        row.Cells[1].AddParagraph("COACHING PLATFORM").Format.Alignment = ParagraphAlignment.Right;
-        row.Cells[1].Format.Font.Size = 7;
-        row.Cells[1].Format.Font.Color = Color.Parse("#6B7280");
-        row.BottomPadding = Unit.FromMillimeter(2);
-    }
-
-    private static void AddFooter(Section section)
-    {
-        var footer = section.Footers.Primary.AddParagraph();
-        footer.Format.Alignment = ParagraphAlignment.Center;
-        footer.Format.Font.Size = 7;
-        footer.Format.Font.Color = Color.Parse("#76767E");
-        footer.AddText("Sensitive coaching report  |  Page ");
-        footer.AddPageField();
-        footer.AddText(" of ");
-        footer.AddNumPagesField();
-    }
-
-    private static void AddAthleteOverview(Section section, AthleteProgressReportDto report)
-    {
-        var table = section.AddTable();
-        table.Borders.Width = 0.5;
-        table.Borders.Color = Color.Parse("#D8DCE7");
-        table.Shading.Color = Color.Parse("#F7F8FC");
-        table.AddColumn(Unit.FromCentimeter(5.5));
-        table.AddColumn(Unit.FromCentimeter(5.5));
-        table.AddColumn(Unit.FromCentimeter(5.5));
-        var row = table.AddRow();
-        AddOverviewCell(
-            row.Cells[0],
-            "Goal",
-            FormatPdfUserText(report.TargetGoal, "Not specified in English"));
-        AddOverviewCell(row.Cells[1], "Height", report.HeightCm.HasValue ? $"{report.HeightCm:0.#} cm" : "No data");
-        AddOverviewCell(row.Cells[2], "Current weight", FormatWeight(report.Summary.CurrentWeightKg));
-    }
-
-    private static void AddOverviewCell(Cell cell, string label, string value)
-    {
-        var labelParagraph = cell.AddParagraph(label.ToUpperInvariant());
-        labelParagraph.Format.SpaceBefore = Unit.FromMillimeter(3);
-        labelParagraph.Format.LeftIndent = Unit.FromMillimeter(3);
-        labelParagraph.Format.Font.Size = 7;
-        labelParagraph.Format.Font.Color = Color.Parse("#6B7280");
-        var valueParagraph = cell.AddParagraph(value);
-        valueParagraph.Format.SpaceAfter = Unit.FromMillimeter(3);
-        valueParagraph.Format.LeftIndent = Unit.FromMillimeter(3);
-        valueParagraph.Format.Font.Bold = true;
-        valueParagraph.Format.Font.Size = 10;
-    }
-
-    private static void AddSummary(Section section, ProgressReportSummaryDto summary)
-    {
-        section.AddParagraph("Performance summary", StyleNames.Heading2);
-        var table = section.AddTable();
-        table.AddColumn(Unit.FromCentimeter(4.1));
-        table.AddColumn(Unit.FromCentimeter(4.1));
-        table.AddColumn(Unit.FromCentimeter(4.1));
-        table.AddColumn(Unit.FromCentimeter(4.1));
-        var row = table.AddRow();
-        AddMetricCell(row.Cells[0], FormatSignedWeight(summary.WeightChangeKg), "Weight change");
-        AddMetricCell(row.Cells[1], $"{summary.CompletedWorkouts}/{summary.LoggedWorkouts}", "Logged sessions completed");
-        AddMetricCell(row.Cells[2], FormatPercent(summary.AverageCalorieAdherencePercent), "Calorie adherence");
-        AddMetricCell(row.Cells[3], summary.CheckInCount.ToString(), "Check-ins submitted");
-    }
-
-    private static void AddMetricCell(Cell cell, string value, string label)
-    {
-        cell.Borders.Width = 0.5;
-        cell.Borders.Color = Color.Parse("#D8DCE7");
-        cell.Shading.Color = Color.Parse("#FFFFFF");
-        var valueParagraph = cell.AddParagraph(value);
-        valueParagraph.Format.SpaceBefore = Unit.FromMillimeter(3);
-        valueParagraph.Format.LeftIndent = Unit.FromMillimeter(2.5);
-        valueParagraph.Format.Font.Bold = true;
-        valueParagraph.Format.Font.Size = 13;
-        valueParagraph.Format.Font.Color = Color.Parse("#0B132B");
-        var labelParagraph = cell.AddParagraph(label);
-        labelParagraph.Format.SpaceAfter = Unit.FromMillimeter(3);
-        labelParagraph.Format.LeftIndent = Unit.FromMillimeter(2.5);
-        labelParagraph.Format.Font.Size = 7;
-        labelParagraph.Format.Font.Color = Color.Parse("#6B7280");
-    }
-
-    private static void AddWeeklyProgress(Section section, IReadOnlyCollection<ProgressReportWeekDto> weeks)
-    {
-        section.AddParagraph("Weekly progress", StyleNames.Heading2);
-        var table = section.AddTable();
-        table.Borders.Width = 0.35;
-        table.Borders.Color = Color.Parse("#D8DCE7");
-        table.AddColumn(Unit.FromCentimeter(2.8));
-        table.AddColumn(Unit.FromCentimeter(2.2));
-        table.AddColumn(Unit.FromCentimeter(3));
-        table.AddColumn(Unit.FromCentimeter(2.8));
-        table.AddColumn(Unit.FromCentimeter(2.8));
-        table.AddColumn(Unit.FromCentimeter(2.8));
-        var header = table.AddRow();
-        header.HeadingFormat = true;
-        header.Shading.Color = Color.Parse("#0B132B");
-        header.Format.Font.Color = Colors.White;
-        header.Format.Font.Bold = true;
-        AddTableText(header.Cells[0], "Week");
-        AddTableText(header.Cells[1], "Weight");
-        AddTableText(header.Cells[2], "Workouts");
-        AddTableText(header.Cells[3], "Calories");
-        AddTableText(header.Cells[4], "Protein");
-        AddTableText(header.Cells[5], "Steps");
-
-        foreach (var week in weeks.OrderByDescending(w => w.WeekOf))
+        container.Border(0.7f).BorderColor(Border).Background(Soft).Padding(9).Column(column =>
         {
-            var row = table.AddRow();
-            row.TopPadding = Unit.FromMillimeter(1.7);
-            row.BottomPadding = Unit.FromMillimeter(1.7);
-            AddTableText(row.Cells[0], FormatDate(week.WeekOf));
-            AddTableText(row.Cells[1], FormatWeight(week.WeightKg));
-            AddTableText(row.Cells[2], week.LoggedWorkouts > 0
-                ? $"{week.CompletedWorkouts}/{week.LoggedWorkouts} ({FormatPercent(week.WorkoutCompletionPercent)})"
-                : "No logs");
-            AddTableText(row.Cells[3], FormatPercent(week.CalorieAdherencePercent));
-            AddTableText(row.Cells[4], FormatPercent(week.ProteinAdherencePercent));
-            AddTableText(row.Cells[5], FormatPercent(week.StepsAdherencePercent));
-        }
+            column.Item().Text(label).FontSize(7).FontColor(Muted);
+            column.Item().PaddingTop(2).Text(value).Bold().FontSize(10);
+        });
     }
 
-    private static void AddCheckIns(
-        Section section,
+    private static void ComposeSummary(ColumnDescriptor column, ProgressReportSummaryDto summary, bool isArabic)
+    {
+        SectionTitle(column, L(isArabic, "ملخص الأداء", "Performance summary"));
+        column.Item().Table(table =>
+        {
+            table.ColumnsDefinition(columns =>
+            {
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+            });
+            MetricCell(table.Cell(), FormatSignedWeight(summary.WeightChangeKg, isArabic), L(isArabic, "تغير الوزن", "Weight change"));
+            MetricCell(table.Cell(), $"{summary.CompletedWorkouts}/{summary.LoggedWorkouts}", L(isArabic, "الحصص المكتملة", "Sessions completed"));
+            MetricCell(table.Cell(), FormatPercent(summary.AverageCalorieAdherencePercent, isArabic), L(isArabic, "الالتزام بالسعرات", "Calorie adherence"));
+            MetricCell(table.Cell(), summary.CheckInCount.ToString(CultureInfo.InvariantCulture), L(isArabic, "المتابعات", "Check-ins"));
+        });
+    }
+
+    private static void MetricCell(IContainer container, string value, string label)
+    {
+        container.Border(0.7f).BorderColor(Border).Padding(8).Column(column =>
+        {
+            column.Item().ContentFromLeftToRight().Text(value).Bold().FontSize(13);
+            column.Item().PaddingTop(2).Text(label).FontSize(7).FontColor(Muted);
+        });
+    }
+
+    private static void ComposeWeeklyProgress(
+        ColumnDescriptor column,
+        IReadOnlyCollection<ProgressReportWeekDto> weeks,
+        bool isArabic,
+        CultureInfo culture)
+    {
+        SectionTitle(column, L(isArabic, "التقدم الأسبوعي", "Weekly progress"));
+        column.Item().Table(table =>
+        {
+            table.ColumnsDefinition(columns =>
+            {
+                columns.RelativeColumn(1.25f);
+                columns.RelativeColumn();
+                columns.RelativeColumn(1.3f);
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+            });
+            table.Header(header =>
+            {
+                TableHeader(header.Cell(), L(isArabic, "الأسبوع", "Week"));
+                TableHeader(header.Cell(), L(isArabic, "الوزن", "Weight"));
+                TableHeader(header.Cell(), L(isArabic, "التمارين", "Workouts"));
+                TableHeader(header.Cell(), L(isArabic, "السعرات", "Calories"));
+                TableHeader(header.Cell(), L(isArabic, "البروتين", "Protein"));
+                TableHeader(header.Cell(), L(isArabic, "الخطوات", "Steps"));
+            });
+
+            foreach (var week in weeks.OrderByDescending(week => week.WeekOf))
+            {
+                TableBody(table.Cell(), FormatDate(week.WeekOf, culture));
+                TableBody(table.Cell(), FormatWeight(week.WeightKg, isArabic));
+                TableBody(table.Cell(), week.LoggedWorkouts > 0
+                    ? $"{week.CompletedWorkouts}/{week.LoggedWorkouts} ({FormatPercent(week.WorkoutCompletionPercent, isArabic)})"
+                    : L(isArabic, "لا توجد سجلات", "No logs"));
+                TableBody(table.Cell(), FormatPercent(week.CalorieAdherencePercent, isArabic));
+                TableBody(table.Cell(), FormatPercent(week.ProteinAdherencePercent, isArabic));
+                TableBody(table.Cell(), FormatPercent(week.StepsAdherencePercent, isArabic));
+            }
+        });
+    }
+
+    private static void ComposeCheckIns(
+        ColumnDescriptor column,
         IReadOnlyCollection<ProgressReportCheckInDto> checkIns,
-        bool includeCoachNotes)
+        bool includeCoachNotes,
+        bool isArabic,
+        CultureInfo culture)
     {
-        section.AddParagraph("Check-in history", StyleNames.Heading2);
+        SectionTitle(column, L(isArabic, "سجل المتابعة", "Check-in history"));
         if (checkIns.Count == 0)
         {
-            section.AddParagraph("No check-ins were submitted during this period.");
+            column.Item().Text(L(isArabic, "لم يتم إرسال متابعات خلال هذه الفترة.", "No check-ins were submitted during this period."));
             return;
         }
 
-        var table = section.AddTable();
-        table.Borders.Width = 0.35;
-        table.Borders.Color = Color.Parse("#D8DCE7");
-        table.AddColumn(Unit.FromCentimeter(3.2));
-        table.AddColumn(Unit.FromCentimeter(2.4));
-        table.AddColumn(Unit.FromCentimeter(2.2));
-        table.AddColumn(Unit.FromCentimeter(3.5));
-        table.AddColumn(Unit.FromCentimeter(5.2));
-        var header = table.AddRow();
-        header.HeadingFormat = true;
-        header.Shading.Color = Color.Parse("#E9EDFF");
-        header.Format.Font.Bold = true;
-        AddTableText(header.Cells[0], "Week");
-        AddTableText(header.Cells[1], "Weight");
-        AddTableText(header.Cells[2], "Waist");
-        AddTableText(header.Cells[3], "Chest / thigh");
-        AddTableText(header.Cells[4], "Wellbeing E / S / G / T");
-        foreach (var checkIn in checkIns)
+        column.Item().Table(table =>
         {
-            var row = table.AddRow();
-            row.TopPadding = Unit.FromMillimeter(1.5);
-            row.BottomPadding = Unit.FromMillimeter(1.5);
-            AddTableText(row.Cells[0], FormatDate(checkIn.WeekOf));
-            AddTableText(row.Cells[1], $"{checkIn.WeightKg:0.#} kg");
-            AddTableText(row.Cells[2], checkIn.WaistCm.HasValue ? $"{checkIn.WaistCm:0.#} cm" : "-");
-            AddTableText(row.Cells[3], $"{FormatCentimeters(checkIn.ChestCm)} / {FormatCentimeters(checkIn.ThighCm)}");
-            AddTableText(row.Cells[4], $"{checkIn.EnergyLevel} / {checkIn.SleepQuality} / {checkIn.GutHealth} / {checkIn.TrainingStress}");
-        }
-
-        if (includeCoachNotes)
-        {
-            foreach (var checkIn in checkIns.Where(checkIn => !string.IsNullOrWhiteSpace(checkIn.ReviewNotes)))
+            table.ColumnsDefinition(columns =>
             {
-                var paragraph = section.AddParagraph();
-                paragraph.Format.SpaceBefore = Unit.FromMillimeter(2);
-                paragraph.Format.Borders.Left.Width = 2;
-                paragraph.Format.Borders.Left.Color = Color.Parse("#FDC003");
-                paragraph.Format.LeftIndent = Unit.FromMillimeter(3);
-                paragraph.AddFormattedText($"{FormatDate(checkIn.WeekOf)} review: ", TextFormat.Bold);
-                paragraph.AddText(FormatPdfUserText(checkIn.ReviewNotes, "Arabic review available in the coaching platform"));
+                columns.RelativeColumn(1.25f);
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+                columns.RelativeColumn(1.3f);
+                columns.RelativeColumn(1.8f);
+            });
+            table.Header(header =>
+            {
+                TableHeader(header.Cell(), L(isArabic, "الأسبوع", "Week"));
+                TableHeader(header.Cell(), L(isArabic, "الوزن", "Weight"));
+                TableHeader(header.Cell(), L(isArabic, "الخصر", "Waist"));
+                TableHeader(header.Cell(), L(isArabic, "الصدر / الفخذ", "Chest / thigh"));
+                TableHeader(header.Cell(), L(isArabic, "الطاقة / النوم / الهضم / الإجهاد", "Energy / sleep / gut / stress"));
+            });
+            foreach (var checkIn in checkIns)
+            {
+                TableBody(table.Cell(), FormatDate(checkIn.WeekOf, culture));
+                TableBody(table.Cell(), $"{checkIn.WeightKg:0.#} kg");
+                TableBody(table.Cell(), FormatCentimeters(checkIn.WaistCm));
+                TableBody(table.Cell(), $"{FormatCentimeters(checkIn.ChestCm)} / {FormatCentimeters(checkIn.ThighCm)}");
+                TableBody(table.Cell(), $"{checkIn.EnergyLevel} / {checkIn.SleepQuality} / {checkIn.GutHealth} / {checkIn.TrainingStress}");
             }
+        });
+
+        if (!includeCoachNotes)
+            return;
+
+        foreach (var checkIn in checkIns.Where(checkIn => !string.IsNullOrWhiteSpace(checkIn.ReviewNotes)))
+        {
+            var noteContainer = isArabic
+                ? column.Item().BorderRight(2).BorderColor(Gold).PaddingRight(8)
+                : column.Item().BorderLeft(2).BorderColor(Gold).PaddingLeft(8);
+            noteContainer.Text(text =>
+            {
+                text.Span($"{FormatDate(checkIn.WeekOf, culture)}: ").Bold();
+                text.Span(checkIn.ReviewNotes!.Trim());
+            });
         }
     }
 
-    private static void AddCoachNotes(Section section, IReadOnlyCollection<ProgressReportNoteDto> notes)
+    private static void ComposeCoachNotes(
+        ColumnDescriptor column,
+        IReadOnlyCollection<ProgressReportNoteDto> notes,
+        bool isArabic,
+        CultureInfo culture)
     {
-        section.AddParagraph("Coach notes", StyleNames.Heading2);
+        SectionTitle(column, L(isArabic, "ملاحظات المدرب", "Coach notes"));
         foreach (var note in notes)
         {
-            var paragraph = section.AddParagraph();
-            paragraph.Format.Borders.Left.Width = 2;
-            paragraph.Format.Borders.Left.Color = Color.Parse("#FDC003");
-            paragraph.Format.LeftIndent = Unit.FromMillimeter(3);
-            paragraph.Format.SpaceAfter = Unit.FromMillimeter(3);
-            paragraph.Format.KeepTogether = true;
-            var heading = paragraph.AddFormattedText(
-                $"{FormatPdfUserText(note.CoachName, "Coach")} - {DateTime.Parse(note.CreatedAt):dd MMM yyyy}\n");
-            heading.Bold = true;
-            paragraph.AddText(FormatPdfUserText(note.Text, "Arabic note available in the coaching platform"));
-        }
-    }
-
-    private static void AddProgressPhotos(
-        Section section,
-        IReadOnlyCollection<ProgressReportPhotoDto> photos,
-        IReadOnlyDictionary<int, string> photoSources)
-    {
-        section.AddPageBreak();
-        section.AddParagraph("Progress photos", StyleNames.Heading2);
-        section.AddParagraph("Earliest and latest photos from the selected reporting period.");
-        var table = section.AddTable();
-        table.AddColumn(Unit.FromCentimeter(5.3));
-        table.AddColumn(Unit.FromCentimeter(5.3));
-        table.AddColumn(Unit.FromCentimeter(5.3));
-
-        var selectedPhotos = photos.Where(photo => photoSources.ContainsKey(photo.Id)).ToList();
-        for (var index = 0; index < selectedPhotos.Count; index += 3)
-        {
-            var row = table.AddRow();
-            for (var columnIndex = 0; columnIndex < 3 && index + columnIndex < selectedPhotos.Count; columnIndex++)
+            var noteContainer = isArabic
+                ? column.Item().BorderRight(2).BorderColor(Gold).PaddingRight(8)
+                : column.Item().BorderLeft(2).BorderColor(Gold).PaddingLeft(8);
+            noteContainer.Column(noteColumn =>
             {
-                var photo = selectedPhotos[index + columnIndex];
-                var cell = row.Cells[columnIndex];
-                cell.Borders.Width = 0.5;
-                cell.Borders.Color = Color.Parse("#D8DCE7");
-                var image = cell.AddImage(photoSources[photo.Id]);
-                image.LockAspectRatio = true;
-                image.Width = Unit.FromCentimeter(4.8);
-                var caption = cell.AddParagraph($"{photo.Angle} - {FormatDate(photo.WeekOf)}");
-                caption.Format.Alignment = ParagraphAlignment.Center;
-                caption.Format.Font.Size = 7;
-                caption.Format.SpaceBefore = Unit.FromMillimeter(1);
-                caption.Format.SpaceAfter = Unit.FromMillimeter(2);
-            }
+                noteColumn.Item().Text($"{note.CoachName} - {FormatDate(note.CreatedAt[..10], culture)}").Bold();
+                noteColumn.Item().PaddingTop(2).Text(note.Text);
+            });
         }
     }
 
-    private static void AddTableText(Cell cell, string text)
+    private static void ComposeProgressPhotos(
+        ColumnDescriptor column,
+        IReadOnlyCollection<ProgressReportPhotoDto> photos,
+        IReadOnlyDictionary<int, byte[]> photoSources,
+        bool isArabic,
+        CultureInfo culture)
     {
-        var paragraph = cell.AddParagraph(text);
-        paragraph.Format.LeftIndent = Unit.FromMillimeter(1.5);
-        paragraph.Format.RightIndent = Unit.FromMillimeter(1.5);
+        column.Item().PageBreak();
+        SectionTitle(column, L(isArabic, "صور التقدم", "Progress photos"));
+        column.Item().Text(L(
+            isArabic,
+            "أقدم وأحدث الصور المتاحة خلال فترة التقرير.",
+            "Earliest and latest photos available in the reporting period.")).FontColor(Muted);
+
+        var selected = photos.Where(photo => photoSources.ContainsKey(photo.Id)).ToList();
+        column.Item().Table(table =>
+        {
+            table.ColumnsDefinition(columns =>
+            {
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+            });
+            foreach (var photo in selected)
+            {
+                table.Cell().Border(0.7f).BorderColor(Border).Padding(6).Column(cell =>
+                {
+                    cell.Item().Height(145).Image(photoSources[photo.Id]).FitArea();
+                    cell.Item().PaddingTop(4).AlignCenter().Text(
+                            $"{TranslateAngle(photo.Angle, isArabic)} - {FormatDate(photo.WeekOf, culture)}")
+                        .FontSize(7).FontColor(Muted);
+                });
+            }
+        });
     }
 
-    private async Task<Dictionary<int, string>> DownloadPhotosAsync(
+    private static void SectionTitle(ColumnDescriptor column, string title) =>
+        column.Item().PaddingTop(4).Text(title).Bold().FontSize(13);
+
+    private static void TableHeader(IContainer container, string value) =>
+        container.Background(Navy).Padding(5).AlignMiddle().Text(value).Bold().FontSize(7).FontColor(Colors.White);
+
+    private static void TableBody(IContainer container, string value)
+    {
+        var cell = container.BorderBottom(0.5f).BorderColor(Border).PaddingVertical(5).PaddingHorizontal(3).AlignMiddle();
+        if (!value.Any(IsArabicCharacter))
+            cell = cell.ContentFromLeftToRight();
+        cell.Text(value).FontSize(7);
+    }
+
+    private async Task<Dictionary<int, byte[]>> DownloadPhotosAsync(
         IReadOnlyCollection<ProgressReportPhotoDto> photos,
         CancellationToken cancellationToken)
     {
-        var result = new System.Collections.Concurrent.ConcurrentDictionary<int, string>();
+        var result = new System.Collections.Concurrent.ConcurrentDictionary<int, byte[]>();
         var client = _httpClientFactory.CreateClient();
         client.Timeout = Timeout.InfiniteTimeSpan;
         using var totalTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         totalTimeout.CancelAfter(TimeSpan.FromSeconds(20));
-        using var concurrency = new SemaphoreSlim(3);
+        using var concurrency = new SemaphoreSlim(2);
 
         var tasks = photos.Take(6).Select(async photo =>
         {
@@ -426,20 +422,17 @@ public class ProgressReportPdfGenerator : IProgressReportPdfGenerator
                 entered = true;
                 using var requestTimeout = CancellationTokenSource.CreateLinkedTokenSource(totalTimeout.Token);
                 requestTimeout.CancelAfter(TimeSpan.FromSeconds(8));
-                using var response = await client.GetAsync(
-                    uri,
-                    HttpCompletionOption.ResponseHeadersRead,
-                    requestTimeout.Token);
+                using var response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, requestTimeout.Token);
                 response.EnsureSuccessStatusCode();
                 if (response.Content.Headers.ContentLength > MaximumPhotoBytes)
                     return;
                 var contentType = response.Content.Headers.ContentType?.MediaType;
-                if (contentType is not ("image/jpeg" or "image/png"))
+                if (contentType is not ("image/jpeg" or "image/jpg" or "image/png"))
                     return;
                 await using var content = await response.Content.ReadAsStreamAsync(requestTimeout.Token);
                 var bytes = await ReadCappedAsync(content, MaximumPhotoBytes, requestTimeout.Token);
-                if (bytes is not null && IsSafeDecodableImage(bytes))
-                    result.TryAdd(photo.Id, $"base64:{Convert.ToBase64String(bytes)}");
+                if (bytes is not null && PreparePhoto(bytes) is { } preparedPhoto)
+                    result.TryAdd(photo.Id, preparedPhoto);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -458,14 +451,10 @@ public class ProgressReportPdfGenerator : IProgressReportPdfGenerator
 
         await Task.WhenAll(tasks);
         cancellationToken.ThrowIfCancellationRequested();
-
         return result.ToDictionary(entry => entry.Key, entry => entry.Value);
     }
 
-    private static async Task<byte[]?> ReadCappedAsync(
-        Stream source,
-        int maximumBytes,
-        CancellationToken cancellationToken)
+    private static async Task<byte[]?> ReadCappedAsync(Stream source, int maximumBytes, CancellationToken cancellationToken)
     {
         using var destination = new MemoryStream();
         var buffer = new byte[81920];
@@ -480,55 +469,136 @@ public class ProgressReportPdfGenerator : IProgressReportPdfGenerator
         }
     }
 
-    private static bool IsSafeDecodableImage(byte[] bytes)
+    private static byte[]? PreparePhoto(byte[] bytes)
     {
         try
         {
-            using var stream = new MemoryStream(bytes, writable: false);
-            using var image = XImage.FromStream(stream);
-            return image.PixelWidth > 0 && image.PixelHeight > 0 &&
-                   image.PixelWidth <= MaximumPhotoDimension && image.PixelHeight <= MaximumPhotoDimension &&
-                   (long)image.PixelWidth * image.PixelHeight <= MaximumPhotoPixels;
+            using var data = SKData.CreateCopy(bytes);
+            using var codec = SKCodec.Create(data);
+            if (codec is null || codec.Info.Width <= 0 || codec.Info.Height <= 0 ||
+                codec.Info.Width > MaximumPhotoDimension || codec.Info.Height > MaximumPhotoDimension ||
+                (long)codec.Info.Width * codec.Info.Height > MaximumPhotoPixels)
+                return null;
+
+            var scale = Math.Min(1f, MaximumPreparedPhotoDimension / (float)Math.Max(codec.Info.Width, codec.Info.Height));
+            var width = Math.Max(1, (int)Math.Round(codec.Info.Width * scale));
+            var height = Math.Max(1, (int)Math.Round(codec.Info.Height * scale));
+            var supportedSize = codec.GetScaledDimensions(scale);
+            if (supportedSize.Width <= 0 || supportedSize.Height <= 0)
+                return null;
+
+            var decodeInfo = new SKImageInfo(
+                supportedSize.Width,
+                supportedSize.Height,
+                SKColorType.Rgba8888,
+                SKAlphaType.Premul);
+            using var decoded = new SKBitmap(decodeInfo);
+            var decodeResult = codec.GetPixels(decodeInfo, decoded.GetPixels());
+            if (decodeResult != SKCodecResult.Success)
+                return null;
+
+            using var resized = ResizeBitmap(decoded, width, height);
+            using var prepared = ApplyOrientation(resized, codec.EncodedOrigin);
+            using var image = SKImage.FromBitmap(prepared);
+            using var encoded = image.Encode(SKEncodedImageFormat.Jpeg, 84);
+            var output = encoded?.ToArray();
+            return output is { Length: > 0 and <= MaximumPreparedPhotoBytes } ? output : null;
         }
         catch
         {
-            return false;
+            return null;
         }
     }
 
-    private static string FormatDate(string value) =>
-        DateOnly.TryParse(value, out var date) ? date.ToString("dd MMM yyyy") : value;
+    private static SKBitmap ResizeBitmap(SKBitmap source, int width, int height)
+    {
+        var output = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Premul);
+        using var canvas = new SKCanvas(output);
+        canvas.Clear(SKColors.White);
+        canvas.DrawBitmap(
+            source,
+            new SKRect(0, 0, width, height),
+            new SKSamplingOptions(SKCubicResampler.Mitchell),
+            null);
+        canvas.Flush();
+        return output;
+    }
 
-    private static string FormatWeight(decimal? value) => value.HasValue ? $"{value:0.#} kg" : "No data";
+    private static SKBitmap ApplyOrientation(SKBitmap source, SKEncodedOrigin origin)
+    {
+        var swapsAxes = origin is SKEncodedOrigin.LeftTop or SKEncodedOrigin.RightTop or
+            SKEncodedOrigin.RightBottom or SKEncodedOrigin.LeftBottom;
+        var outputWidth = swapsAxes ? source.Height : source.Width;
+        var outputHeight = swapsAxes ? source.Width : source.Height;
+        var output = new SKBitmap(outputWidth, outputHeight, SKColorType.Rgba8888, SKAlphaType.Premul);
+        using var canvas = new SKCanvas(output);
+        canvas.Clear(SKColors.White);
+
+        var matrix = origin switch
+        {
+            SKEncodedOrigin.TopRight => CreateMatrix(-1, 0, source.Width, 0, 1, 0),
+            SKEncodedOrigin.BottomRight => CreateMatrix(-1, 0, source.Width, 0, -1, source.Height),
+            SKEncodedOrigin.BottomLeft => CreateMatrix(1, 0, 0, 0, -1, source.Height),
+            SKEncodedOrigin.LeftTop => CreateMatrix(0, 1, 0, 1, 0, 0),
+            SKEncodedOrigin.RightTop => CreateMatrix(0, -1, source.Height, 1, 0, 0),
+            SKEncodedOrigin.RightBottom => CreateMatrix(0, -1, source.Height, -1, 0, source.Width),
+            SKEncodedOrigin.LeftBottom => CreateMatrix(0, 1, 0, -1, 0, source.Width),
+            _ => SKMatrix.CreateIdentity()
+        };
+        canvas.SetMatrix(matrix);
+        canvas.DrawBitmap(
+            source,
+            0,
+            0,
+            new SKSamplingOptions(SKCubicResampler.Mitchell),
+            null);
+        canvas.Flush();
+        return output;
+    }
+
+    private static SKMatrix CreateMatrix(
+        float scaleX,
+        float skewX,
+        float transX,
+        float skewY,
+        float scaleY,
+        float transY) => new()
+    {
+        ScaleX = scaleX,
+        SkewX = skewX,
+        TransX = transX,
+        SkewY = skewY,
+        ScaleY = scaleY,
+        TransY = transY,
+        Persp2 = 1
+    };
+
+    private static string L(bool isArabic, string arabic, string english) => isArabic ? arabic : english;
+
+    private static string FormatDate(string value, CultureInfo culture) =>
+        DateOnly.TryParse(value, out var date) ? date.ToString("dd MMM yyyy", culture) : value;
+
+    private static string FormatDateTime(string value, CultureInfo culture) =>
+        DateTime.TryParse(value, out var date) ? date.ToUniversalTime().ToString("dd MMM yyyy, HH:mm 'UTC'", culture) : value;
+
+    private static string FormatWeight(decimal? value, bool isArabic) =>
+        value.HasValue ? $"{value:0.#} kg" : L(isArabic, "لا توجد بيانات", "No data");
 
     private static string FormatCentimeters(decimal? value) => value.HasValue ? $"{value:0.#} cm" : "-";
 
-    private static string FormatSignedWeight(decimal? value) =>
-        value.HasValue ? $"{(value.Value > 0 ? "+" : string.Empty)}{value.Value:0.#} kg" : "No data";
+    private static string FormatSignedWeight(decimal? value, bool isArabic) =>
+        value.HasValue ? $"{(value.Value > 0 ? "+" : string.Empty)}{value.Value:0.#} kg" : L(isArabic, "لا توجد بيانات", "No data");
 
-    private static string FormatPercent(double? value) => value.HasValue ? $"{value:0.#}%" : "No data";
+    private static string FormatPercent(double? value, bool isArabic) =>
+        value.HasValue ? $"{value:0.#}%" : L(isArabic, "لا توجد بيانات", "No data");
 
-    private static string FormatPdfUserText(string? value, string fallback)
+    private static string TranslateAngle(string angle, bool isArabic) => angle.ToLowerInvariant() switch
     {
-        if (string.IsNullOrWhiteSpace(value))
-            return fallback;
-        if (!value.Any(IsArabicCharacter))
-            return value.Trim();
-
-        var nonArabic = new string(value.Where(character => !IsArabicCharacter(character)).ToArray());
-        var compact = string.Join(' ', nonArabic.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
-            .Trim(' ', '/', '-', '–', '—', '.', ',', ':', ';');
-        return compact.Any(char.IsLetterOrDigit) ? compact : fallback;
-    }
-
-    private static bool HasArabicContent(AthleteProgressReportDto report) =>
-        ContainsArabic(report.AthleteName) ||
-        ContainsArabic(report.TargetGoal) ||
-        report.CheckIns.Any(checkIn => ContainsArabic(checkIn.ReviewNotes)) ||
-        report.CoachNotes.Any(note => ContainsArabic(note.CoachName) || ContainsArabic(note.Text));
-
-    private static bool ContainsArabic(string? value) =>
-        !string.IsNullOrEmpty(value) && value.Any(IsArabicCharacter);
+        "front" => L(isArabic, "أمامي", "Front"),
+        "side" => L(isArabic, "جانبي", "Side"),
+        "back" => L(isArabic, "خلفي", "Back"),
+        _ => angle
+    };
 
     private static bool IsArabicCharacter(char character) =>
         character is >= '\u0600' and <= '\u06FF' or
