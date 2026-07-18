@@ -287,6 +287,28 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
                 });
         }
 
+        if (!db.ClientCheckIns.Any())
+        {
+            var weekOf = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(-7);
+            db.ClientCheckIns.Add(new ClientCheckIn
+            {
+                Id = 1,
+                AthleteId = 1,
+                WeekOf = weekOf,
+                SubmittedAt = DateTime.UtcNow.AddDays(-7),
+                WeightKg = 82.5m,
+                WaistCm = 88m,
+                ChestCm = 102m,
+                ThighCm = 60m,
+                SleepQuality = 8,
+                EnergyLevel = 7,
+                GutHealth = 9,
+                TrainingStress = 6,
+                CoachNotes = "Private review note",
+                CoachReviewedAt = DateTime.UtcNow.AddDays(-6)
+            });
+        }
+
         db.SaveChanges();
     }
 }

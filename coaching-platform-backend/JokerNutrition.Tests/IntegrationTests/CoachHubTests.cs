@@ -126,4 +126,92 @@ public class CoachHubTests : IClassFixture<TestWebAppFactory>
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
+
+    [Fact]
+    public async Task GetProgressReport_WithCoachToken_ReturnsReportAndKeepsSensitiveDataExcluded()
+    {
+        var token = await AuthHelpers.GetAccessTokenAsync(_client, "coach@test.com", "Coach@Test123!");
+        AuthHelpers.SetBearerToken(_client, token);
+
+        var response = await _client.GetAsync("/api/coach-hub/athletes/1/progress-report?weeks=4");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        Assert.Equal(1, body.RootElement.GetProperty("athleteId").GetInt32());
+        Assert.Equal(4, body.RootElement.GetProperty("weeks").GetInt32());
+        Assert.Equal(4, body.RootElement.GetProperty("weeklyProgress").GetArrayLength());
+        Assert.Equal(0, body.RootElement.GetProperty("coachNotes").GetArrayLength());
+        Assert.Equal(0, body.RootElement.GetProperty("progressPhotos").GetArrayLength());
+        var defaultCheckIn = body.RootElement.GetProperty("checkIns")[0];
+        Assert.Equal(JsonValueKind.Null, defaultCheckIn.GetProperty("reviewNotes").ValueKind);
+        Assert.Equal(JsonValueKind.Null, defaultCheckIn.GetProperty("reviewedAt").ValueKind);
+        Assert.Equal(JsonValueKind.Null, body.RootElement.GetProperty("summary").GetProperty("weightChangeKg").ValueKind);
+
+        var optedInResponse = await _client.GetAsync(
+            "/api/coach-hub/athletes/1/progress-report?weeks=4&includeCoachNotes=true");
+        Assert.Equal(HttpStatusCode.OK, optedInResponse.StatusCode);
+        using var optedInBody = JsonDocument.Parse(await optedInResponse.Content.ReadAsStringAsync());
+        var optedInCheckIn = optedInBody.RootElement.GetProperty("checkIns")[0];
+        Assert.Equal("Private review note", optedInCheckIn.GetProperty("reviewNotes").GetString());
+        Assert.NotEqual(JsonValueKind.Null, optedInCheckIn.GetProperty("reviewedAt").ValueKind);
+    }
+
+    [Fact]
+    public async Task DownloadProgressReport_WithCoachToken_ReturnsPdf()
+    {
+        var token = await AuthHelpers.GetAccessTokenAsync(_client, "coach@test.com", "Coach@Test123!");
+        AuthHelpers.SetBearerToken(_client, token);
+
+        var response = await _client.GetAsync("/api/coach-hub/athletes/1/progress-report/pdf?weeks=4");
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("application/pdf", response.Content.Headers.ContentType?.MediaType);
+        Assert.True(bytes.Length > 4);
+        Assert.Equal("%PDF", System.Text.Encoding.ASCII.GetString(bytes, 0, 4));
+    }
+
+    [Fact]
+    public async Task GetProgressReport_WithAdminWithoutCoachProfile_Returns200()
+    {
+        var token = await AuthHelpers.GetAccessTokenAsync(_client, "admin@test.com", "Admin@Test123!");
+        AuthHelpers.SetBearerToken(_client, token);
+
+        var response = await _client.GetAsync("/api/coach-hub/athletes/1/progress-report?weeks=8");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetProgressReport_ForAnotherCoachsAthlete_Returns404()
+    {
+        var token = await AuthHelpers.GetAccessTokenAsync(_client, "other-coach@test.com", "Coach@Test123!");
+        AuthHelpers.SetBearerToken(_client, token);
+
+        var response = await _client.GetAsync("/api/coach-hub/athletes/1/progress-report?weeks=8");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetProgressReport_WithAthleteToken_Returns403()
+    {
+        var token = await AuthHelpers.GetAccessTokenAsync(_client, "athlete@test.com", "Athlete@Test123!");
+        AuthHelpers.SetBearerToken(_client, token);
+
+        var response = await _client.GetAsync("/api/coach-hub/athletes/1/progress-report?weeks=8");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetProgressReport_WithUnsupportedRange_Returns400()
+    {
+        var token = await AuthHelpers.GetAccessTokenAsync(_client, "coach@test.com", "Coach@Test123!");
+        AuthHelpers.SetBearerToken(_client, token);
+
+        var response = await _client.GetAsync("/api/coach-hub/athletes/1/progress-report?weeks=6");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
 }

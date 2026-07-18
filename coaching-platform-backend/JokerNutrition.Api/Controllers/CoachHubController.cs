@@ -13,10 +13,14 @@ namespace JokerNutrition.Api.Controllers;
 public class CoachHubController : ControllerBase
 {
     private readonly ICoachHubService _coachHubService;
+    private readonly IAthleteProgressReportService _progressReportService;
 
-    public CoachHubController(ICoachHubService coachHubService)
+    public CoachHubController(
+        ICoachHubService coachHubService,
+        IAthleteProgressReportService progressReportService)
     {
         _coachHubService = coachHubService;
+        _progressReportService = progressReportService;
     }
 
     /// <summary>
@@ -99,6 +103,47 @@ public class CoachHubController : ControllerBase
     {
         var result = await _coachHubService.GetAthleteDeepProfileAsync(id);
         return Ok(result);
+    }
+
+    /// <summary>
+    /// Returns an athlete progress report for the selected 4, 8, or 12 week period.
+    /// Coach notes are opt-in because they may contain sensitive data.
+    /// Progress photos remain excluded until they are migrated to private storage.
+    /// </summary>
+    [HttpGet("athletes/{id:int}/progress-report")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> GetAthleteProgressReport(
+        int id,
+        [FromQuery] int weeks = 8,
+        [FromQuery] bool includeCoachNotes = false)
+    {
+        var result = await _progressReportService.GetReportAsync(
+            id, weeks, includeCoachNotes, includePhotos: false, cancellationToken: HttpContext.RequestAborted);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Generates and downloads the athlete progress report as a branded PDF document.
+    /// </summary>
+    [HttpGet("athletes/{id:int}/progress-report/pdf")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> DownloadAthleteProgressReport(
+        int id,
+        [FromQuery] int weeks = 8,
+        [FromQuery] bool includeCoachNotes = false)
+    {
+        var report = await _progressReportService.GetReportAsync(
+            id, weeks, includeCoachNotes, includePhotos: false, cancellationToken: HttpContext.RequestAborted);
+        var pdf = await _progressReportService.GeneratePdfAsync(
+            report, includeCoachNotes, includePhotos: false, cancellationToken: HttpContext.RequestAborted);
+        var safeName = string.Join('-', report.AthleteName
+            .ToLowerInvariant()
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Select(part => new string(part.Where(char.IsLetterOrDigit).ToArray()))
+            .Where(part => part.Length > 0));
+        if (string.IsNullOrWhiteSpace(safeName))
+            safeName = $"athlete-{id}";
+        return File(pdf, "application/pdf", $"{safeName}-progress-report-{report.PeriodEnd}.pdf");
     }
 
     /// <summary>
