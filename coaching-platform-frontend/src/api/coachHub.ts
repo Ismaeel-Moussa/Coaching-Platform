@@ -14,6 +14,7 @@ import type {
   CoachActionType,
   AthleteProgressReportDto,
   ProgressReportOptions,
+  ProgressReportPreviewOptions,
 } from '../types/CoachHub';
 
 export const getCoachDashboard = async (): Promise<CoachDashboardDto> => {
@@ -89,7 +90,7 @@ export const getWeightHistory = async (id: number): Promise<WeightHistoryPointDt
 
 export const getAthleteProgressReport = async (
   id: number,
-  options: ProgressReportOptions,
+  options: ProgressReportPreviewOptions,
 ): Promise<AthleteProgressReportDto> => {
   const response = await axiosInstance.get<AthleteProgressReportDto>(
     `/coach-hub/athletes/${id}/progress-report`,

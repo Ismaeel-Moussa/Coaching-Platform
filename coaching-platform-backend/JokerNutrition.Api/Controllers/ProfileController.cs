@@ -73,7 +73,7 @@ public class ProfileController : ControllerBase
             var currentProfile = await _profileService.GetProfileAsync();
             var oldAvatarUrl = currentProfile.ProfilePictureUrl;
 
-            var url = await _blobStorageService.UploadFileAsync(stream, file.FileName, file.ContentType);
+            var url = await _blobStorageService.UploadPublicAssetAsync(stream, file.FileName, file.ContentType);
             
             // Automatically update user's profile picture url in db
             var updateForm = new UpdateProfileForm

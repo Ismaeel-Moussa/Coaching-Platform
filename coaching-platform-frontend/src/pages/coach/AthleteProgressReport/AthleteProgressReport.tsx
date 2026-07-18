@@ -37,8 +37,14 @@ const AthleteProgressReport = () => {
   const [options, setOptions] = useState<ProgressReportOptions>({
     weeks: 8,
     includeCoachNotes: false,
+    includePhotos: false,
+    language: i18n.language.startsWith('ar') ? 'ar' : 'en',
   });
-  const { data: report, isLoading, isFetching, error } = useGetAthleteProgressReport(id, options);
+  const previewOptions = useMemo(
+    () => ({ weeks: options.weeks, includeCoachNotes: options.includeCoachNotes }),
+    [options.weeks, options.includeCoachNotes],
+  );
+  const { data: report, isLoading, isFetching, error } = useGetAthleteProgressReport(id, previewOptions);
   const downloadReport = useDownloadAthleteProgressReport(id);
 
   const locale = i18n.language.startsWith('ar') ? 'ar' : 'en';
@@ -148,10 +154,34 @@ const AthleteProgressReport = () => {
               <small>{t('coach:progressReport.includeNotesHint')}</small>
             </span>
           </label>
+          <label>
+            <Switch
+              checked={options.includePhotos}
+              onChange={(includePhotos) => setOptions(current => ({ ...current, includePhotos }))}
+            />
+            <span>
+              <strong>{t('coach:progressReport.includePhotos')}</strong>
+              <small>{t('coach:progressReport.includePhotosHint')}</small>
+            </span>
+          </label>
+          <label className="progress-report__language-option">
+            <span>
+              <strong>{t('coach:progressReport.pdfLanguage')}</strong>
+              <small>{t('coach:progressReport.pdfLanguageHint')}</small>
+            </span>
+            <Segmented
+              value={options.language}
+              options={[
+                { value: 'ar', label: 'العربية' },
+                { value: 'en', label: 'English' },
+              ]}
+              onChange={(language) => setOptions(current => ({ ...current, language: language as 'ar' | 'en' }))}
+            />
+          </label>
         </div>
         <div className="progress-report__privacy-note">
           <span className="material-symbols-outlined">shield_lock</span>
-          <span>{t('coach:progressReport.privacyNotice')} {t('coach:progressReport.pdfLanguageNotice')}</span>
+          <span>{t('coach:progressReport.privacyNotice')}</span>
         </div>
       </section>
 

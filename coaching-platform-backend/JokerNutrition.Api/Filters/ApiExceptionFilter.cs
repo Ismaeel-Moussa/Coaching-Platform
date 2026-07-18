@@ -21,6 +21,7 @@ public class ApiExceptionFilter : IExceptionFilter
 
         var (statusCode, message) = exception switch
         {
+            ForbiddenException => (StatusCodes.Status403Forbidden, exception.Message),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, exception.Message),
             KeyNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
             ArgumentException => (StatusCodes.Status400BadRequest, exception.Message),

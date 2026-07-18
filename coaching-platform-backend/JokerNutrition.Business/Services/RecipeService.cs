@@ -259,7 +259,7 @@ public class RecipeService : _BaseService, IRecipeService
         string imageUrl;
         using (var stream = image.OpenReadStream())
         {
-            imageUrl = await _blobService.UploadFileAsync(stream, blobName, image.ContentType);
+            imageUrl = await _blobService.UploadPublicAssetAsync(stream, blobName, image.ContentType);
         }
 
         recipe.ImageUrl = imageUrl;

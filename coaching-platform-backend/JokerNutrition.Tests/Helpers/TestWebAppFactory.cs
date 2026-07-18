@@ -33,6 +33,10 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        builder.UseSetting("BlobStorageSettings:ConnectionString", "UseDevelopmentStorage=true");
+        builder.UseSetting("BlobStorageSettings:ContainerName", "public-assets");
+        builder.UseSetting("BlobStorageSettings:PrivateContainerName", "athlete-progress-photos");
+        builder.UseSetting("BlobStorageSettings:LocalFallbackBaseUrl", "http://127.0.0.1:8765");
 
         builder.ConfigureServices(services =>
         {
@@ -290,23 +294,53 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
         if (!db.ClientCheckIns.Any())
         {
             var weekOf = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(-7);
-            db.ClientCheckIns.Add(new ClientCheckIn
-            {
-                Id = 1,
-                AthleteId = 1,
-                WeekOf = weekOf,
-                SubmittedAt = DateTime.UtcNow.AddDays(-7),
-                WeightKg = 82.5m,
-                WaistCm = 88m,
-                ChestCm = 102m,
-                ThighCm = 60m,
-                SleepQuality = 8,
-                EnergyLevel = 7,
-                GutHealth = 9,
-                TrainingStress = 6,
-                CoachNotes = "Private review note",
-                CoachReviewedAt = DateTime.UtcNow.AddDays(-6)
-            });
+            db.ClientCheckIns.AddRange(
+                new ClientCheckIn
+                {
+                    Id = 1,
+                    AthleteId = 1,
+                    WeekOf = weekOf,
+                    SubmittedAt = DateTime.UtcNow.AddDays(-7),
+                    WeightKg = 82.5m,
+                    WaistCm = 88m,
+                    ChestCm = 102m,
+                    ThighCm = 60m,
+                    SleepQuality = 8,
+                    EnergyLevel = 7,
+                    GutHealth = 9,
+                    TrainingStress = 6,
+                    CoachNotes = "Private review note",
+                    CoachReviewedAt = DateTime.UtcNow.AddDays(-6)
+                },
+                new ClientCheckIn
+                {
+                    Id = 2,
+                    AthleteId = 3,
+                    WeekOf = weekOf,
+                    SubmittedAt = DateTime.UtcNow.AddDays(-7),
+                    WeightKg = 75m,
+                    SleepQuality = 7,
+                    EnergyLevel = 7,
+                    GutHealth = 7,
+                    TrainingStress = 7
+                });
+            db.CheckInPhotos.AddRange(
+                new CheckInPhoto
+                {
+                    Id = 1,
+                    ClientCheckInId = 2,
+                    Angle = JokerNutrition.Data.Enums.PhotoAngle.Front,
+                    BlobUrl = "http://127.0.0.1:10000/devstoreaccount1/athlete-progress-photos/checkins/3/front.jpg",
+                    UploadedAt = DateTime.UtcNow.AddDays(-7)
+                },
+                new CheckInPhoto
+                {
+                    Id = 2,
+                    ClientCheckInId = 1,
+                    Angle = JokerNutrition.Data.Enums.PhotoAngle.Front,
+                    BlobUrl = "http://127.0.0.1:8765/uploads/sample-progress.png",
+                    UploadedAt = DateTime.UtcNow.AddDays(-7)
+                });
         }
 
         db.SaveChanges();

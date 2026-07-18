@@ -108,7 +108,7 @@ public class CoachHubController : ControllerBase
     /// <summary>
     /// Returns an athlete progress report for the selected 4, 8, or 12 week period.
     /// Coach notes are opt-in because they may contain sensitive data.
-    /// Progress photos remain excluded until they are migrated to private storage.
+    /// The on-screen preview excludes progress photos; PDF photo inclusion is opt-in.
     /// </summary>
     [HttpGet("athletes/{id:int}/progress-report")]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
@@ -130,12 +130,15 @@ public class CoachHubController : ControllerBase
     public async Task<IActionResult> DownloadAthleteProgressReport(
         int id,
         [FromQuery] int weeks = 8,
-        [FromQuery] bool includeCoachNotes = false)
+        [FromQuery] bool includeCoachNotes = false,
+        [FromQuery] bool includePhotos = false,
+        [FromQuery] string language = "en")
     {
+        language = language.Equals("ar", StringComparison.OrdinalIgnoreCase) ? "ar" : "en";
         var report = await _progressReportService.GetReportAsync(
-            id, weeks, includeCoachNotes, includePhotos: false, cancellationToken: HttpContext.RequestAborted);
+            id, weeks, includeCoachNotes, includePhotos, cancellationToken: HttpContext.RequestAborted);
         var pdf = await _progressReportService.GeneratePdfAsync(
-            report, includeCoachNotes, includePhotos: false, cancellationToken: HttpContext.RequestAborted);
+            report, includeCoachNotes, includePhotos, language, cancellationToken: HttpContext.RequestAborted);
         var safeName = string.Join('-', report.AthleteName
             .ToLowerInvariant()
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
