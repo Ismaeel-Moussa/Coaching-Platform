@@ -37,6 +37,7 @@ const CoachDashboard = lazy(() => import('../pages/coach/CoachDashboard/CoachDas
 const CoachTasks = lazy(() => import('../pages/coach/CoachTasks/CoachTasks'));
 const ClientRoster = lazy(() => import('../pages/coach/ClientRoster/ClientRoster'));
 const ClientDetail = lazy(() => import('../pages/coach/ClientDetail/ClientDetail'));
+const AthleteProgressReport = lazy(() => import('../pages/coach/AthleteProgressReport/AthleteProgressReport'));
 const WorkoutTemplateBuilder = lazy(() => import('../pages/coach/WorkoutTemplateBuilder/WorkoutTemplateBuilder'));
 const AthleteAssignmentHub = lazy(() => import('../pages/coach/AthleteAssignmentHub/AthleteAssignmentHub'));
 const ExerciseLibraryAdmin = lazy(() => import('../pages/coach/ExerciseLibraryAdmin/ExerciseLibraryAdmin'));
@@ -228,6 +229,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <ClientDetail />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'roster/:athleteId/progress-report',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <AthleteProgressReport />
           </Suspense>
         ),
       },

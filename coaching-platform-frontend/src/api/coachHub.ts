@@ -12,6 +12,8 @@ import type {
   CoachActionItemDto,
   CoachActionPriority,
   CoachActionType,
+  AthleteProgressReportDto,
+  ProgressReportOptions,
 } from '../types/CoachHub';
 
 export const getCoachDashboard = async (): Promise<CoachDashboardDto> => {
@@ -81,6 +83,28 @@ export const saveFeedbackNote = async (
 export const getWeightHistory = async (id: number): Promise<WeightHistoryPointDto[]> => {
   const response = await axiosInstance.get<WeightHistoryPointDto[]>(
     `/coach-hub/athletes/${id}/weight-history`
+  );
+  return response.data;
+};
+
+export const getAthleteProgressReport = async (
+  id: number,
+  options: ProgressReportOptions,
+): Promise<AthleteProgressReportDto> => {
+  const response = await axiosInstance.get<AthleteProgressReportDto>(
+    `/coach-hub/athletes/${id}/progress-report`,
+    { params: options },
+  );
+  return response.data;
+};
+
+export const downloadAthleteProgressReportPdf = async (
+  id: number,
+  options: ProgressReportOptions,
+): Promise<Blob> => {
+  const response = await axiosInstance.get(
+    `/coach-hub/athletes/${id}/progress-report/pdf`,
+    { params: options, responseType: 'blob' },
   );
   return response.data;
 };

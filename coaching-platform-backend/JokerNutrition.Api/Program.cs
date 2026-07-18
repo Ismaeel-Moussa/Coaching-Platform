@@ -261,7 +261,8 @@ try
     app.UseResponseCaching();
     app.UseStaticFiles();
     app.UseHttpsRedirection();
-    app.UseIpRateLimiting();
+    if (!app.Environment.IsEnvironment("Testing"))
+        app.UseIpRateLimiting();
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();

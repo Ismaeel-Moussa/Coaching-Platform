@@ -182,8 +182,17 @@ const ClientDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Streak metrics */}
-            <div className="client-detail__streak-metrics">
+            <div className="client-detail__header-actions">
+              <Button
+                className="client-detail__report-button"
+                icon={<span className="material-symbols-outlined">picture_as_pdf</span>}
+                onClick={() => navigate(`/coach/roster/${profile.id}/progress-report`)}
+              >
+                {t('coach:clientDetail.progressReport')}
+              </Button>
+
+              {/* Streak metrics */}
+              <div className="client-detail__streak-metrics">
               <div className="client-detail__streak-metric">
                 <span className="client-detail__streak-icon">🔥</span>
                 <div>
@@ -198,6 +207,7 @@ const ClientDetail: React.FC = () => {
                   <span className="client-detail__streak-value mono">{profile.longestStreak}</span>
                   <span className="client-detail__streak-label">{t('coach:clientDetail.longestStreak')}</span>
                 </div>
+              </div>
               </div>
             </div>
           </div>

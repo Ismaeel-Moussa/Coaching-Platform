@@ -1,5 +1,6 @@
 using Autofac;
 using JokerNutrition.Business.Helpers;
+using JokerNutrition.Business.Reports;
 using JokerNutrition.Business.Services;
 
 namespace JokerNutrition.Business.Autofac;
@@ -29,6 +30,8 @@ public class ServicesModule : Module
 
         // ─── Day 4: Coach Operations Hub ─────────────────────────────────
         builder.RegisterType<CoachHubService>().As<ICoachHubService>().InstancePerLifetimeScope();
+        builder.RegisterType<AthleteProgressReportService>().As<IAthleteProgressReportService>().InstancePerLifetimeScope();
+        builder.RegisterType<ProgressReportPdfGenerator>().As<IProgressReportPdfGenerator>().InstancePerLifetimeScope();
         builder.RegisterType<ProfileService>().As<IProfileService>().InstancePerLifetimeScope();
         builder.RegisterType<BlobStorageService>().As<IBlobStorageService>().InstancePerLifetimeScope();
         builder.RegisterType<NotificationService>().As<INotificationService>().InstancePerLifetimeScope();
