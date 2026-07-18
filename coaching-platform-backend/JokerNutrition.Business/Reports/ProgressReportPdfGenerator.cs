@@ -24,9 +24,10 @@ public interface IProgressReportPdfGenerator
 
 public class ProgressReportPdfGenerator : IProgressReportPdfGenerator
 {
-    private const int MaximumPhotoBytes = 8 * 1024 * 1024;
-    private const int MaximumPhotoDimension = 6000;
-    private const long MaximumPhotoPixels = 24_000_000;
+    private const int MaximumPhotoBytes = 10 * 1024 * 1024;
+    private const int MaximumSourcePhotoDimension = 20_000;
+    private const long MaximumSourcePhotoPixels = 120_000_000;
+    private const long MaximumDecodedPhotoPixels = 24_000_000;
     private const int MaximumPreparedPhotoDimension = 1400;
     private const int MaximumPreparedPhotoBytes = 2 * 1024 * 1024;
     private const string FontFamily = "Joker Report Sans";
@@ -431,8 +432,15 @@ public class ProgressReportPdfGenerator : IProgressReportPdfGenerator
                     return;
                 await using var content = await response.Content.ReadAsStreamAsync(requestTimeout.Token);
                 var bytes = await ReadCappedAsync(content, MaximumPhotoBytes, requestTimeout.Token);
-                if (bytes is not null && PreparePhoto(bytes) is { } preparedPhoto)
+                if (bytes is null)
+                    return;
+
+                if (PreparePhoto(bytes) is { } preparedPhoto)
                     result.TryAdd(photo.Id, preparedPhoto);
+                else
+                    _logger.LogWarning(
+                        "Progress photo {PhotoId} could not be decoded safely for the PDF.",
+                        photo.Id);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -469,22 +477,24 @@ public class ProgressReportPdfGenerator : IProgressReportPdfGenerator
         }
     }
 
-    private static byte[]? PreparePhoto(byte[] bytes)
+    internal static byte[]? PreparePhoto(byte[] bytes)
     {
         try
         {
             using var data = SKData.CreateCopy(bytes);
             using var codec = SKCodec.Create(data);
             if (codec is null || codec.Info.Width <= 0 || codec.Info.Height <= 0 ||
-                codec.Info.Width > MaximumPhotoDimension || codec.Info.Height > MaximumPhotoDimension ||
-                (long)codec.Info.Width * codec.Info.Height > MaximumPhotoPixels)
+                codec.Info.Width > MaximumSourcePhotoDimension ||
+                codec.Info.Height > MaximumSourcePhotoDimension ||
+                (long)codec.Info.Width * codec.Info.Height > MaximumSourcePhotoPixels)
                 return null;
 
             var scale = Math.Min(1f, MaximumPreparedPhotoDimension / (float)Math.Max(codec.Info.Width, codec.Info.Height));
             var width = Math.Max(1, (int)Math.Round(codec.Info.Width * scale));
             var height = Math.Max(1, (int)Math.Round(codec.Info.Height * scale));
             var supportedSize = codec.GetScaledDimensions(scale);
-            if (supportedSize.Width <= 0 || supportedSize.Height <= 0)
+            if (supportedSize.Width <= 0 || supportedSize.Height <= 0 ||
+                (long)supportedSize.Width * supportedSize.Height > MaximumDecodedPhotoPixels)
                 return null;
 
             var decodeInfo = new SKImageInfo(
