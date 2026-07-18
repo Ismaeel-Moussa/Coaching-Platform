@@ -13,6 +13,10 @@ public interface IBlobStorageService
     Task<string> UploadPublicAssetAsync(Stream fileStream, string fileName, string contentType);
     Task<string> UploadPrivatePhotoAsync(Stream fileStream, string fileName, string contentType);
     Task<string> GetReadUrlAsync(string fileUrl, TimeSpan? lifetime = null);
+    Task<byte[]?> DownloadPrivateImageAsync(
+        string fileUrl,
+        int maximumBytes,
+        CancellationToken cancellationToken = default);
     Task DeleteFileAsync(string fileUrl);
 }
 
@@ -21,6 +25,7 @@ public class BlobStorageService : IBlobStorageService
     private readonly BlobStorageSettings _settings;
     private readonly IWebHostEnvironment _hostingEnv;
     private readonly ILogger<BlobStorageService> _logger;
+    private readonly Lazy<BlobServiceClient> _blobServiceClient;
 
     public BlobStorageService(
         IOptions<BlobStorageSettings> settings,
@@ -30,6 +35,9 @@ public class BlobStorageService : IBlobStorageService
         _settings = settings.Value;
         _hostingEnv = hostingEnv;
         _logger = logger;
+        _blobServiceClient = new Lazy<BlobServiceClient>(
+            () => new BlobServiceClient(_settings.ConnectionString),
+            LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
     public Task<string> UploadPublicAssetAsync(Stream fileStream, string fileName, string contentType) =>
@@ -54,7 +62,7 @@ public class BlobStorageService : IBlobStorageService
 
             // If connection string is empty or default local without Azurite running, we can trigger the fallback directly.
             // But we can also try the standard SDK route:
-            var blobServiceClient = new BlobServiceClient(_settings.ConnectionString);
+            var blobServiceClient = _blobServiceClient.Value;
             var containerName = isPrivate ? _settings.PrivateContainerName : _settings.ContainerName;
             if (isPrivate && (string.IsNullOrWhiteSpace(_settings.PrivateContainerName) ||
                               string.IsNullOrWhiteSpace(_settings.ContainerName) ||
@@ -113,7 +121,7 @@ public class BlobStorageService : IBlobStorageService
             if (string.IsNullOrWhiteSpace(source.BlobContainerName) || string.IsNullOrWhiteSpace(source.BlobName))
                 return Task.FromResult(fileUrl);
 
-            var serviceClient = new BlobServiceClient(_settings.ConnectionString);
+            var serviceClient = _blobServiceClient.Value;
             if (!string.Equals(uri.Host, serviceClient.Uri.Host, StringComparison.OrdinalIgnoreCase) ||
                 !IsAllowedContainer(source.BlobContainerName))
             {
@@ -153,6 +161,59 @@ public class BlobStorageService : IBlobStorageService
         }
     }
 
+    public async Task<byte[]?> DownloadPrivateImageAsync(
+        string fileUrl,
+        int maximumBytes,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(fileUrl) || maximumBytes <= 0)
+            return null;
+
+        if (fileUrl.Contains("/uploads/", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!Uri.TryCreate(fileUrl, UriKind.Absolute, out var localUri) ||
+                !Uri.TryCreate(_settings.LocalFallbackBaseUrl, UriKind.Absolute, out var fallbackUri) ||
+                !localUri.AbsolutePath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase) ||
+                !localUri.Scheme.Equals(fallbackUri.Scheme, StringComparison.OrdinalIgnoreCase) ||
+                !localUri.Host.Equals(fallbackUri.Host, StringComparison.OrdinalIgnoreCase) ||
+                localUri.Port != fallbackUri.Port)
+                return null;
+
+            var fileName = Path.GetFileName(Uri.UnescapeDataString(localUri.AbsolutePath));
+            var uploadsRoot = Path.GetFullPath(Path.Combine(_hostingEnv.ContentRootPath, "wwwroot", "uploads"));
+            var filePath = Path.GetFullPath(Path.Combine(uploadsRoot, fileName));
+            if (!filePath.StartsWith(uploadsRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
+                !File.Exists(filePath))
+                return null;
+
+            await using var localFile = File.OpenRead(filePath);
+            return await ReadCappedAsync(localFile, maximumBytes, cancellationToken);
+        }
+
+        if (!Uri.TryCreate(fileUrl, UriKind.Absolute, out var uri))
+            return null;
+
+        var serviceClient = _blobServiceClient.Value;
+        var source = new BlobUriBuilder(uri);
+        if (!string.Equals(uri.Host, serviceClient.Uri.Host, StringComparison.OrdinalIgnoreCase) ||
+            !source.BlobContainerName.Equals(_settings.PrivateContainerName, StringComparison.OrdinalIgnoreCase) ||
+            string.IsNullOrWhiteSpace(source.BlobName))
+        {
+            _logger.LogWarning("Refusing to download a private image from an unexpected blob URL.");
+            return null;
+        }
+
+        var blobClient = serviceClient
+            .GetBlobContainerClient(source.BlobContainerName)
+            .GetBlobClient(source.BlobName);
+        var download = await blobClient.DownloadStreamingAsync(cancellationToken: cancellationToken);
+        if (download.Value.Details.ContentLength > maximumBytes)
+            return null;
+
+        await using var content = download.Value.Content;
+        return await ReadCappedAsync(content, maximumBytes, cancellationToken);
+    }
+
     public async Task DeleteFileAsync(string fileUrl)
     {
         if (string.IsNullOrEmpty(fileUrl)) return;
@@ -178,7 +239,7 @@ public class BlobStorageService : IBlobStorageService
             {
                 if (Uri.TryCreate(fileUrl, UriKind.Absolute, out var uri))
                 {
-                    var blobServiceClient = new BlobServiceClient(_settings.ConnectionString);
+                    var blobServiceClient = _blobServiceClient.Value;
                     var source = new BlobUriBuilder(uri);
                     if (!string.Equals(uri.Host, blobServiceClient.Uri.Host, StringComparison.OrdinalIgnoreCase) ||
                         !IsAllowedContainer(source.BlobContainerName))
@@ -216,6 +277,24 @@ public class BlobStorageService : IBlobStorageService
         catch
         {
             return false;
+        }
+    }
+
+    private static async Task<byte[]?> ReadCappedAsync(
+        Stream source,
+        int maximumBytes,
+        CancellationToken cancellationToken)
+    {
+        using var destination = new MemoryStream();
+        var buffer = new byte[81920];
+        while (true)
+        {
+            var read = await source.ReadAsync(buffer, cancellationToken);
+            if (read == 0)
+                return destination.ToArray();
+            if (destination.Length + read > maximumBytes)
+                return null;
+            await destination.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
         }
     }
 
