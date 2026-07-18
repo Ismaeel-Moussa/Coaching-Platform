@@ -1,9 +1,7 @@
 using System.Globalization;
-using Azure.Storage.Blobs;
-using JokerNutrition.Business.Configurations;
 using JokerNutrition.Business.DTOs.Coach;
+using JokerNutrition.Business.Services;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using QuestPDF.Fluent;
 using QuestPDF.Drawing;
 using QuestPDF.Helpers;
@@ -38,29 +36,15 @@ public class ProgressReportPdfGenerator : IProgressReportPdfGenerator
     private const string Soft = "#F7F8FC";
     private static readonly object FontLock = new();
     private static bool _fontsRegistered;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IBlobStorageService _blobStorage;
     private readonly ILogger<ProgressReportPdfGenerator> _logger;
-    private readonly HashSet<string> _allowedPhotoHosts = new(StringComparer.OrdinalIgnoreCase);
 
     public ProgressReportPdfGenerator(
-        IHttpClientFactory httpClientFactory,
-        ILogger<ProgressReportPdfGenerator> logger,
-        IOptions<BlobStorageSettings> blobOptions)
+        IBlobStorageService blobStorage,
+        ILogger<ProgressReportPdfGenerator> logger)
     {
-        _httpClientFactory = httpClientFactory;
+        _blobStorage = blobStorage;
         _logger = logger;
-        var settings = blobOptions.Value;
-        try
-        {
-            _allowedPhotoHosts.Add(new BlobServiceClient(settings.ConnectionString).Uri.Host);
-        }
-        catch (Exception exception)
-        {
-            _logger.LogDebug(exception, "Blob storage host could not be derived for PDF photo validation.");
-        }
-
-        if (Uri.TryCreate(settings.LocalFallbackBaseUrl, UriKind.Absolute, out var fallbackUri))
-            _allowedPhotoHosts.Add(fallbackUri.Host);
     }
 
     public async Task<byte[]> GenerateAsync(
@@ -403,37 +387,28 @@ public class ProgressReportPdfGenerator : IProgressReportPdfGenerator
         CancellationToken cancellationToken)
     {
         var result = new System.Collections.Concurrent.ConcurrentDictionary<int, byte[]>();
-        var client = _httpClientFactory.CreateClient();
-        client.Timeout = Timeout.InfiniteTimeSpan;
         using var totalTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        totalTimeout.CancelAfter(TimeSpan.FromSeconds(20));
+        totalTimeout.CancelAfter(TimeSpan.FromSeconds(30));
         using var concurrency = new SemaphoreSlim(2);
 
         var tasks = photos.Take(6).Select(async photo =>
         {
-            if (!Uri.TryCreate(photo.Url, UriKind.Absolute, out var uri) ||
-                (uri.Scheme != Uri.UriSchemeHttps && !(uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback)) ||
-                !_allowedPhotoHosts.Contains(uri.Host))
-                return;
-
             var entered = false;
             try
             {
                 await concurrency.WaitAsync(totalTimeout.Token);
                 entered = true;
                 using var requestTimeout = CancellationTokenSource.CreateLinkedTokenSource(totalTimeout.Token);
-                requestTimeout.CancelAfter(TimeSpan.FromSeconds(8));
-                using var response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, requestTimeout.Token);
-                response.EnsureSuccessStatusCode();
-                if (response.Content.Headers.ContentLength > MaximumPhotoBytes)
-                    return;
-                var contentType = response.Content.Headers.ContentType?.MediaType;
-                if (contentType is not ("image/jpeg" or "image/jpg" or "image/png"))
-                    return;
-                await using var content = await response.Content.ReadAsStreamAsync(requestTimeout.Token);
-                var bytes = await ReadCappedAsync(content, MaximumPhotoBytes, requestTimeout.Token);
+                requestTimeout.CancelAfter(TimeSpan.FromSeconds(15));
+                var bytes = await _blobStorage.DownloadPrivateImageAsync(
+                    photo.Url,
+                    MaximumPhotoBytes,
+                    requestTimeout.Token);
                 if (bytes is null)
+                {
+                    _logger.LogWarning("Progress photo {PhotoId} could not be downloaded for the PDF.", photo.Id);
                     return;
+                }
 
                 if (PreparePhoto(bytes) is { } preparedPhoto)
                     result.TryAdd(photo.Id, preparedPhoto);
@@ -460,21 +435,6 @@ public class ProgressReportPdfGenerator : IProgressReportPdfGenerator
         await Task.WhenAll(tasks);
         cancellationToken.ThrowIfCancellationRequested();
         return result.ToDictionary(entry => entry.Key, entry => entry.Value);
-    }
-
-    private static async Task<byte[]?> ReadCappedAsync(Stream source, int maximumBytes, CancellationToken cancellationToken)
-    {
-        using var destination = new MemoryStream();
-        var buffer = new byte[81920];
-        while (true)
-        {
-            var read = await source.ReadAsync(buffer, cancellationToken);
-            if (read == 0)
-                return destination.ToArray();
-            if (destination.Length + read > maximumBytes)
-                return null;
-            await destination.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
-        }
     }
 
     internal static byte[]? PreparePhoto(byte[] bytes)
