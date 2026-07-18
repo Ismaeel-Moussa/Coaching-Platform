@@ -170,7 +170,7 @@ const AthleteProgressReport = () => {
             <SectionHeading icon="show_chart" title={t('coach:progressReport.weightTrend')} description={t('coach:progressReport.weightTrendHint')} />
             {report.weeklyProgress.some(point => point.weightKg != null) ? (
               <div className="progress-report__chart" dir="ltr">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={240}>
                   <LineChart data={report.weeklyProgress} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="4 4" stroke="#e4e7ef" />
                     <XAxis dataKey="weekOf" tickFormatter={(value) => formatDate(value)} tick={{ fontSize: 11 }} />
