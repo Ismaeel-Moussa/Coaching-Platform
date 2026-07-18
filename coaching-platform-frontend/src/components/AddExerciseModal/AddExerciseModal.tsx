@@ -9,7 +9,7 @@ interface AddExerciseModalProps {
   visible: boolean;
   onCancel: () => void;
   exercise?: ExerciseAdminDto | null;
-}
+}dd
 
 const MUSCLE_GROUPS: MuscleGroup[] = ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Cardio', 'Core'];
 

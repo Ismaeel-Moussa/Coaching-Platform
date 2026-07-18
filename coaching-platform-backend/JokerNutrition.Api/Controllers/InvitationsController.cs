@@ -19,7 +19,7 @@ public class InvitationsController : ControllerBase
         _invitationService = invitationService;
     }
 
-    /// <summary>List all invitations (paginated). Coach sees own; Admin sees all.</summary>
+    /// <summary>List all invitations (paginated), Coach sees own; Admin sees all.</summary>
     [HttpGet]
     [Authorize(Roles = "Coach,Admin")]
     public async Task<IActionResult> List([FromQuery] BasePaginationForm pagination)
