@@ -299,7 +299,29 @@ try
         var dbContext = scope.ServiceProvider.GetRequiredService<JokerNutritionContext>();
         if (dbContext.Database.IsRelational())
         {
-            await dbContext.Database.MigrateAsync();
+            int maxRetries = 6;
+            int delaySeconds = 10;
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    SerilogLog.Information("Applying database migrations (Attempt {Attempt}/{MaxRetries})...", attempt, maxRetries);
+                    await dbContext.Database.MigrateAsync();
+                    SerilogLog.Information("Database migrations applied successfully.");
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    if (attempt == maxRetries)
+                    {
+                        SerilogLog.Error(ex, "Failed to apply database migrations after {MaxRetries} attempts.", maxRetries);
+                        throw;
+                    }
+
+                    SerilogLog.Warning(ex, "Database migration attempt {Attempt} failed. Retrying in {Delay} seconds...", attempt, delaySeconds);
+                    await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+                }
+            }
         }
         else
         {

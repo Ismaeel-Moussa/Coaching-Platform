@@ -22,6 +22,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
+# Disable configuration auto-reload and switch file watchers to polling in containers
+ENV DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE=false
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+
 # Production deployment status is verified by GitHub Actions after Render goes live.
 # Expose port 10000 (Render default) and run the application
 ENV ASPNETCORE_URLS=http://+:10000
