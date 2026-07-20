@@ -120,6 +120,7 @@ public class CoachHubController : ControllerBase
     {
         var result = await _progressReportService.GetReportAsync(
             id, weeks, includeCoachNotes, includePhotos, cancellationToken: HttpContext.RequestAborted);
+        await _progressReportService.SignPhotoUrlsAsync(result);
         return Ok(result);
     }
 
@@ -136,6 +137,8 @@ public class CoachHubController : ControllerBase
         [FromQuery] string language = "en")
     {
         language = language.Equals("ar", StringComparison.OrdinalIgnoreCase) ? "ar" : "en";
+        // Do NOT sign photo URLs here — the PDF generator downloads photos
+        // server-side using raw blob URLs and account-level credentials.
         var report = await _progressReportService.GetReportAsync(
             id, weeks, includeCoachNotes, includePhotos, cancellationToken: HttpContext.RequestAborted);
         var pdf = await _progressReportService.GeneratePdfAsync(
