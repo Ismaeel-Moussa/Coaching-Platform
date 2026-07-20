@@ -359,7 +359,7 @@ public class ProgressReportPdfGenerator : IProgressReportPdfGenerator
             {
                 table.Cell().Border(0.7f).BorderColor(Border).Padding(6).Column(cell =>
                 {
-                    cell.Item().Height(145).Image(photoSources[photo.Id]).FitArea();
+                    cell.Item().Height(220).Image(photoSources[photo.Id]).FitArea();
                     cell.Item().PaddingTop(4).AlignCenter().Text(
                             $"{TranslateAngle(photo.Angle, isArabic)} - {FormatDate(photo.WeekOf, culture)}")
                         .FontSize(7).FontColor(Muted);
