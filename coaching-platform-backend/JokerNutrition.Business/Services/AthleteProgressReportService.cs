@@ -17,6 +17,15 @@ public interface IAthleteProgressReportService
         bool includePhotos,
         CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Replaces raw blob URLs in <see cref="AthleteProgressReportDto.ProgressPhotos"/>
+    /// with time-limited SAS-signed URLs suitable for browser display.
+    /// Must be called after <see cref="GetReportAsync"/> for the preview API;
+    /// must NOT be called before PDF generation (the PDF generator downloads
+    /// photos server-side using account-level credentials).
+    /// </summary>
+    Task SignPhotoUrlsAsync(AthleteProgressReportDto report);
+
     Task<byte[]> GeneratePdfAsync(
         AthleteProgressReportDto report,
         bool includeCoachNotes,
@@ -208,6 +217,7 @@ public class AthleteProgressReportService : _BaseService, IAthleteProgressReport
         if (includePhotos && checkIns.Count > 0)
         {
             var checkInsWithPhotos = checkIns.Where(c => c.Photos.Count > 0).ToList();
+
             var selectedCheckIns = checkInsWithPhotos.Count == 0
                 ? []
                 : new[] { checkInsWithPhotos.First(), checkInsWithPhotos.Last() }
@@ -223,11 +233,16 @@ public class AthleteProgressReportService : _BaseService, IAthleteProgressReport
                 .Take(6)
                 .ToList();
 
-            foreach (var photo in report.ProgressPhotos)
-                photo.Url = await _blobStorage.GetReadUrlAsync(photo.Url, TimeSpan.FromMinutes(10));
         }
 
         return report;
+    }
+
+    /// <inheritdoc />
+    public async Task SignPhotoUrlsAsync(AthleteProgressReportDto report)
+    {
+        foreach (var photo in report.ProgressPhotos)
+            photo.Url = await _blobStorage.GetReadUrlAsync(photo.Url, TimeSpan.FromMinutes(10));
     }
 
     public async Task<byte[]> GeneratePdfAsync(
