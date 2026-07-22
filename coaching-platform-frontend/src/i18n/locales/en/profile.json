@@ -57,5 +57,10 @@
     "title": "Language Preference",
     "desc": "Choose your preferred language for the application interface.",
     "label": "Language"
+  },
+  "assessment": {
+    "title": "Initial Assessment",
+    "desc": "View and manage your initial health, fitness, and lifestyle assessment questionnaire.",
+    "viewBtn": "Go to Assessment"
   }
 }
