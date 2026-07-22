@@ -106,6 +106,48 @@ public class AdminUserServiceTests
         Assert.Equal("Cannot deactivate the last active Admin account in the system.", ex.Message);
     }
 
+    [Fact]
+    public async Task ToggleUserStatusAsync_SendsAccountStatusEmail()
+    {
+        using var context = new JokerNutritionContext(_dbOptions);
+        var targetUser = new User { Id = 200, FirstName = "Khalid", Email = "khalid@example.com", IsActive = true };
+        context.Users.Add(targetUser);
+        await context.SaveChangesAsync();
+
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, "999"),
+            new Claim(ClaimTypes.Email, "admin@jokernutrition.com"),
+            new Claim(ClaimTypes.Role, "Admin"),
+            new Claim(ClaimTypes.GivenName, "Admin")
+        }));
+
+        var fakeEmailService = new FakeEmailService();
+        var userStore = new FakeUserStore();
+        var userManager = new FakeUserManager(userStore, db: context);
+
+        var service = new AdminUserService(
+            principal,
+            NullLogger<AdminUserService>.Instance,
+            userManager,
+            context,
+            new FakeAuditLogRepository(context),
+            new FakePasswordResetTokenRepository(context),
+            new FakeAthleteRepository(context),
+            new FakeCoachRepository(context),
+            new FakeNotificationService(),
+            fakeEmailService,
+            new FakeAuditLogService());
+
+        var form = new ToggleUserStatusForm { IsActive = false, Reason = "Subscription Expired" };
+
+        await service.ToggleUserStatusAsync(targetUser.Id, form);
+
+        Assert.Equal("khalid@example.com", fakeEmailService.LastStatusEmail);
+        Assert.False(fakeEmailService.LastStatusActive);
+        Assert.Equal("Subscription Expired", fakeEmailService.LastStatusReason);
+    }
+
     private sealed class FakeUserStore : IUserStore<User>
     {
         public Task<IdentityResult> CreateAsync(User user, CancellationToken cancellationToken) => Task.FromResult(IdentityResult.Success);
@@ -124,14 +166,25 @@ public class AdminUserServiceTests
     private sealed class FakeUserManager : UserManager<User>
     {
         private readonly bool _isAdmin;
+        private readonly JokerNutritionContext? _db;
 
-        public FakeUserManager(IUserStore<User> store, bool isAdmin = false)
+        public FakeUserManager(IUserStore<User> store, bool isAdmin = false, JokerNutritionContext? db = null)
             : base(store, null!, null!, null!, null!, null!, null!, null!, null!)
         {
             _isAdmin = isAdmin;
+            _db = db;
         }
 
-        public override Task<User?> FindByIdAsync(string userId) => Task.FromResult<User?>(new User { Id = int.Parse(userId), FirstName = "Test", Email = "test@user.com" });
+        public override async Task<User?> FindByIdAsync(string userId)
+        {
+            if (_db != null && int.TryParse(userId, out var id))
+            {
+                var found = await _db.Users.FindAsync(id);
+                if (found != null) return found;
+            }
+            return new User { Id = int.Parse(userId), FirstName = "Test", Email = "test@user.com" };
+        }
+
         public override Task<IdentityResult> UpdateAsync(User user) => Task.FromResult(IdentityResult.Success);
         public override Task<bool> IsInRoleAsync(User user, string role) => Task.FromResult(role == "Admin" && _isAdmin);
     }
@@ -168,8 +221,19 @@ public class AdminUserServiceTests
 
     private sealed class FakeEmailService : IEmailService
     {
+        public string? LastStatusEmail { get; private set; }
+        public bool? LastStatusActive { get; private set; }
+        public string? LastStatusReason { get; private set; }
+
         public Task SendInvitationEmailAsync(string toEmail, string invitationUrl, string role) => Task.CompletedTask;
         public Task SendPasswordResetEmailAsync(string toEmail, string resetUrl) => Task.CompletedTask;
+        public Task SendAccountStatusEmailAsync(string toEmail, string userName, bool isActive, string? reason = null)
+        {
+            LastStatusEmail = toEmail;
+            LastStatusActive = isActive;
+            LastStatusReason = reason;
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class FakeAuditLogService : IAuditLogService

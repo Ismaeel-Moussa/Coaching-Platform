@@ -336,14 +336,10 @@ public class AdminUserService : _BaseService, IAdminUserService
         // Optional email notification
         if (!string.IsNullOrEmpty(user.Email))
         {
-            var subject = form.IsActive ? "Account Reactivated - JokerNutrition" : "Account Suspended - JokerNutrition";
-            var body = form.IsActive
-                ? $"Hello {user.FirstName}, your account has been reactivated. You can now log back into the platform."
-                : $"Hello {user.FirstName}, your account has been suspended. Reason: {form.Reason ?? "Administrative decision"}. Please contact support for inquiries.";
-            
             try
             {
-                await _emailService.SendPasswordResetEmailAsync(user.Email, body);
+                var userName = !string.IsNullOrWhiteSpace(user.FirstName) ? user.FirstName : user.UserName ?? "User";
+                await _emailService.SendAccountStatusEmailAsync(user.Email, userName, form.IsActive, form.Reason);
             }
             catch (Exception ex)
             {

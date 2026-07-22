@@ -109,6 +109,7 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
     {
         public Task SendInvitationEmailAsync(string toEmail, string inviteUrl, string role) => Task.CompletedTask;
         public Task SendPasswordResetEmailAsync(string toEmail, string resetUrl) => Task.CompletedTask;
+        public Task SendAccountStatusEmailAsync(string toEmail, string userName, bool isActive, string? reason = null) => Task.CompletedTask;
     }
 
     private static void SeedTestData(JokerNutritionContext db, Microsoft.AspNetCore.Identity.IPasswordHasher<User> hasher)
