@@ -1,4 +1,5 @@
 using System.Security.Principal;
+using JokerNutrition.Business.Common;
 using JokerNutrition.Business.Configurations;
 using JokerNutrition.Business.DTOs.Auth;
 using JokerNutrition.Data.Enums;
@@ -83,7 +84,7 @@ public class AuthService : _BaseService, IAuthService
         var role = roles.FirstOrDefault() ?? "Athlete";
 
         // Audit: record successful login
-        var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        var ip = _httpContextAccessor.HttpContext.GetClientIpAddress();
         user.LastLoginAt = DateTime.UtcNow;
         user.LastLoginIp = ip;
         await _userManager.UpdateAsync(user);
@@ -193,7 +194,7 @@ public class AuthService : _BaseService, IAuthService
 
         var user = storedToken.User;
         user.LastLoginAt = DateTime.UtcNow;
-        var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        var ip = _httpContextAccessor.HttpContext.GetClientIpAddress();
         user.LastLoginIp = ip;
         await _userManager.UpdateAsync(user);
 

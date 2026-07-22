@@ -12,7 +12,7 @@ const Profile: React.FC = () => {
   const navigate = useNavigate();
   const { language, setLanguage } = useLanguage();
   const { data: profile, isLoading, error } = useGetProfile();
-  const { data: onboardingData } = useMyOnboardingAssessment();
+  const { data: onboardingData } = useMyOnboardingAssessment({ enabled: profile?.role === 'Athlete' });
   const updateProfileMutation = useUpdateProfile();
   const changePasswordMutation = useChangePassword();
   const uploadAvatarMutation = useUploadAvatar();

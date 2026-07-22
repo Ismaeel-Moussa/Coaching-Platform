@@ -6,6 +6,7 @@ using JokerNutrition.Data.Contexts;
 using JokerNutrition.Data.Entities;
 using JokerNutrition.Data.Entities.Identities;
 using JokerNutrition.Data.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -23,6 +24,7 @@ public class AdminUserService : _BaseService, IAdminUserService
     private readonly INotificationService _notificationService;
     private readonly IEmailService _emailService;
     private readonly IAuditLogService _auditLogService;
+    private readonly IHttpContextAccessor? _httpContextAccessor;
 
     public AdminUserService(
         IPrincipal principal,
@@ -35,7 +37,8 @@ public class AdminUserService : _BaseService, IAdminUserService
         ICoachRepository coachRepo,
         INotificationService notificationService,
         IEmailService emailService,
-        IAuditLogService auditLogService)
+        IAuditLogService auditLogService,
+        IHttpContextAccessor? httpContextAccessor = null)
         : base(principal, logger)
     {
         _userManager = userManager;
@@ -47,6 +50,7 @@ public class AdminUserService : _BaseService, IAdminUserService
         _notificationService = notificationService;
         _emailService = emailService;
         _auditLogService = auditLogService;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<PagedResult<UserManagementDto>> GetUsersAsync(UserFilterParams filterParams)
@@ -327,7 +331,7 @@ public class AdminUserService : _BaseService, IAdminUserService
             action: form.IsActive ? "UserReactivated" : "UserDeactivated",
             entityType: "User",
             entityId: targetUserId.ToString(),
-            ipAddress: null);
+            ipAddress: _httpContextAccessor?.HttpContext.GetClientIpAddress());
 
         // Optional email notification
         if (!string.IsNullOrEmpty(user.Email))

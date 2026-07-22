@@ -19,11 +19,12 @@ interface ApiErrorBody { message?: string }
 const getErrorMessage = (error: unknown, fallback: string) =>
   (error as AxiosError<ApiErrorBody>)?.response?.data?.message ?? fallback;
 
-export const useMyOnboardingAssessment = () => useQuery({
+export const useMyOnboardingAssessment = (options?: { enabled?: boolean }) => useQuery({
   queryKey: ['onboarding', 'me'],
   queryFn: getMyOnboardingAssessment,
   staleTime: 30_000,
   retry: 1,
+  ...options,
 });
 
 export const useSaveOnboardingDraft = () => {

@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SignalR;
 using Serilog;
 using Serilog.Events;
@@ -257,6 +258,16 @@ try
     }
 
     // 14. Middleware pipeline
+    // Configure forwarded headers to accept X-Forwarded-For & X-Forwarded-Proto from cloud load balancers / ingress proxies (e.g. Cloudflare, Render, Nginx).
+    var forwardedHeadersOptions = new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+        ForwardLimit = null // Allow processing through multi-tier cloud ingress proxies
+    };
+    // Clear default loopback restrictions so cloud proxy headers populate HttpContext.Connection.RemoteIpAddress
+    forwardedHeadersOptions.KnownProxies.Clear();
+    forwardedHeadersOptions.KnownIPNetworks.Clear();
+    app.UseForwardedHeaders(forwardedHeadersOptions);
     app.UseCors("AllowFrontend");
     app.UseResponseCaching();
     app.UseStaticFiles();
