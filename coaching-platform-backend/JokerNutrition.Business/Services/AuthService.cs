@@ -84,6 +84,10 @@ public class AuthService : _BaseService, IAuthService
 
         // Audit: record successful login
         var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        user.LastLoginAt = DateTime.UtcNow;
+        user.LastLoginIp = ip;
+        await _userManager.UpdateAsync(user);
+
         await _auditLogService.LogAsync(
             userId: user.Id,
             performedByName: $"{user.FirstName} {user.LastName}",
@@ -180,16 +184,23 @@ public class AuthService : _BaseService, IAuthService
                 t.ExpiresAt > DateTime.UtcNow)
             ?? throw new UnauthorizedAccessException("Invalid or expired refresh token.");
 
+        if (!storedToken.User.IsActive)
+            throw new UnauthorizedAccessException("Account is deactivated.");
+
         storedToken.IsUsed = true;
         _tokenRepo.Update(storedToken);
         await _tokenRepo.SaveChangesAsync();
 
         var user = storedToken.User;
+        user.LastLoginAt = DateTime.UtcNow;
+        var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        user.LastLoginIp = ip;
+        await _userManager.UpdateAsync(user);
+
         var roles = await _userManager.GetRolesAsync(user);
         var role = roles.FirstOrDefault() ?? "Athlete";
 
         // Audit: record successful login
-        var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
         await _auditLogService.LogAsync(
             userId: user.Id,
             performedByName: $"{user.FirstName} {user.LastName}",

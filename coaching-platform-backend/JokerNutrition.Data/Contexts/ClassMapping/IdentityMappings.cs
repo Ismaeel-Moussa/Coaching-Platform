@@ -11,7 +11,10 @@ public class UserMapping : IEntityTypeConfiguration<User>
         builder.Property(u => u.FirstName).HasMaxLength(100).IsRequired();
         builder.Property(u => u.LastName).HasMaxLength(100).IsRequired();
         builder.Property(u => u.ProfilePictureUrl).HasMaxLength(500);
+        builder.Property(u => u.LastLoginIp).HasMaxLength(45);
+        builder.Property(u => u.DeactivationReason).HasMaxLength(500);
         builder.Property(u => u.CreatedAt).IsRequired();
+        builder.HasIndex(u => new { u.IsActive, u.LastLoginAt }).HasDatabaseName("IX_AspNetUsers_IsActive_LastLoginAt");
     }
 }
 
