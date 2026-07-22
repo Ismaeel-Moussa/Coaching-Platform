@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Alert } from 'antd';
+import { Spin, Alert, Tag } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useGetProfile, useUpdateProfile, useChangePassword, useUploadAvatar } from '../../../hooks/useProfile/useProfile';
+import { useMyOnboardingAssessment } from '../../../hooks/useOnboarding/useOnboarding';
 import './Profile.scss';
 
 const Profile: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { language, setLanguage } = useLanguage();
   const { data: profile, isLoading, error } = useGetProfile();
+  const { data: onboardingData } = useMyOnboardingAssessment();
   const updateProfileMutation = useUpdateProfile();
   const changePasswordMutation = useChangePassword();
   const uploadAvatarMutation = useUploadAvatar();
@@ -288,6 +292,49 @@ const Profile: React.FC = () => {
                 {updateProfileMutation.isPending ? t('profile:personal.saveBtnPending') : t('profile:personal.saveBtn')}
               </button>
             </form>
+
+            {/* Initial Assessment Section for Athletes */}
+            {profile.role === 'Athlete' && (
+              <div className="profile-page__assessment-section fade-in">
+                <h2 className="profile-page__section-title profile-page__section-title--spacing">
+                  {t('profile:assessment.title')}
+                </h2>
+                <div className="profile-page__assessment-card">
+                  <div className="profile-page__assessment-info">
+                    <div className="profile-page__assessment-title-row">
+                      <span className="material-symbols-outlined profile-page__assessment-icon">assignment_ind</span>
+                      <h3 className="profile-page__assessment-heading">
+                        {t('common:nav.onboarding')}
+                      </h3>
+                      {onboardingData?.status && (
+                        <Tag
+                          color={
+                            onboardingData.status === 'Reviewed'
+                              ? 'green'
+                              : onboardingData.status === 'Submitted'
+                              ? 'blue'
+                              : 'gold'
+                          }
+                        >
+                          {t(`athlete:onboarding.status.${onboardingData.status}`)}
+                        </Tag>
+                      )}
+                    </div>
+                    <p className="profile-page__assessment-desc">
+                      {t('profile:assessment.desc')}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="profile-page__assessment-btn"
+                    onClick={() => navigate('/athlete/onboarding')}
+                  >
+                    <span>{t('profile:assessment.viewBtn')}</span>
+                    <span className="material-symbols-outlined">arrow_forward</span>
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Dedicated Language preference Section */}
             <div className="profile-page__language-section fade-in">

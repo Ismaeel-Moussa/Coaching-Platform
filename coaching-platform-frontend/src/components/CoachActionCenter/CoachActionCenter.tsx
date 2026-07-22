@@ -8,6 +8,7 @@ import './CoachActionCenter.scss';
 interface CoachActionCenterProps {
   items: CoachActionItemDto[];
   isLoading: boolean;
+  maxItems?: number;
 }
 
 const actionIcons: Record<CoachActionType, string> = {
@@ -17,9 +18,11 @@ const actionIcons: Record<CoachActionType, string> = {
   ComplianceAlert: 'warning',
 };
 
-const CoachActionCenter: React.FC<CoachActionCenterProps> = ({ items, isLoading }) => {
+const CoachActionCenter: React.FC<CoachActionCenterProps> = ({ items, isLoading, maxItems }) => {
   const { t } = useTranslation(['coach']);
   const navigate = useNavigate();
+
+  const displayedItems = maxItems ? items.slice(0, maxItems) : items;
 
   const openAction = (item: CoachActionItemDto) => {
     switch (item.type) {
@@ -90,7 +93,7 @@ const CoachActionCenter: React.FC<CoachActionCenterProps> = ({ items, isLoading 
         />
       ) : (
         <div className="coach-action-center__list">
-          {items.map((item) => (
+          {displayedItems.map((item) => (
             <article key={`${item.athleteId}-${item.type}`} className="coach-action-center__item">
               <div className={`coach-action-center__type-icon coach-action-center__type-icon--${item.priority.toLowerCase()}`}>
                 <span className="material-symbols-outlined">{actionIcons[item.type]}</span>

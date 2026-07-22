@@ -94,11 +94,11 @@
   // KPI cards
   &__kpis {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: var(--space-sm);
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
 
-    @media (max-width: 1100px) and (min-width: 601px) {
-      grid-template-columns: repeat(2, 1fr);
+    @media (max-width: 1280px) {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
 
     @media (max-width: 600px) {
@@ -110,22 +110,23 @@
     background-color: var(--color-white);
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-card);
-    padding: 20px;
+    padding: 16px 18px;
     display: flex;
-    align-items: center;
-    gap: 16px;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 132px;
     box-shadow: var(--shadow-sm);
     position: relative;
     overflow: hidden;
 
     &--alert {
       border-color: rgba(186, 26, 26, 0.3);
-      background-color: rgba(186, 26, 26, 0.01);
+      background-color: rgba(186, 26, 26, 0.015);
     }
 
     &--attention {
-      border-color: rgba(var(--color-gold-rgb), 0.5);
-      background-color: rgba(var(--color-gold-rgb), 0.025);
+      border-color: rgba(var(--color-gold-rgb), 0.4);
+      background-color: rgba(var(--color-gold-rgb), 0.02);
     }
 
     &--clickable {
@@ -133,24 +134,38 @@
       transition: all 0.2s ease-in-out;
 
       &:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
         border-color: var(--color-gold);
       }
     }
   }
 
+  &__kpi-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 12px;
+  }
+
+  &__kpi-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
   &__kpi-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius-full);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 
     span {
-      font-size: 24px;
+      font-size: 22px;
     }
 
     &--navy {
@@ -159,8 +174,8 @@
     }
 
     &--red {
-      background-color: var(--color-red-bg);
-      color: var(--color-red);
+      background-color: rgba(186, 26, 26, 0.1);
+      color: var(--color-red-bright);
     }
 
     &--gold {
@@ -171,66 +186,67 @@
 
   &__kpi-chart {
     position: relative;
-    width: 80px;
-    height: 80px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
 
-    &-text {
+    svg {
+      transform: rotate(-90deg);
+    }
+
+    &-icon {
       position: absolute;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-gold-text);
+
+      span {
+        font-size: 18px;
+      }
     }
   }
 
-  &__kpi-info {
-    display: flex;
-    flex-direction: column;
+  &__kpi-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--color-navy);
+    line-height: 1.1;
+    letter-spacing: -0.5px;
   }
 
   &__kpi-label {
-    font-size: 13px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    line-height: 1.3;
+    margin-top: 2px;
+  }
+
+  &__kpi-sub {
+    font-size: 11px;
     color: var(--color-text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 500;
-  }
-
-  &__kpi-value {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--color-navy);
-    line-height: 1.2;
-  }
-
-  &__kpi-value-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 8px;
   }
 
   &__kpi-alert-badge {
     font-size: 10px;
     font-weight: 700;
-    background-color: var(--color-red);
-    color: var(--color-white);
-    padding: 2px 6px;
+    background-color: rgba(186, 26, 26, 0.12);
+    color: var(--color-red-bright);
+    border: 1px solid rgba(186, 26, 26, 0.25);
+    padding: 3px 8px;
     border-radius: var(--radius-full);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
 
     &--gold {
-      color: var(--color-navy);
-      background-color: var(--color-gold);
+      color: var(--color-gold-text);
+      background-color: var(--color-gold-bg);
+      border-color: rgba(253, 192, 3, 0.3);
     }
-  }
-
-  &__kpi-sub {
-    font-size: 12px;
-    color: var(--color-text-secondary);
   }
 
   // Dashboard Panels Grid
