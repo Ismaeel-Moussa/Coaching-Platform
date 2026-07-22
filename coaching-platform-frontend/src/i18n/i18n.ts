@@ -8,12 +8,14 @@ import enAuth from './locales/en/auth.json';
 import enAthlete from './locales/en/athlete.json';
 import enCoach from './locales/en/coach.json';
 import enProfile from './locales/en/profile.json';
+import enAdmin from './locales/en/admin.json';
 
 import arCommon from './locales/ar/common.json';
 import arAuth from './locales/ar/auth.json';
 import arAthlete from './locales/ar/athlete.json';
 import arCoach from './locales/ar/coach.json';
 import arProfile from './locales/ar/profile.json';
+import arAdmin from './locales/ar/admin.json';
 
 const resources = {
   en: {
@@ -22,6 +24,7 @@ const resources = {
     athlete: enAthlete,
     coach: enCoach,
     profile: enProfile,
+    admin: enAdmin,
   },
   ar: {
     common: arCommon,
@@ -29,6 +32,7 @@ const resources = {
     athlete: arAthlete,
     coach: arCoach,
     profile: arProfile,
+    admin: arAdmin,
   },
 };
 
@@ -38,7 +42,7 @@ i18n
   .init({
     resources,
     fallbackLng: 'en',
-    ns: ['common', 'auth', 'athlete', 'coach', 'profile'],
+    ns: ['common', 'auth', 'athlete', 'coach', 'profile', 'admin'],
     defaultNS: 'common',
     interpolation: {
       escapeValue: false, // React already safes from XSS

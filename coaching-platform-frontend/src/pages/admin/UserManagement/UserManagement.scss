@@ -1,0 +1,162 @@
+.admin-user-management-page {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    h2 {
+      margin: 0;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-color, #1f2937);
+    }
+
+    .page-subtitle {
+      margin: 4px 0 0 0;
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+  }
+
+  .summary-cards-row {
+    margin-bottom: 24px;
+
+    .metric-card {
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+      }
+    }
+  }
+
+  .filter-card {
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .table-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+
+    .user-name {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .user-email {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
+    .user-ip {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      font-family: monospace;
+    }
+
+    .login-online {
+      color: #52c41a;
+      font-weight: 600;
+    }
+
+    .text-muted {
+      color: #9ca3af;
+      font-size: 0.85rem;
+    }
+  }
+
+  .impact-box {
+    background-color: #fffbe6;
+    border: 1px solid #ffe58f;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 16px 0;
+
+    h4 {
+      margin: 0 0 8px 0;
+      color: #d48806;
+      font-size: 0.95rem;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 0.88rem;
+
+      li {
+        margin-bottom: 4px;
+      }
+    }
+  }
+
+  .deactivation-form {
+    margin-top: 16px;
+  }
+
+  .drawer-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+  }
+
+  .audit-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .audit-item {
+      padding: 12px 16px;
+      border-radius: 8px;
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+
+      .audit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+
+        .audit-action {
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        .audit-date {
+          font-size: 0.8rem;
+          color: #6b7280;
+        }
+      }
+
+      .audit-details {
+        font-size: 0.85rem;
+        color: #4b5563;
+
+        code {
+          background: #eef2ff;
+          color: #4f46e5;
+          padding: 2px 6px;
+          border-radius: 4px;
+        }
+
+        .audit-notes {
+          margin-top: 4px;
+          color: #6b7280;
+          font-style: italic;
+        }
+      }
+    }
+  }
+}

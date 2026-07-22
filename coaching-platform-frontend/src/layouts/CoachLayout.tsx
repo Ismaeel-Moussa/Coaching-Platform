@@ -34,11 +34,17 @@ const CoachLayout: React.FC = () => {
   const { unreadCount } = useNotifications();
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
+  const isAdmin = user?.role === 'Admin';
 
   const [collapsed, setCollapsed] = useState<boolean>(
     () => localStorage.getItem(STORAGE_KEY) === 'true',
   );
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const navItems = [
+    ...coachNavItems,
+    ...(isAdmin ? [{ path: '/coach/admin/users', icon: 'manage_accounts', labelKey: 'nav.userMonitoring' }] : []),
+  ];
 
   const toggleCollapsed = () => {
     setCollapsed((prev) => {
@@ -85,7 +91,7 @@ const CoachLayout: React.FC = () => {
 
         {/* Nav */}
         <nav className="coach-layout__nav">
-          {coachNavItems.map((item) => {
+          {navItems.map((item) => {
             const labelText = t(item.labelKey);
             return (
               <Tooltip
@@ -214,7 +220,7 @@ const CoachLayout: React.FC = () => {
         </div>
         <hr className="coach-layout__drawer-divider" />
         <nav className="coach-layout__drawer-nav">
-          {coachNavItems.map((item) => (
+          {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}

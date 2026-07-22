@@ -54,6 +54,8 @@ const PageLoader = () => (
   </div>
 );
 
+const UserManagement = lazy(() => import('../pages/admin/UserManagement/UserManagement'));
+
 export const router = createBrowserRouter([
   // ── Root redirect ──────────────────────────────────────────────────────────
   { path: '/', element: <Navigate to="/sign-in" replace /> },
@@ -310,6 +312,16 @@ export const router = createBrowserRouter([
           <Suspense fallback={<PageLoader />}>
             <InvitationManagement />
           </Suspense>
+        ),
+      },
+      {
+        path: 'admin/users',
+        element: (
+          <RoleGuard allowedRoles={['Admin']}>
+            <Suspense fallback={<PageLoader />}>
+              <UserManagement />
+            </Suspense>
+          </RoleGuard>
         ),
       },
       {

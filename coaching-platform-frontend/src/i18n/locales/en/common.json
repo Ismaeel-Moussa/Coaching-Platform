@@ -26,7 +26,8 @@
     "feedback": "Coach Feedback",
     "signOut": "Sign Out",
     "more": "More",
-    "history": "History"
+    "history": "History",
+    "userMonitoring": "User Monitoring"
   },
   "actions": {
     "back": "Back",

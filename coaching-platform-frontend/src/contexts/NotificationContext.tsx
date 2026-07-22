@@ -168,6 +168,20 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       });
     });
 
+    // Listen to UserEvicted real-time account suspension signal
+    connection.on('UserEvicted', (data: { reason?: string }) => {
+      notification.warning({
+        message: 'Account Suspended',
+        description: data?.reason || 'Your account has been deactivated by an administrator.',
+        placement: 'topRight',
+        duration: 8,
+      });
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    });
+
     // Coaches listen to AthleteActivity silent invalidation events
     if (isCoach) {
       connection.on('AthleteActivity', (event: { type: string; athleteId: number; athleteUserId?: number }) => {

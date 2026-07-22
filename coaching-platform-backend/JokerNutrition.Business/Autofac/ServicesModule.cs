@@ -43,7 +43,8 @@ public class ServicesModule : Module
         builder.RegisterType<CheckInService>().As<ICheckInService>().InstancePerLifetimeScope();
         builder.RegisterType<OnboardingAssessmentService>().As<IOnboardingAssessmentService>().InstancePerLifetimeScope();
 
-        // ─── Day 7: Audit Logging ─────────────────────────────────────────
+        // ─── Day 7: Audit Logging & Admin User Management ────────────────
         builder.RegisterType<AuditLogService>().As<IAuditLogService>().InstancePerLifetimeScope();
+        builder.RegisterType<AdminUserService>().As<IAdminUserService>().InstancePerLifetimeScope();
     }
 }
