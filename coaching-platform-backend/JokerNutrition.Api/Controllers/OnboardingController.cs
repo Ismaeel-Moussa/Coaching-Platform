@@ -12,7 +12,6 @@ namespace JokerNutrition.Api.Controllers;
 [Route("api/onboarding")]
 [Authorize]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-[ServiceFilter(typeof(ApiExceptionFilter))]
 public class OnboardingController : ControllerBase
 {
     private readonly IOnboardingAssessmentService _service;

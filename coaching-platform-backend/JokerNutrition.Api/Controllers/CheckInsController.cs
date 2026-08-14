@@ -13,7 +13,6 @@ namespace JokerNutrition.Api.Controllers;
 [Route("api/checkins")]
 [Authorize]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-[ServiceFilter(typeof(ApiExceptionFilter))]
 public class CheckInsController : ControllerBase
 {
     private readonly ICheckInService _checkInService;

@@ -9,7 +9,6 @@ namespace JokerNutrition.Api.Controllers;
 
 [ApiController]
 [Route("api/nutrition-plans")]
-[ServiceFilter(typeof(ApiExceptionFilter))]
 [Authorize]
 public class NutritionPlansController : ControllerBase
 {

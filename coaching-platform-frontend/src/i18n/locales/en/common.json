@@ -30,6 +30,7 @@
     "userMonitoring": "User Monitoring"
   },
   "actions": {
+    "retry": "Retry",
     "back": "Back",
     "next": "Next",
     "save": "Save Changes",

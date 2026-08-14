@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Skeleton } from 'antd';
 import { useTranslation, Trans } from 'react-i18next';
 import { useGetDashboard } from '../../../hooks/useAthlete/useAthlete';
@@ -19,6 +19,7 @@ const WORKOUT_STATUS_CONFIG = {
 const AthleteDashboard: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const today = getTodayIso();
 
   const { data, isLoading, error } = useGetDashboard();
@@ -26,7 +27,7 @@ const AthleteDashboard: React.FC = () => {
   const updateStepsMutation = useUpdateSteps(today);
 
   React.useEffect(() => {
-    if (window.location.hash === '#coach-feedback' && data) {
+    if (location.hash === '#coach-feedback' && data) {
       const timer = setTimeout(() => {
         const element = document.getElementById('coach-feedback-card');
         if (element) {
@@ -39,7 +40,7 @@ const AthleteDashboard: React.FC = () => {
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [data, window.location.hash]);
+  }, [data, location.hash]);
 
   const handleAddWater = () => {
     if (!data) return;

@@ -10,7 +10,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('antd', () => ({
-  Button: ({ children, icon, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { icon?: ReactNode }) => (
+  Button: ({ children, icon, danger, loading, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { icon?: ReactNode; danger?: boolean; loading?: boolean }) => (
     <button {...props}>{icon}{children}</button>
   ),
   Progress: ({ percent }: { percent: number }) => <div>{percent}%</div>,

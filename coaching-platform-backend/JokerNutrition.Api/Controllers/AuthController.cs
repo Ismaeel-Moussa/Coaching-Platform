@@ -7,7 +7,6 @@ namespace JokerNutrition.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-[ServiceFilter(typeof(ApiExceptionFilter))]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;

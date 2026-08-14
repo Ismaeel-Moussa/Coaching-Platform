@@ -10,7 +10,6 @@ namespace JokerNutrition.Api.Controllers;
 [ApiController]
 [Route("api/notifications")]
 [Authorize]
-[ServiceFilter(typeof(ApiExceptionFilter))]
 public class NotificationsController : ControllerBase
 {
     private readonly INotificationService _notificationService;

@@ -11,7 +11,6 @@ namespace JokerNutrition.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-[ServiceFilter(typeof(Filters.ApiExceptionFilter))]
 public class ExercisesController : ControllerBase
 {
     private readonly IExerciseService _exerciseService;

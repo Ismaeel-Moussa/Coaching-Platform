@@ -9,7 +9,6 @@ namespace JokerNutrition.Api.Controllers;
 [ApiController]
 [Route("api/admin")]
 [Authorize(Roles = "Admin")]
-[ServiceFilter(typeof(ApiExceptionFilter))]
 public class AdminController : ControllerBase
 {
     private readonly IAdminUserService _adminUserService;
