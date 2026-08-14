@@ -88,7 +88,6 @@ public class RecipeService : _BaseService, IRecipeService
             {
                 var searchLower = search.ToLower();
                 filtered = filtered.Where(r => r.Name.ToLower().Contains(searchLower)
-                    || (r.NameAr != null && r.NameAr.ToLower().Contains(searchLower))
                     || (r.Description != null && r.Description.ToLower().Contains(searchLower)));
             }
 

@@ -64,12 +64,10 @@ export interface NutritionPlanBlockAdherenceDto {
   mealBlockId: number;
   orderIndex: number;
   label: string;
-  labelAr: string | null;
   targetCalories: number | null;
   status: NutritionPlanBlockStatus;
   mealOptionId: number | null;
   optionLabel: string | null;
-  optionLabelAr: string | null;
   loggedMealType: MealType | null;
   servings: number | null;
   loggedAt: string | null;
@@ -78,7 +76,6 @@ export interface NutritionPlanBlockAdherenceDto {
 export interface NutritionPlanAdherenceDto {
   assignmentId: number;
   planName: string;
-  planNameAr: string | null;
   dayType: NutritionPlanDayType;
   isPartialDay: boolean;
   completedBlocks: number;

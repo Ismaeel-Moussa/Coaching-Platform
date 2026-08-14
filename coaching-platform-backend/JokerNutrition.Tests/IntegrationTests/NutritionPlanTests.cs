@@ -105,7 +105,6 @@ public class NutritionPlanTests : IClassFixture<TestWebAppFactory>
                 {
                     Id = foodId,
                     Name = "Plan diary food",
-                    NameAr = "طعام الخطة",
                     ContentStatus = ContentStatus.Published,
                     CaloriesPer100g = 100,
                     ProteinPer100g = 20,
@@ -331,8 +330,7 @@ public class NutritionPlanTests : IClassFixture<TestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<JokerNutritionContext>();
             db.Foods.Add(new Food
             {
-                Name = "Arabic searchable food",
-                NameAr = uniqueArabicName,
+                Name = uniqueArabicName,
                 CaloriesPer100g = 100,
                 ProteinPer100g = 10,
                 CarbsPer100g = 10,
@@ -347,7 +345,7 @@ public class NutritionPlanTests : IClassFixture<TestWebAppFactory>
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var json = JsonNode.Parse(body)!.AsObject();
-        Assert.Contains(json["items"]!.AsArray(), item => item!["nameAr"]!.GetValue<string>() == uniqueArabicName);
+        Assert.Contains(json["items"]!.AsArray(), item => item!["name"]!.GetValue<string>() == uniqueArabicName);
     }
 
     [Fact]

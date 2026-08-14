@@ -5,7 +5,6 @@ export type FoodCategory = 'Protein' | 'Carbs' | 'Fat' | 'Vegetable' | 'Dairy' |
 export interface FoodDto {
   id: number;
   name: string;
-  nameAr?: string | null;
   category: FoodCategory;
   caloriesPer100g: number;
   proteinPer100g: number;

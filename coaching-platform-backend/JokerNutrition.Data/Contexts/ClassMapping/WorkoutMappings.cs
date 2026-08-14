@@ -13,9 +13,7 @@ public class ExerciseMapping : IEntityTypeConfiguration<Exercise>
         builder.Property(e => e.SeedKey).HasMaxLength(200);
         builder.HasIndex(e => e.SeedKey).IsUnique();
         builder.Property(e => e.Name).HasMaxLength(200).IsRequired();
-        builder.Property(e => e.NameAr).HasMaxLength(200);
-        builder.Property(e => e.Instructions).HasMaxLength(2000);
-        builder.Property(e => e.InstructionsAr).HasMaxLength(4000);
+        builder.Property(e => e.Instructions).HasMaxLength(4000);
         builder.Property(e => e.EquipmentRequired).HasMaxLength(200);
         builder.Property(e => e.YouTubeVideoId).HasMaxLength(20);
         builder.Property(e => e.VideoUrl).HasMaxLength(1000);
@@ -34,11 +32,8 @@ public class WorkoutTemplateMapping : IEntityTypeConfiguration<WorkoutTemplate>
         builder.Property(wt => wt.SeedKey).HasMaxLength(200);
         builder.HasIndex(wt => wt.SeedKey).IsUnique();
         builder.Property(wt => wt.Name).HasMaxLength(200).IsRequired();
-        builder.Property(wt => wt.NameAr).HasMaxLength(200);
-        builder.Property(wt => wt.Description).HasMaxLength(1000);
-        builder.Property(wt => wt.DescriptionAr).HasMaxLength(2000);
-        builder.Property(wt => wt.Guidance).HasMaxLength(4000);
-        builder.Property(wt => wt.GuidanceAr).HasMaxLength(8000);
+        builder.Property(wt => wt.Description).HasMaxLength(2000);
+        builder.Property(wt => wt.Guidance).HasMaxLength(8000);
         builder.Property(wt => wt.SourceDocument).HasMaxLength(300);
         builder.Property(wt => wt.ContentStatus).HasDefaultValue(JokerNutrition.Data.Enums.ContentStatus.Published);
         builder.Property(wt => wt.ContentVersion).HasDefaultValue(1);
@@ -53,11 +48,8 @@ public class WorkoutTemplateDayMapping : IEntityTypeConfiguration<WorkoutTemplat
         builder.ToTable("WorkoutTemplateDays");
         builder.HasKey(d => d.Id);
         builder.Property(d => d.DayLabel).HasMaxLength(100).IsRequired();
-        builder.Property(d => d.DayLabelAr).HasMaxLength(100);
-        builder.Property(d => d.Instructions).HasMaxLength(2000);
-        builder.Property(d => d.InstructionsAr).HasMaxLength(4000);
-        builder.Property(d => d.CardioInstructions).HasMaxLength(1000);
-        builder.Property(d => d.CardioInstructionsAr).HasMaxLength(2000);
+        builder.Property(d => d.Instructions).HasMaxLength(4000);
+        builder.Property(d => d.CardioInstructions).HasMaxLength(2000);
         builder.HasOne(d => d.WorkoutTemplate).WithMany(t => t.Days).HasForeignKey(d => d.WorkoutTemplateId).OnDelete(DeleteBehavior.Cascade);
     }
 }
@@ -71,8 +63,7 @@ public class TemplateExerciseMapping : IEntityTypeConfiguration<TemplateExercise
         builder.Property(te => te.TargetReps).HasMaxLength(20);
         builder.Property(te => te.ProgressiveOverloadTargetKg).HasPrecision(6, 2);
         builder.Property(te => te.TargetRir).HasPrecision(3, 1);
-        builder.Property(te => te.CoachNotes).HasMaxLength(1000);
-        builder.Property(te => te.CoachNotesAr).HasMaxLength(2000);
+        builder.Property(te => te.CoachNotes).HasMaxLength(2000);
         builder.Property(te => te.AlternativeGroupKey).HasMaxLength(100);
         builder.HasOne(te => te.Day).WithMany(d => d.Exercises).HasForeignKey(te => te.WorkoutTemplateDayId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(te => te.Exercise).WithMany(e => e.TemplateExercises).HasForeignKey(te => te.ExerciseId).OnDelete(DeleteBehavior.Restrict);

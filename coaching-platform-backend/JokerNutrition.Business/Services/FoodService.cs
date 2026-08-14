@@ -48,8 +48,7 @@ public class FoodService : _BaseService, IFoodService
             if (!string.IsNullOrWhiteSpace(form.Search))
             {
                 var search = form.Search.Trim().ToLower();
-                query = query.Where(f => f.Name.ToLower().Contains(search) ||
-                                         (f.NameAr != null && f.NameAr.ToLower().Contains(search)));
+                query = query.Where(f => f.Name.ToLower().Contains(search));
             }
 
             if (!string.IsNullOrWhiteSpace(form.Category))

@@ -20,7 +20,6 @@ export interface RecipeIngredientDto {
   unit?: string;
   measurementState?: string;
   displayText?: string;
-  displayTextAr?: string;
   isOptional?: boolean;
   calories: number;
   protein: number;
@@ -30,8 +29,7 @@ export interface RecipeIngredientDto {
 
 export interface RecipeStepDto {
   orderIndex: number;
-  instruction?: string;
-  instructionAr: string;
+  instruction: string;
   mediaUrl?: string;
 }
 
@@ -39,11 +37,8 @@ export interface RecipeDto {
   id: number;
   seedKey?: string;
   name: string;
-  nameAr?: string;
   description: string;
-  descriptionAr?: string;
   usageNotes?: string;
-  usageNotesAr?: string;
   contentStatus?: 'Draft' | 'InReview' | 'Published' | 'Archived';
   category: RecipeCategory;
   prepTimeMinutes: number;

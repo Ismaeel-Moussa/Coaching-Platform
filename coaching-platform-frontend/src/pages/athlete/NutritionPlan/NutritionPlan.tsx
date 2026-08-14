@@ -42,8 +42,8 @@ const NutritionPlan: React.FC = () => {
 
   const { plan } = assignment;
   const itemName = (item: NutritionOptionItem) => {
-    if (item.foodName) return ar ? item.foodNameAr || item.foodName : item.foodName;
-    if (item.recipeName) return ar ? item.recipeNameAr || item.recipeName : item.recipeName;
+    if (item.foodName) return item.foodName;
+    if (item.recipeName) return item.recipeName;
     return item.itemName;
   };
   const unitLabel = (unit: NutritionOptionItem['unit']) => {

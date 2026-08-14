@@ -27,11 +27,8 @@ public class SupplementCatalogItemMapping : IEntityTypeConfiguration<SupplementC
         builder.Property(s => s.SeedKey).HasMaxLength(200).IsRequired();
         builder.HasIndex(s => s.SeedKey).IsUnique();
         builder.Property(s => s.Name).HasMaxLength(200).IsRequired();
-        builder.Property(s => s.NameAr).HasMaxLength(200);
-        builder.Property(s => s.Education).HasMaxLength(4000);
-        builder.Property(s => s.EducationAr).HasMaxLength(8000);
-        builder.Property(s => s.SafetyWarning).HasMaxLength(2000);
-        builder.Property(s => s.SafetyWarningAr).HasMaxLength(4000);
+        builder.Property(s => s.Education).HasMaxLength(8000);
+        builder.Property(s => s.SafetyWarning).HasMaxLength(4000);
         builder.Property(s => s.SourceDocument).HasMaxLength(300);
         builder.Property(s => s.ContentVersion).HasDefaultValue(1);
     }

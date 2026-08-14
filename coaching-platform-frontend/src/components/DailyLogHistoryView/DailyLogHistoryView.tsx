@@ -256,8 +256,8 @@ const DailyLogHistoryView: React.FC<DailyLogHistoryViewProps> = ({ athleteId, da
                   <div className="daily-history-view__plan-blocks">
                     {nutritionPlanAdherence.blocks.map(block => {
                       const status = blockStatus[block.status] ?? blockStatus.NotTracked;
-                      const blockLabel = isArabic ? block.labelAr || block.label : block.label;
-                      const optionLabel = isArabic ? block.optionLabelAr || block.optionLabel : block.optionLabel;
+                      const blockLabel = block.label;
+                      const optionLabel = block.optionLabel;
                       return (
                         <article key={block.mealBlockId} className={`daily-history-view__plan-block daily-history-view__plan-block--${block.status.toLowerCase()}`}>
                           <div className="daily-history-view__plan-block-header">
@@ -379,7 +379,7 @@ const DailyLogHistoryView: React.FC<DailyLogHistoryViewProps> = ({ athleteId, da
                                 <div key={e.id} className="meal-entry-item">
                                   <div className="info">
                                     <div className="name-row">
-                                      <span className="name">{(isArabic ? e.nameAr || e.name : e.name) ?? e.food?.name ?? e.recipe?.name ?? 'Food'}</span>
+                                      <span className="name">{e.name ?? e.food?.name ?? e.recipe?.name ?? 'Food'}</span>
                                       {e.nutritionPlanDiaryEntryId != null && (
                                         <Tag color="gold">{t('coach:clientDetail.planAdherence.fromPlan')}</Tag>
                                       )}

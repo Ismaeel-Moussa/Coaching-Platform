@@ -57,10 +57,8 @@ public class NutritionOptionItemDto
     public int OrderIndex { get; set; }
     public int? FoodId { get; set; }
     public string? FoodName { get; set; }
-    public string? FoodNameAr { get; set; }
     public int? RecipeId { get; set; }
     public string? RecipeName { get; set; }
-    public string? RecipeNameAr { get; set; }
     public string? ItemName { get; set; }
     public decimal Quantity { get; set; }
     public IngredientUnit Unit { get; set; }

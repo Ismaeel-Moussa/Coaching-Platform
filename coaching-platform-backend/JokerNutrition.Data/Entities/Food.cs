@@ -7,7 +7,6 @@ public class Food
     public int Id { get; set; }
     public string? SeedKey { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? NameAr { get; set; }
     public string? Category { get; set; }
     public bool IsCustom { get; set; } = false;
     public FoodPreparationState PreparationState { get; set; } = FoodPreparationState.Unspecified;

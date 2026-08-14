@@ -84,7 +84,7 @@ const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType,
             <div key={entry.id} className="meal-section__row">
               <div className="meal-section__food-info">
                 <span className="meal-section__food-name">
-                  {(ar ? entry.nameAr || entry.name : entry.name) ?? entry.food?.name ?? entry.recipe?.name ?? t('common:status.unknown')}
+                  {entry.name ?? entry.food?.name ?? entry.recipe?.name ?? t('common:status.unknown')}
                 </span>
                 {entry.nutritionPlanDiaryEntryId != null && <span className="meal-section__plan-badge">{t('athlete:mealLogger.planMeal')}</span>}
                 <span className="meal-section__food-qty mono">
@@ -284,7 +284,7 @@ const MealLogger: React.FC = () => {
           const percent = dailyTarget > 0 ? Math.min(100, Math.round((totalCalories / dailyTarget) * 100)) : 0;
           
           const isExpanded = expandedMeal === type;
-          const foodNames = entries.map(e => (ar ? e.nameAr || e.name : e.name) ?? e.food?.name ?? e.recipe?.name ?? '').filter(Boolean).join(', ');
+          const foodNames = entries.map(e => e.name ?? e.food?.name ?? e.recipe?.name ?? '').filter(Boolean).join(', ');
           
           return (
             <div key={type} className={`meal-logger__row-wrapper ${isExpanded ? 'is-expanded' : ''}`}>

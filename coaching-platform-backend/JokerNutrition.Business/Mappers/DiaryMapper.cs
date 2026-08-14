@@ -35,7 +35,6 @@ public static class DiaryMapper
             Name = log.Recipe.Name
         },
         Name = log.SnapshotName ?? log.Food?.Name ?? log.Recipe?.Name,
-        NameAr = log.SnapshotNameAr ?? log.Food?.NameAr ?? log.Recipe?.NameAr,
         NutritionPlanDiaryEntryId = log.NutritionPlanDiaryEntryId,
         QuantityGrams = log.QuantityGrams,
         Calories = log.Calories,
