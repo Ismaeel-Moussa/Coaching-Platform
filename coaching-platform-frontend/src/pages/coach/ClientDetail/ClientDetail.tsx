@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Skeleton, Input, Button, Avatar, Card, Breadcrumb, Empty, Pagination, Modal, Tag, Progress, Divider, Tabs, DatePicker, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient, useIsFetching } from '@tanstack/react-query';
@@ -31,6 +31,7 @@ const ClientDetail: React.FC = () => {
   const { t, i18n } = useTranslation(['common', 'athlete', 'coach']);
   const { athleteId } = useParams<{ athleteId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const id = athleteId ? parseInt(athleteId, 10) : 0;
 
   const { data: profile, isLoading, error } = useGetAthleteProfile(id);
@@ -77,7 +78,7 @@ const ClientDetail: React.FC = () => {
 
   // Handle tab routing via URL hash
   useEffect(() => {
-    const hash = window.location.hash;
+    const hash = location.hash;
     if (hash === '#onboarding-assessment') {
       setActiveTab('onboarding-assessment');
     } else if (hash === '#check-in-history') {
@@ -85,11 +86,11 @@ const ClientDetail: React.FC = () => {
     } else if (hash === '#daily-history') {
       setActiveTab('history');
     }
-  }, [window.location.hash]);
+  }, [location.hash]);
 
   // Hash scroll check for check-in history section
   useEffect(() => {
-    if (window.location.hash === '#check-in-history' && !isHistoryLoading) {
+    if (location.hash === '#check-in-history' && !isHistoryLoading) {
       const timer = setTimeout(() => {
         const element = document.getElementById('check-in-history-section');
         if (element) {
@@ -98,7 +99,7 @@ const ClientDetail: React.FC = () => {
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [window.location.hash, isHistoryLoading]);
+  }, [location.hash, isHistoryLoading]);
 
   const handleSaveNote = () => {
     if (!noteText.trim()) return;

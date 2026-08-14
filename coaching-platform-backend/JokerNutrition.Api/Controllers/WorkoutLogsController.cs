@@ -8,7 +8,6 @@ namespace JokerNutrition.Api.Controllers;
 [ApiController]
 [Route("api/workouts")]
 [Authorize(Roles = "Athlete")]
-[ServiceFilter(typeof(Filters.ApiExceptionFilter))]
 public class WorkoutLogsController : ControllerBase
 {
     private readonly IWorkoutLogService _workoutLogService;

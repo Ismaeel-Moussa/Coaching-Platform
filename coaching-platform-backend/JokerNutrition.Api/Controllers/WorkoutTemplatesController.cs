@@ -8,7 +8,6 @@ namespace JokerNutrition.Api.Controllers;
 
 [ApiController]
 [Route("api/workout-templates")]
-[ServiceFilter(typeof(ApiExceptionFilter))]
 [Authorize(Roles = "Coach,Admin")]
 public class WorkoutTemplatesController : ControllerBase
 {

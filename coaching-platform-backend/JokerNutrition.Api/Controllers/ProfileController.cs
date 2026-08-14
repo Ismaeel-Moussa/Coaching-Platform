@@ -8,7 +8,6 @@ namespace JokerNutrition.Api.Controllers;
 
 [ApiController]
 [Route("api/profile")]
-[ServiceFilter(typeof(ApiExceptionFilter))]
 [Authorize]
 public class ProfileController : ControllerBase
 {

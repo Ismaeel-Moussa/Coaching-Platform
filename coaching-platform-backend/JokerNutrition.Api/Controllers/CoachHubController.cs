@@ -8,7 +8,6 @@ namespace JokerNutrition.Api.Controllers;
 
 [ApiController]
 [Route("api/coach-hub")]
-[ServiceFilter(typeof(ApiExceptionFilter))]
 [Authorize(Roles = "Coach,Admin")]
 public class CoachHubController : ControllerBase
 {

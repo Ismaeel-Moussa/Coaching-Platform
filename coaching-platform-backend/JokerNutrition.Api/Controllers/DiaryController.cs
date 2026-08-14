@@ -8,7 +8,6 @@ namespace JokerNutrition.Api.Controllers;
 
 [ApiController]
 [Route("api/diary")]
-[ServiceFilter(typeof(ApiExceptionFilter))]
 [Authorize(Roles = "Athlete")]
 public class DiaryController : ControllerBase
 {

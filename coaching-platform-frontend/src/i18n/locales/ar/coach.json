@@ -206,6 +206,18 @@
     "searchPlaceholder": "البحث في القائمة...",
     "noAthleteSelected": "لم يتم اختيار مشترك",
     "noAthleteSelectedDesc": "اختر مشتركاً من القائمة المنسدلة أعلاه لتعديل برنامج التمارين، أهداف التغذية، وجدول المكملات الخاص به.",
+    "readinessEyebrow": "الإعداد المطلوب",
+    "readinessTitle": "جاهزية إعداد المتدرب",
+    "readinessCompleteDesc": "تم إكمال جميع خطوات الإعداد المطلوبة.",
+    "readinessRequiredDesc": "يرجى استكمال الخطوات الناقصة قبل أن يبدأ المتدرب خطته الكاملة.",
+    "requiredSteps": "خطوات مطلوبة",
+    "readinessSteps": {
+      "assessmentReviewed": "تمت مراجعة التقييم المبدئي",
+      "workoutAssigned": "تم تعيين برنامج التمارين",
+      "nutritionPlanAssigned": "تم تعيين خطة التغذية",
+      "nutritionTargetsConfigured": "تم ضبط السعرات والماكروز",
+      "activityTargetsConfigured": "تم ضبط أهداف الماء والخطوات"
+    },
     "workoutProgram": "برنامج التمارين",
     "activeTemplate": "قالب التمارين النشط",
     "changeBtn": "تغيير",

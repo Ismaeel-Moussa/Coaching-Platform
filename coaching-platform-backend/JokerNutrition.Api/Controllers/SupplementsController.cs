@@ -7,7 +7,6 @@ namespace JokerNutrition.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[ServiceFilter(typeof(Filters.ApiExceptionFilter))]
 public class SupplementsController : ControllerBase
 {
     private readonly ISupplementService _supplementService;

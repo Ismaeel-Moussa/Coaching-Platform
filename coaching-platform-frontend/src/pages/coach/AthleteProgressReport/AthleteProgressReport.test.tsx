@@ -51,7 +51,7 @@ vi.mock('antd', () => {
     Alert: ({ message }: { message: ReactNode }) => <div>{message}</div>,
     Avatar: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
     Breadcrumb: () => null,
-    Button: ({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) => <button {...props}>{children}</button>,
+    Button: ({ children, loading, danger, icon, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { loading?: boolean; danger?: boolean; icon?: ReactNode }) => <button {...props}>{icon}{children}</button>,
     Empty,
     Progress: () => null,
     Segmented: () => null,

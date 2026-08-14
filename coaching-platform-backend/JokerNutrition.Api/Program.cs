@@ -130,9 +130,6 @@ try
     builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
     builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
     {
-        // Register JwtTokenHelper
-        containerBuilder.RegisterType<JwtTokenHelper>().As<IJwtTokenHelper>().InstancePerLifetimeScope();
-
         // Register IPrincipal from HttpContext
         containerBuilder.Register(ctx =>
         {
@@ -198,7 +195,10 @@ try
     builder.Services.AddAuthorization();
 
     // 11. Controllers (with UTC DateTime converters to ensure Z suffix)
-    builder.Services.AddControllers()
+    builder.Services.AddControllers(options =>
+        {
+            options.Filters.Add<ApiExceptionFilter>();
+        })
         .AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());

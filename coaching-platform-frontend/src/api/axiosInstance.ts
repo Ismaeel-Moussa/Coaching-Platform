@@ -2,7 +2,8 @@ import axios from 'axios';
 import { message as antMessage } from 'antd';
 import { getRateLimitMessage } from '../utils/rateLimitMessages';
 
-const BASE_URL = import.meta.env.VITE_API_URL as string;
+const rawBaseUrl = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+const BASE_URL = rawBaseUrl ? rawBaseUrl.replace(/\/+$/, '') : '/api';
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,

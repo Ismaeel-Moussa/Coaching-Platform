@@ -9,7 +9,6 @@ namespace JokerNutrition.Api.Controllers;
 
 [ApiController]
 [Route("api/invitations")]
-[ServiceFilter(typeof(ApiExceptionFilter))]
 public class InvitationsController : ControllerBase
 {
     private readonly IInvitationService _invitationService;
