@@ -33,10 +33,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onQuickAdd, onViewDetai
   const { language } = useLanguage();
   const totalTime = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
   const categoryColor = CATEGORY_COLORS[recipe.category];
-  const displayName = language === 'ar' && recipe.nameAr ? recipe.nameAr : recipe.name;
-  const displayDescription = language === 'ar' && recipe.descriptionAr
-    ? recipe.descriptionAr
-    : recipe.description;
+  const displayName = recipe.name;
+  const displayDescription = recipe.description;
 
   return (
     <div className="recipe-card" onClick={() => onViewDetails?.(recipe)}>

@@ -395,21 +395,21 @@ const NutritionPlanEditor: React.FC = () => {
     const options = new Map<number, string>();
     editedPlan?.mealBlocks.flatMap(block => block.options).flatMap(option => option.items)
       .filter(item => item.foodId && item.foodName)
-      .forEach(item => options.set(item.foodId!, ar ? item.foodNameAr || item.foodName! : item.foodName!));
+      .forEach(item => options.set(item.foodId!, item.foodName!));
     foodsQuery.data?.pages.flatMap(result => result.items)
-      .forEach(food => options.set(food.id, ar ? food.nameAr || food.name : food.name));
+      .forEach(food => options.set(food.id, food.name));
     return Array.from(options, ([value, label]) => ({ value, label }));
-  }, [ar, editedPlan, foodsQuery.data]);
+  }, [editedPlan, foodsQuery.data]);
 
   const recipeOptions = useMemo(() => {
     const options = new Map<number, string>();
     editedPlan?.mealBlocks.flatMap(block => block.options).flatMap(option => option.items)
       .filter(item => item.recipeId && item.recipeName)
-      .forEach(item => options.set(item.recipeId!, ar ? item.recipeNameAr || item.recipeName! : item.recipeName!));
+      .forEach(item => options.set(item.recipeId!, item.recipeName!));
     recipesQuery.data?.pages.flatMap(result => result.items)
-      .forEach(recipe => options.set(recipe.id, ar ? recipe.nameAr || recipe.name : recipe.name));
+      .forEach(recipe => options.set(recipe.id, recipe.name));
     return Array.from(options, ([value, label]) => ({ value, label }));
-  }, [ar, editedPlan, recipesQuery.data]);
+  }, [editedPlan, recipesQuery.data]);
 
   const loadMoreOptions = (
     event: React.UIEvent<HTMLDivElement>,

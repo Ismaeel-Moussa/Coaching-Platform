@@ -34,7 +34,6 @@ export interface MealLogDto {
   food: MealLogFoodRef | null;
   recipe: { id: number; name: string } | null;
   name?: string | null;
-  nameAr?: string | null;
   nutritionPlanDiaryEntryId?: number | null;
   quantityGrams: number;
   calories: number;

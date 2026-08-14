@@ -50,7 +50,6 @@ public class MealLog
     public int? RecipeId { get; set; }
     public Recipe? Recipe { get; set; }
     public string? SnapshotName { get; set; }
-    public string? SnapshotNameAr { get; set; }
     public int? NutritionPlanDiaryEntryId { get; set; }
     public NutritionPlanDiaryEntry? NutritionPlanDiaryEntry { get; set; }
     public MealType MealType { get; set; }

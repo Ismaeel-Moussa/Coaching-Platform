@@ -7,11 +7,8 @@ public class Recipe
     public int Id { get; set; }
     public string? SeedKey { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? NameAr { get; set; }
     public string? Description { get; set; }
-    public string? DescriptionAr { get; set; }
     public string? UsageNotes { get; set; }
-    public string? UsageNotesAr { get; set; }
     public RecipeCategory Category { get; set; }
     public int PrepTimeMinutes { get; set; }
     public int CookTimeMinutes { get; set; }
@@ -56,7 +53,6 @@ public class RecipeIngredient
     public IngredientUnit Unit { get; set; } = IngredientUnit.Gram;
     public FoodPreparationState MeasurementState { get; set; } = FoodPreparationState.Unspecified;
     public string? DisplayText { get; set; }
-    public string? DisplayTextAr { get; set; }
     public bool IsOptional { get; set; }
     public string? AlternativeGroupKey { get; set; }
     public int OrderIndex { get; set; }
@@ -68,7 +64,6 @@ public class RecipeStep
     public int RecipeId { get; set; }
     public Recipe Recipe { get; set; } = null!;
     public int OrderIndex { get; set; }
-    public string? Instruction { get; set; }
-    public string InstructionAr { get; set; } = string.Empty;
+    public string Instruction { get; set; } = string.Empty;
     public string? MediaUrl { get; set; }
 }

@@ -296,8 +296,7 @@ public sealed class CatalogImporter(JokerNutritionContext context)
             }
             else if (record.ContentVersion <= entity.ContentVersion) continue;
 
-            entity.Name = record.Name;
-            entity.NameAr = record.NameAr;
+            entity.Name = !string.IsNullOrWhiteSpace(record.NameAr) ? record.NameAr : record.Name;
             entity.Category = record.Category;
             entity.PreparationState = record.PreparationState;
             entity.CaloriesPer100g = record.CaloriesPer100g;
@@ -327,10 +326,8 @@ public sealed class CatalogImporter(JokerNutritionContext context)
             }
             else if (record.ContentVersion <= entity.ContentVersion) continue;
 
-            entity.Name = record.Name;
-            entity.NameAr = record.NameAr;
-            entity.Instructions = record.Instructions;
-            entity.InstructionsAr = record.InstructionsAr;
+            entity.Name = !string.IsNullOrWhiteSpace(record.NameAr) ? record.NameAr : record.Name;
+            entity.Instructions = !string.IsNullOrWhiteSpace(record.InstructionsAr) ? record.InstructionsAr : record.Instructions;
             entity.PrimaryMuscle = record.PrimaryMuscle;
             entity.EquipmentRequired = record.EquipmentRequired;
             entity.VideoUrl = record.VideoUrl;
@@ -371,12 +368,9 @@ public sealed class CatalogImporter(JokerNutritionContext context)
                 entity.Steps = new List<RecipeStep>();
             }
 
-            entity.Name = record.Name;
-            entity.NameAr = record.NameAr;
-            entity.Description = record.Description;
-            entity.DescriptionAr = record.DescriptionAr;
-            entity.UsageNotes = record.UsageNotes;
-            entity.UsageNotesAr = record.UsageNotesAr;
+            entity.Name = !string.IsNullOrWhiteSpace(record.NameAr) ? record.NameAr : record.Name;
+            entity.Description = !string.IsNullOrWhiteSpace(record.DescriptionAr) ? record.DescriptionAr : record.Description;
+            entity.UsageNotes = !string.IsNullOrWhiteSpace(record.UsageNotesAr) ? record.UsageNotesAr : record.UsageNotes;
             entity.Category = record.Category;
             entity.PrepTimeMinutes = record.PrepTimeMinutes;
             entity.CookTimeMinutes = record.CookTimeMinutes;
@@ -402,8 +396,7 @@ public sealed class CatalogImporter(JokerNutritionContext context)
                 DisplayQuantity = item.DisplayQuantity,
                 Unit = item.Unit,
                 MeasurementState = item.MeasurementState,
-                DisplayText = item.DisplayText,
-                DisplayTextAr = item.DisplayTextAr,
+                DisplayText = !string.IsNullOrWhiteSpace(item.DisplayTextAr) ? item.DisplayTextAr : item.DisplayText,
                 IsOptional = item.IsOptional,
                 AlternativeGroupKey = item.AlternativeGroupKey,
                 OrderIndex = item.OrderIndex
@@ -411,8 +404,7 @@ public sealed class CatalogImporter(JokerNutritionContext context)
             entity.Steps = record.Steps.OrderBy(s => s.OrderIndex).Select(step => new RecipeStep
             {
                 OrderIndex = step.OrderIndex,
-                Instruction = step.Instruction,
-                InstructionAr = step.InstructionAr,
+                Instruction = !string.IsNullOrWhiteSpace(step.InstructionAr) ? step.InstructionAr : (!string.IsNullOrWhiteSpace(step.Instruction) ? step.Instruction : string.Empty),
                 MediaUrl = step.MediaUrl
             }).ToList();
 
@@ -455,12 +447,9 @@ public sealed class CatalogImporter(JokerNutritionContext context)
                 entity.Days = new List<WorkoutTemplateDay>();
             }
 
-            entity.Name = record.Name;
-            entity.NameAr = record.NameAr;
-            entity.Description = record.Description;
-            entity.DescriptionAr = record.DescriptionAr;
-            entity.Guidance = record.Guidance;
-            entity.GuidanceAr = record.GuidanceAr;
+            entity.Name = !string.IsNullOrWhiteSpace(record.NameAr) ? record.NameAr : record.Name;
+            entity.Description = !string.IsNullOrWhiteSpace(record.DescriptionAr) ? record.DescriptionAr : record.Description;
+            entity.Guidance = !string.IsNullOrWhiteSpace(record.GuidanceAr) ? record.GuidanceAr : record.Guidance;
             entity.DailyStepTarget = record.DailyStepTarget;
             entity.ContentStatus = record.ContentStatus;
             entity.ContentVersion = record.ContentVersion;
@@ -471,13 +460,10 @@ public sealed class CatalogImporter(JokerNutritionContext context)
             entity.Days = record.Days.OrderBy(d => d.DayNumber).Select(day => new WorkoutTemplateDay
             {
                 DayNumber = day.DayNumber,
-                DayLabel = day.DayLabel,
-                DayLabelAr = day.DayLabelAr,
+                DayLabel = !string.IsNullOrWhiteSpace(day.DayLabelAr) ? day.DayLabelAr : day.DayLabel,
                 IsRestDay = day.IsRestDay,
-                Instructions = day.Instructions,
-                InstructionsAr = day.InstructionsAr,
-                CardioInstructions = day.CardioInstructions,
-                CardioInstructionsAr = day.CardioInstructionsAr,
+                Instructions = !string.IsNullOrWhiteSpace(day.InstructionsAr) ? day.InstructionsAr : day.Instructions,
+                CardioInstructions = !string.IsNullOrWhiteSpace(day.CardioInstructionsAr) ? day.CardioInstructionsAr : day.CardioInstructions,
                 Exercises = day.Exercises.OrderBy(e => e.OrderIndex).Select(item => new TemplateExercise
                 {
                     ExerciseId = exercises[item.ExerciseSeedKey].Id,
@@ -488,8 +474,7 @@ public sealed class CatalogImporter(JokerNutritionContext context)
                     TargetReps = item.TargetReps,
                     RestSeconds = item.RestSeconds,
                     TargetRir = item.TargetRir,
-                    CoachNotes = item.CoachNotes,
-                    CoachNotesAr = item.CoachNotesAr,
+                    CoachNotes = !string.IsNullOrWhiteSpace(item.CoachNotesAr) ? item.CoachNotesAr : item.CoachNotes,
                     AlternativeGroupKey = item.AlternativeGroupKey
                 }).ToList()
             }).ToList();
@@ -591,13 +576,10 @@ public sealed class CatalogImporter(JokerNutritionContext context)
             }
             else if (record.ContentVersion <= entity.ContentVersion) continue;
 
-            entity.Name = record.Name;
-            entity.NameAr = record.NameAr;
+            entity.Name = !string.IsNullOrWhiteSpace(record.NameAr) ? record.NameAr : record.Name;
             entity.Type = record.Type;
-            entity.Education = record.Education;
-            entity.EducationAr = record.EducationAr;
-            entity.SafetyWarning = record.SafetyWarning;
-            entity.SafetyWarningAr = record.SafetyWarningAr;
+            entity.Education = !string.IsNullOrWhiteSpace(record.EducationAr) ? record.EducationAr : record.Education;
+            entity.SafetyWarning = !string.IsNullOrWhiteSpace(record.SafetyWarningAr) ? record.SafetyWarningAr : record.SafetyWarning;
             entity.RequiresClinicianApproval = record.RequiresClinicianApproval;
             entity.ContentStatus = record.ContentStatus;
             entity.ContentVersion = record.ContentVersion;

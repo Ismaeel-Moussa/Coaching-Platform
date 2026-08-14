@@ -199,9 +199,7 @@ const RecipeLibrary: React.FC = () => {
       >
         <p className="recipe-library__meal-modal-copy">
           {t('athlete:recipeLibrary.chooseMealDescription', {
-            name: language === 'ar' && selectedRecipe?.nameAr
-              ? selectedRecipe.nameAr
-              : selectedRecipe?.name,
+            name: selectedRecipe?.name,
           })}
         </p>
         <Radio.Group

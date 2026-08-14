@@ -7,9 +7,7 @@ public class Exercise
     public int Id { get; set; }
     public string? SeedKey { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? NameAr { get; set; }
     public string? Instructions { get; set; }
-    public string? InstructionsAr { get; set; }
     public MuscleGroup PrimaryMuscle { get; set; }
     public string? EquipmentRequired { get; set; }
     public string? YouTubeVideoId { get; set; }

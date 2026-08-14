@@ -544,7 +544,6 @@ public class MealLogService : _BaseService, IMealLogService
     {
         var quantityGrams = await ResolveQuantityGramsAsync(item, servings);
         var snapshotName = item.FoodName ?? item.RecipeName ?? item.ItemName;
-        var snapshotNameAr = item.FoodNameAr ?? item.RecipeNameAr;
 
         if (item.FoodId.HasValue &&
             item.CaloriesPer100Grams.HasValue && item.ProteinPer100Grams.HasValue &&
@@ -557,7 +556,6 @@ public class MealLogService : _BaseService, IMealLogService
                 DailyDiaryId = diaryId,
                 FoodId = foodStillExists ? item.FoodId : null,
                 SnapshotName = snapshotName,
-                SnapshotNameAr = snapshotNameAr,
                 MealType = mealType,
                 QuantityGrams = quantityGrams,
                 Calories = item.CaloriesPer100Grams.Value * factor,
@@ -579,7 +577,6 @@ public class MealLogService : _BaseService, IMealLogService
                 DailyDiaryId = diaryId,
                 RecipeId = recipeStillExists ? item.RecipeId : null,
                 SnapshotName = snapshotName,
-                SnapshotNameAr = snapshotNameAr,
                 MealType = mealType,
                 QuantityGrams = quantityGrams,
                 Calories = item.RecipeTotalCalories.Value * factor,
@@ -595,7 +592,6 @@ public class MealLogService : _BaseService, IMealLogService
         var legacyLog = await CreateMealLogAsync(
             diaryId, mealType, item.FoodId, item.RecipeId, quantityGrams);
         legacyLog.SnapshotName = snapshotName;
-        legacyLog.SnapshotNameAr = snapshotNameAr;
         return legacyLog;
     }
 

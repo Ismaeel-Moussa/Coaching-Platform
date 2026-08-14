@@ -11,11 +11,8 @@ public static class RecipeMapper
         Id = recipe.Id,
         SeedKey = recipe.SeedKey,
         Name = recipe.Name,
-        NameAr = recipe.NameAr,
         Description = recipe.Description,
-        DescriptionAr = recipe.DescriptionAr,
         UsageNotes = recipe.UsageNotes,
-        UsageNotesAr = recipe.UsageNotesAr,
         Category = recipe.Category,
         ContentStatus = recipe.ContentStatus,
         PrepTimeMinutes = recipe.PrepTimeMinutes,
@@ -36,7 +33,6 @@ public static class RecipeMapper
         {
             OrderIndex = step.OrderIndex,
             Instruction = step.Instruction,
-            InstructionAr = step.InstructionAr,
             MediaUrl = step.MediaUrl
         }).ToList(),
         IsFavorite = isFavorite
@@ -56,7 +52,6 @@ public static class RecipeMapper
             Unit = ingredient.Unit,
             MeasurementState = ingredient.MeasurementState,
             DisplayText = ingredient.DisplayText,
-            DisplayTextAr = ingredient.DisplayTextAr,
             IsOptional = ingredient.IsOptional,
             Calories = cal,
             Protein = pro,

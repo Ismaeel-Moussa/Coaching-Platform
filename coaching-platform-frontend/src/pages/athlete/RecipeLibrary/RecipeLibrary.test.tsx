@@ -19,7 +19,7 @@ vi.mock('../../../contexts/LanguageContext', () => ({
 vi.mock('../../../hooks/useRecipes/useRecipes', () => ({
   useGetRecipes: () => ({
     data: {
-      items: [{ id: 17, name: 'Coach Recipe', nameAr: 'وصفة المدرب' }],
+      items: [{ id: 17, name: 'وصفة المدرب' }],
     },
     isLoading: false,
   }),

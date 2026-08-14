@@ -23,12 +23,9 @@ public class SupplementCatalogItem
     public int Id { get; set; }
     public string SeedKey { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public string? NameAr { get; set; }
     public SupplementType Type { get; set; }
     public string? Education { get; set; }
-    public string? EducationAr { get; set; }
     public string? SafetyWarning { get; set; }
-    public string? SafetyWarningAr { get; set; }
     public bool RequiresClinicianApproval { get; set; }
     public ContentStatus ContentStatus { get; set; } = ContentStatus.Draft;
     public int ContentVersion { get; set; } = 1;

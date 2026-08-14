@@ -8,10 +8,8 @@ export interface NutritionOptionItem {
   orderIndex?: number;
   foodId?: number | null;
   foodName?: string | null;
-  foodNameAr?: string | null;
   recipeId?: number | null;
   recipeName?: string | null;
-  recipeNameAr?: string | null;
   itemName?: string | null;
   quantity: number;
   unit: IngredientUnit;
