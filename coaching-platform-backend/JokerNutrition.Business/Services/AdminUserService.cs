@@ -53,21 +53,23 @@ public class AdminUserService : _BaseService, IAdminUserService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<PagedResult<UserManagementDto>> GetUsersAsync(UserFilterParams filterParams)
+    private sealed class UserRoleProjection
     {
-        var page = filterParams.PageNumber <= 0 ? 1 : filterParams.PageNumber;
-        var pageSize = filterParams.PageSize <= 0 ? 10 : filterParams.PageSize;
+        public required User User { get; init; }
+        public required string RoleName { get; init; }
+    }
 
-        // Base user query with roles
+    private IQueryable<UserRoleProjection> BuildFilteredUsersQuery(UserFilterParams filterParams)
+    {
         var query = from u in _context.Users
                     join ur in _context.UserRoles on u.Id equals ur.UserId into urGroup
                     from ur in urGroup.DefaultIfEmpty()
                     join r in _context.Roles on ur.RoleId equals r.Id into rGroup
                     from r in rGroup.DefaultIfEmpty()
-                    select new
+                    select new UserRoleProjection
                     {
                         User = u,
-                        RoleName = r != null ? r.Name : "Athlete"
+                        RoleName = r != null && r.Name != null ? r.Name : "Athlete"
                     };
 
         // Search filter
@@ -94,7 +96,7 @@ public class AdminUserService : _BaseService, IAdminUserService
         // Inactivity filter
         if (!string.IsNullOrWhiteSpace(filterParams.InactivityFilter))
         {
-            var filter = filterParams.InactivityFilter.ToLower();
+            var filter = filterParams.InactivityFilter.Trim().ToLower();
             if (filter == "never")
             {
                 query = query.Where(x => x.User.LastLoginAt == null);
@@ -110,6 +112,16 @@ public class AdminUserService : _BaseService, IAdminUserService
                 query = query.Where(x => x.User.LastLoginAt >= cutoff);
             }
         }
+
+        return query;
+    }
+
+    public async Task<PagedResult<UserManagementDto>> GetUsersAsync(UserFilterParams filterParams)
+    {
+        var page = filterParams.PageNumber <= 0 ? 1 : filterParams.PageNumber;
+        var pageSize = filterParams.PageSize <= 0 ? 10 : filterParams.PageSize;
+
+        var query = BuildFilteredUsersQuery(filterParams);
 
         var totalCount = await query.CountAsync();
 
@@ -369,31 +381,75 @@ public class AdminUserService : _BaseService, IAdminUserService
 
     public async Task<byte[]> ExportUserAuditLogsCsvAsync(UserFilterParams filterParams)
     {
-        var logsQuery = _auditRepo.Query();
+        var query = BuildFilteredUsersQuery(filterParams);
 
-        if (!string.IsNullOrWhiteSpace(filterParams.Search))
-        {
-            var search = filterParams.Search.Trim().ToLower();
-            logsQuery = logsQuery.Where(a => (a.Action != null && a.Action.ToLower().Contains(search))
-                                          || (a.PerformedByName != null && a.PerformedByName.ToLower().Contains(search))
-                                          || (a.Details != null && a.Details.ToLower().Contains(search))
-                                          || (a.IpAddress != null && a.IpAddress.ToLower().Contains(search)));
-        }
-
-        var logs = await logsQuery
-            .OrderByDescending(a => a.CreatedAt)
-            .Take(5000)
+        var users = await query
+            .OrderByDescending(x => x.User.LastLoginAt.HasValue)
+            .ThenByDescending(x => x.User.LastLoginAt)
+            .ThenByDescending(x => x.User.CreatedAt)
             .ToListAsync();
 
-        var sb = new StringBuilder();
-        sb.AppendLine("ID,Date/Time (UTC),Action,Performed By,User ID,IP Address,Details");
+        var userIds = users.Select(x => x.User.Id).ToList();
 
-        foreach (var log in logs)
+        // Get athlete details (assigned coach info)
+        var athleteMap = await _context.Athletes
+            .Include(a => a.AssignedCoach)
+            .ThenInclude(c => c!.User)
+            .Where(a => userIds.Contains(a.UserId))
+            .ToDictionaryAsync(a => a.UserId, a => a);
+
+        // Get coach details (assigned athlete counts)
+        var coachMap = await _context.Coaches
+            .Where(c => userIds.Contains(c.UserId))
+            .Select(c => new
+            {
+                c.UserId,
+                c.Id,
+                AthleteCount = _context.Athletes.Count(a => a.AssignedCoachId == c.Id)
+            })
+            .ToDictionaryAsync(c => c.UserId, c => c.AthleteCount);
+
+        var sb = new StringBuilder();
+        sb.AppendLine("User ID,Full Name,First Name,Last Name,Email,Role,Status,Deactivation Reason,Last Sign-In (UTC),Last Sign-In IP,Assignments,Created At (UTC)");
+
+        foreach (var item in users)
         {
-            sb.AppendLine($"\"{log.Id}\",\"{log.CreatedAt:yyyy-MM-dd HH:mm:ss}\",\"{EscapeCsv(log.Action)}\",\"{EscapeCsv(log.PerformedByName)}\",\"{log.UserId}\",\"{EscapeCsv(log.IpAddress)}\",\"{EscapeCsv(log.Details)}\"");
+            var u = item.User;
+            var role = item.RoleName;
+            var status = u.IsActive ? "Active" : "Deactivated";
+            var deactivationReason = u.DeactivationReason ?? string.Empty;
+            var lastLoginAt = u.LastLoginAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Never";
+            var lastLoginIp = u.LastLoginIp ?? string.Empty;
+            var createdAt = u.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss");
+
+            string assignments;
+            if (role == "Coach")
+            {
+                coachMap.TryGetValue(u.Id, out var count);
+                assignments = $"{count} athlete(s)";
+            }
+            else if (role == "Athlete")
+            {
+                if (athleteMap.TryGetValue(u.Id, out var athlete) && athlete.AssignedCoach?.User != null)
+                {
+                    assignments = $"Coach: {athlete.AssignedCoach.User.FirstName} {athlete.AssignedCoach.User.LastName}".Trim();
+                }
+                else
+                {
+                    assignments = "Unassigned";
+                }
+            }
+            else
+            {
+                assignments = "—";
+            }
+
+            sb.AppendLine($"\"{u.Id}\",\"{EscapeCsv($"{u.FirstName} {u.LastName}".Trim())}\",\"{EscapeCsv(u.FirstName)}\",\"{EscapeCsv(u.LastName)}\",\"{EscapeCsv(u.Email)}\",\"{EscapeCsv(role)}\",\"{status}\",\"{EscapeCsv(deactivationReason)}\",\"{lastLoginAt}\",\"{EscapeCsv(lastLoginIp)}\",\"{EscapeCsv(assignments)}\",\"{createdAt}\"");
         }
 
-        return Encoding.UTF8.GetBytes(sb.ToString());
+        var preamble = Encoding.UTF8.GetPreamble();
+        var contentBytes = Encoding.UTF8.GetBytes(sb.ToString());
+        return preamble.Concat(contentBytes).ToArray();
     }
 
     private static string EscapeCsv(string? value)
