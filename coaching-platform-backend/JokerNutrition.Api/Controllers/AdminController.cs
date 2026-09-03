@@ -69,12 +69,12 @@ public class AdminController : ControllerBase
     }
 
     /// <summary>
-    /// Downloads CSV report of user sign-in and security audit activities.
+    /// Downloads CSV report of user management and sign-in activities matching applied filters.
     /// </summary>
     [HttpGet("users/export-audit-csv")]
     public async Task<IActionResult> ExportUserAuditLogsCsv([FromQuery] UserFilterParams filterParams)
     {
         var bytes = await _adminUserService.ExportUserAuditLogsCsvAsync(filterParams);
-        return File(bytes, "text/csv", $"user_login_audit_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv");
+        return File(bytes, "text/csv", $"user_management_report_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv");
     }
 }

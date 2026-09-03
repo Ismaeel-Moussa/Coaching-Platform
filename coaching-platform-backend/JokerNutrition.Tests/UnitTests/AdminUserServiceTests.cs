@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text;
 using JokerNutrition.Business.DTOs.Admin;
 using JokerNutrition.Business.Services;
 using JokerNutrition.Data.Contexts;
@@ -146,6 +147,137 @@ public class AdminUserServiceTests
         Assert.Equal("khalid@example.com", fakeEmailService.LastStatusEmail);
         Assert.False(fakeEmailService.LastStatusActive);
         Assert.Equal("Subscription Expired", fakeEmailService.LastStatusReason);
+    }
+
+    [Fact]
+    public async Task ExportUserAuditLogsCsvAsync_AppliesRoleFilter()
+    {
+        using var context = new JokerNutritionContext(_dbOptions);
+        var coachRole = new Role { Id = 10, Name = "Coach" };
+        var athleteRole = new Role { Id = 11, Name = "Athlete" };
+
+        var coachUser = new User { Id = 301, FirstName = "CoachSam", LastName = "Smith", Email = "coach.sam@example.com", IsActive = true, CreatedAt = DateTime.UtcNow };
+        var athleteUser = new User { Id = 302, FirstName = "AthleteDan", LastName = "Brown", Email = "athlete.dan@example.com", IsActive = true, CreatedAt = DateTime.UtcNow };
+
+        context.Roles.AddRange(coachRole, athleteRole);
+        context.Users.AddRange(coachUser, athleteUser);
+        context.UserRoles.AddRange(
+            new UserRole { UserId = coachUser.Id, RoleId = coachRole.Id },
+            new UserRole { UserId = athleteUser.Id, RoleId = athleteRole.Id }
+        );
+        await context.SaveChangesAsync();
+
+        var service = CreateTestService(context);
+
+        var bytes = await service.ExportUserAuditLogsCsvAsync(new UserFilterParams { Role = "Coach" });
+        var csv = Encoding.UTF8.GetString(bytes);
+
+        Assert.Contains("coach.sam@example.com", csv);
+        Assert.DoesNotContain("athlete.dan@example.com", csv);
+    }
+
+    [Fact]
+    public async Task ExportUserAuditLogsCsvAsync_AppliesStatusFilter()
+    {
+        using var context = new JokerNutritionContext(_dbOptions);
+        var activeUser = new User { Id = 401, FirstName = "ActiveUser", Email = "enabled.user@example.com", IsActive = true, CreatedAt = DateTime.UtcNow };
+        var deactivatedUser = new User { Id = 402, FirstName = "DeactivatedUser", Email = "disabled.user@example.com", IsActive = false, DeactivationReason = "Terms Violation", CreatedAt = DateTime.UtcNow };
+
+        context.Users.AddRange(activeUser, deactivatedUser);
+        await context.SaveChangesAsync();
+
+        var service = CreateTestService(context);
+
+        var bytes = await service.ExportUserAuditLogsCsvAsync(new UserFilterParams { IsActive = false });
+        var csv = Encoding.UTF8.GetString(bytes);
+
+        Assert.Contains("disabled.user@example.com", csv);
+        Assert.Contains("Terms Violation", csv);
+        Assert.DoesNotContain("enabled.user@example.com", csv);
+    }
+
+    [Fact]
+    public async Task ExportUserAuditLogsCsvAsync_AppliesSearchFilter()
+    {
+        using var context = new JokerNutritionContext(_dbOptions);
+        var user1 = new User { Id = 501, FirstName = "Tariq", LastName = "Al-Mansour", Email = "tariq@example.com", IsActive = true, CreatedAt = DateTime.UtcNow };
+        var user2 = new User { Id = 502, FirstName = "Hala", LastName = "Salem", Email = "hala@example.com", IsActive = true, CreatedAt = DateTime.UtcNow };
+
+        context.Users.AddRange(user1, user2);
+        await context.SaveChangesAsync();
+
+        var service = CreateTestService(context);
+
+        var bytes = await service.ExportUserAuditLogsCsvAsync(new UserFilterParams { Search = "tariq" });
+        var csv = Encoding.UTF8.GetString(bytes);
+
+        Assert.Contains("tariq@example.com", csv);
+        Assert.DoesNotContain("hala@example.com", csv);
+    }
+
+    [Fact]
+    public async Task ExportUserAuditLogsCsvAsync_AppliesInactivityFilter()
+    {
+        using var context = new JokerNutritionContext(_dbOptions);
+        var neverLoggedInUser = new User { Id = 601, FirstName = "NeverLoggedIn", Email = "never@example.com", IsActive = true, LastLoginAt = null, CreatedAt = DateTime.UtcNow };
+        var recentlyActiveUser = new User { Id = 602, FirstName = "RecentUser", Email = "recent@example.com", IsActive = true, LastLoginAt = DateTime.UtcNow, CreatedAt = DateTime.UtcNow };
+
+        context.Users.AddRange(neverLoggedInUser, recentlyActiveUser);
+        await context.SaveChangesAsync();
+
+        var service = CreateTestService(context);
+
+        var bytes = await service.ExportUserAuditLogsCsvAsync(new UserFilterParams { InactivityFilter = "never" });
+        var csv = Encoding.UTF8.GetString(bytes);
+
+        Assert.Contains("never@example.com", csv);
+        Assert.DoesNotContain("recent@example.com", csv);
+    }
+
+    [Fact]
+    public async Task ExportUserAuditLogsCsvAsync_IncludesUtf8Bom()
+    {
+        using var context = new JokerNutritionContext(_dbOptions);
+        var user = new User { Id = 701, FirstName = "طارق", LastName = "المنصور", Email = "arabic@example.com", IsActive = true, CreatedAt = DateTime.UtcNow };
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+
+        var service = CreateTestService(context);
+
+        var bytes = await service.ExportUserAuditLogsCsvAsync(new UserFilterParams());
+
+        Assert.True(bytes.Length >= 3);
+        Assert.Equal(0xEF, bytes[0]);
+        Assert.Equal(0xBB, bytes[1]);
+        Assert.Equal(0xBF, bytes[2]);
+
+        var csv = Encoding.UTF8.GetString(bytes);
+        Assert.Contains("طارق المنصور", csv);
+    }
+
+    private static AdminUserService CreateTestService(JokerNutritionContext context)
+    {
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, "999"),
+            new Claim(ClaimTypes.Email, "admin@jokernutrition.com"),
+            new Claim(ClaimTypes.Role, "Admin"),
+            new Claim(ClaimTypes.GivenName, "Admin")
+        }));
+        var userStore = new FakeUserStore();
+        var userManager = new FakeUserManager(userStore, db: context);
+        return new AdminUserService(
+            principal,
+            NullLogger<AdminUserService>.Instance,
+            userManager,
+            context,
+            new FakeAuditLogRepository(context),
+            new FakePasswordResetTokenRepository(context),
+            new FakeAthleteRepository(context),
+            new FakeCoachRepository(context),
+            new FakeNotificationService(),
+            new FakeEmailService(),
+            new FakeAuditLogService());
     }
 
     private sealed class FakeUserStore : IUserStore<User>

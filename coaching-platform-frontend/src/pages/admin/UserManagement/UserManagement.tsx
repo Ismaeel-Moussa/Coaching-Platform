@@ -101,10 +101,10 @@ const UserManagement: React.FC = () => {
     try {
       setLoadingUsers(true);
       const params: UserFilterParams = {
-        search,
+        search: search.trim() || undefined,
         role: role === 'All' ? undefined : role,
         isActive: statusFilter === 'All' ? undefined : statusFilter === 'Active',
-        inactivityFilter,
+        inactivityFilter: inactivityFilter === 'all' ? undefined : inactivityFilter,
         pageNumber: page,
         pageSize,
       };
@@ -238,16 +238,16 @@ const UserManagement: React.FC = () => {
     try {
       setExportingCsv(true);
       const params: UserFilterParams = {
-        search,
+        search: search.trim() || undefined,
         role: role === 'All' ? undefined : role,
         isActive: statusFilter === 'All' ? undefined : statusFilter === 'Active',
-        inactivityFilter,
+        inactivityFilter: inactivityFilter === 'all' ? undefined : inactivityFilter,
       };
       const blob = await exportUserAuditLogsCsv(params);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `user_audit_report_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.setAttribute('download', `user_management_report_${new Date().toISOString().slice(0, 10)}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -392,7 +392,7 @@ const UserManagement: React.FC = () => {
           loading={exportingCsv}
           onClick={handleExportCsv}
         >
-          {t('admin:users.exportCsv', 'Export Audit CSV')}
+          {t('admin:users.exportCsv', 'Export Users CSV')}
         </Button>
       </div>
 

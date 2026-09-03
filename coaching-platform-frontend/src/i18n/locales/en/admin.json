@@ -2,7 +2,7 @@
   "users": {
     "title": "User Management & Sign-In Monitoring",
     "subtitle": "Monitor account activities, manage user statuses, and review sign-in audit histories.",
-    "exportCsv": "Export Audit CSV",
+    "exportCsv": "Export Users CSV",
     "searchPlaceholder": "Search Name or Email...",
     "never": "Never",
     "justNow": "Just now",
