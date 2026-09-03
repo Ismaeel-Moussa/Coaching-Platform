@@ -239,7 +239,7 @@ try
                 var exceptionHandlerFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
                 if (exceptionHandlerFeature?.Error != null)
                 {
-                    Console.WriteLine($"[GLOBAL EXCEPTION] {exceptionHandlerFeature.Error}");
+                    SerilogLog.Error(exceptionHandlerFeature.Error, "[GLOBAL EXCEPTION] Unhandled server error: {Message}", exceptionHandlerFeature.Error.Message);
                 }
 
                 context.Response.StatusCode = 500;

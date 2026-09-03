@@ -58,7 +58,7 @@ public class ProfileService : _BaseService, IProfileService
         if (role == "Athlete")
         {
             var athlete = await _athleteRepo.Query()
-                .Include(a => a.AssignedCoach).ThenInclude(c => c.User)
+                .Include(a => a.AssignedCoach).ThenInclude(c => c!.User)
                 .FirstOrDefaultAsync(a => a.UserId == userId);
 
             if (athlete != null)
@@ -68,9 +68,9 @@ public class ProfileService : _BaseService, IProfileService
                 dto.TargetGoal = athlete.TargetGoal;
                 dto.CurrentStreak = athlete.CurrentStreak;
                 dto.LongestStreak = athlete.LongestStreak;
-                if (athlete.AssignedCoach != null)
+                if (athlete.AssignedCoach?.User != null)
                 {
-                    dto.AssignedCoachName = $"{athlete.AssignedCoach.User.FirstName} {athlete.AssignedCoach.User.LastName}";
+                    dto.AssignedCoachName = $"{athlete.AssignedCoach.User.FirstName} {athlete.AssignedCoach.User.LastName}".Trim();
                 }
             }
         }

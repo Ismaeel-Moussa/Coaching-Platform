@@ -126,7 +126,7 @@ public class AdminUserService : _BaseService, IAdminUserService
         // Get athlete details (assigned coach info)
         var athleteMap = await _context.Athletes
             .Include(a => a.AssignedCoach)
-            .ThenInclude(c => c.User)
+            .ThenInclude(c => c!.User)
             .Where(a => userIds.Contains(a.UserId))
             .ToDictionaryAsync(a => a.UserId, a => a);
 

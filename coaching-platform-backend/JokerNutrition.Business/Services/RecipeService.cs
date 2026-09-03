@@ -303,6 +303,7 @@ public class RecipeService : _BaseService, IRecipeService
 
         await _mealLogRepo.CreateAsync(log);
         await _mealLogRepo.SaveChangesAsync();
+        _cacheService.EvictByPrefix("coach-dashboard:");
 
         // Return refreshed full diary
         var allLogs = await _mealLogRepo.Query()

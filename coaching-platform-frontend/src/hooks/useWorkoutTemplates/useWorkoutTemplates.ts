@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
 import type { AxiosError } from 'axios';
 import i18n from '../../i18n/i18n';
@@ -92,18 +92,18 @@ export const useAssignTemplate = () => {
 
 export const useDeleteTemplate = () => {
   const queryClient = useQueryClient();
-  return useMutation<void, AxiosError, number, { previousQueries: { queryKey: any; data: any }[] }>({
+  return useMutation<void, AxiosError, number, { previousQueries: { queryKey: QueryKey; data: unknown }[] }>({
     mutationFn: (id) => deleteWorkoutTemplate(id),
     onMutate: async (deletedId) => {
       await queryClient.cancelQueries({ queryKey: ['workout-templates'] });
-      const queries = queryClient.getQueriesData<any>({ queryKey: ['workout-templates'] });
+      const queries = queryClient.getQueriesData<PagedWorkoutTemplateSummaryResult>({ queryKey: ['workout-templates'] });
       const previousQueries = queries.map(([queryKey, data]) => ({ queryKey, data }));
 
       queries.forEach(([queryKey, data]) => {
         if (data && Array.isArray(data.items)) {
           queryClient.setQueryData(queryKey, {
             ...data,
-            items: data.items.filter((item: any) => item.id !== deletedId),
+            items: data.items.filter((item) => item.id !== deletedId),
             totalCount: Math.max(0, data.totalCount - 1),
           });
         }

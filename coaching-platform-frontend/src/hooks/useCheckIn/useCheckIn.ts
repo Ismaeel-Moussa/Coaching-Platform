@@ -11,6 +11,7 @@ import {
   getCheckInPhotos,
   getCheckInById,
 } from '../../api/checkIn';
+import type { AxiosError } from 'axios';
 import type { SubmitCheckInForm, AddCoachNotesForm, PhotoAngle } from '../../types/CheckIn';
 
 export const useSubmitCheckIn = () => {
@@ -23,7 +24,7 @@ export const useSubmitCheckIn = () => {
       queryClient.invalidateQueries({ queryKey: ['coach-dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['coach-pending-checkins'] });
     },
-    onError: (err: any) => {
+    onError: (err: AxiosError<{ message?: string }>) => {
       antMessage.error(err.response?.data?.message || i18n.t('common:alerts.checkInFailed'));
     },
   });
@@ -43,7 +44,7 @@ export const useUploadPhotos = () => {
       queryClient.invalidateQueries({ queryKey: ['checkin-photos', variables.checkInId] });
       queryClient.invalidateQueries({ queryKey: ['coach-athlete-profile'] });
     },
-    onError: (err: any) => {
+    onError: (err: AxiosError<{ message?: string }>) => {
       antMessage.error(err.response?.data?.message || i18n.t('common:alerts.photosUploadFailed'));
     },
   });
@@ -60,7 +61,7 @@ export const useDeletePhoto = () => {
       queryClient.invalidateQueries({ queryKey: ['checkin-photos', variables.id] });
       queryClient.invalidateQueries({ queryKey: ['coach-athlete-profile'] });
     },
-    onError: (err: any) => {
+    onError: (err: AxiosError<{ message?: string }>) => {
       antMessage.error(err.response?.data?.message || i18n.t('common:alerts.photoDeleteFailed'));
     },
   });
@@ -87,7 +88,7 @@ export const useAddCoachNotes = (checkInId: number) => {
       queryClient.invalidateQueries({ queryKey: ['checkin-history'] });
       queryClient.invalidateQueries({ queryKey: ['coach-athlete-profile'] });
     },
-    onError: (err: any) => {
+    onError: (err: AxiosError<{ message?: string }>) => {
       antMessage.error(err.response?.data?.message || i18n.t('common:alerts.feedbackSaveFailed'));
     },
   });

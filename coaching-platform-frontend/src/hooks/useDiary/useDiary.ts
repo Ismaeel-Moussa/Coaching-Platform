@@ -122,12 +122,19 @@ export const useRemoveLogEntry = (date: string) => {
     mutationFn: (id: number) => removeLogEntry(id),
     onMutate: async (entryId) => {
       await queryClient.cancelQueries({ queryKey: ['diary', date] });
-      const previousDiary = queryClient.getQueryData<any>(['diary', date]);
+      const previousDiary = queryClient.getQueryData<DailyDiaryDto>(['diary', date]);
 
       if (previousDiary) {
-        queryClient.setQueryData(['diary', date], {
+        queryClient.setQueryData<DailyDiaryDto>(['diary', date], {
           ...previousDiary,
-          mealLogs: (previousDiary.mealLogs || []).filter((log: any) => log.id !== entryId),
+          breakfast: (previousDiary.breakfast || []).filter((log) => log.id !== entryId),
+          lunch: (previousDiary.lunch || []).filter((log) => log.id !== entryId),
+          dinner: (previousDiary.dinner || []).filter((log) => log.id !== entryId),
+          snack: (previousDiary.snack || []).filter((log) => log.id !== entryId),
+          suhoor: (previousDiary.suhoor || []).filter((log) => log.id !== entryId),
+          iftar: (previousDiary.iftar || []).filter((log) => log.id !== entryId),
+          preWorkout: (previousDiary.preWorkout || []).filter((log) => log.id !== entryId),
+          postWorkout: (previousDiary.postWorkout || []).filter((log) => log.id !== entryId),
         });
       }
 

@@ -12,12 +12,12 @@ import CoachLayout from '../layouts/CoachLayout';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary';
 
-// Auth pages (eager — small, critical path)
+// Auth pages (SignIn is eager for instant initial render, secondary auth routes are lazy)
 import SignIn from '../pages/auth/SignIn/SignIn';
-import JoinTheTeam from '../pages/auth/JoinTheTeam/JoinTheTeam';
-import InvalidInvite from '../pages/auth/InvalidInvite/InvalidInvite';
-import ForgotPassword from '../pages/auth/ForgotPassword/ForgotPassword';
-import ResetPassword from '../pages/auth/ResetPassword/ResetPassword';
+const JoinTheTeam = lazy(() => import('../pages/auth/JoinTheTeam/JoinTheTeam'));
+const InvalidInvite = lazy(() => import('../pages/auth/InvalidInvite/InvalidInvite'));
+const ForgotPassword = lazy(() => import('../pages/auth/ForgotPassword/ForgotPassword'));
+const ResetPassword = lazy(() => import('../pages/auth/ResetPassword/ResetPassword'));
 import NotFound from '../pages/NotFound/NotFound';
 
 // Athlete pages (lazy — loaded only when athlete logs in)
@@ -65,11 +65,46 @@ export const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [
       { path: '/sign-in', element: <SignIn /> },
-      { path: '/join-the-team', element: <JoinTheTeam /> },
-      { path: '/register', element: <JoinTheTeam /> },
-      { path: '/invalid-invite', element: <InvalidInvite /> },
-      { path: '/forgot-password', element: <ForgotPassword /> },
-      { path: '/reset-password', element: <ResetPassword /> },
+      {
+        path: '/join-the-team',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <JoinTheTeam />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/register',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <JoinTheTeam />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/invalid-invite',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <InvalidInvite />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/forgot-password',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <ForgotPassword />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/reset-password',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <ResetPassword />
+          </Suspense>
+        ),
+      },
     ],
   },
 

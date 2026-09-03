@@ -27,6 +27,7 @@ public class WorkoutLogService : _BaseService, IWorkoutLogService
     private readonly IWorkoutLogRepository _workoutLogRepo;
     private readonly IExerciseSetLogRepository _setLogRepo;
     private readonly INotificationService _notificationService;
+    private readonly ICacheService _cacheService;
 
     public WorkoutLogService(
         IPrincipal principal,
@@ -35,7 +36,8 @@ public class WorkoutLogService : _BaseService, IWorkoutLogService
         IClientProgramRepository clientProgramRepo,
         IWorkoutLogRepository workoutLogRepo,
         IExerciseSetLogRepository setLogRepo,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        ICacheService cacheService)
         : base(principal, logger)
     {
         _athleteRepo = athleteRepo;
@@ -43,6 +45,7 @@ public class WorkoutLogService : _BaseService, IWorkoutLogService
         _workoutLogRepo = workoutLogRepo;
         _setLogRepo = setLogRepo;
         _notificationService = notificationService;
+        _cacheService = cacheService;
     }
 
     // ─── Get Today's Workout ──────────────────────────────────────────
@@ -177,6 +180,7 @@ public class WorkoutLogService : _BaseService, IWorkoutLogService
         _athleteRepo.Update(athlete);
 
         await _workoutLogRepo.SaveChangesAsync();
+        _cacheService.EvictByPrefix("coach-dashboard:");
 
         // Push real-time silent update to coach
         var coachUserId = await _athleteRepo.Query()
@@ -195,7 +199,7 @@ public class WorkoutLogService : _BaseService, IWorkoutLogService
     {
         var athlete = await GetAthleteAsync();
 
-        var allSets = await _setLogRepo.Query()
+        var allSets = await _setLogRepo.QueryAll()
             .Include(s => s.Exercise)
             .Include(s => s.WorkoutLog)
             .Where(s => s.WorkoutLog.AthleteId == athlete.Id && s.IsCompleted)

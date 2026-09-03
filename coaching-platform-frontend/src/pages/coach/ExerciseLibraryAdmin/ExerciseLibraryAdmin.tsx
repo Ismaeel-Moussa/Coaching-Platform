@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { useGetExercises, useDeleteExercise } from '../../../hooks/useExercises/useExercises';
 import AddExerciseModal from '../../../components/AddExerciseModal/AddExerciseModal';
 import type { ExerciseAdminDto, MuscleGroup } from '../../../types/Exercise';
+import type { TFunction } from 'i18next';
 import './ExerciseLibraryAdmin.scss';
 
-const getMuscleCategoryLabel = (category: string, t: any) => {
+const getMuscleCategoryLabel = (category: string, t: TFunction) => {
   switch (category) {
     case 'All': return t('common:status.all', { defaultValue: 'All' });
     case 'Chest': return t('common:muscleGroups.chest', { defaultValue: 'Chest' });

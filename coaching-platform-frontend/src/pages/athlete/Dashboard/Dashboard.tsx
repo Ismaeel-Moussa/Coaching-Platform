@@ -7,6 +7,7 @@ import { useUpdateWater, useUpdateSteps } from '../../../hooks/useDiary/useDiary
 import MacroProgressBar from '../../../components/MacroProgressBar/MacroProgressBar';
 import RingProgress from '../../../components/RingProgress/RingProgress';
 import { getTodayIso, formatDateDisplay, getDayOfWeek } from '../../../utils/date';
+import type { CoachFeedbackNoteDto } from '../../../types/CoachHub';
 import './Dashboard.scss';
 
 const WORKOUT_STATUS_CONFIG = {
@@ -273,7 +274,7 @@ const AthleteDashboard: React.FC = () => {
             <Skeleton active paragraph={{ rows: 3 }} title={false} />
           ) : data?.recentFeedbackNotes && data.recentFeedbackNotes.length > 0 ? (
             <div className="dashboard__feedback-list">
-              {data.recentFeedbackNotes.map((note: any) => (
+              {data.recentFeedbackNotes.map((note: CoachFeedbackNoteDto) => (
                 <div key={note.id} className="dashboard__feedback-item">
                   <div className="dashboard__feedback-date">
                     {new Date(note.createdAt).toLocaleDateString(undefined, {

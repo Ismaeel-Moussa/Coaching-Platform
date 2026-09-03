@@ -6,6 +6,7 @@ import { useGetFeedbackHistory } from '../../../hooks/useAthlete/useAthlete';
 import { useGetCheckInHistory, useGetCheckInById } from '../../../hooks/useCheckIn/useCheckIn';
 import { formatDateDisplay } from '../../../utils/date';
 import ProgressPhotoViewer from '../../../components/ProgressPhotoViewer/ProgressPhotoViewer';
+import type { CheckInPhotoDto } from '../../../types/CheckIn';
 import './Feedback.scss';
 
 const Feedback: React.FC = () => {
@@ -275,7 +276,7 @@ const Feedback: React.FC = () => {
               <ProgressPhotoViewer
                 photos={['Front', 'Side', 'Back'].map((angle) => ({
                   angle,
-                  url: checkInDetails.photos?.find((p: any) => p.angle === angle)?.signedDownloadUrl
+                  url: checkInDetails.photos?.find((p: CheckInPhotoDto) => p.angle === angle)?.signedDownloadUrl
                 }))}
                 variant="grid"
               />

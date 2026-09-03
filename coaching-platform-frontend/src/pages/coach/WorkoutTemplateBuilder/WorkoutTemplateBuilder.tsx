@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DndContext } from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
+import type { TFunction } from 'i18next';
 import { Button, Input, Tabs, List, Modal, Checkbox, Space, Skeleton, Card, Tag, Empty, Popconfirm } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useGetExercises } from '../../../hooks/useExercises/useExercises';
@@ -15,15 +17,16 @@ import {
 import { useGetRoster } from '../../../hooks/useCoachHub/useCoachHub';
 import DraggableExercise from '../../../components/DraggableExercise/DraggableExercise';
 import WorkoutDayColumn from '../../../components/WorkoutDayColumn/WorkoutDayColumn';
-import type { WorkoutTemplateExerciseDto, WorkoutTemplateDayDto } from '../../../types/Workout';
+import type { WorkoutTemplateExerciseDto, WorkoutTemplateDayDto, WorkoutTemplateSummaryDto, ExerciseDto } from '../../../types/Workout';
 import type { MuscleGroup } from '../../../types/Exercise';
+import type { RosterItemDto } from '../../../types/CoachHub';
 import './WorkoutTemplateBuilder.scss';
 
 const INITIAL_DAYS: WorkoutTemplateDayDto[] = [
   { dayNumber: 1, dayLabel: 'Day 1', isRestDay: false, exercises: [] },
 ];
 
-const getMuscleCategoryLabel = (category: string, t: any) => {
+const getMuscleCategoryLabel = (category: string, t: TFunction) => {
   switch (category) {
     case 'All': return t('common:status.all', { defaultValue: 'All' });
     case 'Chest': return t('common:muscleGroups.chest', { defaultValue: 'Chest' });
@@ -125,13 +128,13 @@ const WorkoutTemplateBuilder: React.FC = () => {
   }, [existingTemplate, templateId]);
 
   // DnD Drag End Handler
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over) return;
 
     const targetDayId = over.id as string;
     const dayNumber = parseInt(targetDayId.replace('day-', ''), 10);
-    const exercise = active.data.current?.exercise;
+    const exercise = (active.data.current as { exercise?: ExerciseDto } | undefined)?.exercise;
 
     if (exercise && dayNumber) {
       setDays((prevDays) =>
@@ -298,7 +301,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
         dayNumber: day.dayNumber,
         dayLabel: day.dayLabel,
         isRestDay: day.isRestDay,
-        exercises: day.exercises.map((ex: any) => ({
+        exercises: day.exercises.map((ex: WorkoutTemplateExerciseDto) => ({
           exerciseId: ex.exercise?.id || ex.exerciseId,
           exerciseName: ex.exercise?.name || ex.exerciseName,
           section: ex.section,
@@ -405,7 +408,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
     return (
       <div className="workout-template-builder__list-container animate-fade-in">
         <div className="workout-template-builder__list-grid">
-          {items.map((tmpl: any) => (
+          {items.map((tmpl: WorkoutTemplateSummaryDto) => (
             <Card
               key={tmpl.id}
               className="workout-template-builder__template-card"
@@ -710,7 +713,7 @@ const WorkoutTemplateBuilder: React.FC = () => {
                 <List
                   size="small"
                   dataSource={rosterData.items}
-                  renderItem={(item: any) => (
+                  renderItem={(item: RosterItemDto) => (
                     <List.Item key={item.athleteId} className="assign-athletes-modal__item">
                       <Checkbox value={item.athleteId}>
                         <div className="assign-athletes-modal__athlete-info">

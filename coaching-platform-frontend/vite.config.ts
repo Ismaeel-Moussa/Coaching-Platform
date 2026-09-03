@@ -49,4 +49,27 @@ export default defineConfig({
     port: 5173,
     open: true,
   },
+  build: {
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@tanstack/react-query')) {
+              return 'vendor-query';
+            }
+            if (id.includes('@microsoft/signalr')) {
+              return 'vendor-signalr';
+            }
+            if (id.includes('i18next') || id.includes('react-i18next') || id.includes('i18next-browser-languagedetector')) {
+              return 'vendor-i18n';
+            }
+          }
+        },
+      },
+    },
+  },
 });

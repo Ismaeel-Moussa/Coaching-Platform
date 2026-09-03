@@ -3,6 +3,7 @@ import { Modal, Form, Input, Select, Button } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useCreateExercise, useUpdateExercise } from '../../hooks/useExercises/useExercises';
 import type { ExerciseAdminDto, MuscleGroup } from '../../types/Exercise';
+import type { TFunction } from 'i18next';
 import './AddExerciseModal.scss';
 
 interface AddExerciseModalProps {
@@ -13,7 +14,7 @@ interface AddExerciseModalProps {
 
 const MUSCLE_GROUPS: MuscleGroup[] = ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Cardio', 'Core'];
 
-const getMuscleCategoryLabel = (category: string, t: any) => {
+const getMuscleCategoryLabel = (category: string, t: TFunction) => {
   switch (category) {
     case 'Chest': return t('common:muscleGroups.chest', { defaultValue: 'Chest' });
     case 'Back': return t('common:muscleGroups.back', { defaultValue: 'Back' });

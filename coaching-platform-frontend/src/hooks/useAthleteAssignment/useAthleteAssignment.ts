@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
 import i18n from '../../i18n/i18n';
+import type { AxiosError } from 'axios';
+import type { SupplementDto } from '../../types/Supplement';
 import {
   setMacroTargets,
   getAthleteSupplements,
@@ -22,7 +24,7 @@ export const useSetMacroTargets = (athleteId: number) => {
       queryClient.invalidateQueries({ queryKey: ['coach-roster'] });
       queryClient.invalidateQueries({ queryKey: ['coach-dashboard'] });
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message?: string }>) => {
       const msg = error.response?.data?.message || i18n.t('common:alerts.targetsUpdateFailed');
       antMessage.error(msg);
     },
@@ -45,7 +47,7 @@ export const useAddAthleteSupplement = (athleteId: number) => {
       antMessage.success(i18n.t('common:alerts.suppScheduleAdded'));
       queryClient.invalidateQueries({ queryKey: ['athlete-supplements', athleteId] });
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message?: string }>) => {
       const msg = error.response?.data?.message || i18n.t('common:alerts.suppScheduleAddFailed');
       antMessage.error(msg);
     },
@@ -61,7 +63,7 @@ export const useUpdateAthleteSupplement = (athleteId: number) => {
       antMessage.success(i18n.t('common:alerts.suppScheduleUpdated'));
       queryClient.invalidateQueries({ queryKey: ['athlete-supplements', athleteId] });
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message?: string }>) => {
       const msg = error.response?.data?.message || i18n.t('common:alerts.suppScheduleUpdateFailed');
       antMessage.error(msg);
     },
@@ -74,7 +76,7 @@ export const useDeleteAthleteSupplement = (athleteId: number) => {
     mutationFn: (id: number) => deleteAthleteSupplement(id),
     onMutate: async (deletedId) => {
       await queryClient.cancelQueries({ queryKey: ['athlete-supplements', athleteId] });
-      const previousSupplements = queryClient.getQueryData<any[]>(['athlete-supplements', athleteId]);
+      const previousSupplements = queryClient.getQueryData<SupplementDto[]>(['athlete-supplements', athleteId]);
 
       if (previousSupplements) {
         queryClient.setQueryData(
@@ -85,7 +87,7 @@ export const useDeleteAthleteSupplement = (athleteId: number) => {
 
       return { previousSupplements };
     },
-    onError: (error: any, deletedId, context) => {
+    onError: (error: AxiosError<{ message?: string }>, deletedId, context) => {
       if (context?.previousSupplements) {
         queryClient.setQueryData(['athlete-supplements', athleteId], context.previousSupplements);
       }

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { RecipeCategory, RECIPE_CATEGORY_LABELS, type RecipeDto } from '../../types/Recipe';
 import { MealType } from '../../types/Diary';
 import { useLanguage } from '../../contexts/LanguageContext';
+import type { TFunction } from 'i18next';
 import './RecipeCard.scss';
 
 interface RecipeCardProps {
@@ -19,7 +20,7 @@ const CATEGORY_COLORS: Record<RecipeCategory, string> = {
   [RecipeCategory.Custom]: '#785900',           // Gold text
 };
 
-const getRecipeCategoryLabel = (category: RecipeCategory, t: any) => {
+const getRecipeCategoryLabel = (category: RecipeCategory, t: TFunction) => {
   switch (category) {
     case RecipeCategory.MuscleBuilding: return t('athlete:recipeLibrary.categories.muscleBuilding');
     case RecipeCategory.FatLoss: return t('athlete:recipeLibrary.categories.fatLoss');

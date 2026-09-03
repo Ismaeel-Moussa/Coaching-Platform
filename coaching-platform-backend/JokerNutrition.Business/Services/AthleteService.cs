@@ -85,7 +85,7 @@ public class AthleteService : _BaseService, IAthleteService
         var userId = LoggedInUser.Id;
         var athlete = await _athleteRepo.Query()
             .Include(a => a.User)
-            .Include(a => a.AssignedCoach).ThenInclude(c => c.User)
+            .Include(a => a.AssignedCoach).ThenInclude(c => c!.User)
             .FirstOrDefaultAsync(a => a.UserId == userId)
             ?? throw new UnauthorizedAccessException("Athlete profile not found.");
 
@@ -110,8 +110,8 @@ public class AthleteService : _BaseService, IAthleteService
             _ => "NoProgram"
         };
 
-        var coachName = athlete.AssignedCoach != null
-            ? $"{athlete.AssignedCoach.User.FirstName} {athlete.AssignedCoach.User.LastName}"
+        var coachName = athlete.AssignedCoach?.User != null
+            ? $"{athlete.AssignedCoach.User.FirstName} {athlete.AssignedCoach.User.LastName}".Trim()
             : "Coach";
 
         var recentFeedback = await GetMergedFeedbackNotesAsync(athlete.Id, coachName, 2);
@@ -138,12 +138,12 @@ public class AthleteService : _BaseService, IAthleteService
     {
         var userId = LoggedInUser.Id;
         var athlete = await _athleteRepo.Query()
-            .Include(a => a.AssignedCoach).ThenInclude(c => c.User)
+            .Include(a => a.AssignedCoach).ThenInclude(c => c!.User)
             .FirstOrDefaultAsync(a => a.UserId == userId)
             ?? throw new UnauthorizedAccessException("Athlete profile not found.");
 
-        var coachName = athlete.AssignedCoach != null
-            ? $"{athlete.AssignedCoach.User.FirstName} {athlete.AssignedCoach.User.LastName}"
+        var coachName = athlete.AssignedCoach?.User != null
+            ? $"{athlete.AssignedCoach.User.FirstName} {athlete.AssignedCoach.User.LastName}".Trim()
             : "Coach";
 
         return await GetMergedFeedbackNotesAsync(athlete.Id, coachName);

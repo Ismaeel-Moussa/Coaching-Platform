@@ -8,13 +8,14 @@ import { RecipeCategory, type RecipeDto } from '../../../types/Recipe';
 import { MealType, MEAL_TYPE_LABELS } from '../../../types/Diary';
 import { getTodayIso } from '../../../utils/date';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import type { TFunction } from 'i18next';
 import './RecipeLibrary.scss';
 
 const MEAL_TYPE_OPTIONS = [
   MealType.Breakfast, MealType.Lunch, MealType.Dinner, MealType.Snack,
 ];
 
-const getMealTypeLabel = (type: MealType, t: any) => {
+const getMealTypeLabel = (type: MealType, t: TFunction) => {
   switch (type) {
     case MealType.Breakfast: return t('common:meals.breakfast');
     case MealType.Lunch: return t('common:meals.lunch');
