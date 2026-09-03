@@ -11,7 +11,7 @@ interface DraggableExerciseProps {
     primaryMuscle: string;
   };
   days?: { dayNumber: number; dayLabel: string }[];
-  onAddToDay?: (exercise: any, dayNumber: number) => void;
+  onAddToDay?: (exercise: { id: number; name: string; primaryMuscle: string }, dayNumber: number) => void;
 }
 
 const DraggableExercise: React.FC<DraggableExerciseProps> = ({ id, exercise, days, onAddToDay }) => {

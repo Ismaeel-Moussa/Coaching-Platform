@@ -4,8 +4,9 @@ import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import { useGetDailyLog } from '../../hooks/useAthlete/useAthlete';
 import MacroProgressBar from '../MacroProgressBar/MacroProgressBar';
-import { MealType } from '../../types/Diary';
+import { MealType, type MealLogDto } from '../../types/Diary';
 import { WorkoutStatus } from '../../types/Workout';
+import type { TFunction } from 'i18next';
 import './DailyLogHistoryView.scss';
 
 interface DailyLogHistoryViewProps {
@@ -13,7 +14,7 @@ interface DailyLogHistoryViewProps {
   date: string; // ISO format: YYYY-MM-DD
 }
 
-const getMealTypeLabel = (type: MealType, t: any) => {
+const getMealTypeLabel = (type: MealType, t: TFunction) => {
   switch (type) {
     case MealType.Breakfast: return t('common:meals.breakfast');
     case MealType.Lunch: return t('common:meals.lunch');
@@ -36,7 +37,7 @@ const getStatusTagColor = (status: string) => {
   }
 };
 
-const getStatusLabel = (status: string, t: any) => {
+const getStatusLabel = (status: string, t: TFunction) => {
   switch (status) {
     case WorkoutStatus.Completed: return t('athlete:dashboard.workout.completed');
     case WorkoutStatus.InProgress: return t('athlete:dashboard.workout.inProgress');
@@ -375,7 +376,7 @@ const DailyLogHistoryView: React.FC<DailyLogHistoryViewProps> = ({ athleteId, da
                           <div key={type} className="daily-history-view__meal-slot">
                             <h5 className="meal-slot-title">{getMealTypeLabel(type, t)}</h5>
                             <div className="meal-slot-entries">
-                              {mealEntries.map((e: any) => (
+                              {mealEntries.map((e: MealLogDto) => (
                                 <div key={e.id} className="meal-entry-item">
                                   <div className="info">
                                     <div className="name-row">

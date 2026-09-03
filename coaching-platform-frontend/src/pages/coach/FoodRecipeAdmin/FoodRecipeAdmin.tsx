@@ -8,11 +8,12 @@ import CreateRecipeModal from '../../../components/CreateRecipeModal/CreateRecip
 import RecipeCard from '../../../components/RecipeCard/RecipeCard';
 import type { FoodDto, FoodCategory, CreateFoodForm } from '../../../types/Food';
 import type { RecipeDto } from '../../../types/Recipe';
+import type { TFunction } from 'i18next';
 import './FoodRecipeAdmin.scss';
 
 const FOOD_CATEGORIES: FoodCategory[] = ['Protein', 'Carbs', 'Fat', 'Vegetable', 'Dairy', 'Fruit', 'Meat', 'Bakery', 'Cheese', 'Poultry', 'Nuts', 'Oils', 'Condiments', 'Juice', 'Snacks'];
 
-const getFoodCategoryLabel = (category: string, t: any) => {
+const getFoodCategoryLabel = (category: string, t: TFunction) => {
   const key = `common:foodCategories.${category.toLowerCase()}`;
   return t(key, { defaultValue: category });
 };
@@ -142,7 +143,7 @@ const FoodRecipeAdmin: React.FC = () => {
     {
       title: t('coach:foodAdmin.table.actions'),
       key: 'actions',
-      render: (_: any, record: FoodDto) => (
+      render: (_: unknown, record: FoodDto) => (
         <Space size="middle">
           <Button
             type="text"

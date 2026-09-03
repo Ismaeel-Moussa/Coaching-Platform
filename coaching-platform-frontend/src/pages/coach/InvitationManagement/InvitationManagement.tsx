@@ -116,7 +116,7 @@ const InvitationManagement: React.FC = () => {
     {
       title: t('coach:invitations.actions'),
       key: 'actions',
-      render: (_: any, record: InvitationDto) => {
+      render: (_: unknown, record: InvitationDto) => {
         const isPending = record.status === InvitationStatus.Pending || record.status === 0;
         const isExpired = record.status === InvitationStatus.Expired || record.status === 2;
         const isRevoked = record.status === InvitationStatus.Revoked || record.status === 3;

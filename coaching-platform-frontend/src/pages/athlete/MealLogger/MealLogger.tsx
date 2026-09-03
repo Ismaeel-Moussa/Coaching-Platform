@@ -6,6 +6,7 @@ import MacroProgressBar from '../../../components/MacroProgressBar/MacroProgress
 import AddFoodModal from '../../../components/AddFoodModal/AddFoodModal';
 import { MealType, MEAL_TYPE_LABELS, type MealLogDto } from '../../../types/Diary';
 import { getTodayIso } from '../../../utils/date';
+import type { TFunction } from 'i18next';
 import './MealLogger.scss';
 
 const MEAL_ICONS: Record<MealType, string> = {
@@ -170,7 +171,7 @@ const MealSection: React.FC<MealSectionProps> = ({ entries, isLoading, mealType,
   );
 };
 
-const getMealTypeLabel = (type: MealType, t: any) => {
+const getMealTypeLabel = (type: MealType, t: TFunction) => {
   switch (type) {
     case MealType.Breakfast: return t('common:meals.breakfast');
     case MealType.Lunch: return t('common:meals.lunch');

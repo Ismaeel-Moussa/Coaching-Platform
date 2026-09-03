@@ -3,7 +3,8 @@ import { Divider, Progress, Input, Button } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useAddCoachNotes } from '../../hooks/useCheckIn/useCheckIn';
 import { formatDateDisplay } from '../../utils/date';
-import type { CheckInDto } from '../../types/CheckIn';
+import type { CheckInDto, CheckInPhotoDto } from '../../types/CheckIn';
+import type { TFunction } from 'i18next';
 import ProgressPhotoViewer from '../ProgressPhotoViewer/ProgressPhotoViewer';
 import './CheckInCard.scss';
 
@@ -15,7 +16,7 @@ interface CheckInCardProps {
   onPhotoClick?: (url: string) => void;
 }
 
-const getSubjectiveLabel = (label: string, t: any) => {
+const getSubjectiveLabel = (label: string, t: TFunction) => {
   switch (label) {
     case 'Sleep Quality': return t('athlete:checkIn.sleepLabel');
     case 'Energy Level': return t('athlete:checkIn.energyLabel');
@@ -109,7 +110,7 @@ const CheckInCard: React.FC<CheckInCardProps> = React.memo(({
         <div className="checkin-card-item__section checkin-card-item__section--photos">
           <h4 className="checkin-card-item__section-title">{t('coach:clientDetail.photos')}</h4>
           <ProgressPhotoViewer
-            photos={checkIn.photos?.map((photo: any) => ({
+            photos={checkIn.photos?.map((photo: CheckInPhotoDto) => ({
               angle: photo.angle,
               url: photo.signedDownloadUrl
             })) || []}

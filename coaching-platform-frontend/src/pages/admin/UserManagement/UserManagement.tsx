@@ -177,8 +177,9 @@ const UserManagement: React.FC = () => {
             message.success(t('admin:users.messages.reactivated', 'Account reactivated successfully.'));
             loadUsers();
             loadSummary();
-          } catch (err: any) {
-            message.error(err?.response?.data?.message || 'Failed to reactivate account.');
+          } catch (err: unknown) {
+            const errMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+            message.error(errMessage || 'Failed to reactivate account.');
           }
         },
       });
@@ -207,9 +208,10 @@ const UserManagement: React.FC = () => {
       setDeactivateModalVisible(false);
       loadUsers();
       loadSummary();
-    } catch (err: any) {
-      if (err?.response?.data?.message) {
-        message.error(err.response.data.message);
+    } catch (err: unknown) {
+      const errMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      if (errMessage) {
+        message.error(errMessage);
       }
     } finally {
       setSubmittingStatus(false);
@@ -290,7 +292,7 @@ const UserManagement: React.FC = () => {
       title: t('admin:users.table.user', 'User'),
       dataIndex: 'fullName',
       key: 'fullName',
-      render: (_: any, record: UserManagementDto) => (
+      render: (_: unknown, record: UserManagementDto) => (
         <Space size="middle">
           <Avatar
             src={record.profilePictureUrl}
@@ -328,7 +330,7 @@ const UserManagement: React.FC = () => {
     {
       title: t('admin:users.table.assignments', 'Assignments'),
       key: 'assignments',
-      render: (_: any, record: UserManagementDto) => {
+      render: (_: unknown, record: UserManagementDto) => {
         if (record.role === 'Coach') {
           return <span>{record.assignedAthleteCount} {t('admin:users.athletes', 'athletes')}</span>;
         }
@@ -345,7 +347,7 @@ const UserManagement: React.FC = () => {
     {
       title: t('admin:users.table.lastLogin', 'Last Sign-In'),
       key: 'lastLoginAt',
-      render: (_: any, record: UserManagementDto) => (
+      render: (_: unknown, record: UserManagementDto) => (
         <div>
           <div>{formatLastLogin(record.lastLoginAt)}</div>
           {record.lastLoginIp && <div className="user-ip">IP: {record.lastLoginIp}</div>}
@@ -355,7 +357,7 @@ const UserManagement: React.FC = () => {
     {
       title: t('admin:users.table.actions', 'Actions'),
       key: 'actions',
-      render: (_: any, record: UserManagementDto) => (
+      render: (_: unknown, record: UserManagementDto) => (
         <Space size="small">
           <Button
             type={record.isActive ? 'default' : 'primary'}

@@ -203,9 +203,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       try {
         await connection.start();
         setConnectionState('Connected');
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as Error | undefined;
         // Suppress expected abort errors from React StrictMode mounting/unmounting in dev
-        if (err?.name === 'AbortError' || err?.message?.includes('stopped')) {
+        if (error?.name === 'AbortError' || error?.message?.includes('stopped')) {
           return;
         }
         console.error('SignalR Connection Error:', err);

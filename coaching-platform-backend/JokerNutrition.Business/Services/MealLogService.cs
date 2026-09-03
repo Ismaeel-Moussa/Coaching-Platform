@@ -385,9 +385,11 @@ public class MealLogService : _BaseService, IMealLogService
         {
             var entries = await _mealLogRepo.QueryAll()
                 .Where(l => l.DailyDiary.AthleteId == athleteId && l.FoodId.HasValue)
-                .OrderByDescending(l => l.LoggedAt).Select(l => new { l.FoodId, l.LoggedAt })
+                .OrderByDescending(l => l.LoggedAt)
+                .Select(l => l.FoodId!.Value)
+                .Take(200)
                 .ToListAsync();
-            var ids = entries.GroupBy(x => x.FoodId!.Value).Take(30).Select(g => g.Key).ToList();
+            var ids = entries.Distinct().Take(30).ToList();
             foods = await _foodRepo.QueryAll().Where(f => ids.Contains(f.Id)).ToListAsync();
             var foodMap = foods.ToDictionary(f => f.Id);
             foods = ids.Select(id => foodMap.GetValueOrDefault(id)).Where(f => f != null).ToList()!;
@@ -424,9 +426,11 @@ public class MealLogService : _BaseService, IMealLogService
         {
             var entries = await _mealLogRepo.QueryAll()
                 .Where(l => l.DailyDiary.AthleteId == athleteId && l.RecipeId.HasValue)
-                .OrderByDescending(l => l.LoggedAt).Select(l => new { l.RecipeId, l.LoggedAt })
+                .OrderByDescending(l => l.LoggedAt)
+                .Select(l => l.RecipeId!.Value)
+                .Take(200)
                 .ToListAsync();
-            var ids = entries.GroupBy(x => x.RecipeId!.Value).Take(30).Select(g => g.Key).ToList();
+            var ids = entries.Distinct().Take(30).ToList();
             recipes = await GetRecipesByIdsAsync(ids);
             var recipeMap = recipes.ToDictionary(r => r.Id);
             recipes = ids.Select(id => recipeMap.GetValueOrDefault(id)).Where(r => r != null).ToList()!;

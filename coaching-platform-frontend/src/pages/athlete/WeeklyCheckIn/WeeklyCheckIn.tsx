@@ -9,6 +9,7 @@ import { useSubmitCheckIn, useUploadPhotos, useGetCheckInHistory } from '../../.
 import { deletePhoto } from '../../../api/checkIn';
 import { formatDateDisplay } from '../../../utils/date';
 import ProgressPhotoViewer from '../../../components/ProgressPhotoViewer/ProgressPhotoViewer';
+import type { CheckInPhotoDto } from '../../../types/CheckIn';
 import './WeeklyCheckIn.scss';
 
 const WeeklyCheckIn: React.FC = () => {
@@ -84,9 +85,9 @@ const WeeklyCheckIn: React.FC = () => {
   const { data: historyData, isLoading: historyLoading } = useGetCheckInHistory(1, 1);
   const latestCheckIn = historyData?.items?.[0];
 
-  const existingFrontPhoto = latestCheckIn?.photos?.find((p: any) => p.angle === 'Front');
-  const existingSidePhoto = latestCheckIn?.photos?.find((p: any) => p.angle === 'Side');
-  const existingBackPhoto = latestCheckIn?.photos?.find((p: any) => p.angle === 'Back');
+  const existingFrontPhoto = latestCheckIn?.photos?.find((p: CheckInPhotoDto) => p.angle === 'Front');
+  const existingSidePhoto = latestCheckIn?.photos?.find((p: CheckInPhotoDto) => p.angle === 'Side');
+  const existingBackPhoto = latestCheckIn?.photos?.find((p: CheckInPhotoDto) => p.angle === 'Back');
 
   // Prefill check-in if there is a recent one to make life easier
   useEffect(() => {

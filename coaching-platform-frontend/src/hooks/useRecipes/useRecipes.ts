@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { message as antMessage } from 'antd';
 import i18n from '../../i18n/i18n';
 import { getRecipes, createRecipe, updateRecipe, quickAddRecipeToDiary, deleteRecipe, uploadRecipeImage } from '../../api/recipe';
@@ -51,18 +51,18 @@ export const useQuickAddRecipe = (date: string) => {
 
 export const useDeleteRecipe = () => {
   const queryClient = useQueryClient();
-  return useMutation<void, Error, number, { previousQueries: { queryKey: any; data: any }[] }>({
+  return useMutation<void, Error, number, { previousQueries: { queryKey: QueryKey; data: unknown }[] }>({
     mutationFn: deleteRecipe,
     onMutate: async (deletedId) => {
       await queryClient.cancelQueries({ queryKey: ['recipes'] });
-      const queries = queryClient.getQueriesData<any>({ queryKey: ['recipes'] });
+      const queries = queryClient.getQueriesData<RecipesPagedResult>({ queryKey: ['recipes'] });
       const previousQueries = queries.map(([queryKey, data]) => ({ queryKey, data }));
 
       queries.forEach(([queryKey, data]) => {
         if (data && Array.isArray(data.items)) {
           queryClient.setQueryData(queryKey, {
             ...data,
-            items: data.items.filter((item: any) => item.id !== deletedId),
+            items: data.items.filter((item) => item.id !== deletedId),
             totalCount: Math.max(0, data.totalCount - 1),
           });
         }

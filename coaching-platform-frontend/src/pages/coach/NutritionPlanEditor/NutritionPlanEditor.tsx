@@ -15,6 +15,7 @@ import {
   Segmented,
   Modal,
 } from 'antd';
+import type { FormInstance } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -75,7 +76,7 @@ interface OptionItemRowProps {
   itemName: number;
   onRemove: () => void;
   showRemove: boolean;
-  form: any;
+  form: FormInstance;
   foodOptions: { value: number; label: string }[];
   recipeOptions: { value: number; label: string }[];
   onSearchFood: (search: string) => void;
@@ -84,7 +85,7 @@ interface OptionItemRowProps {
   recipesLoading: boolean;
   loadMoreFoods: (e: React.UIEvent<HTMLDivElement>) => void;
   loadMoreRecipes: (e: React.UIEvent<HTMLDivElement>) => void;
-  copy: any;
+  copy: Record<string, string>;
 }
 
 const OptionItemRow: React.FC<OptionItemRowProps> = ({
@@ -152,7 +153,7 @@ const OptionItemRow: React.FC<OptionItemRowProps> = ({
       <div className="nutrition-editor-item-row__source-selector">
         <Segmented
           value={sourceType}
-          onChange={(val) => handleSourceTypeChange(val as any)}
+          onChange={(val) => handleSourceTypeChange(val as 'food' | 'recipe' | 'custom')}
           options={[
             {
               label: (

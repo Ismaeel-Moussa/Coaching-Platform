@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLogSet } from '../../hooks/useWorkout/useWorkout';
 import type { TemplateExerciseDto, SetLogDto, LogSetForm } from '../../types/Workout';
 import { ExerciseSection } from '../../types/Workout';
+import type { TFunction } from 'i18next';
 import './ExerciseCard.scss';
 
 interface ExerciseCardProps {
@@ -22,7 +23,7 @@ const SECTION_CLASSES: Record<ExerciseSection, string> = {
 // Sections that don't use weight/reps — show a simple "Mark as Done" toggle
 const SIMPLE_SECTIONS: ExerciseSection[] = [ExerciseSection.WarmUp, ExerciseSection.CoolDown];
 
-const getSectionLabel = (sec: ExerciseSection, t: any) => {
+const getSectionLabel = (sec: ExerciseSection, t: TFunction) => {
   switch (sec) {
     case ExerciseSection.WarmUp: return t('athlete:workoutLogger.sections.warmup');
     case ExerciseSection.Main: return t('athlete:workoutLogger.sections.main');

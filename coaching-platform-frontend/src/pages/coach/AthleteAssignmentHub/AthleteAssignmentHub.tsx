@@ -20,6 +20,7 @@ import {
   useDeleteAthleteSupplement 
 } from '../../../hooks/useAthleteAssignment/useAthleteAssignment';
 import type { SupplementDto } from '../../../types/Supplement';
+import type { RosterItemDto } from '../../../types/CoachHub';
 import './AthleteAssignmentHub.scss';
 
 const { Option } = Select;
@@ -114,7 +115,7 @@ const AthleteAssignmentHub: React.FC = () => {
   };
 
   // Find roster info for active program display
-  const selectedRosterItem = rosterData?.items?.find((item: any) => item.athleteId === selectedAthleteId);
+  const selectedRosterItem = rosterData?.items?.find((item: RosterItemDto) => item.athleteId === selectedAthleteId);
   const setupReadiness = profile?.setupReadiness ?? {
     isComplete: false,
     completedRequiredSteps: 0,
@@ -306,7 +307,7 @@ const AthleteAssignmentHub: React.FC = () => {
                 String(option?.children ?? '').toLowerCase().includes(input.toLowerCase())
               }
             >
-              {rosterData?.items?.map((ath: any) => (
+              {rosterData?.items?.map((ath: RosterItemDto) => (
                 <Option key={ath.athleteId} value={ath.athleteId}>
                   {ath.athleteName}
                 </Option>

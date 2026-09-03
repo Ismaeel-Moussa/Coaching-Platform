@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGetRoster } from '../../../hooks/useCoachHub/useCoachHub';
 import { formatRelativeTime } from '../../../utils/date';
-import type { AthleteSetupReadinessDto, OnboardingDisplayStatus } from '../../../types/CoachHub';
+import type { AthleteSetupReadinessDto, OnboardingDisplayStatus, RosterItemDto } from '../../../types/CoachHub';
 import './ClientRoster.scss';
 
 type ActiveTab = 'All' | 'ComplianceAlert' | 'NoRecentCheckIn' | 'AwaitingAssessmentReview' | 'SetupRequired';
@@ -98,7 +98,7 @@ const ClientRoster: React.FC = () => {
       title: t('coach:roster.table.name'),
       dataIndex: 'athleteName',
       key: 'athleteName',
-      render: (_text: string, record: any) => (
+      render: (_text: string, record: RosterItemDto) => (
         <div className="roster-table__athlete-cell">
           {record.athleteAvatarUrl ? (
             <Avatar src={record.athleteAvatarUrl} size="large" />
@@ -177,7 +177,7 @@ const ClientRoster: React.FC = () => {
     {
       title: t('coach:roster.table.actions'),
       key: 'action',
-      render: (_: any, record: any) => (
+      render: (_: unknown, record: RosterItemDto) => (
         <Button 
           type="link" 
           onClick={(e) => {
