@@ -93,7 +93,14 @@ const AthleteDashboard: React.FC = () => {
         </div>
 
         {/* Streak badge */}
-        {!isLoading && athlete && (
+        {isLoading ? (
+          <div className="dashboard__streak dashboard__streak--skeleton" aria-hidden="true">
+            <span className="dashboard__streak-flame">🔥</span>
+            <div className="dashboard__streak-info">
+              <Skeleton.Input active size="small" style={{ width: 48, minWidth: 48 }} />
+            </div>
+          </div>
+        ) : athlete ? (
           <div className="dashboard__streak">
             <span className="dashboard__streak-flame">🔥</span>
             <div className="dashboard__streak-info">
@@ -101,7 +108,7 @@ const AthleteDashboard: React.FC = () => {
               <span className="dashboard__streak-label">{t('athlete:dashboard.streakLabel')}</span>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* ── Bento Grid ── */}
@@ -241,28 +248,32 @@ const AthleteDashboard: React.FC = () => {
         </div>
 
         {/* ── Card 4: Stats / Goal ── */}
-        {!isLoading && athlete && (
-          <div className="dashboard__card dashboard__card--stats">
-            <div className="dashboard__card-header">
-              <span className="material-symbols-outlined">emoji_events</span>
-              <h2 className="dashboard__card-title">{t('athlete:dashboard.goal')}</h2>
-            </div>
-            <div className="dashboard__goal">
-              <span className="dashboard__goal-label">{athlete.targetGoal || t('athlete:dashboard.generalFitness')}</span>
-            </div>
-            <div className="dashboard__streak-stats">
-              <div className="dashboard__streak-stat">
-                <span className="dashboard__streak-stat-val mono">{athlete.currentStreak}</span>
-                <span className="dashboard__streak-stat-label">{t('profile:insights.currentStreak')}</span>
-              </div>
-              <div className="dashboard__streak-divider" />
-              <div className="dashboard__streak-stat">
-                <span className="dashboard__streak-stat-val mono">{athlete.longestStreak}</span>
-                <span className="dashboard__streak-stat-label">{t('profile:insights.longestStreak')}</span>
-              </div>
-            </div>
+        <div className="dashboard__card dashboard__card--stats">
+          <div className="dashboard__card-header">
+            <span className="material-symbols-outlined">emoji_events</span>
+            <h2 className="dashboard__card-title">{t('athlete:dashboard.goal')}</h2>
           </div>
-        )}
+          {isLoading ? (
+            <Skeleton active paragraph={{ rows: 2 }} title={false} />
+          ) : athlete ? (
+            <>
+              <div className="dashboard__goal">
+                <span className="dashboard__goal-label">{athlete.targetGoal || t('athlete:dashboard.generalFitness')}</span>
+              </div>
+              <div className="dashboard__streak-stats">
+                <div className="dashboard__streak-stat">
+                  <span className="dashboard__streak-stat-val mono">{athlete.currentStreak}</span>
+                  <span className="dashboard__streak-stat-label">{t('profile:insights.currentStreak')}</span>
+                </div>
+                <div className="dashboard__streak-divider" />
+                <div className="dashboard__streak-stat">
+                  <span className="dashboard__streak-stat-val mono">{athlete.longestStreak}</span>
+                  <span className="dashboard__streak-stat-label">{t('profile:insights.longestStreak')}</span>
+                </div>
+              </div>
+            </>
+          ) : null}
+        </div>
 
         {/* ── Card 5: Coach Feedback ── */}
         <div id="coach-feedback-card" className="dashboard__card dashboard__card--feedback">

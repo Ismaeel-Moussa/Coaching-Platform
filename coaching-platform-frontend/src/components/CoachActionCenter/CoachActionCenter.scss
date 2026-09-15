@@ -45,7 +45,7 @@
     padding: 5px 10px;
   }
 
-  &__header-actions { align-items: center; display: flex; gap: 10px; }
+  &__header-actions { align-items: center; display: flex; gap: 10px; min-height: 28px; }
 
   &__view-all {
     align-items: center;

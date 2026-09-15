@@ -121,7 +121,15 @@ const AthleteLayout: React.FC = () => {
               <NavLink to="/athlete/profile" className="athlete-layout__user">
                 <div className="athlete-layout__avatar">
                   {user.profilePictureUrl ? (
-                    <img src={user.profilePictureUrl} alt="avatar" className="athlete-layout__avatar-img" />
+                    <img
+                      src={user.profilePictureUrl}
+                      alt="avatar"
+                      className="athlete-layout__avatar-img"
+                      width={36}
+                      height={36}
+                      loading="lazy"
+                      decoding="async"
+                    />
                   ) : (
                     `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
                   )}
@@ -176,7 +184,15 @@ const AthleteLayout: React.FC = () => {
             >
               <div className="athlete-layout__avatar">
                 {user.profilePictureUrl ? (
-                  <img src={user.profilePictureUrl} alt="avatar" className="athlete-layout__avatar-img" />
+                  <img
+                    src={user.profilePictureUrl}
+                    alt="avatar"
+                    className="athlete-layout__avatar-img"
+                    width={36}
+                    height={36}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ) : (
                   `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
                 )}
@@ -205,7 +221,15 @@ const AthleteLayout: React.FC = () => {
             <>
               <div className="athlete-layout__avatar athlete-layout__avatar--large">
                 {user.profilePictureUrl ? (
-                  <img src={user.profilePictureUrl} alt="avatar" className="athlete-layout__avatar-img" />
+                  <img
+                    src={user.profilePictureUrl}
+                    alt="avatar"
+                    className="athlete-layout__avatar-img"
+                    width={48}
+                    height={48}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ) : (
                   `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
                 )}
