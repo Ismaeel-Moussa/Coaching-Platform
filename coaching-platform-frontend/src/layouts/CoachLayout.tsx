@@ -127,7 +127,15 @@ const CoachLayout: React.FC = () => {
               <NavLink to="/coach/profile" className="coach-layout__user">
                 <div className="coach-layout__avatar">
                   {user.profilePictureUrl ? (
-                    <img src={user.profilePictureUrl} alt="avatar" className="coach-layout__avatar-img" />
+                    <img
+                      src={user.profilePictureUrl}
+                      alt="avatar"
+                      className="coach-layout__avatar-img"
+                      width={36}
+                      height={36}
+                      loading="lazy"
+                      decoding="async"
+                    />
                   ) : (
                     `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
                   )}
@@ -177,7 +185,15 @@ const CoachLayout: React.FC = () => {
             <NavLink to="/coach/profile" className="coach-layout__mobile-avatar-btn" aria-label="Open profile">
               <div className="coach-layout__avatar">
                 {user.profilePictureUrl ? (
-                  <img src={user.profilePictureUrl} alt="avatar" className="coach-layout__avatar-img" />
+                  <img
+                    src={user.profilePictureUrl}
+                    alt="avatar"
+                    className="coach-layout__avatar-img"
+                    width={36}
+                    height={36}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ) : (
                   `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
                 )}
@@ -206,7 +222,15 @@ const CoachLayout: React.FC = () => {
             <>
               <div className="coach-layout__avatar coach-layout__avatar--large">
                 {user.profilePictureUrl ? (
-                  <img src={user.profilePictureUrl} alt="avatar" className="coach-layout__avatar-img" />
+                  <img
+                    src={user.profilePictureUrl}
+                    alt="avatar"
+                    className="coach-layout__avatar-img"
+                    width={48}
+                    height={48}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ) : (
                   `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`
                 )}

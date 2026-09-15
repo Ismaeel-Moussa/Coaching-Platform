@@ -40,7 +40,7 @@
 
   &__date {
     font-size: 14px;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     margin-top: 4px;
   }
 
@@ -52,7 +52,15 @@
     border: 2px solid var(--color-gold);
     border-radius: var(--radius-lg);
     padding: 10px 20px;
+    min-height: 52px;
+    min-width: 120px;
     animation: pulse-gold 2s infinite;
+
+    &--skeleton {
+      animation: none;
+      opacity: 0.85;
+      border-color: rgba(253, 192, 3, 0.4);
+    }
   }
 
   &__streak-flame {
@@ -452,7 +460,7 @@
   &__feedback-date {
     font-size: 0.75rem;
     font-family: var(--font-data);
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
   }
 
   &__feedback-text {
@@ -515,14 +523,13 @@
   }
 
   @keyframes pulse-border {
-    0% {
-      box-shadow: 0 0 0 0 rgba(253, 192, 3, 0.7);
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
     }
-    70% {
-      box-shadow: 0 0 0 10px rgba(253, 192, 3, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(253, 192, 3, 0);
+    50% {
+      transform: scale(1.02);
+      opacity: 0.9;
     }
   }
 }

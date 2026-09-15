@@ -5,6 +5,7 @@ using JokerNutrition.Business.Configurations;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SkiaSharp;
 
 namespace JokerNutrition.Business.Services;
 
@@ -52,13 +53,27 @@ public class BlobStorageService : IBlobStorageService
         string contentType,
         bool isPrivate = false)
     {
+        Stream uploadStream = fileStream;
+        string uploadFileName = fileName;
+        string uploadContentType = contentType;
+        IDisposable? disposableStream = null;
+
+        if (!isPrivate)
+        {
+            var optimized = ProcessImageIfApplicable(fileStream, fileName, contentType);
+            uploadStream = optimized.stream;
+            uploadFileName = optimized.fileName;
+            uploadContentType = optimized.contentType;
+            disposableStream = optimized.disposableStream;
+        }
+
         try
         {
-            var normalizedContentType = contentType.Equals("image/jpg", StringComparison.OrdinalIgnoreCase)
+            var normalizedContentType = uploadContentType.Equals("image/jpg", StringComparison.OrdinalIgnoreCase)
                 ? "image/jpeg"
-                : contentType;
+                : uploadContentType;
             // Clean filename to avoid path issues
-            var cleanFileName = $"{Guid.NewGuid()}_{Path.GetFileName(fileName)}";
+            var cleanFileName = $"{Guid.NewGuid()}_{Path.GetFileName(uploadFileName)}";
 
             // If connection string is empty or default local without Azurite running, we can trigger the fallback directly.
             // But we can also try the standard SDK route:
@@ -82,15 +97,15 @@ public class BlobStorageService : IBlobStorageService
             
             var blobClient = containerClient.GetBlobClient(cleanFileName);
             
-            if (fileStream.CanSeek)
+            if (uploadStream.CanSeek)
             {
-                fileStream.Position = 0;
+                uploadStream.Position = 0;
             }
 
-            await blobClient.UploadAsync(fileStream, new BlobHttpHeaders
+            await blobClient.UploadAsync(uploadStream, new BlobHttpHeaders
             {
                 ContentType = normalizedContentType,
-                CacheControl = isPrivate ? "private, no-store" : "public, max-age=86400"
+                CacheControl = isPrivate ? "private, no-store" : "public, max-age=31536000, immutable"
             });
             return blobClient.Uri.ToString();
         }
@@ -103,7 +118,11 @@ public class BlobStorageService : IBlobStorageService
             }
 
             _logger.LogWarning(ex, "Azure Blob Storage upload failed. Falling back to simulated local file storage.");
-            return await SaveLocalFileAsync(fileStream, fileName);
+            return await SaveLocalFileAsync(uploadStream, uploadFileName);
+        }
+        finally
+        {
+            disposableStream?.Dispose();
         }
     }
 
@@ -323,5 +342,73 @@ public class BlobStorageService : IBlobStorageService
             ? _settings.LocalFallbackBaseUrl.TrimEnd('/')
             : "http://localhost:7000";
         return $"{baseUrl}/uploads/{uniqueFileName}";
+    }
+
+    private static (Stream stream, string fileName, string contentType, IDisposable? disposableStream) ProcessImageIfApplicable(
+        Stream fileStream,
+        string fileName,
+        string contentType)
+    {
+        var isImage = contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) &&
+                      !contentType.Contains("svg", StringComparison.OrdinalIgnoreCase);
+
+        if (!isImage)
+        {
+            return (fileStream, fileName, contentType, null);
+        }
+
+        try
+        {
+            if (fileStream.CanSeek)
+            {
+                fileStream.Position = 0;
+            }
+
+            using var original = SKBitmap.Decode(fileStream);
+            if (original != null && original.Width > 0 && original.Height > 0)
+            {
+                const int maxDim = 800;
+                int width = original.Width;
+                int height = original.Height;
+
+                if (width > maxDim || height > maxDim)
+                {
+                    if (width > height)
+                    {
+                        height = (int)((float)height * maxDim / width);
+                        width = maxDim;
+                    }
+                    else
+                    {
+                        width = (int)((float)width * maxDim / height);
+                        height = maxDim;
+                    }
+                }
+
+                var imageInfo = new SKImageInfo(width, height, original.ColorType, original.AlphaType);
+                using var resized = (width != original.Width || height != original.Height)
+                    ? original.Resize(imageInfo, SKSamplingOptions.Default)
+                    : null;
+                using var image = SKImage.FromBitmap(resized ?? original);
+                using var data = image.Encode(SKEncodedImageFormat.Webp, 80);
+
+                if (data != null && data.Size > 0)
+                {
+                    var memoryStream = new MemoryStream(data.ToArray());
+                    var newFileName = Path.ChangeExtension(fileName, ".webp");
+                    return (memoryStream, newFileName, "image/webp", memoryStream);
+                }
+            }
+        }
+        catch
+        {
+            // Graceful fallback to original stream if SkiaSharp decoding fails
+        }
+
+        if (fileStream.CanSeek)
+        {
+            fileStream.Position = 0;
+        }
+        return (fileStream, fileName, contentType, null);
     }
 }
